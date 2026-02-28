@@ -20,7 +20,8 @@
         "anthropic.claude-code",
         "dbaeumer.vscode-eslint",
         "esbenp.prettier-vscode",
-        "eamodio.gitlens"
+        "eamodio.gitlens",
+        "davidanson.vscode-markdownlint"
       ],
       "settings": {
         "editor.formatOnSave": true,
