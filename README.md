@@ -4,6 +4,16 @@
 
 Created using Claude Code - initial request "Create a 2D web browser dungeon crawler game with randomly generated levels, responsive on mobile".
 
+## Dev Containers
+
+To enable Claude (and yourself) to push to GitHub from the dev container add a `GH_TOKEN=xxx` line into .devcontainer/.env.devcontainer with `xxx` as your GitHub access token for accessing this repository.
+
+### Troubleshooting
+
+If containers are not rebuilding after changing devcontainer.json, Dockerfile, init-firewall.sh or any other dependencies choose 'Dev Containers: Rebuild Without Cache and Reopen in Container' instead of 'Dev Containers: Rebuild and Reopen in Container' as the latter uses a cache when building the container images which can sometimes miss your changes.
+
+If this doesn't work then try running `docker buildx prune` from a terminal to forcefully clear out the docker build cache.
+
 ## TODO
 
 ### Bugs
@@ -52,3 +62,9 @@ Created using Claude Code - initial request "Create a 2D web browser dungeon cra
 - save between sessions
 - multiple save slots
 - cloud save (Google?)
+
+## References
+
+- <https://code.claude.com/docs/en/devcontainer>
+- <https://nakamasato.medium.com/using-claude-code-safely-with-dev-containers-b46b8fedbca9>
+- <https://github.com/anthropics/claude-code/issues/15611>
