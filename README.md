@@ -139,7 +139,6 @@ If this doesn't work then try running `docker buildx prune` from a terminal to f
 
 ### General
 
-- rename 'master' branch to 'main'
 - consider making Claude work in feature branches using git worktrees and requiring changes are never made directly on main to ensure multiple contributors can work safely in parallel
 - consider adding unit tests and a TDD requirement for Claude
 - music
