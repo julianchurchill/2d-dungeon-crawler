@@ -105,6 +105,10 @@ If this doesn't work then try running `docker buildx prune` from a terminal to f
 
 ### General
 
+- Add an automated acceptance test suite
+  - test specfications should be in plain English
+  - tests should be seeded with the current capabilities of the game
+  - add a CLAUDE.md file which includes a requirement that the automated acceptance tests should be run whenever making a change to the application code to ensure existing features are not broken
 - music
 - bosses - unique (once per run) and repeatable (champions?)
 - remote deployment/hosting for app
