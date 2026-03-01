@@ -1,4 +1,4 @@
-# 2D Game
+# 2D Dungeon Crawler
 
 ## Summary
 
@@ -141,6 +141,7 @@ If this doesn't work then try running `docker buildx prune` from a terminal to f
 
 - consider making Claude work in feature branches using git worktrees and requiring changes are never made directly on main to ensure multiple contributors can work safely in parallel
 - consider adding unit tests and a TDD requirement for Claude
+- deployment to GitHub Pages
 - music
 - bosses - unique (once per run) and repeatable (champions?)
 - remote deployment/hosting for app
