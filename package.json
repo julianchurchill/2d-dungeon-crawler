@@ -5,12 +5,16 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "NODE_OPTIONS='--loader ./features/support/phaser-loader.mjs --no-warnings' cucumber-js --format progress-bar",
+    "test:pretty": "NODE_OPTIONS='--loader ./features/support/phaser-loader.mjs --no-warnings' cucumber-js --format pretty --format-options '{\"colorsEnabled\":true}'",
+    "test:html": "NODE_OPTIONS='--loader ./features/support/phaser-loader.mjs --no-warnings' cucumber-js --format html:cucumber-report.html"
   },
   "dependencies": {
     "phaser": "^3.60.0"
   },
   "devDependencies": {
+    "@cucumber/cucumber": "^12.7.0",
     "vite": "^4.5.0"
   }
 }

@@ -41,6 +41,40 @@ npm run preview
 
 Serves the `dist/` folder locally so you can verify the production build before deployment.
 
+## Testing
+
+The game has an automated acceptance test suite written in [Gherkin](https://cucumber.io/docs/gherkin/) (plain English) and run with [Cucumber.js](https://github.com/cucumber/cucumber-js). Tests cover the core game logic: combat, player movement, inventory, character progression, dungeon generation, field of view, and turn management.
+
+### Run tests
+
+```bash
+npm test                  # compact progress bar
+npm run test:pretty       # full step-by-step output
+npm run test:html         # generate cucumber-report.html
+```
+
+### Test structure
+
+```text
+features/
+  combat.feature                    # attack resolution, kills, minimum damage
+  player-movement.feature           # movement, walls, combat triggers, stairs
+  inventory.feature                 # pickup, use potions, equip weapons/armor, drop
+  character-progression.feature     # XP gain, levelling up, stat increases
+  dungeon-generation.feature        # BSP generation, determinism, connectivity
+  fov.feature                       # visibility radius, line of sight, explored state
+  turn-management.feature           # turn state machine transitions
+  step-definitions/                 # step implementations (one file per feature)
+  support/
+    world.js                        # shared state between Gherkin steps
+    phaser-loader.mjs               # ESM hook: replaces Phaser with a Node.js mock
+    mocks/phaser.mjs                # minimal Phaser stub for the test environment
+```
+
+### How it works
+
+The game's core logic (`src/systems/`, `src/entities/`, `src/dungeon/`, `src/fov/`) is pure JavaScript with no browser dependencies, so it runs directly in Node.js. The only exception is `EventBus`, which wraps a Phaser class. A custom ESM loader hook intercepts the `phaser` import at test time and substitutes a lightweight Node.js `EventEmitter` mock, so no browser or canvas is needed to run the tests.
+
 ## Frameworks
 
 | Framework                       | Version | Purpose                                             |
@@ -105,10 +139,6 @@ If this doesn't work then try running `docker buildx prune` from a terminal to f
 
 ### General
 
-- Add an automated acceptance test suite
-  - test specfications should be in plain English
-  - tests should be seeded with the current capabilities of the game
-  - add a CLAUDE.md file which includes a requirement that the automated acceptance tests should be run whenever making a change to the application code to ensure existing features are not broken
 - music
 - bosses - unique (once per run) and repeatable (champions?)
 - remote deployment/hosting for app
