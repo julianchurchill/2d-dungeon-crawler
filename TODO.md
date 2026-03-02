@@ -42,7 +42,7 @@
 - [ ] multiple save slots
 - [ ] cloud save (Google?)
 
-## Done
+## Other
 
 - [x] Add to README: instructions on building and running the app
 - [x] Add to README: information about the chosen frameworks
