@@ -468,6 +468,8 @@ export class GameScene extends Phaser.Scene {
     const msg = InventorySystem.useItem(this.player, index);
     EventBus.emit('message', msg);
     this._syncRegistry();
+    // Notify the inventory panel so it can refresh the equipped-name display.
+    EventBus.emit('inventory-changed');
     if (this.player.isDead()) {
       this._gameOver();
     }

@@ -2,7 +2,7 @@
 
 ## Bugs
 
-- [ ] Inventory window does not change the currently equipped weapon/armour name when clicked (it does change the equipped state, just not the text)
+- [x] Inventory window does not change the currently equipped weapon/armour name when clicked (it does change the equipped state, just not the text)
 
 ## General
 
