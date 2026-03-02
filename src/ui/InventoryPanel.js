@@ -82,8 +82,8 @@ export class InventoryPanel {
     });
     this._container.add(this._equippedText);
 
-    // Refresh the equipped-name display whenever an item is used while open.
-    // GameScene emits 'inventory-changed' after every inventory interaction.
+    // Refresh the equipped-name display whenever the inventory changes.
+    // InventorySystem emits 'inventory-changed' after every interaction.
     EventBus.on('inventory-changed', () => {
       if (this.visible) {
         this._refresh(this._player);

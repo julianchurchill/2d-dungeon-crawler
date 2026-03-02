@@ -34,12 +34,9 @@ function makeFluent(initialText = '') {
   obj.setFillStyle = chain;
   obj.setOrigin = chain;
   obj.setPosition = chain;
-  // Container's add() accepts arrays or single values — just ignore them.
   obj.add = chain;
-  // Event listener stubs — record the pointerdown handler so slots are clickable.
   obj._handlers = {};
   obj.on = (event, fn) => { obj._handlers[event] = fn; return obj; };
-  // setText records what the UI would display.
   obj.setText = (text) => { obj._text = text; return obj; };
   return obj;
 }
@@ -89,15 +86,11 @@ Given('the inventory panel is open showing a player with leather armor in invent
 // ── When ─────────────────────────────────────────────────────────────────────
 
 When('the player equips the short sword via the inventory panel', function () {
-  // Equip the item (updates player.equippedWeapon but does NOT call _refresh).
   InventorySystem.useItem(this.player, 0);
-  // The panel should refresh itself upon this event — the bug is that it does not.
-  EventBus.emit('inventory-changed');
 });
 
 When('the player equips the leather armor via the inventory panel', function () {
   InventorySystem.useItem(this.player, 0);
-  EventBus.emit('inventory-changed');
 });
 
 // ── Then ─────────────────────────────────────────────────────────────────────
