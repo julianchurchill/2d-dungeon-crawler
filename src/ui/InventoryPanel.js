@@ -81,10 +81,21 @@ export class InventoryPanel {
       stroke: '#000000', strokeThickness: 2, resolution: 2,
     });
     this._container.add(this._equippedText);
+
+    // Refresh the equipped-name display whenever the inventory changes.
+    // InventorySystem emits 'inventory-changed' after every interaction.
+    EventBus.on('inventory-changed', () => {
+      if (this.visible) {
+        this._refresh(this._player);
+      }
+    });
   }
 
   show(inventory, player) {
     this.inventory = inventory;
+    // Store the player ref so inventory-changed events can refresh without
+    // the caller needing to pass the player again.
+    this._player = player;
     this.visible = true;
     this._container.setVisible(true);
     this._refresh(player);
