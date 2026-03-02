@@ -7,6 +7,7 @@ Always work on a feature branch — never commit directly to `main`.
 1. Create a branch before making any changes: `git checkout -b <descriptive-branch-name>`
 2. Commit work to the feature branch.
 3. Push the branch and open a pull request to merge into `main`.
+4. Before adding more code to an existing branch, check whether its PR has already been merged (`gh pr view <branch>`). If it has, create a new branch from `main` for the next change.
 
 ## Test Driven Development
 
