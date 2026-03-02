@@ -35,6 +35,14 @@ Write application code that follows SOLID principles:
 - **Interface Segregation** — prefer small, focused interfaces over large, general-purpose ones.
 - **Dependency Inversion** — depend on abstractions, not concretions; inject dependencies rather than hard-coding them.
 
+## Changelog
+
+Add an entry to `CHANGELOG.md` for every new feature or bug fix before committing. Place it under the appropriate heading (`Added`, `Changed`, `Fixed`, or `Removed`) inside `[Unreleased]`, newest entry first, with the date in `YYYY-MM-DD` format:
+
+```markdown
+- 2026-03-02 — Short description of what changed
+```
+
 ## Markdown Style
 
 Whenever you change a Markdown file, run markdownlint on it and fix all violations before committing:
