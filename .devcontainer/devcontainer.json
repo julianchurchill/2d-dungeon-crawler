@@ -61,6 +61,6 @@
   },
   "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=delegated",
   "workspaceFolder": "/workspace",
-  "postStartCommand": "sudo bash /workspace/.devcontainer/init-firewall.sh",
+  "postStartCommand": "sudo bash /workspace/.devcontainer/init-firewall.sh && bash /workspace/.devcontainer/init-claude-settings.sh",
   "waitFor": "postStartCommand"
 }
