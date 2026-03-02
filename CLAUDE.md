@@ -35,6 +35,14 @@ Write application code that follows SOLID principles:
 - **Interface Segregation** — prefer small, focused interfaces over large, general-purpose ones.
 - **Dependency Inversion** — depend on abstractions, not concretions; inject dependencies rather than hard-coding them.
 
+## Markdown Style
+
+Whenever you change a Markdown file, run markdownlint on it and fix all violations before committing:
+
+```bash
+npx markdownlint-cli <file.md>
+```
+
 ## Running Tests
 
 Whenever you make a change to any application code in `src/`, run the automated acceptance
