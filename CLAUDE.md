@@ -18,6 +18,22 @@ Follow the red-green-refactor cycle for all new features and bug fixes:
 
 Never write application code in `src/` before there is a failing test that requires it.
 
+## Code Style
+
+### Comments
+
+Add a JSDoc comment to every function, class, and module explaining its purpose, parameters, and return value. Use inline comments to explain non-obvious logic — the *why*, not the *what*.
+
+### SOLID Design Principles
+
+Write application code that follows SOLID principles:
+
+- **Single Responsibility** — each class or module has one reason to change.
+- **Open/Closed** — extend behaviour through new code rather than modifying existing code.
+- **Liskov Substitution** — subtypes must be substitutable for their base types without altering correctness.
+- **Interface Segregation** — prefer small, focused interfaces over large, general-purpose ones.
+- **Dependency Inversion** — depend on abstractions, not concretions; inject dependencies rather than hard-coding them.
+
 ## Running Tests
 
 Whenever you make a change to any application code in `src/`, run the automated acceptance
