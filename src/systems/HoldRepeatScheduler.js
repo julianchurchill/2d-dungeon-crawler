@@ -19,7 +19,7 @@ export class HoldRepeatScheduler {
    *   Scheduler function with the same signature as `setTimeout`:
    *   `schedFn(callback, delayMs)`.
    */
-  constructor(tracker, delayMs, schedFn = setTimeout) {
+  constructor(tracker, delayMs, schedFn = (fn, delay) => setTimeout(fn, delay)) {
     this._tracker = tracker;
     this._delayMs = delayMs;
     this._schedFn = schedFn;
