@@ -284,31 +284,22 @@ export class GameScene extends Phaser.Scene {
       right: Phaser.Input.Keyboard.KeyCodes.D,
     });
 
-    this.heldMovement = new HeldMovementTracker();
+    // HeldMovementTracker self-registers its own keydown/keyup listeners.
+    this.heldMovement = new HeldMovementTracker(this.input.keyboard, EventBus);
 
     this.input.keyboard.on('keydown-I', () => this._toggleInventory());
     this.input.keyboard.on('keydown-PERIOD', () => this._tryUseStairs());
     this.input.keyboard.on('keydown-GREATER_THAN', () => this._tryUseStairs());
 
-    // keydown: record the held direction and handle the first step immediately.
-    this.input.keyboard.on('keydown-UP',    () => { this.heldMovement.press(DIR.UP);    this._handleDir(DIR.UP);    });
-    this.input.keyboard.on('keydown-DOWN',  () => { this.heldMovement.press(DIR.DOWN);  this._handleDir(DIR.DOWN);  });
-    this.input.keyboard.on('keydown-LEFT',  () => { this.heldMovement.press(DIR.LEFT);  this._handleDir(DIR.LEFT);  });
-    this.input.keyboard.on('keydown-RIGHT', () => { this.heldMovement.press(DIR.RIGHT); this._handleDir(DIR.RIGHT); });
-    this.input.keyboard.on('keydown-W',     () => { this.heldMovement.press(DIR.UP);    this._handleDir(DIR.UP);    });
-    this.input.keyboard.on('keydown-S',     () => { this.heldMovement.press(DIR.DOWN);  this._handleDir(DIR.DOWN);  });
-    this.input.keyboard.on('keydown-A',     () => { this.heldMovement.press(DIR.LEFT);  this._handleDir(DIR.LEFT);  });
-    this.input.keyboard.on('keydown-D',     () => { this.heldMovement.press(DIR.RIGHT); this._handleDir(DIR.RIGHT); });
-
-    // keyup: release the held direction so continuous movement stops.
-    this.input.keyboard.on('keyup-UP',    () => this.heldMovement.release(DIR.UP));
-    this.input.keyboard.on('keyup-DOWN',  () => this.heldMovement.release(DIR.DOWN));
-    this.input.keyboard.on('keyup-LEFT',  () => this.heldMovement.release(DIR.LEFT));
-    this.input.keyboard.on('keyup-RIGHT', () => this.heldMovement.release(DIR.RIGHT));
-    this.input.keyboard.on('keyup-W',     () => this.heldMovement.release(DIR.UP));
-    this.input.keyboard.on('keyup-S',     () => this.heldMovement.release(DIR.DOWN));
-    this.input.keyboard.on('keyup-A',     () => this.heldMovement.release(DIR.LEFT));
-    this.input.keyboard.on('keyup-D',     () => this.heldMovement.release(DIR.RIGHT));
+    // keydown: handle the first movement step immediately on key press.
+    this.input.keyboard.on('keydown-UP',    () => this._handleDir(DIR.UP));
+    this.input.keyboard.on('keydown-DOWN',  () => this._handleDir(DIR.DOWN));
+    this.input.keyboard.on('keydown-LEFT',  () => this._handleDir(DIR.LEFT));
+    this.input.keyboard.on('keydown-RIGHT', () => this._handleDir(DIR.RIGHT));
+    this.input.keyboard.on('keydown-W',     () => this._handleDir(DIR.UP));
+    this.input.keyboard.on('keydown-S',     () => this._handleDir(DIR.DOWN));
+    this.input.keyboard.on('keydown-A',     () => this._handleDir(DIR.LEFT));
+    this.input.keyboard.on('keydown-D',     () => this._handleDir(DIR.RIGHT));
   }
 
   _setupEvents() {
@@ -466,8 +457,7 @@ export class GameScene extends Phaser.Scene {
   }
 
   _toggleInventory() {
-    // Stop held movement so the player doesn't walk after closing the inventory.
-    this.heldMovement?.clear();
+    // 'open-inventory' causes HeldMovementTracker to clear itself automatically.
     EventBus.emit('open-inventory', {
       inventory: this.player.inventory,
       player: this.player,
@@ -541,7 +531,8 @@ export class GameScene extends Phaser.Scene {
   // ─── Game Over ────────────────────────────────────────────────────────────
 
   _gameOver() {
-    this.heldMovement?.clear();
+    // 'game-over' causes HeldMovementTracker to clear itself automatically.
+    EventBus.emit('game-over');
     this.turnManager.setGameOver();
     EventBus.emit('message', 'You died! Press R to restart.');
     this.input.keyboard.once('keydown-R', () => this._restart());

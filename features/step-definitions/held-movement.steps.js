@@ -1,43 +1,65 @@
 /**
  * Step definitions for HeldMovementTracker behaviour.
- * Tests that pressing and releasing direction keys correctly tracks
- * the currently held movement direction.
+ *
+ * The tracker self-registers keyboard event listeners, so these steps use a
+ * Node EventEmitter as a mock keyboard and a second one as a mock EventBus.
+ * Simulating a key press / release / game-event is just emitting the
+ * corresponding event on the appropriate mock.
  */
+import { EventEmitter } from 'node:events';
 import { Given, When, Then } from '@cucumber/cucumber';
 import assert from 'node:assert/strict';
 import { HeldMovementTracker } from '../../src/systems/HeldMovementTracker.js';
 import { DIR } from '../../src/utils/Direction.js';
 
-// ── Given ────────────────────────────────────────────────────────────────────
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+/**
+ * Create a fresh tracker with new mock keyboard and EventBus emitters,
+ * storing them on the Cucumber World for use in subsequent steps.
+ *
+ * @param {object} world - The Cucumber World (`this` in step definitions).
+ */
+function createTracker(world) {
+  world.mockKeyboard = new EventEmitter();
+  world.mockEventBus = new EventEmitter();
+  world.tracker = new HeldMovementTracker(world.mockKeyboard, world.mockEventBus);
+}
+
+// ── Given ─────────────────────────────────────────────────────────────────────
 
 Given('no movement key is held', function () {
-  this.tracker = new HeldMovementTracker();
+  createTracker(this);
 });
 
-Given('the player is holding the right key', function () {
-  this.tracker = new HeldMovementTracker();
-  this.tracker.press(DIR.RIGHT);
+Given('the right key is held on the keyboard', function () {
+  createTracker(this);
+  this.mockKeyboard.emit('keydown-RIGHT');
 });
 
-// ── When ─────────────────────────────────────────────────────────────────────
+// ── When ──────────────────────────────────────────────────────────────────────
 
-When('the player presses and holds the right key', function () {
-  this.tracker.press(DIR.RIGHT);
+When('the right key is pressed on the keyboard', function () {
+  this.mockKeyboard.emit('keydown-RIGHT');
 });
 
-When('the player presses and holds the up key', function () {
-  this.tracker.press(DIR.UP);
+When('the up key is pressed on the keyboard', function () {
+  this.mockKeyboard.emit('keydown-UP');
 });
 
-When('the player releases the right key', function () {
-  this.tracker.release(DIR.RIGHT);
+When('the right key is released on the keyboard', function () {
+  this.mockKeyboard.emit('keyup-RIGHT');
 });
 
-When('the player releases the left key', function () {
-  this.tracker.release(DIR.LEFT);
+When('the left key is released on the keyboard', function () {
+  this.mockKeyboard.emit('keyup-LEFT');
 });
 
-// ── Then ─────────────────────────────────────────────────────────────────────
+When('the game over event fires', function () {
+  this.mockEventBus.emit('game-over');
+});
+
+// ── Then ──────────────────────────────────────────────────────────────────────
 
 Then('the held movement direction should be right', function () {
   assert.equal(this.tracker.getDir(), DIR.RIGHT);

@@ -1,40 +1,48 @@
 /**
  * Tracks which movement direction key is currently held down.
  *
- * A direction is "held" from the moment a key is pressed until the matching
- * key is released. Only one direction is tracked at a time — the most recently
- * pressed key takes precedence, so the player can change direction mid-hold.
+ * Self-registers keydown and keyup listeners on the supplied keyboard emitter
+ * so that GameScene does not need to manage held-direction state directly.
+ * Clears the held direction automatically when a 'game-over' or
+ * 'open-inventory' event fires on the supplied event bus.
  *
- * GameScene uses this to automatically repeat movement each turn while a key
- * remains held, giving the feel of continuous movement in turn-based play.
+ * Only one direction is tracked at a time — the most recently pressed key
+ * takes precedence, so the player can change direction mid-hold.
  */
+import { DIR } from '../utils/Direction.js';
+
 export class HeldMovementTracker {
-  constructor() {
+  /**
+   * @param {object} keyboard  - Emitter that fires 'keydown-<KEY>' and 'keyup-<KEY>' events (e.g. Phaser keyboard plugin).
+   * @param {object} eventBus  - Application event bus; clears the held direction on 'game-over' and 'open-inventory'.
+   */
+  constructor(keyboard, eventBus) {
     /** @type {string|null} The currently held direction, or null if none. */
     this._dir = null;
-  }
 
-  /**
-   * Record that a direction key has been pressed.
-   * Replaces any previously held direction.
-   *
-   * @param {string} dir - One of the DIR constants (e.g. DIR.UP).
-   */
-  press(dir) {
-    this._dir = dir;
-  }
+    // Map each physical key name to a logical direction.
+    const keyDirs = [
+      ['UP',    DIR.UP],
+      ['DOWN',  DIR.DOWN],
+      ['LEFT',  DIR.LEFT],
+      ['RIGHT', DIR.RIGHT],
+      // WASD aliases
+      ['W', DIR.UP],
+      ['S', DIR.DOWN],
+      ['A', DIR.LEFT],
+      ['D', DIR.RIGHT],
+    ];
 
-  /**
-   * Record that a direction key has been released.
-   * Only clears the held direction if it matches the released key,
-   * so releasing a non-active key has no effect.
-   *
-   * @param {string} dir - The direction key that was released.
-   */
-  release(dir) {
-    if (this._dir === dir) {
-      this._dir = null;
+    for (const [key, dir] of keyDirs) {
+      // Pressing any direction key sets the held direction.
+      keyboard.on(`keydown-${key}`, () => { this._dir = dir; });
+      // Releasing a key clears the direction only if it is the currently held one.
+      keyboard.on(`keyup-${key}`, () => { if (this._dir === dir) this._dir = null; });
     }
+
+    // Clear held direction whenever game-stopping events occur.
+    eventBus.on('game-over',      () => { this._dir = null; });
+    eventBus.on('open-inventory', () => { this._dir = null; });
   }
 
   /**
@@ -44,14 +52,5 @@ export class HeldMovementTracker {
    */
   getDir() {
     return this._dir;
-  }
-
-  /**
-   * Clears the held direction unconditionally.
-   * Call this when movement should stop regardless of key state
-   * (e.g. when the inventory opens or the game ends).
-   */
-  clear() {
-    this._dir = null;
   }
 }
