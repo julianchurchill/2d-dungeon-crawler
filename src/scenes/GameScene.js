@@ -457,7 +457,6 @@ export class GameScene extends Phaser.Scene {
   }
 
   _toggleInventory() {
-    // 'open-inventory' causes HeldMovementTracker to clear itself automatically.
     EventBus.emit('open-inventory', {
       inventory: this.player.inventory,
       player: this.player,
@@ -547,7 +546,6 @@ export class GameScene extends Phaser.Scene {
   // ─── Game Over ────────────────────────────────────────────────────────────
 
   _gameOver() {
-    // 'game-over' causes HeldMovementTracker to clear itself automatically.
     EventBus.emit('game-over');
     this.turnManager.setGameOver();
     EventBus.emit('message', 'You died! Press R to restart.');
