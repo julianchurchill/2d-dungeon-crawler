@@ -513,8 +513,24 @@ export class GameScene extends Phaser.Scene {
     }
 
     this.turnManager.setPlayerInput();
+    this._beginPlayerTurn();
+  }
 
-    // If a movement key is still held, continue moving automatically.
+  /**
+   * Called at the start of every player turn — both the first turn of the game
+   * and after each round of enemy turns.  This method is the "loop-back" point
+   * that makes the turn cycle explicit:
+   *
+   *   _handleDir → _doPlayerMove / _playerAttack
+   *             → _startEnemyTurns
+   *             → _beginPlayerTurn
+   *             → _handleDir (if a key is still held, otherwise wait for input)
+   *
+   * Separating this from _startEnemyTurns keeps enemy-turn logic and
+   * player-turn-start logic in distinct, single-purpose methods.
+   */
+  _beginPlayerTurn() {
+    // Auto-continue movement if a direction key is still held from last turn.
     const heldDir = this.heldMovement?.getDir();
     if (heldDir) {
       this._handleDir(heldDir);
