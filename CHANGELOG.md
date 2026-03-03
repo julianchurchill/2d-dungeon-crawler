@@ -9,6 +9,7 @@ Entries are listed newest-first within each section.
 
 ### Added
 
+- 2026-03-03 — Inventory panel now supports arrow key and WASD navigation; Enter key equips or uses the highlighted item
 - 2026-03-03 — Vite HMR now works in WSL2 devcontainers via usePolling config
 - 2026-03-03 — Hold-key auto-repeat interval decoupled from animation cycle (~150 ms total: 80 ms animation + 70 ms delay)
 - 2026-03-03 — Holding a movement key now continues moving each turn until the key is released

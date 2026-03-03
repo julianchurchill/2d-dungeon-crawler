@@ -1,4 +1,5 @@
 import { EventBus } from '../utils/EventBus.js';
+import { InventoryCursor } from '../systems/InventoryCursor.js';
 
 const COLS = 4;
 const ROWS = 5;
@@ -11,6 +12,7 @@ export class InventoryPanel {
     this.scene = scene;
     this.visible = false;
     this.inventory = [];
+    this._cursor = new InventoryCursor(COLS, ROWS);
     this._build();
   }
 
@@ -32,7 +34,7 @@ export class InventoryPanel {
     this._container.add(bg);
 
     // Title
-    const title = s.add.text(panelW / 2, 10, 'INVENTORY  (I to close)', {
+    const title = s.add.text(panelW / 2, 10, 'INVENTORY  [I] close  [↵] use/equip', {
       fontSize: '12px', fontFamily: 'monospace', color: '#aaccff',
       stroke: '#000000', strokeThickness: 2, resolution: 2,
     }).setOrigin(0.5, 0);
@@ -61,6 +63,9 @@ export class InventoryPanel {
 
         slotBg.on('pointerdown', () => {
           if (index < this.inventory.length) {
+            // Move cursor to the clicked slot so the highlight stays consistent.
+            this._cursor.setIndex(index);
+            this._highlightCursor();
             EventBus.emit('inventory-use', index);
           }
         });
@@ -98,12 +103,17 @@ export class InventoryPanel {
     this._player = player;
     this.visible = true;
     this._container.setVisible(true);
+    this._cursor.reset();
     this._refresh(player);
+    this._highlightCursor();
+    this._addKeyListeners();
   }
 
   hide() {
     this.visible = false;
     this._container.setVisible(false);
+    this._clearCursorHighlight();
+    this._removeKeyListeners();
   }
 
   toggle(inventory, player) {
@@ -113,6 +123,103 @@ export class InventoryPanel {
       this.show(inventory, player);
     }
   }
+
+  // ─── Cursor highlighting ──────────────────────────────────────────────────
+
+  /**
+   * Restores the previous slot's stroke and applies a bright highlight to the
+   * current cursor slot.
+   */
+  _highlightCursor() {
+    if (this._prevCursorIndex !== undefined) {
+      this._slots[this._prevCursorIndex].bg.setStrokeStyle(1, 0x445566);
+    }
+    const idx = this._cursor.index;
+    this._slots[idx].bg.setStrokeStyle(2, 0xffdd44);
+    this._prevCursorIndex = idx;
+  }
+
+  /**
+   * Removes the cursor highlight when the panel is hidden.
+   */
+  _clearCursorHighlight() {
+    if (this._prevCursorIndex !== undefined) {
+      this._slots[this._prevCursorIndex].bg.setStrokeStyle(1, 0x445566);
+      this._prevCursorIndex = undefined;
+    }
+  }
+
+  // ─── Keyboard navigation ──────────────────────────────────────────────────
+
+  /**
+   * Registers keyboard handlers on the UIScene keyboard plugin while the
+   * panel is visible. Stored as named arrow functions so they can be removed
+   * precisely by _removeKeyListeners.
+   */
+  _addKeyListeners() {
+    const kb = this.scene.input.keyboard;
+    // Arrow keys and WASD for navigation; Enter to use the highlighted item.
+    this._kbUp    = () => this._navigate('up');
+    this._kbDown  = () => this._navigate('down');
+    this._kbLeft  = () => this._navigate('left');
+    this._kbRight = () => this._navigate('right');
+    this._kbEnter = () => this._useCurrentSlot();
+
+    kb.on('keydown-UP',    this._kbUp);
+    kb.on('keydown-DOWN',  this._kbDown);
+    kb.on('keydown-LEFT',  this._kbLeft);
+    kb.on('keydown-RIGHT', this._kbRight);
+    kb.on('keydown-W',     this._kbUp);
+    kb.on('keydown-S',     this._kbDown);
+    kb.on('keydown-A',     this._kbLeft);
+    kb.on('keydown-D',     this._kbRight);
+    kb.on('keydown-ENTER', this._kbEnter);
+  }
+
+  /**
+   * Removes the keyboard handlers registered by _addKeyListeners.
+   */
+  _removeKeyListeners() {
+    const kb = this.scene.input.keyboard;
+    if (!this._kbUp) return;
+    kb.off('keydown-UP',    this._kbUp);
+    kb.off('keydown-DOWN',  this._kbDown);
+    kb.off('keydown-LEFT',  this._kbLeft);
+    kb.off('keydown-RIGHT', this._kbRight);
+    kb.off('keydown-W',     this._kbUp);
+    kb.off('keydown-S',     this._kbDown);
+    kb.off('keydown-A',     this._kbLeft);
+    kb.off('keydown-D',     this._kbRight);
+    kb.off('keydown-ENTER', this._kbEnter);
+    this._kbUp = this._kbDown = this._kbLeft = this._kbRight = this._kbEnter = null;
+  }
+
+  /**
+   * Moves the cursor in the given direction and refreshes the visual highlight.
+   *
+   * @param {'up'|'down'|'left'|'right'} direction
+   */
+  _navigate(direction) {
+    switch (direction) {
+      case 'up':    this._cursor.moveUp();    break;
+      case 'down':  this._cursor.moveDown();  break;
+      case 'left':  this._cursor.moveLeft();  break;
+      case 'right': this._cursor.moveRight(); break;
+    }
+    this._highlightCursor();
+  }
+
+  /**
+   * Uses (equips or consumes) the item at the current cursor slot, if any.
+   */
+  _useCurrentSlot() {
+    const idx = this._cursor.index;
+    if (idx < this.inventory.length) {
+      EventBus.emit('inventory-use', idx);
+    }
+  }
+
+  // ─── Content refresh ─────────────────────────────────────────────────────
 
   _refresh(player) {
     const ICONS = {
