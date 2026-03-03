@@ -14,10 +14,14 @@ import { DIR, DIR_DELTA } from '../utils/Direction.js';
 import { TILE, FOV_STATE } from '../utils/TileTypes.js';
 import { createRNG } from '../utils/RNG.js';
 import { HeldMovementTracker } from '../systems/HeldMovementTracker.js';
+import { HoldRepeatScheduler } from '../systems/HoldRepeatScheduler.js';
 
 const TILE_SIZE = 16;
 const FOV_RADIUS = 8;
 const MOVE_DURATION = 80;
+// Additional delay after the move animation before auto-repeat fires.
+// Total repeat interval ≈ MOVE_DURATION + MOVE_REPEAT_DELAY_MS (~150 ms).
+const MOVE_REPEAT_DELAY_MS = 70;
 
 export class GameScene extends Phaser.Scene {
   constructor() {
@@ -286,6 +290,7 @@ export class GameScene extends Phaser.Scene {
 
     // HeldMovementTracker self-registers its own keydown/keyup listeners.
     this.heldMovement = new HeldMovementTracker(this.input.keyboard, EventBus);
+    this._holdRepeat  = new HoldRepeatScheduler(this.heldMovement, MOVE_REPEAT_DELAY_MS);
 
     this.input.keyboard.on('keydown-I', () => this._toggleInventory());
     this.input.keyboard.on('keydown-PERIOD', () => this._tryUseStairs());
@@ -529,11 +534,10 @@ export class GameScene extends Phaser.Scene {
    * player-turn-start logic in distinct, single-purpose methods.
    */
   _beginPlayerTurn() {
-    // Auto-continue movement if a direction key is still held from last turn.
-    const heldDir = this.heldMovement?.getDir();
-    if (heldDir) {
-      this._handleDir(heldDir);
-    }
+    // Auto-continue movement if a direction key is still held from last turn,
+    // but wait MOVE_REPEAT_DELAY_MS before triggering the next move so the
+    // total repeat interval (~150 ms) feels comfortable rather than frantic.
+    this._holdRepeat?.schedule((dir) => this._handleDir(dir));
   }
 
   // ─── Entity Lookup ────────────────────────────────────────────────────────
