@@ -31,11 +31,11 @@
 
 ## Character
 
-- [ ] hold keys for continued movement
 - [ ] compressed movement - if nothing new then SHIFT-direction keeps going until an obstacle is hit
 - [ ] character graphic
 - [ ] detailed status
 - [ ] xp bar - make it clearer that it is an XP bar
+- [x] hold keys for continued movement
 
 ## Saving
 

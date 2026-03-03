@@ -13,6 +13,7 @@ import { EventBus } from '../utils/EventBus.js';
 import { DIR, DIR_DELTA } from '../utils/Direction.js';
 import { TILE, FOV_STATE } from '../utils/TileTypes.js';
 import { createRNG } from '../utils/RNG.js';
+import { HeldMovementTracker } from '../systems/HeldMovementTracker.js';
 
 const TILE_SIZE = 16;
 const FOV_RADIUS = 8;
@@ -283,11 +284,14 @@ export class GameScene extends Phaser.Scene {
       right: Phaser.Input.Keyboard.KeyCodes.D,
     });
 
+    // HeldMovementTracker self-registers its own keydown/keyup listeners.
+    this.heldMovement = new HeldMovementTracker(this.input.keyboard, EventBus);
+
     this.input.keyboard.on('keydown-I', () => this._toggleInventory());
     this.input.keyboard.on('keydown-PERIOD', () => this._tryUseStairs());
     this.input.keyboard.on('keydown-GREATER_THAN', () => this._tryUseStairs());
 
-    // Arrow keys with justDown
+    // keydown: handle the first movement step immediately on key press.
     this.input.keyboard.on('keydown-UP',    () => this._handleDir(DIR.UP));
     this.input.keyboard.on('keydown-DOWN',  () => this._handleDir(DIR.DOWN));
     this.input.keyboard.on('keydown-LEFT',  () => this._handleDir(DIR.LEFT));
@@ -508,6 +512,28 @@ export class GameScene extends Phaser.Scene {
     }
 
     this.turnManager.setPlayerInput();
+    this._beginPlayerTurn();
+  }
+
+  /**
+   * Called at the start of every player turn — both the first turn of the game
+   * and after each round of enemy turns.  This method is the "loop-back" point
+   * that makes the turn cycle explicit:
+   *
+   *   _handleDir → _doPlayerMove / _playerAttack
+   *             → _startEnemyTurns
+   *             → _beginPlayerTurn
+   *             → _handleDir (if a key is still held, otherwise wait for input)
+   *
+   * Separating this from _startEnemyTurns keeps enemy-turn logic and
+   * player-turn-start logic in distinct, single-purpose methods.
+   */
+  _beginPlayerTurn() {
+    // Auto-continue movement if a direction key is still held from last turn.
+    const heldDir = this.heldMovement?.getDir();
+    if (heldDir) {
+      this._handleDir(heldDir);
+    }
   }
 
   // ─── Entity Lookup ────────────────────────────────────────────────────────
@@ -520,6 +546,7 @@ export class GameScene extends Phaser.Scene {
   // ─── Game Over ────────────────────────────────────────────────────────────
 
   _gameOver() {
+    EventBus.emit('game-over');
     this.turnManager.setGameOver();
     EventBus.emit('message', 'You died! Press R to restart.');
     this.input.keyboard.once('keydown-R', () => this._restart());
