@@ -16,5 +16,5 @@ Entries are listed newest-first within each section.
 
 ### Fixed
 
-- 2026-03-03 — Brief key taps no longer trigger unintended extra movement; a hold threshold (150 ms) must elapse before a direction is considered held for auto-repeat
+- 2026-03-03 — Fixed hold-key movement: the move animation (80 ms) provides the natural tap-prevention window, so auto-repeat now works correctly when a key is held
 - 2026-03-02 — Inventory panel now updates the equipped weapon/armor name immediately when an item is equipped while the panel is open
