@@ -7,6 +7,7 @@
 ## General
 
 - [ ] deployment to GitHub Pages
+- [ ] display and maintain an application version number following semantic versioning and include the git commit hash for the built application
 - [ ] music
 - [ ] bosses - unique (once per run) and repeatable (champions?)
 - [ ] remote deployment/hosting for app
