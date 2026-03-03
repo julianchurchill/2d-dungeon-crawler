@@ -30,7 +30,7 @@
 
 ## Character
 
-- [ ] hold keys for continued movement
+- [x] hold keys for continued movement
 - [ ] compressed movement - if nothing new then SHIFT-direction keeps going until an obstacle is hit
 - [ ] character graphic
 - [ ] detailed status
