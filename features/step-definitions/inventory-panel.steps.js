@@ -43,10 +43,13 @@ function makeFluent(initialText = '') {
 
 /**
  * Creates a minimal mock of a Phaser.Scene sufficient for InventoryPanel.
+ * Includes a mock keyboard so _addKeyListeners / _removeKeyListeners can run
+ * without errors.
  *
- * @returns {{ scale: object, add: object }} Mock scene object.
+ * @returns {{ scale: object, add: object, input: object }} Mock scene object.
  */
 function createMockScene() {
+  const keyboard = { on: () => {}, off: () => {} };
   return {
     scale: { width: 800, height: 600 },
     add: {
@@ -54,6 +57,7 @@ function createMockScene() {
       rectangle: () => makeFluent(),
       text: (_x, _y, text) => makeFluent(text),
     },
+    input: { keyboard },
   };
 }
 

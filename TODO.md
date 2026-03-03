@@ -16,8 +16,8 @@
 
 ## Inventory
 
-- [ ] arrow keys to move around inventory (no mouse)
 - [ ] show details of inventory item when highlighted
+- [x] arrow keys to move around inventory (no mouse)
 
 ## UI
 
