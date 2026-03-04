@@ -10,7 +10,6 @@ Entries are listed newest-first within each section.
 ### Added
 
 - 2026-03-04 — Version number (semver + git commit hash + build date/time) displayed on the main menu
-- 2026-03-04 — Version number (semver + git commit hash + build date/time) displayed on the main menu
 - 2026-03-03 — Inventory panel now supports arrow key and WASD navigation; Enter key equips or uses the highlighted item
 - 2026-03-03 — Vite HMR now works in WSL2 devcontainers via usePolling config
 - 2026-03-03 — Hold-key auto-repeat interval decoupled from animation cycle (~150 ms total: 80 ms animation + 70 ms delay)
@@ -18,6 +17,10 @@ Entries are listed newest-first within each section.
 - 2026-03-02 — Port 3000 forwarded automatically in devcontainer; Vite dev server binds to all interfaces via --host flag
 - 2026-03-02 — Guideline added: CHANGELOG.md must be updated with every new feature or bug fix
 - 2026-03-02 — CHANGELOG.md introduced to track feature changes and bug fixes
+
+### Changed
+
+- 2026-03-04 — Build info (git hash, date, version) now written to src/build-info.js by a pre-build script; vite.config.js no longer calls git directly
 
 ### Fixed
 
