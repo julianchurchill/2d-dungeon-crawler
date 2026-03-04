@@ -7,12 +7,12 @@
 ## General
 
 - [ ] deployment to GitHub Pages
-- [ ] display and maintain an application version number following semantic versioning and include the git commit hash for the built application
 - [ ] music
 - [ ] bosses - unique (once per run) and repeatable (champions?)
 - [ ] remote deployment/hosting for app
 - [ ] stats - deepest level reached, monster types kill count, unique bosses kill count
 - [ ] achievements - hide achievements until completed, hints. Examples 'Burrower - reached level 10' (hint 'reach level 10'), with some more cryptic: achievement 'Hoarder - gained 100g' (hint 'what would Smaug do?')
+- [x] display and maintain an application version number following semantic versioning and include the git commit hash for the built application
 
 ## Inventory
 

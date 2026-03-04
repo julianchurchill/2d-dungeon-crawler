@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { APP_VERSION_STRING } from '../utils/AppVersion.js';
 
 export class MainMenuScene extends Phaser.Scene {
   constructor() {
@@ -11,6 +12,7 @@ export class MainMenuScene extends Phaser.Scene {
     this._buildTitle(width, height);
     this._buildMenu(width, height);
     this._buildControls(width, height);
+    this._buildVersion(width, height);
 
     this.scale.on('resize', this._onResize, this);
   }
@@ -124,6 +126,22 @@ export class MainMenuScene extends Phaser.Scene {
         resolution: 2,
       }).setOrigin(0.5);
     });
+  }
+
+  /**
+   * Renders the build version string in the bottom-right corner of the screen.
+   * Displays the semantic version, short git commit hash, and UTC build time.
+   *
+   * @param {number} width  - Current canvas width.
+   * @param {number} height - Current canvas height.
+   */
+  _buildVersion(width, height) {
+    this.add.text(width - 8, height - 8, APP_VERSION_STRING, {
+      fontSize: '9px',
+      fontFamily: 'monospace',
+      color: '#445566',
+      resolution: 2,
+    }).setOrigin(1, 1);
   }
 
   _onResize(gameSize) {

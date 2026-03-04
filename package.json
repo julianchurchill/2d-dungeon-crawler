@@ -1,11 +1,14 @@
 {
   "name": "dungeon-crawler",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "type": "module",
   "scripts": {
+    "predev": "node scripts/gen-build-info.js",
     "dev": "vite --host",
+    "prebuild": "node scripts/gen-build-info.js",
     "build": "vite build",
     "preview": "vite preview",
+    "pretest": "node scripts/gen-build-info.js",
     "test": "NODE_OPTIONS='--loader ./features/support/phaser-loader.mjs --no-warnings' cucumber-js --format progress-bar",
     "test:pretty": "NODE_OPTIONS='--loader ./features/support/phaser-loader.mjs --no-warnings' cucumber-js --format pretty --format-options '{\"colorsEnabled\":true}'",
     "test:html": "NODE_OPTIONS='--loader ./features/support/phaser-loader.mjs --no-warnings' cucumber-js --format html:cucumber-report.html"
