@@ -39,6 +39,16 @@ Write application code that follows SOLID principles:
 
 When completing a task from `TODO.md`, mark it `- [x]` and move it to the **bottom** of its section so incomplete items stay at the top.
 
+## Versioning
+
+Bump the `version` field in `package.json` with every PR, following [Semantic Versioning](https://semver.org/):
+
+- **PATCH** (`x.x.X`) — backwards-compatible bug fixes.
+- **MINOR** (`x.X.0`) — new backwards-compatible features.
+- **MAJOR** (`X.0.0`) — breaking changes.
+
+The version is read by the Vite build and displayed on the main menu automatically — no other changes are needed beyond the `package.json` bump.
+
 ## Changelog
 
 Add an entry to `CHANGELOG.md` for every new feature or bug fix before committing. Place it under the appropriate heading (`Added`, `Changed`, `Fixed`, or `Removed`) inside `[Unreleased]`, newest entry first, with the date in `YYYY-MM-DD` format:
