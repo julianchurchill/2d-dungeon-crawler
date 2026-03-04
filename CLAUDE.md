@@ -57,6 +57,17 @@ Add an entry to `CHANGELOG.md` for every new feature or bug fix before committin
 - 2026-03-02 — Short description of what changed
 ```
 
+## Releasing
+
+Before merging `main` into `release` to trigger a deployment:
+
+1. Bump `version` in `package.json` (see Versioning below).
+2. Run `npm run prepare-release` — this renames the `[Unreleased]` section in
+   `CHANGELOG.md` to the current version number and inserts a fresh empty
+   `[Unreleased]` section above it.
+3. Commit both files, push, and open a PR to `main` as normal.
+4. Once merged, deploy by pushing `main` to `release`.
+
 ## Markdown Style
 
 Whenever you change a Markdown file, run markdownlint on it and fix all violations before committing:

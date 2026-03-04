@@ -129,6 +129,16 @@ Deployment is triggered by pushing to the `release` branch. A GitHub Actions wor
 
 ### How to deploy
 
+**Step 1 — Prepare the release on a feature branch:**
+
+1. Bump `version` in `package.json` following [Semantic Versioning](https://semver.org/)
+   (PATCH for bug fixes, MINOR for new features, MAJOR for breaking changes).
+2. Run `npm run prepare-release` to rename the `[Unreleased]` section in `CHANGELOG.md`
+   to the new version number and date.
+3. Commit both files, push, and open a PR to `main` as normal.
+
+**Step 2 — Trigger the deployment once the PR is merged:**
+
 ```bash
 git checkout release
 git merge main

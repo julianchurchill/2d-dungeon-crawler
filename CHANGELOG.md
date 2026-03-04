@@ -9,6 +9,14 @@ Entries are listed newest-first within each section.
 
 ---
 
+## [0.4.0] - 2026-03-04
+
+### Added
+
+- 2026-03-04 — `prepare-release` script renames `[Unreleased]` to the current version in CHANGELOG.md before a deployment
+
+---
+
 ## [0.3.0] - 2026-03-04
 
 ### Added
