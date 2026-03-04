@@ -121,6 +121,31 @@ The map tileset is rendered once into a `RenderTexture` when a floor loads. A se
 
 All visual assets — tiles, characters, items — are drawn with Phaser's `Graphics` API at boot time. This keeps the project free of external image assets and makes visual tweaks straightforward.
 
+## Deployment
+
+The game is hosted on [GitHub Pages](https://julianchurchill.github.io/2d-dungeon-crawler/).
+
+Deployment is triggered by pushing to the `release` branch. A GitHub Actions workflow then runs the test suite, builds the application with Vite, and publishes the `dist/` output to GitHub Pages automatically. The deployment will fail and stop if any test fails.
+
+### How to deploy
+
+```bash
+git checkout release
+git merge main
+git push origin release
+```
+
+That's it — the Actions workflow does the rest. You can monitor progress in the [Actions tab](https://github.com/julianchurchill/2d-dungeon-crawler/actions).
+
+### Workflow overview
+
+- **Trigger** — any push to the `release` branch (typically a merge from `main`)
+- **Test gate** — `npm test` must pass before the build step runs
+- **Build** — `npm run build` produces the `dist/` folder; Vite automatically sets the correct base path for GitHub Pages when running in GitHub Actions
+- **Deploy** — the `dist/` folder is published via `actions/deploy-pages`; no generated files are committed to git
+
+The workflow is defined in [.github/workflows/deploy.yml](.github/workflows/deploy.yml).
+
 ## Dev Containers
 
 To enable Claude (and yourself) to push to GitHub from the dev container add a `GH_TOKEN=xxx` line into .devcontainer/.env.devcontainer with `xxx` as your GitHub access token for accessing this repository. New tokens can be created here <https://github.com/settings/personal-access-tokens/new>.
