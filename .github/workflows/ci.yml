@@ -1,0 +1,30 @@
+# Runs the test suite on every pull request targeting main.
+#
+# The `test` job name is used as a required status check in the main branch
+# ruleset — configure it under Settings → Rules → main → Require status checks.
+
+name: CI
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test
