@@ -1,0 +1,63 @@
+# Deploys the built application to GitHub Pages.
+#
+# Triggered by any push to the `release` branch (typically a merge from `main`).
+# Tests must pass before the build and deploy steps run.
+#
+# Prerequisites (one-time repo setup):
+#   Settings → Pages → Source: "GitHub Actions"
+
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches:
+      - release
+
+# Grant the GITHUB_TOKEN the minimum permissions needed to deploy Pages.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Only allow one deployment at a time; do not cancel an in-progress deploy.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  test-and-build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test
+
+      - name: Build
+        run: npm run build
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: test-and-build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

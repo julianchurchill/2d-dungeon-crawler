@@ -9,6 +9,7 @@ Entries are listed newest-first within each section.
 
 ### Added
 
+- 2026-03-04 — GitHub Actions workflow deploys built application to GitHub Pages on push to `release` branch
 - 2026-03-04 — Version number (semver + git commit hash + build date/time) displayed on the main menu
 - 2026-03-03 — Inventory panel now supports arrow key and WASD navigation; Enter key equips or uses the highlighted item
 - 2026-03-03 — Vite HMR now works in WSL2 devcontainers via usePolling config

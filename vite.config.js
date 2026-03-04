@@ -10,7 +10,11 @@ import { defineConfig } from 'vite';
  * child_process calls are needed here.
  */
 export default defineConfig({
-  base: './',
+  // Use the repo subpath when building in GitHub Actions so asset URLs are
+  // correct on GitHub Pages (https://<user>.github.io/<repo>/). Locally,
+  // relative paths keep the dev server and `vite preview` working without any
+  // server configuration.
+  base: process.env.GITHUB_ACTIONS ? '/2d-dungeon-crawler/' : './',
   build: {
     outDir: 'dist',
     assetsDir: 'assets',
