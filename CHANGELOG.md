@@ -7,6 +7,10 @@ Entries are listed newest-first within each section.
 
 ## [Unreleased]
 
+---
+
+## [0.3.0] - 2026-03-04
+
 ### Added
 
 - 2026-03-04 — CI workflow runs the test suite automatically on every pull request targeting `main`
