@@ -55,5 +55,8 @@ export class UIScene extends Phaser.Scene {
     this.messageLog?.resize(width, height);
     this.inventoryPanel?.resize(width, height);
     this.dpad?.resize(width, height);
+    // Re-evaluate touch support on resize — handles DevTools device toolbar
+    // toggling and detachable touchscreen laptops changing touch capability.
+    this.dpad?.setVisible(isTouchDevice());
   }
 }
