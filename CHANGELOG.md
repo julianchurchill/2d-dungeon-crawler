@@ -7,6 +7,10 @@ Entries are listed newest-first within each section.
 
 ## [Unreleased]
 
+### Added
+
+- 2026-03-05 — On-screen D-pad is shown only on touch-capable devices
+
 ---
 
 ## [0.4.0] - 2026-03-04
