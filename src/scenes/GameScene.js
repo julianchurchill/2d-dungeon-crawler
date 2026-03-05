@@ -15,6 +15,7 @@ import { TILE, FOV_STATE } from '../utils/TileTypes.js';
 import { createRNG } from '../utils/RNG.js';
 import { HeldMovementTracker } from '../systems/HeldMovementTracker.js';
 import { HoldRepeatScheduler } from '../systems/HoldRepeatScheduler.js';
+import { RunMovementController } from '../systems/RunMovementController.js';
 
 const TILE_SIZE = 16;
 const FOV_RADIUS = 8;
@@ -47,6 +48,7 @@ export class GameScene extends Phaser.Scene {
     this._buildFloor(this.floorManager.generateFloor());
 
     // Input
+    this._runController = new RunMovementController();
     this._setupInput();
 
     // Cross-scene events
@@ -292,19 +294,23 @@ export class GameScene extends Phaser.Scene {
     this.heldMovement = new HeldMovementTracker(this.input.keyboard, EventBus);
     this._holdRepeat  = new HoldRepeatScheduler(this.heldMovement, MOVE_REPEAT_DELAY_MS);
 
-    this.input.keyboard.on('keydown-I', () => this._toggleInventory());
-    this.input.keyboard.on('keydown-PERIOD', () => this._tryUseStairs());
-    this.input.keyboard.on('keydown-GREATER_THAN', () => this._tryUseStairs());
+    // Non-movement actions cancel any active run before executing.
+    this.input.keyboard.on('keydown-I',            () => { this._runController.cancel(); this._toggleInventory(); });
+    this.input.keyboard.on('keydown-PERIOD',        () => { this._runController.cancel(); this._tryUseStairs(); });
+    this.input.keyboard.on('keydown-GREATER_THAN',  () => { this._runController.cancel(); this._tryUseStairs(); });
 
-    // keydown: handle the first movement step immediately on key press.
-    this.input.keyboard.on('keydown-UP',    () => this._handleDir(DIR.UP));
-    this.input.keyboard.on('keydown-DOWN',  () => this._handleDir(DIR.DOWN));
-    this.input.keyboard.on('keydown-LEFT',  () => this._handleDir(DIR.LEFT));
-    this.input.keyboard.on('keydown-RIGHT', () => this._handleDir(DIR.RIGHT));
-    this.input.keyboard.on('keydown-W',     () => this._handleDir(DIR.UP));
-    this.input.keyboard.on('keydown-S',     () => this._handleDir(DIR.DOWN));
-    this.input.keyboard.on('keydown-A',     () => this._handleDir(DIR.LEFT));
-    this.input.keyboard.on('keydown-D',     () => this._handleDir(DIR.RIGHT));
+    // SHIFT+direction starts a run; a plain direction key cancels any active run
+    // and performs a single step.  Cancelling before _handleDir is safe because
+    // _startRun calls runController.start() directly, which does not depend on
+    // the previous run state.
+    this.input.keyboard.on('keydown-UP',    (e) => { if (e.shiftKey) { this._startRun(DIR.UP);    } else { this._runController.cancel(); this._handleDir(DIR.UP);    } });
+    this.input.keyboard.on('keydown-DOWN',  (e) => { if (e.shiftKey) { this._startRun(DIR.DOWN);  } else { this._runController.cancel(); this._handleDir(DIR.DOWN);  } });
+    this.input.keyboard.on('keydown-LEFT',  (e) => { if (e.shiftKey) { this._startRun(DIR.LEFT);  } else { this._runController.cancel(); this._handleDir(DIR.LEFT);  } });
+    this.input.keyboard.on('keydown-RIGHT', (e) => { if (e.shiftKey) { this._startRun(DIR.RIGHT); } else { this._runController.cancel(); this._handleDir(DIR.RIGHT); } });
+    this.input.keyboard.on('keydown-W',     (e) => { if (e.shiftKey) { this._startRun(DIR.UP);    } else { this._runController.cancel(); this._handleDir(DIR.UP);    } });
+    this.input.keyboard.on('keydown-S',     (e) => { if (e.shiftKey) { this._startRun(DIR.DOWN);  } else { this._runController.cancel(); this._handleDir(DIR.DOWN);  } });
+    this.input.keyboard.on('keydown-A',     (e) => { if (e.shiftKey) { this._startRun(DIR.LEFT);  } else { this._runController.cancel(); this._handleDir(DIR.LEFT);  } });
+    this.input.keyboard.on('keydown-D',     (e) => { if (e.shiftKey) { this._startRun(DIR.RIGHT); } else { this._runController.cancel(); this._handleDir(DIR.RIGHT); } });
   }
 
   _setupEvents() {
@@ -322,6 +328,53 @@ export class GameScene extends Phaser.Scene {
     if (!this.turnManager.isAcceptingInput()) return;
     const { dx, dy } = DIR_DELTA[dir];
     this._doPlayerMove(dx, dy);
+  }
+
+  /**
+   * Starts a run in the given direction.  If the immediately adjacent tile
+   * contains an entity (enemy), the player attacks normally and no run begins.
+   * Otherwise the run controller is armed and the first step is taken.
+   *
+   * @param {string} dir - A DIR constant (UP / DOWN / LEFT / RIGHT).
+   */
+  _startRun(dir) {
+    if (!this.turnManager.isAcceptingInput()) return;
+    const { dx, dy } = DIR_DELTA[dir];
+    const nx = this.player.x + dx;
+    const ny = this.player.y + dy;
+    if (this._getEntityAt(nx, ny)) {
+      // Target tile has an entity — attack and do not begin running.
+      this._handleDir(dir);
+      return;
+    }
+    this._runController.start(dir);
+    this._doPlayerMove(dx, dy);
+  }
+
+  /**
+   * Advances one step of an active run.  Evaluates stop conditions before
+   * each step: the run ends if the next tile is blocked (wall or entity) or
+   * if any enemy or item is currently visible in the FOV.
+   */
+  _continueRun() {
+    const { dx, dy } = DIR_DELTA[this._runController.getDir()];
+    const nx = this.player.x + dx;
+    const ny = this.player.y + dy;
+    const blocked = !this.dungeonMap.isWalkable(nx, ny) || this._getEntityAt(nx, ny) !== null;
+    const dir = this._runController.nextDir(blocked, this._anyEntityVisible());
+    if (dir) this._handleDir(dir);
+  }
+
+  /**
+   * Returns true if any enemy or item occupies a tile that is currently
+   * visible in the player's FOV.  Used by the run system to stop auto-movement
+   * the moment a threat or point of interest comes into view.
+   *
+   * @returns {boolean}
+   */
+  _anyEntityVisible() {
+    return this.enemies.some(e => this.dungeonMap.getFovState(e.x, e.y) === FOV_STATE.VISIBLE)
+      || this.items.some(i => this.dungeonMap.getFovState(i.x, i.y) === FOV_STATE.VISIBLE);
   }
 
   // ─── Player Actions ───────────────────────────────────────────────────────
@@ -534,10 +587,16 @@ export class GameScene extends Phaser.Scene {
    * player-turn-start logic in distinct, single-purpose methods.
    */
   _beginPlayerTurn() {
-    // Auto-continue movement if a direction key is still held from last turn,
-    // but wait MOVE_REPEAT_DELAY_MS before triggering the next move so the
-    // total repeat interval (~150 ms) feels comfortable rather than frantic.
-    this._holdRepeat?.schedule((dir) => this._handleDir(dir));
+    if (this._runController.isRunning()) {
+      // Continue the active run — each step is a full turn (enemies act, FOV
+      // updates) handled by _continueRun rather than the hold-repeat system.
+      this._continueRun();
+    } else {
+      // Auto-continue movement if a direction key is still held from last turn,
+      // but wait MOVE_REPEAT_DELAY_MS before triggering the next move so the
+      // total repeat interval (~150 ms) feels comfortable rather than frantic.
+      this._holdRepeat?.schedule((dir) => this._handleDir(dir));
+    }
   }
 
   // ─── Entity Lookup ────────────────────────────────────────────────────────
