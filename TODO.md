@@ -21,8 +21,8 @@
 
 ## UI
 
-- [ ] mobile controls on mobile only
 - [ ] map - press 'm'
+- [x] mobile controls on mobile only
 
 ## Enemies
 

@@ -4,6 +4,7 @@ import { DPad } from '../ui/DPad.js';
 import { InventoryPanel } from '../ui/InventoryPanel.js';
 import { MessageLog } from '../ui/MessageLog.js';
 import { EventBus } from '../utils/EventBus.js';
+import { isTouchDevice } from '../utils/TouchDeviceDetector.js';
 
 export class UIScene extends Phaser.Scene {
   constructor() {
@@ -19,6 +20,8 @@ export class UIScene extends Phaser.Scene {
     this.messageLog = new MessageLog(this);
     this.inventoryPanel = new InventoryPanel(this);
     this.dpad = new DPad(this);
+    // Show touch controls only on devices that support touch input
+    this.dpad.setVisible(isTouchDevice());
 
     // Messages from game
     EventBus.on('message', (text) => this.messageLog.addMessage(text), this);
