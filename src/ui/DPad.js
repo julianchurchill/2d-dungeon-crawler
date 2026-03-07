@@ -1,4 +1,5 @@
 import { EventBus } from '../utils/EventBus.js';
+import { GameEvents } from '../events/GameEvents.js';
 import { DIR } from '../utils/Direction.js';
 
 const BTN_SIZE = 52;
@@ -50,7 +51,7 @@ export class DPad {
       bg.on('pointerdown', (ptr, lx, ly, evt) => {
         evt.stopPropagation();
         bg.setFillStyle(0x5555aa, 0.9);
-        EventBus.emit('dpad-press', dir);
+        EventBus.emit(GameEvents.DPAD_PRESS, dir);
       });
 
       bg.on('pointerup', () => bg.setFillStyle(0x333355, 0.75));
@@ -60,8 +61,8 @@ export class DPad {
     }
 
     // Action buttons (right of d-pad)
-    this._addActionBtn(PAD * 2 + 10, 0,    0x334455, 0x88aacc, 'INV',  '#aaccff', () => EventBus.emit('toggle-inventory'));
-    this._addActionBtn(PAD * 2 + 10, -PAD, 0x554433, 0xccaa88, '▼▼',   '#ffcc88', () => EventBus.emit('use-stairs'));
+    this._addActionBtn(PAD * 2 + 10, 0,    0x334455, 0x88aacc, 'INV',  '#aaccff', () => EventBus.emit(GameEvents.TOGGLE_INVENTORY));
+    this._addActionBtn(PAD * 2 + 10, -PAD, 0x554433, 0xccaa88, '▼▼',   '#ffcc88', () => EventBus.emit(GameEvents.USE_STAIRS));
   }
 
   _addActionBtn(x, y, fillColor, strokeColor, label, textColor, onPress) {

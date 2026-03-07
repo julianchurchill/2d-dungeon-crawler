@@ -1,6 +1,7 @@
 import { createRNG } from '../utils/RNG.js';
 import { BSPDungeonGenerator } from '../dungeon/BSPDungeonGenerator.js';
 import { EventBus } from '../utils/EventBus.js';
+import { GameEvents } from '../events/GameEvents.js';
 
 export class FloorManager {
   constructor() {
@@ -21,7 +22,7 @@ export class FloorManager {
 
   descend() {
     this.currentFloor++;
-    EventBus.emit('floor-changed', this.currentFloor);
+    EventBus.emit(GameEvents.FLOOR_CHANGED, this.currentFloor);
     return this.generateFloor();
   }
 

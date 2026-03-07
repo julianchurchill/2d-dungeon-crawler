@@ -4,6 +4,7 @@ import { DPad } from '../ui/DPad.js';
 import { InventoryPanel } from '../ui/InventoryPanel.js';
 import { MessageLog } from '../ui/MessageLog.js';
 import { EventBus } from '../utils/EventBus.js';
+import { GameEvents } from '../events/GameEvents.js';
 import { isTouchDevice } from '../utils/TouchDeviceDetector.js';
 
 export class UIScene extends Phaser.Scene {
@@ -24,13 +25,13 @@ export class UIScene extends Phaser.Scene {
     this.dpad.setVisible(isTouchDevice());
 
     // Messages from game
-    EventBus.on('message', (text) => this.messageLog.addMessage(text), this);
+    EventBus.on(GameEvents.MESSAGE, (text) => this.messageLog.addMessage(text), this);
 
     // Level-up screen effect
-    EventBus.on('player-level-up', (level) => this._showLevelUpBanner(level), this);
+    EventBus.on(GameEvents.PLAYER_LEVEL_UP, (level) => this._showLevelUpBanner(level), this);
 
-    // Inventory toggle — GameScene emits 'open-inventory' with data
-    EventBus.on('open-inventory', ({ inventory, player }) => {
+    // Inventory toggle — GameScene emits OPEN_INVENTORY with data
+    EventBus.on(GameEvents.OPEN_INVENTORY, ({ inventory, player }) => {
       this._playerRef = player;
       this.inventoryPanel.toggle(inventory, player);
     }, this);

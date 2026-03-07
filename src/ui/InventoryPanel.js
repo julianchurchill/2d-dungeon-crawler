@@ -1,4 +1,5 @@
 import { EventBus } from '../utils/EventBus.js';
+import { GameEvents } from '../events/GameEvents.js';
 import { InventoryCursor } from '../systems/InventoryCursor.js';
 
 const COLS = 4;
@@ -66,7 +67,7 @@ export class InventoryPanel {
             // Move cursor to the clicked slot so the highlight stays consistent.
             this._cursor.setIndex(index);
             this._highlightCursor();
-            EventBus.emit('inventory-use', index);
+            EventBus.emit(GameEvents.INVENTORY_USE, index);
           }
         });
 
@@ -89,7 +90,7 @@ export class InventoryPanel {
 
     // Refresh the equipped-name display whenever the inventory changes.
     // InventorySystem emits 'inventory-changed' after every interaction.
-    EventBus.on('inventory-changed', () => {
+    EventBus.on(GameEvents.INVENTORY_CHANGED, () => {
       if (this.visible) {
         this._refresh(this._player);
       }
@@ -215,7 +216,7 @@ export class InventoryPanel {
   _useCurrentSlot() {
     const idx = this._cursor.index;
     if (idx < this.inventory.length) {
-      EventBus.emit('inventory-use', idx);
+      EventBus.emit(GameEvents.INVENTORY_USE, idx);
     }
   }
 

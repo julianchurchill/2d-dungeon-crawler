@@ -7,6 +7,10 @@ Entries are listed newest-first within each section.
 
 ## [Unreleased]
 
+### Changed
+
+- 2026-03-07 — Centralise EventBus event names into `src/events/GameEvents.js` constants
+
 ---
 
 ## [0.7.3] - 2026-03-07

@@ -13,6 +13,7 @@ import { Item } from '../../src/items/Item.js';
 import { ITEM_TYPES } from '../../src/items/ItemTypes.js';
 import { InventorySystem } from '../../src/systems/InventorySystem.js';
 import { EventBus } from '../../src/utils/EventBus.js';
+import { GameEvents } from '../../src/events/GameEvents.js';
 
 // ── Minimal Phaser scene mock ────────────────────────────────────────────────
 
@@ -68,7 +69,7 @@ function createMockScene() {
  * to prevent listener accumulation across the test suite.
  */
 After(function () {
-  EventBus.removeAllListeners('inventory-changed');
+  EventBus.removeAllListeners(GameEvents.INVENTORY_CHANGED);
 });
 
 // ── Given ────────────────────────────────────────────────────────────────────
