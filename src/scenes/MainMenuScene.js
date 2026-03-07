@@ -137,6 +137,7 @@ export class MainMenuScene extends Phaser.Scene {
       'CONTROLS',
       '──────────────────',
       'WASD / Arrow Keys — Move',
+      'SHIFT + Direction — Run',
       'Bump into enemies — Attack',
       'Walk over items — Pick Up',
       'I — Open Inventory',
