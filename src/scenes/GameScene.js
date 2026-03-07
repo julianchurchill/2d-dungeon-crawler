@@ -452,6 +452,9 @@ export class GameScene extends Phaser.Scene {
           const leveled = this.player.gainXP(target.xp);
           if (leveled) {
             EventBus.emit('message', `Level up! You are now level ${this.player.stats.level}!`);
+            EventBus.emit('player-level-up', this.player.stats.level);
+            // Golden flash over the game world to make the moment unmissable.
+            this.cameras.main.flash(600, 255, 220, 100);
           }
           this.dungeonMap.setEntity(target.x, target.y, null);
           this.enemies = this.enemies.filter(e => e !== target);

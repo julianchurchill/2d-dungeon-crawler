@@ -23,10 +23,10 @@
 
 ## UI
 
-- [ ] screen effect when you level up during the game
 - [ ] allow arrows and WASD keys to navigate menus and ENTER/SPACE to select buttons
 - [ ] map - press 'm'
 - [x] mobile controls on mobile only
+- [x] screen effect when you level up during the game
 
 ## Enemies
 
