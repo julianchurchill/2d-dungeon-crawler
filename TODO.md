@@ -17,6 +17,8 @@
 ## Inventory
 
 - [ ] show details of inventory item when highlighted
+- [ ] drop items
+- [ ] destroy items
 - [x] arrow keys to move around inventory (no mouse)
 
 ## UI
@@ -28,20 +30,41 @@
 
 - [ ] enemy health - perhaps a health bar
 - [ ] enemy types
+- [ ] associate enemies with a chance of appearing based on the dungeon level. Record that against their enemy stats as their level. This can then be used for Hall of Legends information when players die for the highest level enemy they have defeated.
+- [ ] have an optional max dungeon level below which enemies will appear
 
 ## Character
 
+- [ ] increase defense when a character levels up
 - [ ] character graphic
-- [ ] detailed status
+- [ ] show a character sheet by pressing 'c' which shows all the players stats currently
 - [ ] xp bar - make it clearer that it is an XP bar
 - [x] hold keys for continued movement
 - [x] run movement - SHIFT+direction keeps going until an obstacle or visible enemy/item stops them
+
+## Character Skills
+
+- [ ] a character can have passive skills that have dynamic effects. These can be viewed by pressing 'k'. Initially the character has one placeholder skill of 'Lucky Strike' which gives a 1% chance for the character to gain 50% damage on a hit during combat.
+- [ ] on level up there is a chance the character can gain a special skill
 
 ## Saving
 
 - [ ] save between sessions
 - [ ] multiple save slots
 - [ ] cloud save (Google?)
+
+## Hall of Legends
+
+- [ ] add a Hall of Legends from the main screen where players can view the stats and game record for previous runs where they have died
+- [ ] Hall of Legends should show the previous runs as an ordered table based on a field the player can select which defaults to deepest dungeon level reached. Other options for ordering could be xp, character level, highest level enemy defeated.
+
+## Developer
+
+- [ ] add a developer options screen accessible from the main menu that allows:
+  - [ ] set start character level
+  - [ ] set start dungeon level
+  - [ ] when the player starts the game the settings from the developer options are immediately applied. When the level is set the the character is leveled up to match the value specified
+- [ ] allow inventory contents to be set via developer options
 
 ## Other
 
