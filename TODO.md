@@ -18,7 +18,7 @@
 
 - [ ] show details of inventory item when highlighted
 - [ ] drop items
-- [ ] destroy items
+- [ ] destroy items to get collectable materials that could be used later to create new items or enhance existing ones
 - [x] arrow keys to move around inventory (no mouse)
 
 ## UI
