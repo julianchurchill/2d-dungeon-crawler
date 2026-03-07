@@ -37,7 +37,7 @@ Write application code that follows SOLID principles:
 
 ## TODO
 
-When completing a task from `TODO.md`, mark it `- [x]` and move it to the **bottom** of its section so incomplete items stay at the top.
+When completing a task from `TODO.md`, mark it `- [x]` and move it to the **bottom** of its section, but **above** any already-completed `[x]` items there, so the newest completion sits at the top of the completed group.
 
 ## Versioning
 
