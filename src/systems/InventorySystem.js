@@ -1,4 +1,5 @@
 import { EventBus } from '../utils/EventBus.js';
+import { GameEvents } from '../events/GameEvents.js';
 
 /**
  * Pure inventory logic — no Phaser dependencies.
@@ -14,7 +15,7 @@ export class InventorySystem {
       return 'Your pack is full!';
     }
     player.addItem(item);
-    EventBus.emit('inventory-changed', player.inventory);
+    EventBus.emit(GameEvents.INVENTORY_CHANGED, player.inventory);
     return `You pick up the ${item.name}.`;
   }
 
@@ -32,8 +33,8 @@ export class InventorySystem {
       player.removeItem(index);
     }
 
-    EventBus.emit('inventory-changed', player.inventory);
-    EventBus.emit('player-stats-changed', player.stats);
+    EventBus.emit(GameEvents.INVENTORY_CHANGED, player.inventory);
+    EventBus.emit(GameEvents.PLAYER_STATS_CHANGED, player.stats);
     return msg;
   }
 
@@ -46,7 +47,7 @@ export class InventorySystem {
     if (!item) return null;
     item.x = player.x;
     item.y = player.y;
-    EventBus.emit('inventory-changed', player.inventory);
+    EventBus.emit(GameEvents.INVENTORY_CHANGED, player.inventory);
     return { item, message: `You drop the ${item.name}.` };
   }
 }

@@ -2,18 +2,19 @@ import { Given, When, Then, After } from '@cucumber/cucumber';
 import assert from 'node:assert/strict';
 import { Player } from '../../src/entities/Player.js';
 import { EventBus } from '../../src/utils/EventBus.js';
+import { GameEvents } from '../../src/events/GameEvents.js';
 
 // Clean up the specific listener after each scenario in this file so other
 // tests are not affected by leftover level-up event captures.
 After(function () {
-  EventBus.removeAllListeners('player-level-up');
+  EventBus.removeAllListeners(GameEvents.PLAYER_LEVEL_UP);
 });
 
 Given('a player who needs 20 XP to reach the next level', function () {
   this.player = new Player(0, 0);
   // Player starts with xpToNext = 20, which matches the scenario.
   this.levelUpEvents = [];
-  EventBus.on('player-level-up', (level) => this.levelUpEvents.push(level));
+  EventBus.on(GameEvents.PLAYER_LEVEL_UP, (level) => this.levelUpEvents.push(level));
 });
 
 When('the player gains {int} XP and the game processes the level-up', function (xp) {
@@ -22,7 +23,7 @@ When('the player gains {int} XP and the game processes the level-up', function (
   // a full Phaser scene.
   const leveled = this.player.gainXP(xp);
   if (leveled) {
-    EventBus.emit('player-level-up', this.player.stats.level);
+    EventBus.emit(GameEvents.PLAYER_LEVEL_UP, this.player.stats.level);
   }
 });
 

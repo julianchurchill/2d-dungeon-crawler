@@ -10,6 +10,7 @@ import { getSpawnTable, getEnemiesPerRoom } from '../entities/EnemyTypes.js';
 import { getFloorLoot } from '../items/ItemTypes.js';
 import { computeFOV } from '../fov/ShadowcastFOV.js';
 import { EventBus } from '../utils/EventBus.js';
+import { GameEvents } from '../events/GameEvents.js';
 import { DIR, DIR_DELTA } from '../utils/Direction.js';
 import { TILE, FOV_STATE } from '../utils/TileTypes.js';
 import { createRNG } from '../utils/RNG.js';
@@ -321,11 +322,11 @@ export class GameScene extends Phaser.Scene {
 
   _setupEvents() {
     // D-pad presses from UIScene
-    EventBus.on('dpad-press', (dir) => this._handleDir(dir), this);
-    EventBus.on('toggle-inventory', () => this._toggleInventory(), this);
-    EventBus.on('use-stairs', () => this._tryUseStairs(), this);
-    EventBus.on('inventory-use', (index) => this._useInventoryItem(index), this);
-    EventBus.on('floor-changed', (floor) => {
+    EventBus.on(GameEvents.DPAD_PRESS, (dir) => this._handleDir(dir), this);
+    EventBus.on(GameEvents.TOGGLE_INVENTORY, () => this._toggleInventory(), this);
+    EventBus.on(GameEvents.USE_STAIRS, () => this._tryUseStairs(), this);
+    EventBus.on(GameEvents.INVENTORY_USE, (index) => this._useInventoryItem(index), this);
+    EventBus.on(GameEvents.FLOOR_CHANGED, (floor) => {
       this.registry.set('floor', floor);
     }, this);
   }
@@ -445,14 +446,14 @@ export class GameScene extends Phaser.Scene {
         const { damage, killed, message } = resolveMeleeAttack(
           this.player, target, this.rng
         );
-        EventBus.emit('message', message);
+        EventBus.emit(GameEvents.MESSAGE, message);
         this._flashSprite(target.sprite, 0xff4444);
 
         if (killed) {
           const leveled = this.player.gainXP(target.xp);
           if (leveled) {
-            EventBus.emit('message', `Level up! You are now level ${this.player.stats.level}!`);
-            EventBus.emit('player-level-up', this.player.stats.level);
+            EventBus.emit(GameEvents.MESSAGE, `Level up! You are now level ${this.player.stats.level}!`);
+            EventBus.emit(GameEvents.PLAYER_LEVEL_UP, this.player.stats.level);
             // Golden flash over the game world to make the moment unmissable.
             this.cameras.main.flash(600, 255, 220, 100);
           }
@@ -488,7 +489,7 @@ export class GameScene extends Phaser.Scene {
 
     const item = this.items[itemIndex];
     const msg = InventorySystem.pickUp(this.player, item);
-    EventBus.emit('message', msg);
+    EventBus.emit(GameEvents.MESSAGE, msg);
 
     if (this.player.inventory.includes(item)) {
       // Successfully picked up
@@ -499,7 +500,7 @@ export class GameScene extends Phaser.Scene {
   }
 
   _showStairsPrompt() {
-    EventBus.emit('message', 'You stand on the stairs. Press > or tap ▼▼ to descend.');
+    EventBus.emit(GameEvents.MESSAGE, 'You stand on the stairs. Press > or tap ▼▼ to descend.');
   }
 
   _tryUseStairs() {
@@ -508,7 +509,7 @@ export class GameScene extends Phaser.Scene {
     if (tileType === TILE.STAIRS_DOWN) {
       this._descend();
     } else {
-      EventBus.emit('message', 'No stairs here.');
+      EventBus.emit(GameEvents.MESSAGE, 'No stairs here.');
     }
   }
 
@@ -518,13 +519,13 @@ export class GameScene extends Phaser.Scene {
       const dungeonData = this.floorManager.descend();
       this._buildFloor(dungeonData);
       this._syncRegistry();
-      EventBus.emit('message', `You descend to floor ${this.floorManager.currentFloor}.`);
+      EventBus.emit(GameEvents.MESSAGE, `You descend to floor ${this.floorManager.currentFloor}.`);
       this.cameras.main.fadeIn(300, 0, 0, 0);
     });
   }
 
   _toggleInventory() {
-    EventBus.emit('open-inventory', {
+    EventBus.emit(GameEvents.OPEN_INVENTORY, {
       inventory: this.player.inventory,
       player: this.player,
     });
@@ -537,7 +538,7 @@ export class GameScene extends Phaser.Scene {
 
   _useInventoryItem(index) {
     const msg = InventorySystem.useItem(this.player, index);
-    EventBus.emit('message', msg);
+    EventBus.emit(GameEvents.MESSAGE, msg);
     this._syncRegistry();
     if (this.player.isDead()) {
       this._gameOver();
@@ -556,7 +557,7 @@ export class GameScene extends Phaser.Scene {
         const { damage, killed, message } = resolveMeleeAttack(
           enemy, this.player, this.rng
         );
-        EventBus.emit('message', message);
+        EventBus.emit(GameEvents.MESSAGE, message);
         this._flashSprite(this.playerSprite, 0xff0000);
         this._syncRegistry();
 
@@ -618,11 +619,11 @@ export class GameScene extends Phaser.Scene {
   // ─── Game Over ────────────────────────────────────────────────────────────
 
   _gameOver() {
-    EventBus.emit('game-over');
+    EventBus.emit(GameEvents.GAME_OVER);
     this.turnManager.setGameOver();
-    EventBus.emit('message', 'You died! Press R to restart.');
+    EventBus.emit(GameEvents.MESSAGE, 'You died! Press R to restart.');
     this.input.keyboard.once('keydown-R', () => this._restart());
-    EventBus.once('restart-game', () => this._restart());
+    EventBus.once(GameEvents.RESTART_GAME, () => this._restart());
   }
 
   _restart() {
