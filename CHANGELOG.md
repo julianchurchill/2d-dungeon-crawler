@@ -7,6 +7,10 @@ Entries are listed newest-first within each section.
 
 ## [Unreleased]
 
+---
+
+## [0.7.3] - 2026-03-07
+
 ### Added
 
 - 2026-03-07 — Main menu controls list now includes SHIFT+Direction run movement
