@@ -13,8 +13,8 @@ Always work on a feature branch — never commit directly to `main`.
 
 Follow the red-green-refactor cycle for all new features and bug fixes:
 
-1. **Red** — write a failing Gherkin scenario (and step definitions) that describes the desired behaviour. Run `npm test` and confirm it fails.
-2. **Green** — write the minimum application code in `src/` needed to make the scenario pass. Run `npm test` and confirm it passes.
+1. **Red** — write a failing Gherkin scenario and step definitions. Create any necessary stub source files with the correct shape (exported functions/classes that return placeholder values) so the test can actually run and reach its assertion. Run `npm test` and confirm the test fails **on the assertion** (e.g. `expected true but got false`), not on a missing file or undefined symbol. A crash due to missing scaffolding is not a meaningful red.
+2. **Green** — replace the stub with the minimum real implementation needed to make the scenario pass. Run `npm test` and confirm it passes.
 3. **Refactor** — clean up the implementation if needed. Run `npm test` again to confirm everything still passes.
 
 Never write application code in `src/` before there is a failing test that requires it.
