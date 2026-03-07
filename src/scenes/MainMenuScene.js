@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { APP_VERSION_STRING } from '../utils/AppVersion.js';
+import { resetDevOptions } from '../systems/DevOptions.js';
 
 export class MainMenuScene extends Phaser.Scene {
   constructor() {
@@ -90,6 +91,29 @@ export class MainMenuScene extends Phaser.Scene {
       yoyo: true,
       repeat: -1,
       ease: 'Sine.easeInOut',
+    });
+
+    // DEV OPTIONS button (below START GAME)
+    const devBtnY = btnY + 56;
+    const devBg = this.add.rectangle(width / 2, devBtnY, 200, 34, 0x1a2a3a)
+      .setStrokeStyle(1, 0x336677)
+      .setInteractive({ useHandCursor: true });
+
+    const devTxt = this.add.text(width / 2, devBtnY, '⚙  DEV OPTIONS', {
+      fontSize: '12px', fontFamily: 'monospace', color: '#6699aa', resolution: 2,
+    }).setOrigin(0.5);
+
+    devBg.on('pointerover', () => {
+      devBg.setFillStyle(0x223344);
+      devTxt.setColor('#88ccff');
+    });
+    devBg.on('pointerout', () => {
+      devBg.setFillStyle(0x1a2a3a);
+      devTxt.setColor('#6699aa');
+    });
+    devBg.on('pointerdown', () => {
+      this.cameras.main.fadeOut(200, 0, 0, 0);
+      this.time.delayedCall(200, () => this.scene.start('DevOptionsScene'));
     });
 
     // Also start on spacebar / enter

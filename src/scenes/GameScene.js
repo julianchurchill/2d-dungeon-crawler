@@ -16,6 +16,7 @@ import { createRNG } from '../utils/RNG.js';
 import { HeldMovementTracker } from '../systems/HeldMovementTracker.js';
 import { HoldRepeatScheduler } from '../systems/HoldRepeatScheduler.js';
 import { RunMovementController } from '../systems/RunMovementController.js';
+import { applyToGame } from '../systems/DevOptions.js';
 
 const TILE_SIZE = 16;
 const FOV_RADIUS = 8;
@@ -43,6 +44,11 @@ export class GameScene extends Phaser.Scene {
 
     // Player
     this.player = new Player(0, 0);
+
+    // Apply developer options (level, floor, starting items) before generating
+    // the first floor so that floorManager.currentFloor is already set when
+    // generateFloor() evaluates enemy spawn tables.
+    applyToGame(this.player, this.floorManager);
 
     // Generate first floor
     this._buildFloor(this.floorManager.generateFloor());
