@@ -68,6 +68,11 @@ Before merging `main` into `release` to trigger a deployment:
 3. Commit both files, push, and open a PR to `main` as normal.
 4. Once merged, deploy by pushing `main` to `release`.
 
+## Event Map
+
+Whenever an EventBus event is added, removed, or modified (in `src/events/GameEvents.js`
+or any publisher/subscriber), update `EVENTS.md` to reflect the change.
+
 ## Markdown Style
 
 Whenever you change a Markdown file, run markdownlint on it and fix all violations before committing:
