@@ -60,11 +60,11 @@
 
 ## Developer
 
-- [ ] add a developer options screen accessible from the main menu that allows:
-  - [ ] set start character level
-  - [ ] set start dungeon level
-  - [ ] when the player starts the game the settings from the developer options are immediately applied. When the level is set the the character is leveled up to match the value specified
-- [ ] allow inventory contents to be set via developer options
+- [x] add a developer options screen accessible from the main menu that allows:
+  - [x] set start character level
+  - [x] set start dungeon level
+  - [x] when the player starts the game the settings from the developer options are immediately applied. When the level is set the the character is leveled up to match the value specified
+- [x] allow inventory contents to be set via developer options
 
 ## Other
 
