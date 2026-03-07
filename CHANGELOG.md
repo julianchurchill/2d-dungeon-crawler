@@ -9,6 +9,7 @@ Entries are listed newest-first within each section.
 
 ### Added
 
+- 2026-03-07 — Dev options button is hidden in production builds; visible only during local development
 - 2026-03-07 — Golden screen flash and "LEVEL UP!" banner when the player levels up
 - 2026-03-07 — Developer options screen: configure start floor, level, and inventory from the main menu
 - 2026-03-05 — SHIFT+direction runs the player until an obstacle or visible enemy/item stops them
