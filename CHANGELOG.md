@@ -9,7 +9,9 @@ Entries are listed newest-first within each section.
 
 ### Added
 
-- 2026-03-08 — Add 21 additional achievements: Orc Slayer, Troll Hunter (kill 10 of each), floor milestones every 10 floors up to 100, and level milestones every 10 levels up to 100
+- 2026-03-08 — Rename kill achievements to consistent "Killer" pattern: Orc Killer, Troll Killer
+- 2026-03-08 — Rename kill achievements to consistent {enemy} Killer pattern: Orc Killer, Troll Killer
+- 2026-03-08 — Add 21 additional achievements: Orc Killer, Troll Killer (kill 10 of each), floor milestones every 10 floors up to 100, and level milestones every 10 levels up to 100
 - 2026-03-08 — Achievement system: Goblin Killer (kill 10 goblins) and Burrower (reach floor 10) with progress tracking, banners, and message log notifications
 
 ### Fixed
