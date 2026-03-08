@@ -17,9 +17,9 @@
 - [ ] achievements are events that occur as a player explores the dungeon when they achieve certain conditions, for example 'Goblin Killer - killed 10 goblins' and 'Burrower - reached level 10'. Once an achievement is completed a message appears and a clear alert is shown to the player. Each achievement can only be completed once. Achievements that require the player to reach a certain number of something should have the value so far alongside, e.g 'Goblin Killer - killed 10 goblins (4 killed so far)'. 
 - [ ] achievements can be viewed by pressing ESCAPE to access an in game menu which shows 'Achievements'. This same screen can also be reached from the main menu before starting a game. This screen shows all achievements completed so far as well as achievements not yet completed.
 - [ ] some achievements unlock the availability of new permanent skills that apply to the player from then such as 'Goblin Killer' achievement unlocks 'Goblin hunting' permanent skill that gives the player an extra 10% damage against goblins
+- [ ] when running in dev mode allow the achievements to be completed and uncompleted by a tick box that is otherwise hidden
 - [ ] some achievements unlock the availability of new items that can appear from then on in the game based on any other item specific conditions (e.g. only appears after level 10)
 - [ ] some achievements unlock the availability of new skills that can be selected by the player from then on in the game based on any other skill specific conditions (e.g. only appears after level 10)
-- [ ] when running in dev mode allow the achievements to be completed and uncompleted by a tick box that is otherwise hidden
 - [ ] 'Goblin Slayer - killed 100 goblins (n killed so far)' grants 'Goblin slaying' permanent skill of an extra 15% damage against goblins (cumulative with 'Goblin hunting').
 - [ ] 'Top Nogg - killed Boss Nogg' grants 'Goblin destroyer' permanent skill of extra 25% damage against goblins (cumulative with 'Goblin hunting' and 'Goblin slaying').
 
@@ -57,6 +57,7 @@
 
 - [ ] a character can have skills that have dynamic effects. These can be viewed by pressing 'k' or using a button on the mobile interface. Initially the character has one active skill of 'Lucky Strike' which gives a 1% chance for the character to gain 50% damage on a hit during combat and shows a message when it is triggered.
 - [ ] every 5 levels the character can either choose a new skill from the pool of not activated skills to activate or upgrade an existing one. 'Lucky Strike' can be upgraded increasing the chance of activation by 1% on each upgrade to a maximum of 50%.
+- [ ] in dev mode the player can upgrade their skills or activate new ones at any time in the skills screen
 - [ ] the character initially has two deactivated skills. When active 'Ferocity' adds +1 to each attack and does not output a message. When active 'Dodge' gives a 1% chance of completely dodging an attack and shows a message when it is triggered. 'Ferocity' can be upgraded by +1 per upgrade with no maximum. 'Dodge' can be upgraded by +1% per upgrade to a maximum of 50%.
 
 ## Town
