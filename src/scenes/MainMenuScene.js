@@ -177,6 +177,7 @@ export class MainMenuScene extends Phaser.Scene {
       'Bump into enemies — Attack',
       'Walk over items — Pick Up',
       'I — Open Inventory',
+      'M — Message History',
       '> on stairs — Descend',
       '',
       'Mobile: Use the D-Pad on screen',
