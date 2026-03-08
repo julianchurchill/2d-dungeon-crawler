@@ -81,3 +81,18 @@ export function setProgressIfHigher(id, value, store = achievementStore) {
 export function completeAchievement(id, store = achievementStore) {
   getProgress(id, store).completed = true;
 }
+
+/**
+ * Resets an achievement to its initial uncompleted state, clearing both the
+ * completed flag and the progress count.  Used by the dev-mode toggle so
+ * developers can re-test achievement unlock flows without restarting the game.
+ *
+ * @param {string} id
+ * @param {Object.<string, AchievementProgress>} [store=achievementStore]
+ */
+export function uncompleteAchievement(id, store = achievementStore) {
+  if (store[id]) {
+    store[id].count = 0;
+    store[id].completed = false;
+  }
+}
