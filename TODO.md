@@ -61,7 +61,8 @@
 
 ## Saving
 
-- [ ] save between sessions
+- [ ] local save (cookies)
+- [ ] export save as text file/string option
 - [ ] multiple save slots
 - [ ] cloud save (Google?)
 
