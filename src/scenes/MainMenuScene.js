@@ -94,9 +94,33 @@ export class MainMenuScene extends Phaser.Scene {
       ease: 'Sine.easeInOut',
     });
 
+    // Achievements button
+    const achBtnY = btnY + 56;
+    const achBg = this.add.rectangle(width / 2, achBtnY, 200, 34, 0x1a2a3a)
+      .setStrokeStyle(1, 0x336677)
+      .setInteractive({ useHandCursor: true });
+
+    const achTxt = this.add.text(width / 2, achBtnY, '★  ACHIEVEMENTS', {
+      fontSize: '12px', fontFamily: 'monospace', color: '#6699aa', resolution: 2,
+    }).setOrigin(0.5);
+
+    achBg.on('pointerover', () => {
+      achBg.setFillStyle(0x223344);
+      achTxt.setColor('#ffdd88');
+    });
+    achBg.on('pointerout', () => {
+      achBg.setFillStyle(0x1a2a3a);
+      achTxt.setColor('#6699aa');
+    });
+    achBg.on('pointerdown', () => {
+      this.cameras.main.fadeOut(200, 0, 0, 0);
+      this.time.delayedCall(200, () =>
+        this.scene.start('AchievementsScene', { fromScene: 'MainMenuScene' }));
+    });
+
     // DEV OPTIONS button — only shown in development builds
     if (isDevEnvironment()) {
-      const devBtnY = btnY + 56;
+      const devBtnY = achBtnY + 44;
       const devBg = this.add.rectangle(width / 2, devBtnY, 200, 34, 0x1a2a3a)
         .setStrokeStyle(1, 0x336677)
         .setInteractive({ useHandCursor: true });

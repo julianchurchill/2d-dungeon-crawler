@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { BootScene } from './scenes/BootScene.js';
 import { MainMenuScene } from './scenes/MainMenuScene.js';
 import { DevOptionsScene } from './scenes/DevOptionsScene.js';
+import { AchievementsScene } from './scenes/AchievementsScene.js';
 import { GameScene } from './scenes/GameScene.js';
 import { UIScene } from './scenes/UIScene.js';
 
@@ -17,7 +18,7 @@ const config = {
     width: window.innerWidth,
     height: window.innerHeight,
   },
-  scene: [BootScene, MainMenuScene, DevOptionsScene, GameScene, UIScene],
+  scene: [BootScene, MainMenuScene, DevOptionsScene, AchievementsScene, GameScene, UIScene],
 };
 
 const game = new Phaser.Game(config);
