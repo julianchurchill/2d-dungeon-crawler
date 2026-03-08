@@ -18,6 +18,7 @@ import { HeldMovementTracker } from '../systems/HeldMovementTracker.js';
 import { HoldRepeatScheduler } from '../systems/HoldRepeatScheduler.js';
 import { RunMovementController } from '../systems/RunMovementController.js';
 import { applyToGame } from '../systems/DevOptions.js';
+import { AchievementSystem } from '../achievements/AchievementSystem.js';
 
 const TILE_SIZE = 16;
 const FOV_RADIUS = 8;
@@ -38,6 +39,8 @@ export class GameScene extends Phaser.Scene {
     this.floorManager = new FloorManager();
     this.turnManager = new TurnManager();
     this.rng = createRNG(Date.now());
+    // AchievementSystem self-registers on the EventBus in its constructor.
+    new AchievementSystem();
 
     // Entities lists
     this.enemies = [];
@@ -329,6 +332,10 @@ export class GameScene extends Phaser.Scene {
     EventBus.on(GameEvents.FLOOR_CHANGED, (floor) => {
       this.registry.set('floor', floor);
     }, this);
+    // Log a message when an achievement is unlocked (banner is shown by UIScene).
+    EventBus.on(GameEvents.ACHIEVEMENT_UNLOCKED, (achievement) => {
+      EventBus.emit(GameEvents.MESSAGE, `Achievement unlocked: ${achievement.name}!`);
+    }, this);
   }
 
   _handleDir(dir) {
@@ -450,6 +457,9 @@ export class GameScene extends Phaser.Scene {
         this._flashSprite(target.sprite, 0xff4444);
 
         if (killed) {
+          // Notify achievement system via event so it can update kill-based progress.
+          EventBus.emit(GameEvents.ENEMY_KILLED, target.type);
+
           const leveled = this.player.gainXP(target.xp);
           if (leveled) {
             EventBus.emit(GameEvents.MESSAGE, `Level up! You are now level ${this.player.stats.level}!`);

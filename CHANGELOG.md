@@ -7,6 +7,11 @@ Entries are listed newest-first within each section.
 
 ## [Unreleased]
 
+### Added
+
+- 2026-03-08 — Add 21 additional achievements: Orc Slayer, Troll Hunter (kill 10 of each), floor milestones every 10 floors up to 100, and level milestones every 10 levels up to 100
+- 2026-03-08 — Achievement system: Goblin Killer (kill 10 goblins) and Burrower (reach floor 10) with progress tracking, banners, and message log notifications
+
 ### Fixed
 
 - 2026-03-08 — Dev options start floor and start level not reflected in HUD on game start; UIScene now eagerly reads initial registry values via `syncHudFromRegistry` so dev-option overrides display correctly from the first frame
