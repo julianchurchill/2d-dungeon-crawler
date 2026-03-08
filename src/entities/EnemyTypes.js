@@ -32,10 +32,17 @@ export const ENEMY_DEFS = {
 };
 
 /**
- * Get the enemy spawn table for a given floor.
- * Returns an array of type strings (weighted).
+ * Returns the weighted enemy spawn table for a given floor.
+ * When `spawnWeights` is provided (non-null), the floor-based defaults are
+ * bypassed and the custom weights are used instead — allowing developer
+ * options to override the composition without modifying this function.
+ *
+ * @param {number} floor - Current dungeon floor.
+ * @param {Object.<string,number>|null} [spawnWeights=null] - Optional override map.
+ * @returns {string[]} Weighted array of enemy type strings.
  */
-export function getSpawnTable(floor) {
+export function getSpawnTable(floor, spawnWeights = null) {
+  if (spawnWeights !== null) return buildSpawnTableFromWeights(spawnWeights);
   if (floor <= 1) return ['goblin', 'goblin', 'goblin'];
   if (floor <= 3) return ['goblin', 'goblin', 'orc'];
   return ['goblin', 'orc', 'orc', 'troll'];
