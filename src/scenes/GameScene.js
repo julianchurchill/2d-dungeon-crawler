@@ -6,7 +6,6 @@ import { InventorySystem } from '../systems/InventorySystem.js';
 import { Player } from '../entities/Player.js';
 import { Enemy } from '../entities/Enemy.js';
 import { Item } from '../items/Item.js';
-import { getSpawnTable, getEnemiesPerRoom } from '../entities/EnemyTypes.js';
 import { getFloorLoot } from '../items/ItemTypes.js';
 import { computeFOV } from '../fov/ShadowcastFOV.js';
 import { EventBus } from '../utils/EventBus.js';
@@ -18,6 +17,7 @@ import { HeldMovementTracker } from '../systems/HeldMovementTracker.js';
 import { HoldRepeatScheduler } from '../systems/HoldRepeatScheduler.js';
 import { RunMovementController } from '../systems/RunMovementController.js';
 import { applyToGame } from '../systems/DevOptions.js';
+import { EnemySpawner } from '../systems/EnemySpawner.js';
 import { AchievementSystem } from '../achievements/AchievementSystem.js';
 
 const TILE_SIZE = 16;
@@ -53,6 +53,9 @@ export class GameScene extends Phaser.Scene {
     // the first floor so that floorManager.currentFloor is already set when
     // generateFloor() evaluates enemy spawn tables.
     applyToGame(this.player, this.floorManager);
+
+    // EnemySpawner reads devOptions automatically (uses singleton by default).
+    this._enemySpawner = new EnemySpawner(this.rng);
 
     // Generate first floor
     this._buildFloor(this.floorManager.generateFloor());
@@ -194,23 +197,12 @@ export class GameScene extends Phaser.Scene {
   // ─── Enemy & Item Spawning ────────────────────────────────────────────────
 
   _spawnEnemies(rooms) {
-    const floor = this.floorManager.currentFloor;
-    const spawnTable = getSpawnTable(floor);
-    const perRoom = getEnemiesPerRoom(floor);
-
-    for (let i = 1; i < rooms.length; i++) {
-      const room = rooms[i];
-      const count = this.rng.nextInt(0, perRoom);
-      for (let j = 0; j < count; j++) {
-        const type = this.rng.pick(spawnTable);
-        // Random position within room
-        const ex = this.rng.nextInt(room.x + 1, room.x + room.w - 2);
-        const ey = this.rng.nextInt(room.y + 1, room.y + room.h - 2);
-        if (!this._getEntityAt(ex, ey)) {
-          this._spawnEnemy(ex, ey, type);
-        }
-      }
-    }
+    this._enemySpawner.spawnForRooms(
+      rooms,
+      this.floorManager.currentFloor,
+      (x, y)       => this._getEntityAt(x, y),
+      (x, y, type) => this._spawnEnemy(x, y, type),
+    );
   }
 
   _spawnEnemy(x, y, type) {

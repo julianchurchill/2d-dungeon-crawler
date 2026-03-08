@@ -89,7 +89,7 @@
 
 ## Developer
 
-- [ ] add to developer options the ability to edit the spawn table and to change minimum and maximum number of enemies per room to be set before the game starts
+- [x] add to developer options the ability to edit the spawn table and to change minimum and maximum number of enemies per room to be set before the game starts
 - [x] add a developer options screen accessible from the main menu that allows:
   - [x] set start character level
   - [x] set start dungeon level
