@@ -30,6 +30,9 @@ export class UIScene extends Phaser.Scene {
     // Level-up screen effect
     EventBus.on(GameEvents.PLAYER_LEVEL_UP, (level) => this._showLevelUpBanner(level), this);
 
+    // Achievement unlocked banner
+    EventBus.on(GameEvents.ACHIEVEMENT_UNLOCKED, (achievement) => this._showAchievementBanner(achievement), this);
+
     // Inventory toggle — GameScene emits OPEN_INVENTORY with data
     EventBus.on(GameEvents.OPEN_INVENTORY, ({ inventory, player }) => {
       this._playerRef = player;
@@ -83,6 +86,47 @@ export class UIScene extends Phaser.Scene {
           alpha: 0,
           delay: 800,
           duration: 400,
+          onComplete: () => txt.destroy(),
+        });
+      },
+    });
+  }
+
+  /**
+   * Displays a prominent "ACHIEVEMENT UNLOCKED!" banner with the achievement
+   * name.  More visually distinct than the level-up banner — uses a cyan/teal
+   * colour scheme and a longer hold time to give the player time to read it.
+   * Self-destructs after the animation completes.
+   *
+   * @param {import('../achievements/AchievementDefinitions.js').AchievementDefinition} achievement
+   */
+  _showAchievementBanner(achievement) {
+    const { width, height } = this.scale;
+    const txt = this.add.text(
+      width / 2, height / 4,
+      `ACHIEVEMENT UNLOCKED!\n${achievement.name}`,
+      {
+        fontSize: '20px',
+        fontFamily: 'monospace',
+        color: '#88ffee',
+        stroke: '#004433',
+        strokeThickness: 4,
+        resolution: 2,
+        align: 'center',
+      }
+    ).setOrigin(0.5).setAlpha(0).setScrollFactor(0).setDepth(510);
+
+    // Fade in, hold longer than level-up, fade out, then destroy.
+    this.tweens.add({
+      targets: txt,
+      alpha: 1,
+      duration: 300,
+      onComplete: () => {
+        this.tweens.add({
+          targets: txt,
+          alpha: 0,
+          delay: 1500,
+          duration: 500,
           onComplete: () => txt.destroy(),
         });
       },

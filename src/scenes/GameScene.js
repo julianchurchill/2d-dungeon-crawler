@@ -18,6 +18,7 @@ import { HeldMovementTracker } from '../systems/HeldMovementTracker.js';
 import { HoldRepeatScheduler } from '../systems/HoldRepeatScheduler.js';
 import { RunMovementController } from '../systems/RunMovementController.js';
 import { applyToGame } from '../systems/DevOptions.js';
+import { AchievementSystem } from '../achievements/AchievementSystem.js';
 
 const TILE_SIZE = 16;
 const FOV_RADIUS = 8;
@@ -38,6 +39,7 @@ export class GameScene extends Phaser.Scene {
     this.floorManager = new FloorManager();
     this.turnManager = new TurnManager();
     this.rng = createRNG(Date.now());
+    this._achievementSystem = new AchievementSystem();
 
     // Entities lists
     this.enemies = [];
@@ -450,10 +452,14 @@ export class GameScene extends Phaser.Scene {
         this._flashSprite(target.sprite, 0xff4444);
 
         if (killed) {
+          // Check kill-based achievements before removing the enemy.
+          this._notifyAchievements(this._achievementSystem.onEnemyKilled(target.type));
+
           const leveled = this.player.gainXP(target.xp);
           if (leveled) {
             EventBus.emit(GameEvents.MESSAGE, `Level up! You are now level ${this.player.stats.level}!`);
             EventBus.emit(GameEvents.PLAYER_LEVEL_UP, this.player.stats.level);
+            this._notifyAchievements(this._achievementSystem.onPlayerLevelUp(this.player.stats.level));
             // Golden flash over the game world to make the moment unmissable.
             this.cameras.main.flash(600, 255, 220, 100);
           }
@@ -520,6 +526,7 @@ export class GameScene extends Phaser.Scene {
       this._buildFloor(dungeonData);
       this._syncRegistry();
       EventBus.emit(GameEvents.MESSAGE, `You descend to floor ${this.floorManager.currentFloor}.`);
+      this._notifyAchievements(this._achievementSystem.onFloorReached(this.floorManager.currentFloor));
       this.cameras.main.fadeIn(300, 0, 0, 0);
     });
   }
@@ -614,6 +621,22 @@ export class GameScene extends Phaser.Scene {
   _getEntityAt(x, y) {
     if (this.player && this.player.x === x && this.player.y === y) return this.player;
     return this.enemies.find(e => e.x === x && e.y === y) || null;
+  }
+
+  // ─── Achievements ────────────────────────────────────────────────────────
+
+  /**
+   * Emits ACHIEVEMENT_UNLOCKED for each achievement in the list and logs a
+   * message to the game log.  Called whenever AchievementSystem returns
+   * newly-completed achievements.
+   *
+   * @param {import('../achievements/AchievementDefinitions.js').AchievementDefinition[]} achievements
+   */
+  _notifyAchievements(achievements) {
+    for (const achievement of achievements) {
+      EventBus.emit(GameEvents.ACHIEVEMENT_UNLOCKED, achievement);
+      EventBus.emit(GameEvents.MESSAGE, `Achievement unlocked: ${achievement.name}!`);
+    }
   }
 
   // ─── Game Over ────────────────────────────────────────────────────────────

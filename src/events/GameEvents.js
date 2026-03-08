@@ -102,4 +102,12 @@ export const GameEvents = {
    * Subscribed by: GameScene (once, triggers _restart)
    */
   RESTART_GAME: 'restart-game',
+
+  /**
+   * An achievement has just been unlocked.
+   * Emitted by: GameScene (after AchievementSystem returns a newly-completed achievement)
+   * Subscribed by: UIScene (shows achievement banner)
+   * @type {import('../achievements/AchievementDefinitions.js').AchievementDefinition}
+   */
+  ACHIEVEMENT_UNLOCKED: 'achievement-unlocked',
 };

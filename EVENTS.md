@@ -16,6 +16,7 @@ GameScene                ──► MESSAGE              ──► UIScene → Me
 GameScene                ──► PLAYER_LEVEL_UP      ──► UIScene → _showLevelUpBanner
 GameScene                ──► OPEN_INVENTORY       ──► UIScene → InventoryPanel.toggle
 GameScene                ──► GAME_OVER            ──► (none — reserved for future use)
+GameScene                ──► ACHIEVEMENT_UNLOCKED ──► UIScene → _showAchievementBanner
 GameScene (once)         ──► RESTART_GAME         ──► GameScene._restart
 
 InventorySystem          ──► INVENTORY_CHANGED    ──► InventoryPanel._refresh
@@ -50,3 +51,4 @@ DPad (▼▼ button)         ──► USE_STAIRS           ──► GameScene.
 | `USE_STAIRS` | `'use-stairs'` | *(none)* | DPad | GameScene |
 | `GAME_OVER` | `'game-over'` | *(none)* | GameScene | *(none)* |
 | `RESTART_GAME` | `'restart-game'` | *(none)* | GameScene (key handler) | GameScene |
+| `ACHIEVEMENT_UNLOCKED` | `'achievement-unlocked'` | `AchievementDefinition` | GameScene | UIScene → achievement banner |
