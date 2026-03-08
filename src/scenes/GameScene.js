@@ -39,7 +39,8 @@ export class GameScene extends Phaser.Scene {
     this.floorManager = new FloorManager();
     this.turnManager = new TurnManager();
     this.rng = createRNG(Date.now());
-    this._achievementSystem = new AchievementSystem();
+    // AchievementSystem self-registers on the EventBus in its constructor.
+    new AchievementSystem();
 
     // Entities lists
     this.enemies = [];
@@ -331,6 +332,10 @@ export class GameScene extends Phaser.Scene {
     EventBus.on(GameEvents.FLOOR_CHANGED, (floor) => {
       this.registry.set('floor', floor);
     }, this);
+    // Log a message when an achievement is unlocked (banner is shown by UIScene).
+    EventBus.on(GameEvents.ACHIEVEMENT_UNLOCKED, (achievement) => {
+      EventBus.emit(GameEvents.MESSAGE, `Achievement unlocked: ${achievement.name}!`);
+    }, this);
   }
 
   _handleDir(dir) {
@@ -452,14 +457,13 @@ export class GameScene extends Phaser.Scene {
         this._flashSprite(target.sprite, 0xff4444);
 
         if (killed) {
-          // Check kill-based achievements before removing the enemy.
-          this._notifyAchievements(this._achievementSystem.onEnemyKilled(target.type));
+          // Notify achievement system via event so it can update kill-based progress.
+          EventBus.emit(GameEvents.ENEMY_KILLED, target.type);
 
           const leveled = this.player.gainXP(target.xp);
           if (leveled) {
             EventBus.emit(GameEvents.MESSAGE, `Level up! You are now level ${this.player.stats.level}!`);
             EventBus.emit(GameEvents.PLAYER_LEVEL_UP, this.player.stats.level);
-            this._notifyAchievements(this._achievementSystem.onPlayerLevelUp(this.player.stats.level));
             // Golden flash over the game world to make the moment unmissable.
             this.cameras.main.flash(600, 255, 220, 100);
           }
@@ -526,7 +530,6 @@ export class GameScene extends Phaser.Scene {
       this._buildFloor(dungeonData);
       this._syncRegistry();
       EventBus.emit(GameEvents.MESSAGE, `You descend to floor ${this.floorManager.currentFloor}.`);
-      this._notifyAchievements(this._achievementSystem.onFloorReached(this.floorManager.currentFloor));
       this.cameras.main.fadeIn(300, 0, 0, 0);
     });
   }
@@ -621,22 +624,6 @@ export class GameScene extends Phaser.Scene {
   _getEntityAt(x, y) {
     if (this.player && this.player.x === x && this.player.y === y) return this.player;
     return this.enemies.find(e => e.x === x && e.y === y) || null;
-  }
-
-  // ─── Achievements ────────────────────────────────────────────────────────
-
-  /**
-   * Emits ACHIEVEMENT_UNLOCKED for each achievement in the list and logs a
-   * message to the game log.  Called whenever AchievementSystem returns
-   * newly-completed achievements.
-   *
-   * @param {import('../achievements/AchievementDefinitions.js').AchievementDefinition[]} achievements
-   */
-  _notifyAchievements(achievements) {
-    for (const achievement of achievements) {
-      EventBus.emit(GameEvents.ACHIEVEMENT_UNLOCKED, achievement);
-      EventBus.emit(GameEvents.MESSAGE, `Achievement unlocked: ${achievement.name}!`);
-    }
   }
 
   // ─── Game Over ────────────────────────────────────────────────────────────

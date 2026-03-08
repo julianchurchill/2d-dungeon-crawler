@@ -1,67 +1,74 @@
 import { Given, When, Then } from '@cucumber/cucumber';
 import assert from 'node:assert/strict';
+import { EventEmitter } from 'node:events';
 import { AchievementSystem } from '../../src/achievements/AchievementSystem.js';
 import { ACHIEVEMENTS } from '../../src/achievements/AchievementDefinitions.js';
 import { getProgress, completeAchievement } from '../../src/achievements/AchievementStore.js';
+import { GameEvents } from '../../src/events/GameEvents.js';
 
 /**
  * Step definitions for the achievement system.
  *
- * Each scenario uses its own isolated store (a plain object) so tests
- * cannot bleed state into one another.  The AchievementSystem and store
- * functions all accept an injectable store parameter for this purpose.
+ * Each scenario injects a fresh EventEmitter as the event bus so tests are
+ * fully isolated from the singleton EventBus and from each other.
+ * The store is also a plain object injected per scenario.
  */
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
-/** Returns the Goblin Killer definition from the default achievement list. */
-function goblinKillerDef() {
-  return ACHIEVEMENTS.find(a => a.id === 'goblin_killer');
-}
-
-/** Returns the Burrower definition from the default achievement list. */
-function burrowerDef() {
-  return ACHIEVEMENTS.find(a => a.id === 'burrower');
+/**
+ * Creates a minimal EventEmitter-compatible bus for test injection.
+ * Uses Node's built-in EventEmitter, which matches the Phaser mock used
+ * during testing.
+ *
+ * @returns {EventEmitter}
+ */
+function makeEventBus() {
+  return new EventEmitter();
 }
 
 // ── Given ────────────────────────────────────────────────────────────────────
 
 Given('the achievement system is initialised', function () {
-  // Isolated store per scenario — no singleton pollution.
+  // Isolated store and bus per scenario — no singleton pollution.
   this.store = {};
-  this.system = new AchievementSystem(ACHIEVEMENTS, this.store);
+  this.eventBus = makeEventBus();
+  this.system = new AchievementSystem(ACHIEVEMENTS, this.store, this.eventBus);
+  this.unlockedAchievements = [];
+  this.eventBus.on(GameEvents.ACHIEVEMENT_UNLOCKED, (a) => this.unlockedAchievements.push(a));
 });
 
 Given('the Goblin Killer achievement has already been completed', function () {
   this.store = {};
-  this.system = new AchievementSystem(ACHIEVEMENTS, this.store);
-  // Pre-complete the achievement so we can verify it is not completed again.
+  this.eventBus = makeEventBus();
+  this.system = new AchievementSystem(ACHIEVEMENTS, this.store, this.eventBus);
+  // Track new unlocks fired through the bus (not the pre-existing completion).
+  this.unlockedAchievements = [];
+  this.eventBus.on(GameEvents.ACHIEVEMENT_UNLOCKED, (a) => this.unlockedAchievements.push(a));
+  // Pre-complete the achievement directly so the system skips it on the next event.
   completeAchievement('goblin_killer', this.store);
-  // Already completed once; subsequent kills must not increment this count.
+  // completionCount starts at 1 to represent the already-completed state.
   this.completionCount = 1;
 });
 
 // ── When ─────────────────────────────────────────────────────────────────────
 
 When('the player kills a goblin', function () {
-  const completed = this.system.onEnemyKilled('goblin');
-  this.completionCount = (this.completionCount || 0) + completed.length;
+  this.eventBus.emit(GameEvents.ENEMY_KILLED, 'goblin');
 });
 
 When('the player kills {int} goblins', function (count) {
   for (let i = 0; i < count; i++) {
-    const completed = this.system.onEnemyKilled('goblin');
-    this.completionCount = (this.completionCount || 0) + completed.length;
+    this.eventBus.emit(GameEvents.ENEMY_KILLED, 'goblin');
   }
 });
 
 When('the player kills another goblin', function () {
-  const completed = this.system.onEnemyKilled('goblin');
-  this.completionCount += completed.length;
+  this.eventBus.emit(GameEvents.ENEMY_KILLED, 'goblin');
 });
 
 When('the player reaches dungeon floor {int}', function (floor) {
-  this.completionCount = (this.completionCount || 0) + this.system.onFloorReached(floor).length;
+  this.eventBus.emit(GameEvents.FLOOR_CHANGED, floor);
 });
 
 // ── Then ─────────────────────────────────────────────────────────────────────
@@ -77,18 +84,21 @@ Then('the Goblin Killer achievement should be completed', function () {
 });
 
 Then('the Goblin Killer achievement completion count should still be {int}', function (expected) {
-  // completionCount tracks how many times the system returned the achievement
-  // as newly-completed — it must never exceed 1.
-  assert.strictEqual(this.completionCount, expected);
+  // completionCount starts at 1 (pre-existing) plus any new ACHIEVEMENT_UNLOCKED
+  // events fired through the bus.  Must never exceed 1.
+  const total = this.completionCount + this.unlockedAchievements.filter(a => a.id === 'goblin_killer').length;
+  assert.strictEqual(total, expected);
 });
 
 Then('the Goblin Killer progress text should include {string}', function (expected) {
-  const text = this.system.formatProgress(goblinKillerDef());
+  const def = ACHIEVEMENTS.find(a => a.id === 'goblin_killer');
+  const text = this.system.formatProgress(def);
   assert.ok(text.includes(expected), `Expected "${text}" to include "${expected}"`);
 });
 
 Then('the Goblin Killer progress text should not include {string}', function (unexpected) {
-  const text = this.system.formatProgress(goblinKillerDef());
+  const def = ACHIEVEMENTS.find(a => a.id === 'goblin_killer');
+  const text = this.system.formatProgress(def);
   assert.ok(!text.includes(unexpected), `Expected "${text}" not to include "${unexpected}"`);
 });
 
@@ -100,4 +110,10 @@ Then('the Burrower achievement should be completed', function () {
 Then('the Burrower achievement should not be completed', function () {
   const { completed } = getProgress('burrower', this.store);
   assert.strictEqual(completed, false);
+});
+
+Then('the Burrower progress text should include {string}', function (expected) {
+  const def = ACHIEVEMENTS.find(a => a.id === 'burrower');
+  const text = this.system.formatProgress(def);
+  assert.ok(text.includes(expected), `Expected "${text}" to include "${expected}"`);
 });

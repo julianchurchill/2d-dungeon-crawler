@@ -1,72 +1,46 @@
 /**
  * @module AchievementSystem
- * @description Evaluates achievement conditions and returns newly-completed
- * achievements so callers can react (e.g. emit events, show banners).
+ * @description Evaluates achievement conditions in response to game events and
+ * emits ACHIEVEMENT_UNLOCKED when an achievement is completed.
  *
- * All dependencies (definitions and store) are injectable so the system can
- * be exercised in unit tests without side effects on the singleton store.
+ * Integrates with the EventBus by subscribing to ENEMY_KILLED, PLAYER_LEVEL_UP,
+ * and FLOOR_CHANGED.  All dependencies (definitions, store, eventBus) are
+ * injectable so the system can be exercised in unit tests without side effects
+ * on the singleton store or bus.
  */
 
 import { ACHIEVEMENTS } from './AchievementDefinitions.js';
 import {
   getProgress,
   incrementProgress,
+  setProgressIfHigher,
   completeAchievement,
   achievementStore,
 } from './AchievementStore.js';
+import { EventBus } from '../utils/EventBus.js';
+import { GameEvents } from '../events/GameEvents.js';
 
 export class AchievementSystem {
   /**
    * @param {import('./AchievementDefinitions.js').AchievementDefinition[]} [definitions]
-   * @param {object} [store] - Injectable progress store (defaults to singleton).
+   * @param {object} [store]    - Injectable progress store (defaults to singleton).
+   * @param {object} [eventBus] - Injectable event bus (defaults to shared EventBus).
    */
-  constructor(definitions = ACHIEVEMENTS, store = achievementStore) {
+  constructor(definitions = ACHIEVEMENTS, store = achievementStore, eventBus = EventBus) {
     this.definitions = definitions;
     this.store = store;
-  }
+    this.eventBus = eventBus;
 
-  /**
-   * Called when an enemy is killed.  Increments progress for any kill-type
-   * achievement that matches the enemy type, then checks for completion.
-   *
-   * @param {string} enemyType - The type identifier of the killed enemy.
-   * @returns {import('./AchievementDefinitions.js').AchievementDefinition[]}
-   *   Achievements newly completed by this kill (empty if none).
-   */
-  onEnemyKilled(enemyType) {
-    return this._checkConditions((def) => {
-      const { type, enemyType: target } = def.condition;
-      return type === 'kill_type' && target === enemyType;
-    });
-  }
-
-  /**
-   * Called when the player descends to a new dungeon floor.
-   *
-   * @param {number} floor - The floor number now being entered.
-   * @returns {import('./AchievementDefinitions.js').AchievementDefinition[]}
-   */
-  onFloorReached(floor) {
-    return this._checkConditions((def) => {
-      return def.condition.type === 'floor_reached' && floor >= def.condition.target;
-    });
-  }
-
-  /**
-   * Called when the player levels up.
-   *
-   * @param {number} level - The new character level.
-   * @returns {import('./AchievementDefinitions.js').AchievementDefinition[]}
-   */
-  onPlayerLevelUp(level) {
-    return this._checkConditions((def) => {
-      return def.condition.type === 'player_level' && level >= def.condition.target;
-    });
+    // Subscribe to game events so the system updates itself automatically.
+    this.eventBus.on(GameEvents.ENEMY_KILLED,    (enemyType) => this._handleEnemyKilled(enemyType));
+    this.eventBus.on(GameEvents.PLAYER_LEVEL_UP, (level)     => this._handlePlayerLevelUp(level));
+    this.eventBus.on(GameEvents.FLOOR_CHANGED,   (floor)     => this._handleFloorReached(floor));
   }
 
   /**
    * Returns a human-readable progress string for an achievement.
-   * Count-based achievements include "(N unit so far)" while incomplete.
+   * While incomplete, includes "(N unit so far)" to show progress toward the
+   * target.  All achievements are count-based so progressUnit is always present.
    *
    * @param {import('./AchievementDefinitions.js').AchievementDefinition} def
    * @returns {string} e.g. "Goblin Killer - Kill 10 goblins (4 killed so far)"
@@ -74,42 +48,77 @@ export class AchievementSystem {
   formatProgress(def) {
     const { count, completed } = getProgress(def.id, this.store);
     const base = `${def.name} - ${def.description}`;
-    if (!completed && def.progressUnit !== undefined && def.condition.target !== undefined) {
+    if (!completed) {
       return `${base} (${count} ${def.progressUnit} so far)`;
     }
     return base;
   }
 
-  // ── Private ─────────────────────────────────────────────────────────────
+  // ── Private event handlers ───────────────────────────────────────────────
 
   /**
-   * Evaluates all definitions where `predicate` returns true, increments
-   * their count, and completes any that have now reached their target.
+   * Handles ENEMY_KILLED events.  Increments the kill count for any kill-type
+   * achievement matching the enemy type and completes it if the target is met.
    *
-   * @param {function} predicate
-   * @returns {import('./AchievementDefinitions.js').AchievementDefinition[]}
+   * @param {string} enemyType - Type identifier of the killed enemy.
    */
-  _checkConditions(predicate) {
-    const newlyCompleted = [];
+  _handleEnemyKilled(enemyType) {
     for (const def of this.definitions) {
+      if (def.condition.type !== 'kill_type') continue;
+      if (def.condition.enemyType !== enemyType) continue;
+
       const progress = getProgress(def.id, this.store);
       if (progress.completed) continue;
-      if (!predicate(def)) continue;
 
-      if (def.condition.type === 'kill_type') {
-        // Count-based: accumulate kills and unlock when the target is reached.
-        incrementProgress(def.id, 1, this.store);
-        if (progress.count >= def.condition.target) {
-          completeAchievement(def.id, this.store);
-          newlyCompleted.push(def);
-        }
-      } else {
-        // Threshold-based (floor_reached, player_level): predicate matching
-        // is sufficient — complete immediately without counting.
+      // Accumulate kills; unlock when the total reaches the target.
+      incrementProgress(def.id, 1, this.store);
+      if (progress.count >= def.condition.target) {
         completeAchievement(def.id, this.store);
-        newlyCompleted.push(def);
+        this.eventBus.emit(GameEvents.ACHIEVEMENT_UNLOCKED, def);
       }
     }
-    return newlyCompleted;
+  }
+
+  /**
+   * Handles FLOOR_CHANGED events.  Updates the highest-floor-reached counter
+   * and completes any floor_reached achievement whose target is now met.
+   *
+   * @param {number} floor - The floor number just entered.
+   */
+  _handleFloorReached(floor) {
+    for (const def of this.definitions) {
+      if (def.condition.type !== 'floor_reached') continue;
+
+      const progress = getProgress(def.id, this.store);
+      if (progress.completed) continue;
+
+      // Track the highest floor reached rather than a simple increment.
+      setProgressIfHigher(def.id, floor, this.store);
+      if (progress.count >= def.condition.target) {
+        completeAchievement(def.id, this.store);
+        this.eventBus.emit(GameEvents.ACHIEVEMENT_UNLOCKED, def);
+      }
+    }
+  }
+
+  /**
+   * Handles PLAYER_LEVEL_UP events.  Updates the highest-level counter and
+   * completes any player_level achievement whose target is now met.
+   *
+   * @param {number} level - The new character level.
+   */
+  _handlePlayerLevelUp(level) {
+    for (const def of this.definitions) {
+      if (def.condition.type !== 'player_level') continue;
+
+      const progress = getProgress(def.id, this.store);
+      if (progress.completed) continue;
+
+      setProgressIfHigher(def.id, level, this.store);
+      if (progress.count >= def.condition.target) {
+        completeAchievement(def.id, this.store);
+        this.eventBus.emit(GameEvents.ACHIEVEMENT_UNLOCKED, def);
+      }
+    }
   }
 }

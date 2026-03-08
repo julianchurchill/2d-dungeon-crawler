@@ -22,7 +22,7 @@ export const GameEvents = {
   /**
    * The player has levelled up.
    * Emitted by: GameScene
-   * Subscribed by: UIScene (level-up banner)
+   * Subscribed by: UIScene (level-up banner), AchievementSystem
    * @type {number} The new character level.
    */
   PLAYER_LEVEL_UP: 'player-level-up',
@@ -84,7 +84,7 @@ export const GameEvents = {
   /**
    * The active dungeon floor number has changed.
    * Emitted by: FloorManager
-   * Subscribed by: GameScene (updates Phaser registry → HUD)
+   * Subscribed by: GameScene (updates Phaser registry → HUD), AchievementSystem
    * @type {number} The new floor number.
    */
   FLOOR_CHANGED: 'floor-changed',
@@ -104,9 +104,17 @@ export const GameEvents = {
   RESTART_GAME: 'restart-game',
 
   /**
+   * An enemy has been killed.
+   * Emitted by: GameScene
+   * Subscribed by: AchievementSystem
+   * @type {string} The enemy type identifier (e.g. 'goblin').
+   */
+  ENEMY_KILLED: 'enemy-killed',
+
+  /**
    * An achievement has just been unlocked.
-   * Emitted by: GameScene (after AchievementSystem returns a newly-completed achievement)
-   * Subscribed by: UIScene (shows achievement banner)
+   * Emitted by: AchievementSystem
+   * Subscribed by: GameScene (message log), UIScene (banner)
    * @type {import('../achievements/AchievementDefinitions.js').AchievementDefinition}
    */
   ACHIEVEMENT_UNLOCKED: 'achievement-unlocked',

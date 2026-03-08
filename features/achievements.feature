@@ -36,3 +36,8 @@ Feature: Achievement system
     Given the achievement system is initialised
     When the player reaches dungeon floor 5
     Then the Burrower achievement should not be completed
+
+  Scenario: Floor progress text shows floors reached so far
+    Given the achievement system is initialised
+    When the player reaches dungeon floor 5
+    Then the Burrower progress text should include "(5 reached so far)"

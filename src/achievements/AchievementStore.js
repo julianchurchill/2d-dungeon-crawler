@@ -58,6 +58,21 @@ export function incrementProgress(id, amount = 1, store = achievementStore) {
 }
 
 /**
+ * Sets the count for an achievement to `value` only if `value` is greater
+ * than the current count.  Used for achievements where the metric is a
+ * monotonically-increasing number (e.g. floor reached, player level) rather
+ * than an accumulating total.
+ *
+ * @param {string} id
+ * @param {number} value
+ * @param {Object.<string, AchievementProgress>} [store=achievementStore]
+ */
+export function setProgressIfHigher(id, value, store = achievementStore) {
+  const progress = getProgress(id, store);
+  if (value > progress.count) progress.count = value;
+}
+
+/**
  * Marks an achievement as completed.
  *
  * @param {string} id

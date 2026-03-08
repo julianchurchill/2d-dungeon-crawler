@@ -14,15 +14,17 @@ PUBLISHERS                      EVENT                    SUBSCRIBERS
 ───────────────────────────────────────────────────────────────────────
 GameScene                ──► MESSAGE              ──► UIScene → MessageLog
 GameScene                ──► PLAYER_LEVEL_UP      ──► UIScene → _showLevelUpBanner
+GameScene                ──► PLAYER_LEVEL_UP      ──► AchievementSystem → _handlePlayerLevelUp
 GameScene                ──► OPEN_INVENTORY       ──► UIScene → InventoryPanel.toggle
 GameScene                ──► GAME_OVER            ──► (none — reserved for future use)
-GameScene                ──► ACHIEVEMENT_UNLOCKED ──► UIScene → _showAchievementBanner
 GameScene (once)         ──► RESTART_GAME         ──► GameScene._restart
+GameScene                ──► ENEMY_KILLED         ──► AchievementSystem → _handleEnemyKilled
 
 InventorySystem          ──► INVENTORY_CHANGED    ──► InventoryPanel._refresh
 InventorySystem          ──► PLAYER_STATS_CHANGED ──► (none — reserved for future use)
 
 FloorManager             ──► FLOOR_CHANGED        ──► GameScene → registry.set('floor')
+FloorManager             ──► FLOOR_CHANGED        ──► AchievementSystem → _handleFloorReached
 
 InventoryPanel (click)   ──► INVENTORY_USE        ──► GameScene._useInventoryItem
 InventoryPanel (keyboard)──► INVENTORY_USE        ──► GameScene._useInventoryItem
@@ -30,6 +32,9 @@ InventoryPanel (keyboard)──► INVENTORY_USE        ──► GameScene._use
 DPad (arrow buttons)     ──► DPAD_PRESS           ──► GameScene._handleDir
 DPad (INV button)        ──► TOGGLE_INVENTORY     ──► GameScene._toggleInventory
 DPad (▼▼ button)         ──► USE_STAIRS           ──► GameScene._tryUseStairs
+
+AchievementSystem        ──► ACHIEVEMENT_UNLOCKED ──► GameScene → MESSAGE log
+AchievementSystem        ──► ACHIEVEMENT_UNLOCKED ──► UIScene → _showAchievementBanner
 ───────────────────────────────────────────────────────────────────────
 ```
 
@@ -40,15 +45,16 @@ DPad (▼▼ button)         ──► USE_STAIRS           ──► GameScene.
 | Constant | String value | Payload | Publisher(s) | Subscriber(s) |
 | --- | --- | --- | --- | --- |
 | `MESSAGE` | `'message'` | `string` | GameScene | UIScene → MessageLog |
-| `PLAYER_LEVEL_UP` | `'player-level-up'` | `number` (new level) | GameScene | UIScene → level-up banner |
+| `PLAYER_LEVEL_UP` | `'player-level-up'` | `number` (new level) | GameScene | UIScene → level-up banner, AchievementSystem |
 | `OPEN_INVENTORY` | `'open-inventory'` | `{ inventory, player }` | GameScene | UIScene → InventoryPanel |
 | `INVENTORY_USE` | `'inventory-use'` | `number` (index) | InventoryPanel | GameScene |
 | `INVENTORY_CHANGED` | `'inventory-changed'` | `Item[]` | InventorySystem | InventoryPanel |
 | `PLAYER_STATS_CHANGED` | `'player-stats-changed'` | `object` (stats) | InventorySystem | *(none)* |
-| `FLOOR_CHANGED` | `'floor-changed'` | `number` (floor) | FloorManager | GameScene |
+| `FLOOR_CHANGED` | `'floor-changed'` | `number` (floor) | FloorManager | GameScene, AchievementSystem |
 | `DPAD_PRESS` | `'dpad-press'` | `string` (DIR constant) | DPad | GameScene |
 | `TOGGLE_INVENTORY` | `'toggle-inventory'` | *(none)* | DPad | GameScene |
 | `USE_STAIRS` | `'use-stairs'` | *(none)* | DPad | GameScene |
 | `GAME_OVER` | `'game-over'` | *(none)* | GameScene | *(none)* |
 | `RESTART_GAME` | `'restart-game'` | *(none)* | GameScene (key handler) | GameScene |
-| `ACHIEVEMENT_UNLOCKED` | `'achievement-unlocked'` | `AchievementDefinition` | GameScene | UIScene → achievement banner |
+| `ENEMY_KILLED` | `'enemy-killed'` | `string` (enemy type) | GameScene | AchievementSystem |
+| `ACHIEVEMENT_UNLOCKED` | `'achievement-unlocked'` | `AchievementDefinition` | AchievementSystem | GameScene (message log), UIScene (banner) |
