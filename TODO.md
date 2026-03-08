@@ -8,7 +8,6 @@
 
 - [ ] music
 - [ ] bosses - unique (once per run) and repeatable (champions?)
-- [ ] remote deployment/hosting for app
 - [ ] stats - deepest level reached, monster types kill count, unique bosses kill count
 - [x] display and maintain an application version number following semantic versioning and include the git commit hash for the built application
 - [x] deployment to GitHub Pages
@@ -56,8 +55,9 @@
 
 ## Character Skills
 
-- [ ] a character can have passive skills that have dynamic effects. These can be viewed by pressing 'k'. Initially the character has one placeholder skill of 'Lucky Strike' which gives a 1% chance for the character to gain 50% damage on a hit during combat.
-- [ ] on level up there is a chance the character can gain a special skill
+- [ ] a character can have skills that have dynamic effects. These can be viewed by pressing 'k' or using a button on the mobile interface. Initially the character has one active skill of 'Lucky Strike' which gives a 1% chance for the character to gain 50% damage on a hit during combat and shows a message when it is triggered.
+- [ ] every 5 levels the character can either choose a new skill from the pool of not activated skills to activate or upgrade an existing one. 'Lucky Strike' can be upgraded increasing the chance of activation by 1% on each upgrade to a maximum of 50%.
+- [ ] the character initially has two deactivated skills. When active 'Ferocity' adds +1 to each attack and does not output a message. When active 'Dodge' gives a 1% chance of completely dodging an attack and shows a message when it is triggered. 'Ferocity' can be upgraded by +1 per upgrade with no maximum. 'Dodge' can be upgraded by +1% per upgrade to a maximum of 50%.
 
 ## Saving
 
