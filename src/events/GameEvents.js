@@ -118,4 +118,19 @@ export const GameEvents = {
    * @type {import('../achievements/AchievementDefinitions.js').AchievementDefinition}
    */
   ACHIEVEMENT_UNLOCKED: 'achievement-unlocked',
+
+  /**
+   * The message log history panel has been opened or closed.
+   * Emitted by: MessageLog (on every toggle)
+   * Subscribed by: GameScene (to gate the ESC → Achievements handler)
+   * @type {boolean} true = panel just opened, false = panel just closed.
+   */
+  MESSAGE_LOG_TOGGLED: 'message-log-toggled',
+
+  /**
+   * Request to close the message log history panel.
+   * Emitted by: GameScene (ESC key, when panel is open)
+   * Subscribed by: UIScene → MessageLog.close()
+   */
+  CLOSE_MESSAGE_LOG: 'close-message-log',
 };

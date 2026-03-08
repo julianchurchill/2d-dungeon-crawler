@@ -60,8 +60,8 @@ export class UIScene extends Phaser.Scene {
     // reflects the correct initial state (including dev-option overrides).
     syncHudFromRegistry(this.registry, this.hud);
 
-    // M key toggles the expanded message log history panel.
-    this.input.keyboard.on('keydown-M', () => this.messageLog.toggleExpanded());
+    // GameScene sends CLOSE_MESSAGE_LOG when ESC is pressed while the panel is open.
+    EventBus.on(GameEvents.CLOSE_MESSAGE_LOG, () => this.messageLog?.close(), this);
 
     // Mouse wheel scrolls the history panel when it is open.
     this._onWheel = (e) => {

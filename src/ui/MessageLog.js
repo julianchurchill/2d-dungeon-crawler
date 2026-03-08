@@ -2,14 +2,19 @@
  * @module MessageLog
  * @description Renders the in-game message log in the bottom-left corner of
  * the UIScene.  In its compact form it shows the four most recent messages.
- * Pressing M (wired in UIScene) toggles an expanded history panel that shows
+ * Clicking the compact log area opens an expanded history panel that shows
  * up to 15 lines and can be scrolled with the mouse wheel to reveal older
- * entries.
+ * entries.  Press ESC to close the panel.
  *
  * Depends on MessageHistory for all data storage and windowing logic.
+ * Emits MESSAGE_LOG_TOGGLED via EventBus so GameScene can gate its own
+ * ESC handler (to prevent the Achievements screen opening while the panel
+ * is visible).
  */
 
 import { MessageHistory } from './MessageHistory.js';
+import { EventBus } from '../utils/EventBus.js';
+import { GameEvents } from '../events/GameEvents.js';
 
 /** Number of lines visible in the compact (always-on) log strip. */
 const COMPACT_LINES = 4;
@@ -22,6 +27,9 @@ const LINE_H = 18;
 
 /** Left padding for log text. */
 const PAD_X = 8;
+
+/** Width of the compact click zone and expanded panel. */
+const PANEL_W_MAX = 500;
 
 export class MessageLog {
   /**
@@ -42,6 +50,9 @@ export class MessageLog {
 
     /** @type {Phaser.GameObjects.Text[]} Compact log text objects. */
     this._compactTexts = [];
+
+    /** @type {Phaser.GameObjects.Rectangle} Invisible click zone over compact log. */
+    this._clickZone = null;
 
     /** @type {Phaser.GameObjects.Rectangle|null} Expanded panel background. */
     this._panelBg = null;
@@ -74,6 +85,7 @@ export class MessageLog {
   /**
    * Toggles the expanded history panel on or off.
    * Resets the scroll position to the newest message whenever it opens.
+   * Emits MESSAGE_LOG_TOGGLED so GameScene can track the panel state.
    */
   toggleExpanded() {
     this._expanded = !this._expanded;
@@ -82,6 +94,15 @@ export class MessageLog {
       this._refreshPanel();
     }
     this._setExpandedVisible(this._expanded);
+    EventBus.emit(GameEvents.MESSAGE_LOG_TOGGLED, this._expanded);
+  }
+
+  /**
+   * Closes the expanded panel if it is currently open.
+   * Called when GameScene receives CLOSE_MESSAGE_LOG (ESC key while panel open).
+   */
+  close() {
+    if (this._expanded) this.toggleExpanded();
   }
 
   /**
@@ -105,12 +126,17 @@ export class MessageLog {
    * @param {number} height
    */
   resize(width, height) {
-    // Reposition compact texts.
+    // Reposition compact texts and click zone.
     const compactStartY = height - 20 - (COMPACT_LINES - 1) * LINE_H;
     for (let i = 0; i < COMPACT_LINES; i++) {
       if (this._compactTexts[i]) {
         this._compactTexts[i].setPosition(PAD_X, compactStartY + i * LINE_H);
       }
+    }
+    if (this._clickZone) {
+      const zoneW = Math.min(width - 16, PANEL_W_MAX);
+      const zoneH = COMPACT_LINES * LINE_H + 8;
+      this._clickZone.setPosition(PAD_X, compactStartY - 4).setSize(zoneW, zoneH);
     }
 
     // Reposition expanded panel.
@@ -120,11 +146,14 @@ export class MessageLog {
   // ── Private helpers ────────────────────────────────────────────────────────
 
   /**
-   * Creates the compact four-line log strip pinned to the bottom-left.
+   * Creates the compact four-line log strip pinned to the bottom-left, plus
+   * an invisible interactive zone over it that opens the history panel on click.
    */
   _buildCompact() {
     const { width, height } = this.scene.scale;
     const startY = height - 20 - (COMPACT_LINES - 1) * LINE_H;
+    const zoneW  = Math.min(width - 16, PANEL_W_MAX);
+    const zoneH  = COMPACT_LINES * LINE_H + 8;
 
     for (let i = 0; i < COMPACT_LINES; i++) {
       const txt = this.scene.add.text(PAD_X, startY + i * LINE_H, '', {
@@ -137,6 +166,18 @@ export class MessageLog {
       }).setScrollFactor(0).setDepth(100);
       this._compactTexts.push(txt);
     }
+
+    // Transparent rectangle covering the compact log — clicking it opens the panel.
+    this._clickZone = this.scene.add.rectangle(PAD_X, startY - 4, zoneW, zoneH, 0xffffff, 0)
+      .setOrigin(0, 0)
+      .setScrollFactor(0)
+      .setDepth(102)
+      .setInteractive({ useHandCursor: true });
+
+    // Subtle highlight on hover to hint interactivity.
+    this._clickZone.on('pointerover', () => this._clickZone.setFillStyle(0xffffff, 0.04));
+    this._clickZone.on('pointerout',  () => this._clickZone.setFillStyle(0xffffff, 0));
+    this._clickZone.on('pointerdown', () => this.toggleExpanded());
   }
 
   /**
@@ -146,7 +187,7 @@ export class MessageLog {
   _buildExpandedPanel() {
     const { width, height } = this.scene.scale;
     const panelH = EXPANDED_LINES * LINE_H + 28; // +28 for header & hint rows
-    const panelW = Math.min(width - 16, 500);
+    const panelW = Math.min(width - 16, PANEL_W_MAX);
     const panelY = height - 20 - COMPACT_LINES * LINE_H - panelH - 4;
 
     // Semi-transparent dark background.
@@ -157,7 +198,7 @@ export class MessageLog {
       .setStrokeStyle(1, 0x223344);
 
     // Header label.
-    this._panelHeader = this.scene.add.text(PAD_X + 4, panelY + 4, 'MESSAGE HISTORY  (M to close)', {
+    this._panelHeader = this.scene.add.text(PAD_X + 4, panelY + 4, 'MESSAGE HISTORY  (ESC to close)', {
       fontSize: '10px', fontFamily: 'monospace', color: '#446688', resolution: 2,
     }).setScrollFactor(0).setDepth(200);
 
@@ -174,7 +215,7 @@ export class MessageLog {
     // Scroll hint at the bottom of the panel.
     this._scrollHint = this.scene.add.text(
       PAD_X + 4, rowStartY + EXPANDED_LINES * LINE_H + 2,
-      '↑↓ scroll  |  wheel to scroll', {
+      'Wheel to scroll', {
         fontSize: '9px', fontFamily: 'monospace', color: '#334455', resolution: 2,
       }
     ).setScrollFactor(0).setDepth(200);
@@ -200,7 +241,7 @@ export class MessageLog {
    */
   _repositionPanel(width, height) {
     const panelH = EXPANDED_LINES * LINE_H + 28;
-    const panelW = Math.min(width - 16, 500);
+    const panelW = Math.min(width - 16, PANEL_W_MAX);
     const panelY = height - 20 - COMPACT_LINES * LINE_H - panelH - 4;
     const rowStartY = panelY + 18;
 
@@ -253,10 +294,10 @@ export class MessageLog {
     const total = this._history.getCount();
     const maxOffset = Math.max(0, total - EXPANDED_LINES);
     if (this._scrollHint && maxOffset > 0) {
-      const pct = maxOffset > 0 ? Math.round((this._scrollOffset / maxOffset) * 100) : 100;
-      this._scrollHint.setText(`↑↓ scroll  |  ${pct}% from newest`);
+      const pct = Math.round((this._scrollOffset / maxOffset) * 100);
+      this._scrollHint.setText(`Wheel to scroll  |  ${pct}% from newest`);
     } else if (this._scrollHint) {
-      this._scrollHint.setText('↑↓ scroll  |  wheel to scroll');
+      this._scrollHint.setText('Wheel to scroll');
     }
   }
 }
