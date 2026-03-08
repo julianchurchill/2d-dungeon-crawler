@@ -12,7 +12,8 @@
     "test": "NODE_OPTIONS='--loader ./features/support/phaser-loader.mjs --no-warnings' cucumber-js --format progress-bar",
     "test:pretty": "NODE_OPTIONS='--loader ./features/support/phaser-loader.mjs --no-warnings' cucumber-js --format pretty --format-options '{\"colorsEnabled\":true}'",
     "test:html": "NODE_OPTIONS='--loader ./features/support/phaser-loader.mjs --no-warnings' cucumber-js --format html:cucumber-report.html",
-    "prepare-release": "node scripts/prepare-release.js"
+    "prepare-release": "node scripts/prepare-release.js",
+    "tag-release": "node scripts/tag-release.js"
   },
   "dependencies": {
     "phaser": "^3.60.0"

@@ -59,14 +59,19 @@ Add an entry to `CHANGELOG.md` for every new feature or bug fix before committin
 
 ## Releasing
 
-Before merging `main` into `release` to trigger a deployment:
-
 1. Bump `version` in `package.json` (see Versioning below).
 2. Run `npm run prepare-release` — this renames the `[Unreleased]` section in
    `CHANGELOG.md` to the current version number and inserts a fresh empty
    `[Unreleased]` section above it.
 3. Commit both files, push, and open a PR to `main` as normal.
-4. Once merged, deploy by pushing `main` to `release`.
+4. Once the PR is merged, pull `main` locally and create an annotated git tag:
+
+   ```bash
+   git checkout main && git pull
+   npm run tag-release
+   ```
+
+5. Deploy by pushing `main` to `release`.
 
 ## Event Map
 
