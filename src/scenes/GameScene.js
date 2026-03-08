@@ -300,6 +300,7 @@ export class GameScene extends Phaser.Scene {
     this.input.keyboard.on('keydown-I',            () => { this._runController.cancel(); this._toggleInventory(); });
     this.input.keyboard.on('keydown-PERIOD',        () => { this._runController.cancel(); this._tryUseStairs(); });
     this.input.keyboard.on('keydown-GREATER_THAN',  () => { this._runController.cancel(); this._tryUseStairs(); });
+    this.input.keyboard.on('keydown-ESC',           () => { this._runController.cancel(); this._openAchievements(); });
 
     // SHIFT+direction starts a run; a plain direction key cancels any active run
     // and performs a single step.  Cancelling before _handleDir is safe because
@@ -503,6 +504,20 @@ export class GameScene extends Phaser.Scene {
 
   _showStairsPrompt() {
     EventBus.emit(GameEvents.MESSAGE, 'You stand on the stairs. Press > or tap ▼▼ to descend.');
+  }
+
+  /**
+   * Pauses the game and UI scenes and opens the AchievementsScene overlay.
+   * The AchievementsScene will resume both scenes when the player closes it.
+   */
+  _openAchievements() {
+    // Launch first so the queue operation is registered while this scene is still
+    // running, then sleep GameScene and UIScene.  sleep() stops both update and
+    // rendering (unlike pause() which only stops update, leaving the scenes
+    // visible on top of the achievements overlay).
+    this.scene.launch('AchievementsScene', { fromScene: 'GameScene' });
+    this.scene.sleep('UIScene');
+    this.scene.sleep('GameScene');
   }
 
   _tryUseStairs() {

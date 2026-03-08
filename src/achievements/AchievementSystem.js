@@ -38,6 +38,25 @@ export class AchievementSystem {
   }
 
   /**
+   * Returns the full display list for the achievements screen.
+   * Each entry contains the achievement id, whether it is completed, and
+   * a formatted text string suitable for rendering in the UI.
+   *
+   * @returns {Array<{id: string, name: string, completed: boolean, text: string}>}
+   */
+  getDisplayList() {
+    return this.definitions.map(def => {
+      const { completed } = getProgress(def.id, this.store);
+      return {
+        id:        def.id,
+        name:      def.name,
+        completed,
+        text:      this.formatProgress(def),
+      };
+    });
+  }
+
+  /**
    * Returns a human-readable progress string for an achievement.
    * While incomplete, includes "(N unit so far)" to show progress toward the
    * target.  All achievements are count-based so progressUnit is always present.

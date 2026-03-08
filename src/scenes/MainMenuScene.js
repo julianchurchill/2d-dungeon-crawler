@@ -12,8 +12,8 @@ export class MainMenuScene extends Phaser.Scene {
     const { width, height } = this.scale;
     this._buildBackground();
     this._buildTitle(width, height);
-    this._buildMenu(width, height);
-    this._buildControls(width, height);
+    const menuBottomY = this._buildMenu(width, height);
+    this._buildControls(width, menuBottomY + 24);
     this._buildVersion(width, height);
 
     this.scale.on('resize', this._onResize, this);
@@ -94,9 +94,35 @@ export class MainMenuScene extends Phaser.Scene {
       ease: 'Sine.easeInOut',
     });
 
+    // Achievements button
+    const achBtnY = btnY + 56;
+    const achBg = this.add.rectangle(width / 2, achBtnY, 200, 34, 0x1a2a3a)
+      .setStrokeStyle(1, 0x336677)
+      .setInteractive({ useHandCursor: true });
+
+    const achTxt = this.add.text(width / 2, achBtnY, '★  ACHIEVEMENTS', {
+      fontSize: '12px', fontFamily: 'monospace', color: '#6699aa', resolution: 2,
+    }).setOrigin(0.5);
+
+    achBg.on('pointerover', () => {
+      achBg.setFillStyle(0x223344);
+      achTxt.setColor('#ffdd88');
+    });
+    achBg.on('pointerout', () => {
+      achBg.setFillStyle(0x1a2a3a);
+      achTxt.setColor('#6699aa');
+    });
+    achBg.on('pointerdown', () => {
+      this.cameras.main.fadeOut(200, 0, 0, 0);
+      this.time.delayedCall(200, () =>
+        this.scene.start('AchievementsScene', { fromScene: 'MainMenuScene' }));
+    });
+
     // DEV OPTIONS button — only shown in development builds
+    let lastBtnY = achBtnY;
     if (isDevEnvironment()) {
-      const devBtnY = btnY + 56;
+      const devBtnY = achBtnY + 44;
+      lastBtnY = devBtnY;
       const devBg = this.add.rectangle(width / 2, devBtnY, 200, 34, 0x1a2a3a)
         .setStrokeStyle(1, 0x336677)
         .setInteractive({ useHandCursor: true });
@@ -122,6 +148,10 @@ export class MainMenuScene extends Phaser.Scene {
     // Also start on spacebar / enter
     this.input.keyboard.on('keydown-SPACE', () => this._startGame());
     this.input.keyboard.on('keydown-ENTER', () => this._startGame());
+
+    // Return the bottom edge of the last button so the caller can position
+    // content below it without overlapping.
+    return lastBtnY + 17;
   }
 
   _startGame() {
@@ -132,7 +162,13 @@ export class MainMenuScene extends Phaser.Scene {
     });
   }
 
-  _buildControls(width, height) {
+  /**
+   * Renders the controls reference below the menu buttons.
+   *
+   * @param {number} width  - Canvas width.
+   * @param {number} startY - Y pixel to place the first line at.
+   */
+  _buildControls(width, startY) {
     const lines = [
       'CONTROLS',
       '──────────────────',
@@ -147,7 +183,7 @@ export class MainMenuScene extends Phaser.Scene {
     ];
 
     lines.forEach((line, i) => {
-      this.add.text(width / 2, height * 0.7 + i * 16, line, {
+      this.add.text(width / 2, startY + i * 16, line, {
         fontSize: i === 0 ? '13px' : '11px',
         fontFamily: 'monospace',
         color: i === 0 ? '#ffdd88' : '#888888',
