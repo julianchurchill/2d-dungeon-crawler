@@ -24,8 +24,14 @@ import { EventBus } from '../utils/EventBus.js';
 /** Rows are this tall in pixels. */
 const ROW_H = 28;
 
-/** Vertical padding inside the scrollable content area. */
+/** Vertical padding below the last row. */
 const PAD = 16;
+
+/** Height reserved for the fixed title area at the top. */
+const HEADER_H = 72;
+
+/** Height of the fixed back-button strip at the bottom. */
+const FOOTER_H = 52;
 
 export class AchievementsScene extends Phaser.Scene {
   constructor() {
@@ -100,11 +106,17 @@ export class AchievementsScene extends Phaser.Scene {
   }
 
   /**
-   * Renders the "ACHIEVEMENTS" heading.
+   * Renders the "ACHIEVEMENTS" heading with a solid backing strip so that
+   * list items which scroll past the top are hidden behind it.
    *
    * @param {number} width
    */
   _buildTitle(width) {
+    // Dark backing strip — same height as HEADER_H — clips content that
+    // scrolls above the header.
+    this.add.rectangle(0, 0, width, HEADER_H, 0x080818)
+      .setOrigin(0, 0).setScrollFactor(0).setDepth(9);
+
     this.add.text(width / 2, 28, 'ACHIEVEMENTS', {
       fontSize: '28px',
       fontFamily: 'monospace',
@@ -123,6 +135,16 @@ export class AchievementsScene extends Phaser.Scene {
    * @param {number} width
    * @param {number} height
    */
+  /**
+   * Builds the scrollable list of achievement rows inside a Container so that
+   * scrolling is performed by moving the container's y position, completely
+   * independent of the Phaser camera.
+   * Completed achievements are shown first in gold; incomplete ones follow
+   * in grey with their progress counters.
+   *
+   * @param {number} width
+   * @param {number} height
+   */
   _buildList(width, height) {
     // Build display list using an AchievementSystem wired to the live store.
     const system  = new AchievementSystem(ACHIEVEMENTS, achievementStore, EventBus);
@@ -134,19 +156,25 @@ export class AchievementsScene extends Phaser.Scene {
       ...entries.filter(e => !e.completed),
     ];
 
-    const startY = 80;
+    const startY = HEADER_H + 4;
     this._contentHeight = startY + sorted.length * ROW_H + PAD;
+    this._scrollOffset  = 0;
+
+    // All rows live in a single Container so moving container.y scrolls them
+    // as a unit without touching the camera.
+    this._listContainer = this.add.container(0, 0);
 
     sorted.forEach((entry, i) => {
       const y = startY + i * ROW_H;
       const prefix = entry.completed ? '✓ ' : '  ';
       const color  = entry.completed ? '#ffdd88' : '#888888';
-      this.add.text(PAD + 16, y, `${prefix}${entry.text}`, {
+      const txt = this.add.text(PAD + 16, y, `${prefix}${entry.text}`, {
         fontSize: '11px',
         fontFamily: 'monospace',
         color,
         resolution: 2,
       }).setOrigin(0, 0);
+      this._listContainer.add(txt);
     });
   }
 
@@ -178,19 +206,18 @@ export class AchievementsScene extends Phaser.Scene {
   }
 
   /**
-   * Scrolls the camera vertically by `delta` pixels, clamped so the
-   * player cannot scroll past the first or last row.
+   * Scrolls the list by moving the container's y position, clamped so the
+   * player cannot scroll past the first or last row.  Adding FOOTER_H to
+   * maxScroll ensures the last row can be scrolled fully above the back-button
+   * strip even on shorter viewports.
    *
    * @param {number} delta - Positive scrolls down, negative scrolls up.
    */
   _scrollContent(delta) {
     const { height } = this.scale;
-    const maxScroll = Math.max(0, this._contentHeight - height);
-    this.cameras.main.scrollY = Phaser.Math.Clamp(
-      this.cameras.main.scrollY + delta,
-      0,
-      maxScroll,
-    );
+    const maxScroll = Math.max(0, this._contentHeight - height + FOOTER_H);
+    this._scrollOffset = Phaser.Math.Clamp(this._scrollOffset + delta, 0, maxScroll);
+    this._listContainer.y = -this._scrollOffset;
   }
 
   /**
