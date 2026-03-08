@@ -4,7 +4,8 @@
  * the UIScene.  In its compact form it shows the four most recent messages.
  * Clicking the compact log area opens an expanded history panel that shows
  * up to 15 lines and can be scrolled with the mouse wheel to reveal older
- * entries.  Press ESC to close the panel.
+ * entries.  A scrollbar on the right side of the panel shows current position.
+ * Press ESC to close the panel.
  *
  * Depends on MessageHistory for all data storage and windowing logic.
  * Emits MESSAGE_LOG_TOGGLED via EventBus so GameScene can gate its own
@@ -30,6 +31,15 @@ const PAD_X = 8;
 
 /** Width of the compact click zone and expanded panel. */
 const PANEL_W_MAX = 500;
+
+/** Width of the scrollbar track and thumb in pixels. */
+const SCROLLBAR_W = 5;
+
+/** Inset of the scrollbar from the right inner edge of the panel. */
+const SCROLLBAR_INSET = 4;
+
+/** Minimum thumb height in pixels so it remains clickable/visible. */
+const THUMB_MIN_H = 16;
 
 export class MessageLog {
   /**
@@ -62,6 +72,12 @@ export class MessageLog {
 
     /** @type {Phaser.GameObjects.Text|null} Scroll-hint label. */
     this._scrollHint = null;
+
+    /** @type {Phaser.GameObjects.Rectangle|null} Scrollbar track. */
+    this._scrollTrack = null;
+
+    /** @type {Phaser.GameObjects.Rectangle|null} Scrollbar thumb. */
+    this._scrollThumb = null;
 
     this._buildCompact();
     this._buildExpandedPanel();
@@ -139,7 +155,7 @@ export class MessageLog {
       this._clickZone.setPosition(PAD_X, compactStartY - 4).setSize(zoneW, zoneH);
     }
 
-    // Reposition expanded panel.
+    // Reposition expanded panel and scrollbar.
     this._repositionPanel(width, height);
   }
 
@@ -181,14 +197,13 @@ export class MessageLog {
   }
 
   /**
-   * Creates the expanded history panel (background + text rows + scroll hint).
-   * The panel is initially hidden.
+   * Creates the expanded history panel (background + text rows + scroll hint
+   * + scrollbar track and thumb).  The panel is initially hidden.
    */
   _buildExpandedPanel() {
     const { width, height } = this.scene.scale;
-    const panelH = EXPANDED_LINES * LINE_H + 28; // +28 for header & hint rows
-    const panelW = Math.min(width - 16, PANEL_W_MAX);
-    const panelY = height - 20 - COMPACT_LINES * LINE_H - panelH - 4;
+    const { panelW, panelH, panelY, rowStartY, trackX, trackY, trackH } =
+      this._panelLayout(width, height);
 
     // Semi-transparent dark background.
     this._panelBg = this.scene.add.rectangle(8, panelY, panelW, panelH, 0x060612, 0.88)
@@ -203,7 +218,6 @@ export class MessageLog {
     }).setScrollFactor(0).setDepth(200);
 
     // Text rows for history lines.
-    const rowStartY = panelY + 18;
     for (let i = 0; i < EXPANDED_LINES; i++) {
       const txt = this.scene.add.text(PAD_X + 4, rowStartY + i * LINE_H, '', {
         fontSize: '11px', fontFamily: 'monospace', color: '#cccccc',
@@ -219,10 +233,45 @@ export class MessageLog {
         fontSize: '9px', fontFamily: 'monospace', color: '#334455', resolution: 2,
       }
     ).setScrollFactor(0).setDepth(200);
+
+    // Scrollbar track — a subtle vertical bar on the right inner edge.
+    this._scrollTrack = this.scene.add.rectangle(trackX, trackY, SCROLLBAR_W, trackH, 0x1a2a3a)
+      .setOrigin(0, 0)
+      .setScrollFactor(0)
+      .setDepth(200);
+
+    // Scrollbar thumb — positioned and sized in _updateScrollbar().
+    this._scrollThumb = this.scene.add.rectangle(trackX, trackY, SCROLLBAR_W, THUMB_MIN_H, 0x446688)
+      .setOrigin(0, 0)
+      .setScrollFactor(0)
+      .setDepth(201);
+  }
+
+  /**
+   * Computes the shared layout values used by build, reposition, and scrollbar
+   * update methods so the calculations are never duplicated.
+   *
+   * @param {number} width
+   * @param {number} height
+   * @returns {{ panelW: number, panelH: number, panelY: number,
+   *             rowStartY: number, trackX: number, trackY: number, trackH: number }}
+   */
+  _panelLayout(width, height) {
+    const panelH    = EXPANDED_LINES * LINE_H + 28;
+    const panelW    = Math.min(width - 16, PANEL_W_MAX);
+    const panelY    = height - 20 - COMPACT_LINES * LINE_H - panelH - 4;
+    const rowStartY = panelY + 18;
+    // Scrollbar track spans the full row area on the right inner edge.
+    const trackX = 8 + panelW - SCROLLBAR_W - SCROLLBAR_INSET;
+    const trackY = rowStartY;
+    const trackH = EXPANDED_LINES * LINE_H;
+    return { panelW, panelH, panelY, rowStartY, trackX, trackY, trackH };
   }
 
   /**
    * Shows or hides all expanded-panel objects as a unit.
+   * The scrollbar visibility is further controlled by _updateScrollbar()
+   * based on whether there is content to scroll.
    *
    * @param {boolean} visible
    */
@@ -230,20 +279,20 @@ export class MessageLog {
     this._panelBg.setVisible(visible);
     this._panelHeader.setVisible(visible);
     this._scrollHint.setVisible(visible);
+    this._scrollTrack.setVisible(visible);
+    this._scrollThumb.setVisible(visible);
     for (const t of this._panelTexts) t.setVisible(visible);
   }
 
   /**
-   * Repositions the expanded panel after a canvas resize.
+   * Repositions the expanded panel and scrollbar after a canvas resize.
    *
    * @param {number} width
    * @param {number} height
    */
   _repositionPanel(width, height) {
-    const panelH = EXPANDED_LINES * LINE_H + 28;
-    const panelW = Math.min(width - 16, PANEL_W_MAX);
-    const panelY = height - 20 - COMPACT_LINES * LINE_H - panelH - 4;
-    const rowStartY = panelY + 18;
+    const { panelW, panelH, panelY, rowStartY, trackX, trackY, trackH } =
+      this._panelLayout(width, height);
 
     this._panelBg.setPosition(8, panelY).setSize(panelW, panelH);
     this._panelHeader.setPosition(PAD_X + 4, panelY + 4);
@@ -257,6 +306,14 @@ export class MessageLog {
     if (this._scrollHint) {
       this._scrollHint.setPosition(PAD_X + 4, rowStartY + EXPANDED_LINES * LINE_H + 2);
     }
+
+    // Reposition scrollbar track.
+    if (this._scrollTrack) {
+      this._scrollTrack.setPosition(trackX, trackY).setSize(SCROLLBAR_W, trackH);
+    }
+
+    // Reposition thumb — recalculate from current scroll state.
+    this._updateScrollbar(trackX, trackY, trackH);
   }
 
   /**
@@ -276,7 +333,8 @@ export class MessageLog {
   }
 
   /**
-   * Refreshes the expanded history panel from the current scroll offset.
+   * Refreshes the expanded history panel from the current scroll offset
+   * and updates the scrollbar position.
    */
   _refreshPanel() {
     const window = this._history.getWindow(this._scrollOffset, EXPANDED_LINES);
@@ -284,20 +342,54 @@ export class MessageLog {
       const text = window[i] ?? '';
       if (this._panelTexts[i]) {
         this._panelTexts[i].setText(text);
-        // Dim entries that are at the top of the panel (oldest in the window).
-        const alpha = i < 2 ? 0.5 : 1.0;
-        this._panelTexts[i].setAlpha(alpha);
+        // Dim entries at the top of the panel (oldest in window).
+        this._panelTexts[i].setAlpha(i < 2 ? 0.5 : 1.0);
       }
     }
 
-    // Update scroll hint to show position.
-    const total = this._history.getCount();
+    // Recalculate layout for scrollbar.
+    const { width, height } = this.scene.scale;
+    const { trackX, trackY, trackH } = this._panelLayout(width, height);
+    this._updateScrollbar(trackX, trackY, trackH);
+  }
+
+  /**
+   * Positions and sizes the scrollbar thumb based on the current scroll state.
+   * Hides both track and thumb when all messages fit in the visible window
+   * (nothing to scroll).
+   *
+   * Thumb position:
+   *  - Thumb at bottom → scrollOffset = 0 (viewing newest messages)
+   *  - Thumb at top    → scrollOffset = maxOffset (viewing oldest messages)
+   *
+   * @param {number} trackX - Left edge of the scrollbar track.
+   * @param {number} trackY - Top edge of the scrollbar track.
+   * @param {number} trackH - Height of the scrollbar track in pixels.
+   */
+  _updateScrollbar(trackX, trackY, trackH) {
+    if (!this._scrollTrack || !this._scrollThumb) return;
+
+    const total     = this._history.getCount();
     const maxOffset = Math.max(0, total - EXPANDED_LINES);
-    if (this._scrollHint && maxOffset > 0) {
-      const pct = Math.round((this._scrollOffset / maxOffset) * 100);
-      this._scrollHint.setText(`Wheel to scroll  |  ${pct}% from newest`);
-    } else if (this._scrollHint) {
-      this._scrollHint.setText('Wheel to scroll');
+
+    if (maxOffset === 0) {
+      // All messages fit — hide scrollbar.
+      this._scrollTrack.setVisible(false);
+      this._scrollThumb.setVisible(false);
+      return;
     }
+
+    this._scrollTrack.setVisible(true).setPosition(trackX, trackY).setSize(SCROLLBAR_W, trackH);
+
+    // Thumb height proportional to the fraction of content that is visible.
+    const thumbH = Math.max(THUMB_MIN_H, Math.round((EXPANDED_LINES / total) * trackH));
+
+    // Thumb Y: offset=0 (newest) → thumb at bottom; offset=maxOffset (oldest) → thumb at top.
+    const thumbY = trackY + Math.round((1 - this._scrollOffset / maxOffset) * (trackH - thumbH));
+
+    this._scrollThumb
+      .setVisible(true)
+      .setPosition(trackX, thumbY)
+      .setSize(SCROLLBAR_W, thumbH);
   }
 }
