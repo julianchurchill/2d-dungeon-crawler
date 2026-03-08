@@ -42,6 +42,11 @@ export class GameScene extends Phaser.Scene {
     // AchievementSystem self-registers on the EventBus in its constructor.
     new AchievementSystem();
 
+    // Track whether the message log history panel is open so the ESC handler
+    // can close it instead of opening the Achievements screen.
+    this._messageLogOpen = false;
+    EventBus.on(GameEvents.MESSAGE_LOG_TOGGLED, (open) => { this._messageLogOpen = open; }, this);
+
     // Entities lists
     this.enemies = [];
     this.items = [];  // floor items (not in inventory)
@@ -300,7 +305,16 @@ export class GameScene extends Phaser.Scene {
     this.input.keyboard.on('keydown-I',            () => { this._runController.cancel(); this._toggleInventory(); });
     this.input.keyboard.on('keydown-PERIOD',        () => { this._runController.cancel(); this._tryUseStairs(); });
     this.input.keyboard.on('keydown-GREATER_THAN',  () => { this._runController.cancel(); this._tryUseStairs(); });
-    this.input.keyboard.on('keydown-ESC',           () => { this._runController.cancel(); this._openAchievements(); });
+    // ESC closes the message log history panel when it is open; otherwise
+    // it opens the Achievements overlay.
+    this.input.keyboard.on('keydown-ESC', () => {
+      this._runController.cancel();
+      if (this._messageLogOpen) {
+        EventBus.emit(GameEvents.CLOSE_MESSAGE_LOG);
+      } else {
+        this._openAchievements();
+      }
+    });
 
     // SHIFT+direction starts a run; a plain direction key cancels any active run
     // and performs a single step.  Cancelling before _handleDir is safe because

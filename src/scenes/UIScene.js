@@ -60,7 +60,23 @@ export class UIScene extends Phaser.Scene {
     // reflects the correct initial state (including dev-option overrides).
     syncHudFromRegistry(this.registry, this.hud);
 
+    // GameScene sends CLOSE_MESSAGE_LOG when ESC is pressed while the panel is open.
+    EventBus.on(GameEvents.CLOSE_MESSAGE_LOG, () => this.messageLog?.close(), this);
+
+    // Mouse wheel scrolls the history panel when it is open.
+    this._onWheel = (e) => {
+      if (this.messageLog) {
+        this.messageLog.scrollHistory(e.deltaY > 0 ? 3 : -3);
+      }
+    };
+    window.addEventListener('wheel', this._onWheel, { passive: true });
+
     this.scale.on('resize', this._onResize, this);
+
+    // Clean up DOM listener when the scene shuts down (e.g. game over).
+    this.events.once('shutdown', () => {
+      window.removeEventListener('wheel', this._onWheel);
+    });
   }
 
   /**

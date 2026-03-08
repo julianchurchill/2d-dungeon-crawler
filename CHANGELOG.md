@@ -9,6 +9,7 @@ Entries are listed newest-first within each section.
 
 ### Added
 
+- 2026-03-08 — Message log history: click the message area to expand a scrollable 15-line history panel; mouse wheel scrolls through older messages; ESC closes the panel
 - 2026-03-08 — Achievements screen: viewable from the main menu and via ESCAPE during play; shows all achievements with completion state and progress
 - 2026-03-08 — Dev options: spawn table weights per enemy type and min/max enemies per room, configurable before game start
 - 2026-03-08 — Rename kill achievements to consistent "Killer" pattern: Orc Killer, Troll Killer
