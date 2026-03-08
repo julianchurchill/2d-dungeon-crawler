@@ -18,8 +18,13 @@
 import Phaser from 'phaser';
 import { ACHIEVEMENTS } from '../achievements/AchievementDefinitions.js';
 import { AchievementSystem } from '../achievements/AchievementSystem.js';
-import { achievementStore } from '../achievements/AchievementStore.js';
+import {
+  achievementStore,
+  completeAchievement,
+  uncompleteAchievement,
+} from '../achievements/AchievementStore.js';
 import { EventBus } from '../utils/EventBus.js';
+import { isDevEnvironment } from '../utils/Environment.js';
 
 /** Rows are this tall in pixels. */
 const ROW_H = 28;
@@ -164,6 +169,8 @@ export class AchievementsScene extends Phaser.Scene {
     // as a unit without touching the camera.
     this._listContainer = this.add.container(0, 0);
 
+    const devMode = isDevEnvironment();
+
     sorted.forEach((entry, i) => {
       const y = startY + i * ROW_H;
       const prefix = entry.completed ? '✓ ' : '  ';
@@ -175,6 +182,12 @@ export class AchievementsScene extends Phaser.Scene {
         resolution: 2,
       }).setOrigin(0, 0);
       this._listContainer.add(txt);
+
+      // Dev-mode checkbox: allows force-completing or resetting any achievement.
+      // Hidden in production builds so players cannot see or use it.
+      if (devMode) {
+        this._addDevCheckbox(entry, y);
+      }
     });
   }
 
@@ -235,5 +248,43 @@ export class AchievementsScene extends Phaser.Scene {
     }
     // Stop self last so scene manager calls above can still execute.
     this.scene.stop();
+  }
+
+  /**
+   * Adds a dev-mode-only interactive checkbox at the left edge of an
+   * achievement row.  Clicking `[ ]` force-completes the achievement;
+   * clicking `[x]` resets it to incomplete.  The scene restarts after each
+   * toggle so the sorted list and progress text refresh immediately.
+   *
+   * Only called when `isDevEnvironment()` returns true — never shown in
+   * production builds.
+   *
+   * @param {{ id: string, completed: boolean }} entry - Display list entry.
+   * @param {number} y - Vertical position of the row within the container.
+   */
+  _addDevCheckbox(entry, y) {
+    const label     = entry.completed ? '[x]' : '[ ]';
+    const baseColor = entry.completed ? '#ffdd88' : '#556677';
+
+    const cb = this.add.text(4, y, label, {
+      fontSize: '11px',
+      fontFamily: 'monospace',
+      color: baseColor,
+      resolution: 2,
+    }).setOrigin(0, 0).setInteractive({ useHandCursor: true });
+
+    cb.on('pointerover', () => cb.setColor('#88aaff'));
+    cb.on('pointerout',  () => cb.setColor(baseColor));
+    cb.on('pointerdown', () => {
+      if (entry.completed) {
+        uncompleteAchievement(entry.id, achievementStore);
+      } else {
+        completeAchievement(entry.id, achievementStore);
+      }
+      // Restart the scene so the list re-sorts and text refreshes.
+      this.scene.restart();
+    });
+
+    this._listContainer.add(cb);
   }
 }
