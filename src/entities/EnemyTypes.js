@@ -44,3 +44,22 @@ export function getSpawnTable(floor) {
 export function getEnemiesPerRoom(floor) {
   return Math.min(1 + Math.floor(floor / 2), 4);
 }
+
+/**
+ * Builds a weighted spawn-table array from a weights map.
+ * Each key in the map is an enemy type; its value is the number of slots
+ * that type occupies in the table (i.e. its relative probability weight).
+ * Types with a weight of 0 are excluded.
+ *
+ * @param {Object.<string, number>} weights - Map of enemy type → weight.
+ * @returns {string[]} Weighted array of enemy type strings.
+ */
+export function buildSpawnTableFromWeights(weights) {
+  const table = [];
+  for (const [type, count] of Object.entries(weights)) {
+    for (let i = 0; i < count; i++) {
+      table.push(type);
+    }
+  }
+  return table;
+}

@@ -6,7 +6,7 @@ import { InventorySystem } from '../systems/InventorySystem.js';
 import { Player } from '../entities/Player.js';
 import { Enemy } from '../entities/Enemy.js';
 import { Item } from '../items/Item.js';
-import { getSpawnTable, getEnemiesPerRoom } from '../entities/EnemyTypes.js';
+import { getSpawnTable, getEnemiesPerRoom, buildSpawnTableFromWeights } from '../entities/EnemyTypes.js';
 import { getFloorLoot } from '../items/ItemTypes.js';
 import { computeFOV } from '../fov/ShadowcastFOV.js';
 import { EventBus } from '../utils/EventBus.js';
@@ -17,7 +17,7 @@ import { createRNG } from '../utils/RNG.js';
 import { HeldMovementTracker } from '../systems/HeldMovementTracker.js';
 import { HoldRepeatScheduler } from '../systems/HoldRepeatScheduler.js';
 import { RunMovementController } from '../systems/RunMovementController.js';
-import { applyToGame } from '../systems/DevOptions.js';
+import { applyToGame, devOptions } from '../systems/DevOptions.js';
 import { AchievementSystem } from '../achievements/AchievementSystem.js';
 
 const TILE_SIZE = 16;
@@ -195,12 +195,17 @@ export class GameScene extends Phaser.Scene {
 
   _spawnEnemies(rooms) {
     const floor = this.floorManager.currentFloor;
-    const spawnTable = getSpawnTable(floor);
-    const perRoom = getEnemiesPerRoom(floor);
+
+    // Use developer overrides when set, otherwise fall back to floor-scaled defaults.
+    const spawnTable = devOptions.spawnWeights
+      ? buildSpawnTableFromWeights(devOptions.spawnWeights)
+      : getSpawnTable(floor);
+    const minPerRoom = devOptions.minEnemiesPerRoom ?? 0;
+    const maxPerRoom = devOptions.maxEnemiesPerRoom ?? getEnemiesPerRoom(floor);
 
     for (let i = 1; i < rooms.length; i++) {
       const room = rooms[i];
-      const count = this.rng.nextInt(0, perRoom);
+      const count = this.rng.nextInt(minPerRoom, maxPerRoom);
       for (let j = 0; j < count; j++) {
         const type = this.rng.pick(spawnTable);
         // Random position within room

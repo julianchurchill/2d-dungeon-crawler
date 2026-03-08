@@ -16,15 +16,24 @@ import { ITEM_TYPES } from '../items/ItemTypes.js';
  * Mutable singleton that holds the current developer option values.
  * All fields reset to these defaults when `resetDevOptions()` is called.
  *
- * @property {number}   startFloor - Dungeon floor to begin on (1-indexed).
- * @property {number}   startLevel - Player character level at game start.
- * @property {string[]} startItems - Array of ITEM_TYPES keys to place in the
- *                                   player's inventory at game start.
+ * @property {number}   startFloor           - Dungeon floor to begin on (1-indexed).
+ * @property {number}   startLevel           - Player character level at game start.
+ * @property {string[]} startItems           - Array of ITEM_TYPES keys to place in the
+ *                                             player's inventory at game start.
+ * @property {Object.<string,number>|null} spawnWeights - Map of enemy type → weight for
+ *                                             the spawn table, or null to use floor defaults.
+ * @property {number|null} minEnemiesPerRoom  - Minimum enemies spawned per room, or null
+ *                                             to use the floor default (0).
+ * @property {number|null} maxEnemiesPerRoom  - Maximum enemies spawned per room, or null
+ *                                             to use the floor-scaled default.
  */
 export const devOptions = {
   startFloor: 1,
   startLevel: 1,
   startItems: [],
+  spawnWeights: null,
+  minEnemiesPerRoom: null,
+  maxEnemiesPerRoom: null,
 };
 
 /**
@@ -34,6 +43,9 @@ export function resetDevOptions() {
   devOptions.startFloor = 1;
   devOptions.startLevel = 1;
   devOptions.startItems = [];
+  devOptions.spawnWeights = null;
+  devOptions.minEnemiesPerRoom = null;
+  devOptions.maxEnemiesPerRoom = null;
 }
 
 /**
