@@ -26,14 +26,14 @@
 ## Inventory
 
 - [ ] show details of inventory item when highlighted
-- [ ] drop items
-- [ ] destroy items to get collectable materials that could be used later to create new items or enhance existing ones
+- [ ] drop items with 'd' when in inventory. Provide a button for mobile interface.
+- [ ] destroy items to get collectable materials that could be used later to create new items or enhance existing ones. Use 'D' when in inventory and provide a button for mobile interface. Protect unique items by asking the player to confirm the action.
 - [x] arrow keys to move around inventory (no mouse)
 
 ## UI
 
 - [ ] allow arrows and WASD keys to navigate menus and ENTER/SPACE to select buttons
-- [ ] map - press 'm'
+- [ ] map - press 'm' to show and provide a button for the mobile interface
 - [x] mobile controls on mobile only
 - [x] screen effect when you level up during the game
 
@@ -48,7 +48,7 @@
 
 - [ ] increase defense when a character levels up
 - [ ] character graphic
-- [ ] show a character sheet by pressing 'c' which shows all the players stats currently
+- [ ] show a character sheet by pressing 'c' which shows all the players stats currently. Provide a button for the mobile interface.
 - [ ] xp bar - make it clearer that it is an XP bar
 - [x] hold keys for continued movement
 - [x] run movement - SHIFT+direction keeps going until an obstacle or visible enemy/item stops them
