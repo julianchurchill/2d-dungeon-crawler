@@ -511,9 +511,13 @@ export class GameScene extends Phaser.Scene {
    * The AchievementsScene will resume both scenes when the player closes it.
    */
   _openAchievements() {
-    this.scene.pause('GameScene');
-    this.scene.pause('UIScene');
+    // Launch first so the queue operation is registered while this scene is still
+    // running, then sleep GameScene and UIScene.  sleep() stops both update and
+    // rendering (unlike pause() which only stops update, leaving the scenes
+    // visible on top of the achievements overlay).
     this.scene.launch('AchievementsScene', { fromScene: 'GameScene' });
+    this.scene.sleep('UIScene');
+    this.scene.sleep('GameScene');
   }
 
   _tryUseStairs() {

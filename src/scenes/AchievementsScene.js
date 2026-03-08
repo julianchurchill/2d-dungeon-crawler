@@ -172,16 +172,18 @@ export class AchievementsScene extends Phaser.Scene {
 
   /**
    * Returns to the scene this screen was opened from.
-   * If the caller was GameScene, the game and UI scenes are resumed.
+   * If the caller was GameScene, both the game and UI scenes are woken (they
+   * were put to sleep when the overlay opened).  wake() is the counterpart to
+   * sleep() — it resumes both update and rendering.
    */
   _back() {
-    this.scene.stop('AchievementsScene');
-
     if (this._fromScene === 'GameScene') {
-      this.scene.resume('GameScene');
-      this.scene.resume('UIScene');
+      this.scene.wake('GameScene');
+      this.scene.wake('UIScene');
     } else {
       this.scene.start(this._fromScene);
     }
+    // Stop self last so scene manager calls above can still execute.
+    this.scene.stop();
   }
 }
