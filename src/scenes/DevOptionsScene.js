@@ -51,6 +51,14 @@ export class DevOptionsScene extends Phaser.Scene {
     // ESC returns to the main menu.
     this.input.keyboard.on('keydown-ESC', () => this._back());
     this.scale.on('resize', () => this.scene.restart());
+
+    // Scroll the content with the mouse wheel or UP/DOWN arrow keys so that
+    // all controls remain reachable even when the content exceeds the viewport.
+    this.input.on('wheel', (_ptr, _objs, _dx, deltaY) => {
+      this._scrollContent(deltaY > 0 ? 30 : -30);
+    });
+    this.input.keyboard.on('keydown-UP',   () => this._scrollContent(-30));
+    this.input.keyboard.on('keydown-DOWN', () => this._scrollContent(30));
   }
 
   // ─── Background ──────────────────────────────────────────────────────────
@@ -155,6 +163,9 @@ export class DevOptionsScene extends Phaser.Scene {
 
     // Back button
     this._makeBackButton(cx, y);
+
+    // Record total content height so _scrollContent can clamp correctly.
+    this._contentHeight = y + 60;
   }
 
   /**
@@ -380,6 +391,19 @@ export class DevOptionsScene extends Phaser.Scene {
     bg.on('pointerover',  () => { bg.setFillStyle(0x336688); txt.setColor('#ffffff'); });
     bg.on('pointerout',   () => { bg.setFillStyle(0x224466); txt.setColor('#88ccff'); });
     bg.on('pointerdown',  () => this._back());
+  }
+
+  /**
+   * Scrolls the camera by `delta` pixels, clamped so the content never
+   * scrolls above its top or below its bottom.
+   *
+   * @param {number} delta - Positive scrolls down, negative scrolls up.
+   */
+  _scrollContent(delta) {
+    const maxScroll = Math.max(0, this._contentHeight - this.scale.height);
+    this.cameras.main.scrollY = Phaser.Math.Clamp(
+      this.cameras.main.scrollY + delta, 0, maxScroll,
+    );
   }
 
   /**
