@@ -1,6 +1,6 @@
 import { Given, When, Then, defineStep } from '@cucumber/cucumber';
 import assert from 'node:assert/strict';
-import { devOptions } from '../../src/systems/DevOptions.js';
+import { devOptions, isSpawnConfigValid } from '../../src/systems/DevOptions.js';
 import { buildSpawnTableFromWeights } from '../../src/entities/EnemyTypes.js';
 
 // ─── Setting spawn overrides ──────────────────────────────────────────────
@@ -43,6 +43,16 @@ Then('the dev min enemies per room should be {int}', function (expected) {
 
 Then('the dev max enemies per room should be {int}', function (expected) {
   assert.equal(devOptions.maxEnemiesPerRoom, expected);
+});
+
+// ─── isSpawnConfigValid ───────────────────────────────────────────────────
+
+Then('the spawn table config should be valid', function () {
+  assert.ok(isSpawnConfigValid(devOptions), 'Expected spawn config to be valid');
+});
+
+Then('the spawn table config should be invalid', function () {
+  assert.ok(!isSpawnConfigValid(devOptions), 'Expected spawn config to be invalid');
 });
 
 // ─── buildSpawnTableFromWeights ───────────────────────────────────────────

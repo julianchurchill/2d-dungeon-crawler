@@ -11,7 +11,7 @@
  */
 
 import Phaser from 'phaser';
-import { devOptions } from '../systems/DevOptions.js';
+import { devOptions, isSpawnConfigValid } from '../systems/DevOptions.js';
 import { ITEM_TYPES } from '../items/ItemTypes.js';
 import { ENEMY_DEFS } from '../entities/EnemyTypes.js';
 
@@ -110,15 +110,22 @@ export class DevOptionsScene extends Phaser.Scene {
     }).setOrigin(0.5);
     y += 28;
 
-    // Initialise weights object when null so rows always have a number to show.
-    if (!devOptions.spawnWeights) {
-      devOptions.spawnWeights = Object.fromEntries(ENEMY_KEYS.map(k => [k, 0]));
-    }
-
+    // allWeightDisplays is shared across rows so that when the first weight is
+    // set (transitioning from null → object), all sibling texts update together.
+    const allWeightDisplays = {};
     for (const key of ENEMY_KEYS) {
-      this._makeSpawnWeightRow(ENEMY_DEFS[key].name, key, cx, y);
+      allWeightDisplays[key] = this._makeSpawnWeightRow(
+        ENEMY_DEFS[key].name, key, cx, y, allWeightDisplays,
+      );
       y += 34;
     }
+
+    // Validation error — shown when all weights are zero; hidden otherwise.
+    this._validationErrorTxt = this.add.text(cx, y, '⚠ At least one weight must be > 0', {
+      fontSize: '11px', fontFamily: 'monospace', color: '#ff6666', resolution: 2,
+    }).setOrigin(0.5).setVisible(false);
+    y += 22;
+    this._updateValidationDisplay();
 
     // "Reset to floor defaults" link for spawn weights
     this._makeResetLink('Reset spawn to floor defaults', cx, y, () => {
@@ -243,31 +250,54 @@ export class DevOptionsScene extends Phaser.Scene {
 
   /**
    * Creates a labelled +/− control for one enemy type's weight in the spawn
-   * table.  The weight is stored in `devOptions.spawnWeights[key]` (0–9).
+   * table.  Displays "--" while `devOptions.spawnWeights` is null (floor
+   * defaults active).  The first [+] press initialises all weights to 0 and
+   * updates every sibling display before incrementing this type.
    *
-   * @param {string} label - Human-readable enemy name.
-   * @param {string} key   - ENEMY_DEFS key, e.g. 'goblin'.
-   * @param {number} cx    - Horizontal centre of the scene.
-   * @param {number} y     - Vertical centre of this row.
+   * @param {string} label            - Human-readable enemy name.
+   * @param {string} key              - ENEMY_DEFS key, e.g. 'goblin'.
+   * @param {number} cx               - Horizontal centre of the scene.
+   * @param {number} y                - Vertical centre of this row.
+   * @param {Object.<string, Phaser.GameObjects.Text>} allWeightDisplays
+   *   Shared map of key → text object; populated by the caller as rows are
+   *   created.  Used to refresh sibling displays on first weight activation.
+   * @returns {Phaser.GameObjects.Text} The value display text object.
    */
-  _makeSpawnWeightRow(label, key, cx, y) {
+  _makeSpawnWeightRow(label, key, cx, y, allWeightDisplays) {
+    /** @returns {string} Current display value for this key. */
+    const display = () =>
+      devOptions.spawnWeights === null ? '--' : String(devOptions.spawnWeights[key] ?? 0);
+
     this.add.text(cx - CTRL_OFFSET / 2 - 8, y, label + ' weight:', {
       fontSize: '12px', fontFamily: 'monospace', color: '#aabbcc', resolution: 2,
     }).setOrigin(1, 0.5);
 
-    const valTxt = this.add.text(cx, y, String(devOptions.spawnWeights[key] ?? 0), {
+    const valTxt = this.add.text(cx, y, display(), {
       fontSize: '13px', fontFamily: 'monospace', color: '#ffffff', resolution: 2,
     }).setOrigin(0.5);
 
     this._makeBtn(cx - 40, y, '−', () => {
-      devOptions.spawnWeights[key] = Math.max(0, (devOptions.spawnWeights[key] ?? 0) - 1);
-      valTxt.setText(String(devOptions.spawnWeights[key]));
+      if (devOptions.spawnWeights === null) return; // nothing to decrement yet
+      devOptions.spawnWeights[key] = Math.max(0, devOptions.spawnWeights[key] - 1);
+      valTxt.setText(display());
+      this._updateValidationDisplay();
     });
 
     this._makeBtn(cx + 40, y, '+', () => {
-      devOptions.spawnWeights[key] = Math.min(9, (devOptions.spawnWeights[key] ?? 0) + 1);
-      valTxt.setText(String(devOptions.spawnWeights[key]));
+      if (devOptions.spawnWeights === null) {
+        // First weight edit — initialise all enemy weights to 0 and refresh
+        // every sibling's "--" text so the UI stays consistent.
+        devOptions.spawnWeights = Object.fromEntries(ENEMY_KEYS.map(k => [k, 0]));
+        for (const [k, txt] of Object.entries(allWeightDisplays)) {
+          txt.setText(String(devOptions.spawnWeights[k]));
+        }
+      }
+      devOptions.spawnWeights[key] = Math.min(9, devOptions.spawnWeights[key] + 1);
+      valTxt.setText(display());
+      this._updateValidationDisplay();
     });
+
+    return valTxt;
   }
 
   /**
@@ -352,8 +382,23 @@ export class DevOptionsScene extends Phaser.Scene {
     bg.on('pointerdown',  () => this._back());
   }
 
-  /** Transitions back to the main menu with a short fade. */
+  /**
+   * Shows or hides the validation error text based on whether the current
+   * spawn configuration is valid.  Called after every weight change.
+   */
+  _updateValidationDisplay() {
+    if (this._validationErrorTxt) {
+      this._validationErrorTxt.setVisible(!isSpawnConfigValid(devOptions));
+    }
+  }
+
+  /**
+   * Attempts to return to the main menu.  Blocked when the spawn table
+   * override has been activated but all weights are zero (which would crash
+   * the spawner with an empty table).
+   */
   _back() {
+    if (!isSpawnConfigValid(devOptions)) return; // validation error already visible
     this.cameras.main.fadeOut(200, 0, 0, 0);
     this.time.delayedCall(200, () => this.scene.start('MainMenuScene'));
   }

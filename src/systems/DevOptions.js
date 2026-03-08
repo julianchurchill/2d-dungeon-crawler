@@ -49,6 +49,19 @@ export function resetDevOptions() {
 }
 
 /**
+ * Returns true if the current spawn configuration is valid for starting a game.
+ * The config is invalid only when `spawnWeights` is non-null and every weight
+ * is zero — which would produce an empty spawn table and crash the spawner.
+ *
+ * @param {typeof devOptions} opts - The dev options object to validate.
+ * @returns {boolean}
+ */
+export function isSpawnConfigValid(opts) {
+  if (opts.spawnWeights === null) return true;
+  return Object.values(opts.spawnWeights).some(w => w > 0);
+}
+
+/**
  * Applies the current developer options to a freshly constructed player and
  * floor manager.  Must be called before `FloorManager.generateFloor()` so
  * that `currentFloor` is already set when enemy spawn tables are evaluated.
