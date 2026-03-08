@@ -47,20 +47,43 @@ export class AchievementsScene extends Phaser.Scene {
     this._buildList(width, height);
     this._buildBackButton(width, height);
 
-    // ESC key closes the screen and returns to the origin scene.
+    // ESC key closes the screen.  Uses Phaser keyboard (consistent with other scenes).
     this.input.keyboard.on('keydown-ESC', () => this._back());
 
-    // Scroll the list with the mouse wheel or UP/DOWN arrow keys.
-    this.input.on('wheel', (_ptr, _objs, _dx, deltaY) => {
-      this._scrollContent(deltaY > 0 ? 30 : -30);
-    });
-    this.input.keyboard.on('keydown-UP',   () => this._scrollContent(-30));
-    this.input.keyboard.on('keydown-DOWN', () => this._scrollContent(30));
+    // Wheel and arrow-key scrolling use DOM listeners so they fire reliably when
+    // this scene is launched as an overlay (Phaser's scene input routing may not
+    // dispatch these events to a scene launched over sleeping scenes).
+    this._initScrollListeners();
 
     this.scale.on('resize', () => this.scene.restart());
   }
 
   // ── Private helpers ─────────────────────────────────────────────────────────
+
+  /**
+   * Attaches DOM-level wheel and arrow-key listeners for scrolling.
+   * DOM listeners are used instead of Phaser's InputPlugin because Phaser may
+   * not dispatch wheel/key events to a scene that was launched as an overlay
+   * on top of sleeping scenes.
+   * Listeners are removed when the scene shuts down.
+   */
+  _initScrollListeners() {
+    const onWheel = (e) => {
+      e.preventDefault();
+      this._scrollContent(e.deltaY > 0 ? 30 : -30);
+    };
+    const onKey = (e) => {
+      if (e.key === 'ArrowUp')   this._scrollContent(-30);
+      if (e.key === 'ArrowDown') this._scrollContent(30);
+    };
+    window.addEventListener('wheel', onWheel, { passive: false });
+    window.addEventListener('keydown', onKey);
+    // Clean up when the scene is stopped so listeners don't linger.
+    this.events.once('shutdown', () => {
+      window.removeEventListener('wheel', onWheel);
+      window.removeEventListener('keydown', onKey);
+    });
+  }
 
   /**
    * Fills the background with a dark gradient.
