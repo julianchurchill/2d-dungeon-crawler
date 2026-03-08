@@ -6,6 +6,7 @@ import { MessageLog } from '../ui/MessageLog.js';
 import { EventBus } from '../utils/EventBus.js';
 import { GameEvents } from '../events/GameEvents.js';
 import { isTouchDevice } from '../utils/TouchDeviceDetector.js';
+import { syncHudFromRegistry } from '../ui/HudRegistrySync.js';
 
 export class UIScene extends Phaser.Scene {
   constructor() {
@@ -49,6 +50,12 @@ export class UIScene extends Phaser.Scene {
     this.registry.events.on('changedata-floor', (parent, floor) => {
       this.hud.updateFloor(floor);
     });
+
+    // GameScene.create() runs before UIScene.create(), so the initial
+    // registry.set() calls happen before the changedata-* listeners above are
+    // registered.  Eagerly read the current values now to ensure the HUD
+    // reflects the correct initial state (including dev-option overrides).
+    syncHudFromRegistry(this.registry, this.hud);
 
     this.scale.on('resize', this._onResize, this);
   }
