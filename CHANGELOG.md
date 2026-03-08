@@ -11,6 +11,10 @@ Entries are listed newest-first within each section.
 
 - 2026-03-08 — Achievement system: Goblin Killer (kill 10 goblins) and Burrower (reach floor 10) with progress tracking, banners, and message log notifications
 
+### Fixed
+
+- 2026-03-08 — Dev options start floor and start level not reflected in HUD on game start; UIScene now eagerly reads initial registry values via `syncHudFromRegistry` so dev-option overrides display correctly from the first frame
+
 ### Changed
 
 - 2026-03-07 — Centralise EventBus event names into `src/events/GameEvents.js` constants
