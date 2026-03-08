@@ -45,12 +45,12 @@ Feature: Achievement system
   Scenario: Orc Slayer is unlocked when 10 orcs are killed
     Given the achievement system is initialised
     When the player kills 10 orcs
-    Then the "Orc Slayer" achievement should be completed
+    Then the "Orc Killer" achievement should be completed
 
   Scenario: Troll Hunter is unlocked when 10 trolls are killed
     Given the achievement system is initialised
     When the player kills 10 trolls
-    Then the "Troll Hunter" achievement should be completed
+    Then the "Troll Killer" achievement should be completed
 
   Scenario: A floor milestone achievement is unlocked when the target floor is reached
     Given the achievement system is initialised
