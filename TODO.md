@@ -66,6 +66,14 @@
 - [ ] the town contains shops that can be entered where the player can buy items with currency. The items will have randomly generated stats and may include occasional rare items that are powerful for the players level. They will not include unique items that can only be found by exploring the dungeon.
 - [ ] the town contains NPCs that can be interacted with for short conversations
 
+## Special Levels
+
+- [ ] special levels are non-random layout levels such as arena, nest, dungeon market, labyrinth, boss room, with a chance of unique bosses and items
+
+## Unique Rooms
+
+- [ ] randomly generated levels have a small chance of generating a unique room that only appears once per game, e.g. "The Dark Armoury" or "Necropolis Library". When the player enters a level with such a room the player is alerted by a message and a special notification. Unique rooms will contain at least one unique item or enemy and may also contain a unique NPC.
+
 ## Saving
 
 - [ ] local save (cookies)
