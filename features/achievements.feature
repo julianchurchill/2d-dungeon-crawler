@@ -41,3 +41,23 @@ Feature: Achievement system
     Given the achievement system is initialised
     When the player reaches dungeon floor 5
     Then the Burrower progress text should include "(5 reached so far)"
+
+  Scenario: Orc Slayer is unlocked when 10 orcs are killed
+    Given the achievement system is initialised
+    When the player kills 10 orcs
+    Then the "Orc Slayer" achievement should be completed
+
+  Scenario: Troll Hunter is unlocked when 10 trolls are killed
+    Given the achievement system is initialised
+    When the player kills 10 trolls
+    Then the "Troll Hunter" achievement should be completed
+
+  Scenario: A floor milestone achievement is unlocked when the target floor is reached
+    Given the achievement system is initialised
+    When the player reaches dungeon floor 50
+    Then the "Abyssal Explorer" achievement should be completed
+
+  Scenario: A level milestone achievement is unlocked when the target level is reached
+    Given the achievement system is initialised
+    When the player reaches level 10
+    Then the "Apprentice" achievement should be completed

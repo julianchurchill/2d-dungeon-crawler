@@ -117,3 +117,26 @@ Then('the Burrower progress text should include {string}', function (expected) {
   const text = this.system.formatProgress(def);
   assert.ok(text.includes(expected), `Expected "${text}" to include "${expected}"`);
 });
+
+When('the player kills {int} orcs', function (count) {
+  for (let i = 0; i < count; i++) {
+    this.eventBus.emit(GameEvents.ENEMY_KILLED, 'orc');
+  }
+});
+
+When('the player kills {int} trolls', function (count) {
+  for (let i = 0; i < count; i++) {
+    this.eventBus.emit(GameEvents.ENEMY_KILLED, 'troll');
+  }
+});
+
+When('the player reaches level {int}', function (level) {
+  this.eventBus.emit(GameEvents.PLAYER_LEVEL_UP, level);
+});
+
+Then('the {string} achievement should be completed', function (name) {
+  const def = ACHIEVEMENTS.find(a => a.name === name);
+  assert.ok(def, `No achievement found with name "${name}"`);
+  const { completed } = getProgress(def.id, this.store);
+  assert.strictEqual(completed, true, `Expected achievement "${name}" to be completed`);
+});
