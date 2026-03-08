@@ -59,6 +59,13 @@
 - [ ] every 5 levels the character can either choose a new skill from the pool of not activated skills to activate or upgrade an existing one. 'Lucky Strike' can be upgraded increasing the chance of activation by 1% on each upgrade to a maximum of 50%.
 - [ ] the character initially has two deactivated skills. When active 'Ferocity' adds +1 to each attack and does not output a message. When active 'Dodge' gives a 1% chance of completely dodging an attack and shows a message when it is triggered. 'Ferocity' can be upgraded by +1 per upgrade with no maximum. 'Dodge' can be upgraded by +1% per upgrade to a maximum of 50%.
 
+## Town
+
+- [ ] the town is a special level, always appears at level 0 and is the starting place for a new game. It has a non-random layout and combat is disabled there.
+- [ ] the town contains shops that can be entered where items from the players inventory can be sold for currency
+- [ ] the town contains shops that can be entered where the player can buy items with currency. The items will have randomly generated stats and may include occasional rare items that are powerful for the players level. They will not include unique items that can only be found by exploring the dungeon.
+- [ ] the town contains NPCs that can be interacted with for short conversations
+
 ## Saving
 
 - [ ] local save (cookies)
