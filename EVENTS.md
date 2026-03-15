@@ -35,6 +35,7 @@ DPad (arrow pointerup)   ──► DPAD_HOLD_END        ──► HeldMovementTr
 DPad (double-tap)        ──► DPAD_RUN             ──► GameScene._startRun
 DPad (INV button)        ──► TOGGLE_INVENTORY     ──► GameScene._toggleInventory
 DPad (▼▼ button)         ──► USE_STAIRS           ──► GameScene._tryUseStairs
+DPad (≡ menu button)     ──► OPEN_ACHIEVEMENTS    ──► GameScene (close log or open Achievements)
 
 AchievementSystem        ──► ACHIEVEMENT_UNLOCKED ──► GameScene → MESSAGE log
 AchievementSystem        ──► ACHIEVEMENT_UNLOCKED ──► UIScene → _showAchievementBanner
@@ -61,6 +62,7 @@ GameScene (ESC key)      ──► CLOSE_MESSAGE_LOG    ──► UIScene → Me
 | `DPAD_HOLD_START` | `'dpad-hold-start'` | `string` (DIR constant) | DPad (pointerdown) | HeldMovementTracker |
 | `DPAD_HOLD_END` | `'dpad-hold-end'` | `string` (DIR constant) | DPad (pointerup/pointerout) | HeldMovementTracker |
 | `DPAD_RUN` | `'dpad-run'` | `string` (DIR constant) | DPad (double-tap) | GameScene._startRun |
+| `OPEN_ACHIEVEMENTS` | `'open-achievements'` | *(none)* | DPad (≡ button) | GameScene (close log or open Achievements) |
 | `TOGGLE_INVENTORY` | `'toggle-inventory'` | *(none)* | DPad | GameScene |
 | `USE_STAIRS` | `'use-stairs'` | *(none)* | DPad | GameScene |
 | `GAME_OVER` | `'game-over'` | *(none)* | GameScene | *(none)* |

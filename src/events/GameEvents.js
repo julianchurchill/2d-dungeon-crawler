@@ -92,6 +92,15 @@ export const GameEvents = {
   DPAD_RUN: 'dpad-run',
 
   /**
+   * The on-screen mobile menu button (≡) was pressed.
+   * Acts as a mobile ESC equivalent: closes the message log if open,
+   * otherwise opens the Achievements screen.
+   * Emitted by: DPad (≡ button)
+   * Subscribed by: GameScene
+   */
+  OPEN_ACHIEVEMENTS: 'open-achievements',
+
+  /**
    * Toggle the inventory panel open or closed.
    * Emitted by: DPad (INV button)
    * Subscribed by: GameScene
