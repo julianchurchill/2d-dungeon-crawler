@@ -309,12 +309,12 @@ export class GameScene extends Phaser.Scene {
     this.input.keyboard.on('keydown-PERIOD',       wrapWithRunCancel(this._runController, () => this._tryUseStairs()));
     this.input.keyboard.on('keydown-GREATER_THAN', wrapWithRunCancel(this._runController, () => this._tryUseStairs()));
     // ESC closes the message log history panel when it is open; otherwise
-    // it opens the Achievements overlay.
+    // it opens the in-game menu (Achievements / Help).
     this.input.keyboard.on('keydown-ESC', wrapWithRunCancel(this._runController, () => {
       if (this._messageLogOpen) {
         EventBus.emit(GameEvents.CLOSE_MESSAGE_LOG);
       } else {
-        this._openAchievements();
+        this._openInGameMenu();
       }
     }));
 
@@ -341,13 +341,13 @@ export class GameScene extends Phaser.Scene {
     EventBus.on(GameEvents.DPAD_PRESS, wrapWithRunCancel(this._runController, (dir) => this._handleDir(dir)), this);
     // D-pad double-tap starts a run (equivalent to SHIFT+direction on keyboard).
     EventBus.on(GameEvents.DPAD_RUN, (dir) => this._startRun(dir), this);
-    // Mobile menu button (≡): cancel run, then close message log if open or open Achievements.
-    EventBus.on(GameEvents.OPEN_ACHIEVEMENTS, () => {
+    // Mobile menu button (≡): cancel run, then close message log if open or open in-game menu.
+    EventBus.on(GameEvents.OPEN_IN_GAME_MENU, () => {
       this._runController.cancel();
       handleMobileMenuPress(
         this._messageLogOpen,
         () => EventBus.emit(GameEvents.CLOSE_MESSAGE_LOG),
-        () => this._openAchievements(),
+        () => this._openInGameMenu(),
       );
     }, this);
     EventBus.on(GameEvents.TOGGLE_INVENTORY, wrapWithRunCancel(this._runController, () => this._toggleInventory()), this);
@@ -541,11 +541,23 @@ export class GameScene extends Phaser.Scene {
    * Pauses the game and UI scenes and opens the AchievementsScene overlay.
    * The AchievementsScene will resume both scenes when the player closes it.
    */
+  /**
+   * Opens the in-game menu (Achievements / Help) as an overlay.
+   * Sleeps GameScene and UIScene so they stop updating while the menu is shown.
+   * InGameMenuScene handles waking them when the player dismisses it.
+   */
+  _openInGameMenu() {
+    this.scene.launch('InGameMenuScene');
+    this.scene.sleep('UIScene');
+    this.scene.sleep('GameScene');
+  }
+
+  /**
+   * Opens the Achievements screen directly as an overlay.
+   * Used by InGameMenuScene when the player clicks "ACHIEVEMENTS".
+   * Left in place so AchievementsScene can still be reached from the main menu.
+   */
   _openAchievements() {
-    // Launch first so the queue operation is registered while this scene is still
-    // running, then sleep GameScene and UIScene.  sleep() stops both update and
-    // rendering (unlike pause() which only stops update, leaving the scenes
-    // visible on top of the achievements overlay).
     this.scene.launch('AchievementsScene', { fromScene: 'GameScene' });
     this.scene.sleep('UIScene');
     this.scene.sleep('GameScene');

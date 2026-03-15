@@ -98,9 +98,9 @@ export class DPad {
     this._addActionBtn(0, 0, 0x334455, 0x88aacc, 'INV', '#aaccff',
       () => EventBus.emit(GameEvents.TOGGLE_INVENTORY));
 
-    // Menu (≡) — top-left corner; opens Achievements or closes the message log.
+    // Menu (≡) — top-left corner; opens the in-game menu or closes the message log.
     this._addActionBtn(-PAD, -PAD, 0x334433, 0x88aa88, '≡', '#aaffaa',
-      () => EventBus.emit(GameEvents.OPEN_ACHIEVEMENTS));
+      () => EventBus.emit(GameEvents.OPEN_IN_GAME_MENU));
 
     // Stairs — bottom-left corner; less frequently used.
     this._addActionBtn(-PAD, PAD, 0x554433, 0xccaa88, '▼▼', '#ffcc88',
