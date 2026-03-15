@@ -1,14 +1,19 @@
 import { EventBus } from '../utils/EventBus.js';
 import { GameEvents } from '../events/GameEvents.js';
 import { DIR } from '../utils/Direction.js';
+import { DoubleTapDetector } from '../systems/DoubleTapDetector.js';
 
 const BTN_SIZE = 52;
 const PAD = BTN_SIZE + 5;
+/** Maximum milliseconds between two taps on the same button to count as a double-tap (run trigger). */
+const DOUBLE_TAP_MS = 300;
 
 export class DPad {
   constructor(scene) {
     this.scene = scene;
     this._container = null;
+    /** @type {DoubleTapDetector} Detects double-taps to trigger runs. */
+    this._doubleTap = new DoubleTapDetector(DOUBLE_TAP_MS);
     this._build();
   }
 
@@ -51,11 +56,24 @@ export class DPad {
       bg.on('pointerdown', (ptr, lx, ly, evt) => {
         evt.stopPropagation();
         bg.setFillStyle(0x5555aa, 0.9);
-        EventBus.emit(GameEvents.DPAD_PRESS, dir);
+        // Notify HeldMovementTracker so auto-repeat kicks in after each turn.
+        EventBus.emit(GameEvents.DPAD_HOLD_START, dir);
+        if (this._doubleTap.tap(dir)) {
+          // Second tap in quick succession — start a run instead of a single move.
+          EventBus.emit(GameEvents.DPAD_RUN, dir);
+        } else {
+          EventBus.emit(GameEvents.DPAD_PRESS, dir);
+        }
       });
 
-      bg.on('pointerup', () => bg.setFillStyle(0x333355, 0.75));
-      bg.on('pointerout', () => bg.setFillStyle(0x333355, 0.75));
+      bg.on('pointerup', () => {
+        bg.setFillStyle(0x333355, 0.75);
+        EventBus.emit(GameEvents.DPAD_HOLD_END, dir);
+      });
+      bg.on('pointerout', () => {
+        bg.setFillStyle(0x333355, 0.75);
+        EventBus.emit(GameEvents.DPAD_HOLD_END, dir);
+      });
 
       this._container.add([bg, txt]);
     }

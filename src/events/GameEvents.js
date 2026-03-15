@@ -68,6 +68,30 @@ export const GameEvents = {
   DPAD_PRESS: 'dpad-press',
 
   /**
+   * A d-pad direction button has been pressed and is now being held.
+   * Emitted by: DPad (pointerdown)
+   * Subscribed by: HeldMovementTracker (to enable auto-repeat movement)
+   * @type {string} Direction constant (UP / DOWN / LEFT / RIGHT).
+   */
+  DPAD_HOLD_START: 'dpad-hold-start',
+
+  /**
+   * A d-pad direction button has been released (or the pointer left it).
+   * Emitted by: DPad (pointerup / pointerout)
+   * Subscribed by: HeldMovementTracker (to cancel auto-repeat)
+   * @type {string} Direction constant (UP / DOWN / LEFT / RIGHT).
+   */
+  DPAD_HOLD_END: 'dpad-hold-end',
+
+  /**
+   * A d-pad direction button was double-tapped — start a run.
+   * Emitted by: DPad (second tap within threshold)
+   * Subscribed by: GameScene (_startRun)
+   * @type {string} Direction constant (UP / DOWN / LEFT / RIGHT).
+   */
+  DPAD_RUN: 'dpad-run',
+
+  /**
    * Toggle the inventory panel open or closed.
    * Emitted by: DPad (INV button)
    * Subscribed by: GameScene

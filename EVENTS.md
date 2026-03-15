@@ -30,6 +30,12 @@ InventoryPanel (click)   ──► INVENTORY_USE        ──► GameScene._use
 InventoryPanel (keyboard)──► INVENTORY_USE        ──► GameScene._useInventoryItem
 
 DPad (arrow buttons)     ──► DPAD_PRESS           ──► GameScene._handleDir
+DPad (arrow pointerdown) ──► DPAD_HOLD_START      ──► HeldMovementTracker (auto-repeat)
+DPad (arrow pointerup)   ──► DPAD_HOLD_END        ──► HeldMovementTracker (cancel repeat)
+DPad (double-tap)        ──► DPAD_RUN             ──► GameScene._startRun
+DPad (arrow pointerdown) ──► DPAD_HOLD_START      ──► HeldMovementTracker (auto-repeat)
+DPad (arrow pointerup)   ──► DPAD_HOLD_END        ──► HeldMovementTracker (cancel repeat)
+DPad (double-tap)        ──► DPAD_RUN             ──► GameScene._startRun
 DPad (INV button)        ──► TOGGLE_INVENTORY     ──► GameScene._toggleInventory
 DPad (▼▼ button)         ──► USE_STAIRS           ──► GameScene._tryUseStairs
 
@@ -55,6 +61,9 @@ GameScene (ESC key)      ──► CLOSE_MESSAGE_LOG    ──► UIScene → Me
 | `PLAYER_STATS_CHANGED` | `'player-stats-changed'` | `object` (stats) | InventorySystem | *(none)* |
 | `FLOOR_CHANGED` | `'floor-changed'` | `number` (floor) | FloorManager | GameScene, AchievementSystem |
 | `DPAD_PRESS` | `'dpad-press'` | `string` (DIR constant) | DPad | GameScene |
+| `DPAD_HOLD_START` | `'dpad-hold-start'` | `string` (DIR constant) | DPad (pointerdown) | HeldMovementTracker |
+| `DPAD_HOLD_END` | `'dpad-hold-end'` | `string` (DIR constant) | DPad (pointerup/pointerout) | HeldMovementTracker |
+| `DPAD_RUN` | `'dpad-run'` | `string` (DIR constant) | DPad (double-tap) | GameScene._startRun |
 | `TOGGLE_INVENTORY` | `'toggle-inventory'` | *(none)* | DPad | GameScene |
 | `USE_STAIRS` | `'use-stairs'` | *(none)* | DPad | GameScene |
 | `GAME_OVER` | `'game-over'` | *(none)* | GameScene | *(none)* |
