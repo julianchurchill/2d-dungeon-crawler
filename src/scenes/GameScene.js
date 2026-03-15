@@ -21,6 +21,7 @@ import { EnemySpawner } from '../systems/EnemySpawner.js';
 import { AchievementSystem } from '../achievements/AchievementSystem.js';
 import { handleMobileMenuPress } from '../systems/MobileMenuHandler.js';
 import { wrapWithRunCancel } from '../utils/ActionWrapper.js';
+import { applyInventoryToggle } from '../systems/InventoryToggle.js';
 
 const TILE_SIZE = 16;
 const FOV_RADIUS = 8;
@@ -572,14 +573,18 @@ export class GameScene extends Phaser.Scene {
   }
 
   _toggleInventory() {
-    EventBus.emit(GameEvents.OPEN_INVENTORY, {
-      inventory: this.player.inventory,
-      player: this.player,
-    });
-    if (this.turnManager.state === TURN_STATE.INVENTORY) {
-      this.turnManager.setPlayerInput();
-    } else if (this.turnManager.isAcceptingInput()) {
-      this.turnManager.setInventory();
+    // Only emit the open/close event when a state transition is actually possible,
+    // so the visual panel and TurnManager state can never get out of sync.
+    const toggled = applyInventoryToggle(
+      this.turnManager.state,
+      () => this.turnManager.setInventory(),
+      () => this.turnManager.setPlayerInput(),
+    );
+    if (toggled) {
+      EventBus.emit(GameEvents.OPEN_INVENTORY, {
+        inventory: this.player.inventory,
+        player: this.player,
+      });
     }
   }
 
