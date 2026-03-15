@@ -14,6 +14,7 @@
 - [ ] music
 - [ ] bosses - unique (once per run) and repeatable (champions?)
 - [ ] stats - deepest level reached, monster types kill count, unique bosses kill count
+- [x] in-game help screen — pressing ESC or the mobile ≡ menu button shows an in-game menu with Achievements and Help options; Help shows controls relevant to the current device (keyboard or mobile)
 - [x] display and maintain an application version number following semantic versioning and include the git commit hash for the built application
 - [x] deployment to GitHub Pages
 

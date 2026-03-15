@@ -25,6 +25,7 @@ import {
 } from '../achievements/AchievementStore.js';
 import { EventBus } from '../utils/EventBus.js';
 import { isDevEnvironment } from '../utils/Environment.js';
+import { resolveSceneBack } from '../systems/SceneNavigation.js';
 
 /** Rows are this tall in pixels. */
 const ROW_H = 28;
@@ -198,24 +199,19 @@ export class AchievementsScene extends Phaser.Scene {
    * @param {number} height
    */
   _buildBackButton(width, height) {
-    const btnY = height - 36;
-
-    // Semi-transparent background strip so the button is readable over rows.
-    this.add.rectangle(0, btnY - 16, width, 52, 0x080818, 0.9)
+    // Dark footer strip so content doesn't bleed under the button.
+    this.add.rectangle(0, height - FOOTER_H, width, FOOTER_H, 0x080818)
       .setOrigin(0, 0).setScrollFactor(0).setDepth(9);
 
-    const bg = this.add.rectangle(width / 2, btnY, 160, 30, 0x1a2a3a)
-      .setStrokeStyle(1, 0x336677)
-      .setScrollFactor(0).setDepth(10)
+    const btn = this.add.text(width / 2, height - FOOTER_H / 2, 'BACK', {
+      fontSize: '18px', fontFamily: 'monospace',
+      color: '#888888', stroke: '#000000', strokeThickness: 3, resolution: 2,
+    }).setOrigin(0.5).setScrollFactor(0).setDepth(10)
       .setInteractive({ useHandCursor: true });
 
-    const txt = this.add.text(width / 2, btnY, '← BACK', {
-      fontSize: '13px', fontFamily: 'monospace', color: '#6699aa', resolution: 2,
-    }).setOrigin(0.5).setScrollFactor(0).setDepth(10);
-
-    bg.on('pointerover',  () => { bg.setFillStyle(0x223344); txt.setColor('#88ccff'); });
-    bg.on('pointerout',   () => { bg.setFillStyle(0x1a2a3a); txt.setColor('#6699aa'); });
-    bg.on('pointerdown',  () => this._back());
+    btn.on('pointerover',  () => btn.setColor('#ffffff'));
+    btn.on('pointerout',   () => btn.setColor('#888888'));
+    btn.on('pointerdown',  () => this._back());
   }
 
   /**
@@ -240,11 +236,14 @@ export class AchievementsScene extends Phaser.Scene {
    * sleep() — it resumes both update and rendering.
    */
   _back() {
-    if (this._fromScene === 'GameScene') {
+    const nav = resolveSceneBack(this._fromScene);
+    if (nav.action === 'wake') {
       this.scene.wake('GameScene');
       this.scene.wake('UIScene');
+    } else if (nav.action === 'launch') {
+      this.scene.launch(nav.scene);
     } else {
-      this.scene.start(this._fromScene);
+      this.scene.start(nav.scene);
     }
     // Stop self last so scene manager calls above can still execute.
     this.scene.stop();

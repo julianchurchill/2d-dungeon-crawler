@@ -7,8 +7,15 @@ Entries are listed newest-first within each section.
 
 ## [Unreleased]
 
+### Changed
+
+- 2026-03-15 — Consistent BACK button style across Achievements, Help, and Dev Options screens: plain text, pinned footer strip, hover highlight
+
 ### Added
 
+- 2026-03-15 — Back navigation from Achievements and Help now returns to the in-game menu rather than directly to the game
+- 2026-03-15 — In-game menu (ESC / ≡ button): now shows a MENU screen with Achievements and Help options instead of going directly to Achievements
+- 2026-03-15 — New Help screen shows device-appropriate control instructions (touch: tap/double-tap/hold; keyboard: arrow keys/WASD/SHIFT/I/ESC)
 - 2026-03-15 — Inventory panel: added ✕ close button on touch devices; header hides keyboard hints (`[I] close`) on touch where they are irrelevant
 
 ### Fixed
