@@ -2,6 +2,7 @@
 
 ## Bugs
 
+- [x] mobile inventory panel has no way to close it — no close button on touch devices
 - [x] mobile double-tap run does not stop when another button is pressed — any d-pad button press should cancel an active run, mirroring keyboard behaviour
 - [x] mobile controls overlap the message log and lack an Achievements/ESC button: move D-pad up to clear the message log, move INV to the centre position, add a menu button that opens Achievements (or closes the message log if it is open)
 - [x] mobile controls cover message panel - when message panel is expanded it states 'ESC to close' which is not relevant for mobile - should have a X to press

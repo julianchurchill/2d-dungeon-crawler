@@ -1,6 +1,18 @@
 import { EventBus } from '../utils/EventBus.js';
 import { GameEvents } from '../events/GameEvents.js';
 import { InventoryCursor } from '../systems/InventoryCursor.js';
+import { isTouchDevice } from '../utils/TouchDeviceDetector.js';
+
+/**
+ * Returns the title text for the inventory panel header.
+ * On touch devices the keyboard hints are omitted since there is no keyboard.
+ *
+ * @param {boolean} isTouchDev - True when running on a touchscreen device.
+ * @returns {string}
+ */
+export function getInventoryPanelTitle(isTouchDev) {
+  return isTouchDev ? 'INVENTORY' : 'INVENTORY  [I] close  [↵] use/equip';
+}
 
 const COLS = 4;
 const ROWS = 5;
@@ -34,12 +46,25 @@ export class InventoryPanel {
       .setStrokeStyle(2, 0x4466aa);
     this._container.add(bg);
 
-    // Title
-    const title = s.add.text(panelW / 2, 10, 'INVENTORY  [I] close  [↵] use/equip', {
+    // Title — keyboard hints omitted on touch devices where they are irrelevant.
+    const title = s.add.text(panelW / 2, 10, getInventoryPanelTitle(isTouchDevice()), {
       fontSize: '12px', fontFamily: 'monospace', color: '#aaccff',
       stroke: '#000000', strokeThickness: 2, resolution: 2,
     }).setOrigin(0.5, 0);
     this._container.add(title);
+
+    // Close button — visible on touch devices only, since keyboard users press I.
+    if (isTouchDevice()) {
+      const closeBtn = s.add.text(panelW - PANEL_PAD / 2, 10, '✕', {
+        fontSize: '14px', fontFamily: 'monospace', color: '#aaccff',
+        stroke: '#000000', strokeThickness: 2, resolution: 2,
+      }).setOrigin(1, 0).setInteractive({ useHandCursor: true });
+      closeBtn.on('pointerover', () => closeBtn.setColor('#ffffff'));
+      closeBtn.on('pointerout',  () => closeBtn.setColor('#aaccff'));
+      // Emit TOGGLE_INVENTORY so GameScene handles the TurnManager state transition.
+      closeBtn.on('pointerdown', () => EventBus.emit(GameEvents.TOGGLE_INVENTORY));
+      this._container.add(closeBtn);
+    }
 
     // Slots
     this._slots = [];
