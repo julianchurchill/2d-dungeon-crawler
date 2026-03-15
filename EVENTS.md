@@ -33,9 +33,6 @@ DPad (arrow buttons)     ──► DPAD_PRESS           ──► GameScene._han
 DPad (arrow pointerdown) ──► DPAD_HOLD_START      ──► HeldMovementTracker (auto-repeat)
 DPad (arrow pointerup)   ──► DPAD_HOLD_END        ──► HeldMovementTracker (cancel repeat)
 DPad (double-tap)        ──► DPAD_RUN             ──► GameScene._startRun
-DPad (arrow pointerdown) ──► DPAD_HOLD_START      ──► HeldMovementTracker (auto-repeat)
-DPad (arrow pointerup)   ──► DPAD_HOLD_END        ──► HeldMovementTracker (cancel repeat)
-DPad (double-tap)        ──► DPAD_RUN             ──► GameScene._startRun
 DPad (INV button)        ──► TOGGLE_INVENTORY     ──► GameScene._toggleInventory
 DPad (▼▼ button)         ──► USE_STAIRS           ──► GameScene._tryUseStairs
 
