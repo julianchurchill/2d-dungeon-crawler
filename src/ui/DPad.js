@@ -5,6 +5,23 @@ import { DoubleTapDetector } from '../systems/DoubleTapDetector.js';
 
 const BTN_SIZE = 52;
 const PAD = BTN_SIZE + 5;
+
+/**
+ * Pixels from the bottom of the screen to the D-pad anchor (centre of the
+ * directional cross).  Must clear the compact message-log strip
+ * (4 lines × 18 px + 20 px margin ≈ 92 px from the bottom) plus a
+ * comfortable gap so the controls do not overlap it.
+ */
+const DPAD_BOTTOM_OFFSET = 175;
+
+/**
+ * Pixels from the left edge of the screen to the D-pad anchor.
+ * The left column of buttons (Menu, LEFT, Stairs) extends PAD + BTN_SIZE/2 px
+ * to the left of the anchor; this offset ensures they remain on screen with a
+ * small margin.
+ */
+const DPAD_LEFT_OFFSET = PAD + Math.ceil(BTN_SIZE / 2) + 12; // ≈ 95 px
+
 /** Maximum milliseconds between two taps on the same button to count as a double-tap (run trigger). */
 const DOUBLE_TAP_MS = 300;
 
@@ -21,22 +38,15 @@ export class DPad {
     const s = this.scene;
     const { width, height } = s.scale;
 
-    // Container anchored at bottom-left
-    const anchorX = BTN_SIZE + 18;
-    const anchorY = height - BTN_SIZE - 18;
-    this._anchorX = anchorX;
-    this._anchorY = anchorY;
+    // Container anchored at bottom-left, raised above the message-log strip.
+    // anchorX is offset enough to keep the left column of buttons on screen.
+    const anchorX = DPAD_LEFT_OFFSET;
+    const anchorY = height - DPAD_BOTTOM_OFFSET;
 
     this._container = s.add.container(anchorX, anchorY)
       .setDepth(200).setScrollFactor(0);
 
-    // Center pad (visual only)
-    this._container.add(
-      s.add.rectangle(0, 0, BTN_SIZE, BTN_SIZE, 0x2a2a3a, 0.6)
-        .setStrokeStyle(1, 0x555566)
-    );
-
-    // Directional buttons — all positioned relative to container origin
+    // Directional buttons — all positioned relative to container origin.
     const dirs = [
       { dir: DIR.UP,    x: 0,    y: -PAD, label: '▲' },
       { dir: DIR.DOWN,  x: 0,    y:  PAD, label: '▼' },
@@ -78,11 +88,36 @@ export class DPad {
       this._container.add([bg, txt]);
     }
 
-    // Action buttons (right of d-pad)
-    this._addActionBtn(PAD * 2 + 10, 0,    0x334455, 0x88aacc, 'INV',  '#aaccff', () => EventBus.emit(GameEvents.TOGGLE_INVENTORY));
-    this._addActionBtn(PAD * 2 + 10, -PAD, 0x554433, 0xccaa88, '▼▼',   '#ffcc88', () => EventBus.emit(GameEvents.USE_STAIRS));
+    // ── Action buttons fill the unused corners of the 3×3 grid ──────────────
+    //
+    //   [≡]  [▲]  [ ]       (-PAD,-PAD)  (0,-PAD)  (PAD,-PAD)
+    //   [◀] [INV] [▶]   →   (-PAD,  0)   (0,  0)   (PAD,  0)
+    //   [▼▼] [▼]  [ ]       (-PAD, PAD)  (0, PAD)  (PAD, PAD)
+
+    // INV — centre, thumb-accessible without repositioning the hand.
+    this._addActionBtn(0, 0, 0x334455, 0x88aacc, 'INV', '#aaccff',
+      () => EventBus.emit(GameEvents.TOGGLE_INVENTORY));
+
+    // Menu (≡) — top-left corner; opens Achievements or closes the message log.
+    this._addActionBtn(-PAD, -PAD, 0x334433, 0x88aa88, '≡', '#aaffaa',
+      () => EventBus.emit(GameEvents.OPEN_ACHIEVEMENTS));
+
+    // Stairs — bottom-left corner; less frequently used.
+    this._addActionBtn(-PAD, PAD, 0x554433, 0xccaa88, '▼▼', '#ffcc88',
+      () => EventBus.emit(GameEvents.USE_STAIRS));
   }
 
+  /**
+   * Adds a labelled action button at the given container-relative position.
+   *
+   * @param {number}   x          - X position relative to the container origin.
+   * @param {number}   y          - Y position relative to the container origin.
+   * @param {number}   fillColor  - Button background colour.
+   * @param {number}   strokeColor - Button border colour.
+   * @param {string}   label      - Text label for the button.
+   * @param {string}   textColor  - CSS colour string for the label.
+   * @param {function} onPress    - Called when the button is tapped.
+   */
   _addActionBtn(x, y, fillColor, strokeColor, label, textColor, onPress) {
     const s = this.scene;
     const bg = s.add.rectangle(x, y, BTN_SIZE, BTN_SIZE, fillColor, 0.8)
@@ -103,12 +138,21 @@ export class DPad {
     this._container.add([bg, txt]);
   }
 
+  /**
+   * Repositions the D-pad container when the canvas is resized.
+   *
+   * @param {number} width
+   * @param {number} height
+   */
   resize(width, height) {
-    const anchorX = BTN_SIZE + 18;
-    const anchorY = height - BTN_SIZE - 18;
-    this._container.setPosition(anchorX, anchorY);
+    this._container.setPosition(DPAD_LEFT_OFFSET, height - DPAD_BOTTOM_OFFSET);
   }
 
+  /**
+   * Shows or hides the entire D-pad.
+   *
+   * @param {boolean} visible
+   */
   setVisible(visible) {
     this._container.setVisible(visible);
   }

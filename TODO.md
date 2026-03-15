@@ -2,7 +2,7 @@
 
 ## Bugs
 
-- [ ] can't access Achievements on mobile - needs a button
+- [x] mobile controls overlap the message log and lack an Achievements/ESC button: move D-pad up to clear the message log, move INV to the centre position, add a menu button that opens Achievements (or closes the message log if it is open)
 - [x] mobile controls cover message panel - when message panel is expanded it states 'ESC to close' which is not relevant for mobile - should have a X to press
 - [x] can't run with mobile controls
 - [x] Inventory window does not change the currently equipped weapon/armour name when clicked (it does change the equipped state, just not the text)
