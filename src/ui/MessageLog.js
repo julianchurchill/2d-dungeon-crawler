@@ -16,6 +16,19 @@
 import { MessageHistory } from './MessageHistory.js';
 import { EventBus } from '../utils/EventBus.js';
 import { GameEvents } from '../events/GameEvents.js';
+import { isTouchDevice } from '../utils/TouchDeviceDetector.js';
+
+/**
+ * Returns the header text for the expanded message log panel.
+ * On touch devices the ESC hint is omitted because the keyboard is unavailable;
+ * the on-screen close button (X) serves as the primary close affordance instead.
+ *
+ * @param {boolean} isTouchDev - True when running on a touchscreen device.
+ * @returns {string}
+ */
+export function getMessageLogHeaderText(isTouchDev) {
+  return isTouchDev ? 'MESSAGE HISTORY' : 'MESSAGE HISTORY  (ESC to close)';
+}
 
 /** Number of lines visible in the compact (always-on) log strip. */
 const COMPACT_LINES = 4;
@@ -78,6 +91,9 @@ export class MessageLog {
 
     /** @type {Phaser.GameObjects.Rectangle|null} Scrollbar thumb. */
     this._scrollThumb = null;
+
+    /** @type {Phaser.GameObjects.Text|null} Close (X) button in the panel header. */
+    this._closeBtn = null;
 
     this._buildCompact();
     this._buildExpandedPanel();
@@ -212,10 +228,20 @@ export class MessageLog {
       .setDepth(199)
       .setStrokeStyle(1, 0x223344);
 
-    // Header label.
-    this._panelHeader = this.scene.add.text(PAD_X + 4, panelY + 4, 'MESSAGE HISTORY  (ESC to close)', {
-      fontSize: '10px', fontFamily: 'monospace', color: '#446688', resolution: 2,
-    }).setScrollFactor(0).setDepth(200);
+    // Header label — ESC hint omitted on touch devices.
+    this._panelHeader = this.scene.add.text(
+      PAD_X + 4, panelY + 4, getMessageLogHeaderText(isTouchDevice()), {
+        fontSize: '10px', fontFamily: 'monospace', color: '#446688', resolution: 2,
+      }
+    ).setScrollFactor(0).setDepth(200);
+
+    // Close button — always visible so touch users can close the panel.
+    this._closeBtn = this.scene.add.text(8 + panelW - 16, panelY + 3, '✕', {
+      fontSize: '12px', fontFamily: 'monospace', color: '#446688', resolution: 2,
+    }).setOrigin(0.5, 0).setScrollFactor(0).setDepth(201).setInteractive({ useHandCursor: true });
+    this._closeBtn.on('pointerover', () => this._closeBtn.setColor('#88aaff'));
+    this._closeBtn.on('pointerout',  () => this._closeBtn.setColor('#446688'));
+    this._closeBtn.on('pointerdown', () => this.close());
 
     // Text rows for history lines.
     for (let i = 0; i < EXPANDED_LINES; i++) {
@@ -278,6 +304,7 @@ export class MessageLog {
   _setExpandedVisible(visible) {
     this._panelBg.setVisible(visible);
     this._panelHeader.setVisible(visible);
+    this._closeBtn?.setVisible(visible);
     this._scrollHint.setVisible(visible);
     this._scrollTrack.setVisible(visible);
     this._scrollThumb.setVisible(visible);
@@ -296,6 +323,7 @@ export class MessageLog {
 
     this._panelBg.setPosition(8, panelY).setSize(panelW, panelH);
     this._panelHeader.setPosition(PAD_X + 4, panelY + 4);
+    if (this._closeBtn) this._closeBtn.setPosition(8 + panelW - 16, panelY + 3);
 
     for (let i = 0; i < EXPANDED_LINES; i++) {
       if (this._panelTexts[i]) {
