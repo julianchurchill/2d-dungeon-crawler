@@ -21,6 +21,8 @@ const BTN_W = 32;
 const BTN_H = 28;
 /** @type {number} Horizontal gap between the label and the control cluster. */
 const CTRL_OFFSET = 160;
+/** @type {number} Height of the fixed back-button strip at the bottom. */
+const FOOTER_H = 52;
 
 /**
  * All item rows shown in the STARTING ITEMS section, derived dynamically from
@@ -47,6 +49,7 @@ export class DevOptionsScene extends Phaser.Scene {
     const { width, height } = this.scale;
     this._buildBackground();
     this._buildUI(width, height);
+    this._buildBackButton(width, height);
 
     // ESC returns to the main menu.
     this.input.keyboard.on('keydown-ESC', () => this._back());
@@ -161,11 +164,8 @@ export class DevOptionsScene extends Phaser.Scene {
     });
     y += 32;
 
-    // Back button
-    this._makeBackButton(cx, y);
-
     // Record total content height so _scrollContent can clamp correctly.
-    this._contentHeight = y + 60;
+    this._contentHeight = y + 20;
   }
 
   /**
@@ -374,23 +374,25 @@ export class DevOptionsScene extends Phaser.Scene {
   }
 
   /**
-   * Creates the "BACK TO MENU" button that returns to MainMenuScene.
+   * Renders a "BACK" button pinned to the bottom of the viewport.
    *
-   * @param {number} cx - Horizontal centre.
-   * @param {number} y  - Vertical centre.
+   * @param {number} width
+   * @param {number} height
    */
-  _makeBackButton(cx, y) {
-    const bg = this.add.rectangle(cx, y, 180, 36, 0x224466)
-      .setStrokeStyle(2, 0x4488cc)
+  _buildBackButton(width, height) {
+    // Dark footer strip so content doesn't bleed under the button.
+    this.add.rectangle(0, height - FOOTER_H, width, FOOTER_H, 0x080818)
+      .setOrigin(0, 0).setScrollFactor(0).setDepth(9);
+
+    const btn = this.add.text(width / 2, height - FOOTER_H / 2, 'BACK', {
+      fontSize: '18px', fontFamily: 'monospace',
+      color: '#888888', stroke: '#000000', strokeThickness: 3, resolution: 2,
+    }).setOrigin(0.5).setScrollFactor(0).setDepth(10)
       .setInteractive({ useHandCursor: true });
 
-    const txt = this.add.text(cx, y, '◀  BACK TO MENU', {
-      fontSize: '13px', fontFamily: 'monospace', color: '#88ccff', resolution: 2,
-    }).setOrigin(0.5);
-
-    bg.on('pointerover',  () => { bg.setFillStyle(0x336688); txt.setColor('#ffffff'); });
-    bg.on('pointerout',   () => { bg.setFillStyle(0x224466); txt.setColor('#88ccff'); });
-    bg.on('pointerdown',  () => this._back());
+    btn.on('pointerover',  () => btn.setColor('#ffffff'));
+    btn.on('pointerout',   () => btn.setColor('#888888'));
+    btn.on('pointerdown',  () => this._back());
   }
 
   /**
@@ -400,7 +402,7 @@ export class DevOptionsScene extends Phaser.Scene {
    * @param {number} delta - Positive scrolls down, negative scrolls up.
    */
   _scrollContent(delta) {
-    const maxScroll = Math.max(0, this._contentHeight - this.scale.height);
+    const maxScroll = Math.max(0, this._contentHeight - this.scale.height + FOOTER_H);
     this.cameras.main.scrollY = Phaser.Math.Clamp(
       this.cameras.main.scrollY + delta, 0, maxScroll,
     );

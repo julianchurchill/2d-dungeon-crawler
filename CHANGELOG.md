@@ -7,6 +7,10 @@ Entries are listed newest-first within each section.
 
 ## [Unreleased]
 
+### Changed
+
+- 2026-03-15 — Consistent BACK button style across Achievements, Help, and Dev Options screens: plain text, pinned footer strip, hover highlight
+
 ### Added
 
 - 2026-03-15 — Back navigation from Achievements and Help now returns to the in-game menu rather than directly to the game
