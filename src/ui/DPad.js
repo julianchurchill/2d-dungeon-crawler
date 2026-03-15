@@ -14,6 +14,14 @@ const PAD = BTN_SIZE + 5;
  */
 const DPAD_BOTTOM_OFFSET = 175;
 
+/**
+ * Pixels from the left edge of the screen to the D-pad anchor.
+ * The left column of buttons (Menu, LEFT, Stairs) extends PAD + BTN_SIZE/2 px
+ * to the left of the anchor; this offset ensures they remain on screen with a
+ * small margin.
+ */
+const DPAD_LEFT_OFFSET = PAD + Math.ceil(BTN_SIZE / 2) + 12; // ≈ 95 px
+
 /** Maximum milliseconds between two taps on the same button to count as a double-tap (run trigger). */
 const DOUBLE_TAP_MS = 300;
 
@@ -31,7 +39,8 @@ export class DPad {
     const { width, height } = s.scale;
 
     // Container anchored at bottom-left, raised above the message-log strip.
-    const anchorX = BTN_SIZE + 18;
+    // anchorX is offset enough to keep the left column of buttons on screen.
+    const anchorX = DPAD_LEFT_OFFSET;
     const anchorY = height - DPAD_BOTTOM_OFFSET;
 
     this._container = s.add.container(anchorX, anchorY)
@@ -79,17 +88,22 @@ export class DPad {
       this._container.add([bg, txt]);
     }
 
-    // INV button at the centre of the cross — thumb-accessible without moving hand.
+    // ── Action buttons fill the unused corners of the 3×3 grid ──────────────
+    //
+    //   [≡]  [▲]  [ ]       (-PAD,-PAD)  (0,-PAD)  (PAD,-PAD)
+    //   [◀] [INV] [▶]   →   (-PAD,  0)   (0,  0)   (PAD,  0)
+    //   [▼▼] [▼]  [ ]       (-PAD, PAD)  (0, PAD)  (PAD, PAD)
+
+    // INV — centre, thumb-accessible without repositioning the hand.
     this._addActionBtn(0, 0, 0x334455, 0x88aacc, 'INV', '#aaccff',
       () => EventBus.emit(GameEvents.TOGGLE_INVENTORY));
 
-    // Menu button (≡) to the right of the cross at centre height — opens Achievements
-    // or closes the message log, mirroring the ESC key behaviour.
-    this._addActionBtn(PAD * 2 + 10, 0, 0x334433, 0x88aa88, '≡', '#aaffaa',
+    // Menu (≡) — top-left corner; opens Achievements or closes the message log.
+    this._addActionBtn(-PAD, -PAD, 0x334433, 0x88aa88, '≡', '#aaffaa',
       () => EventBus.emit(GameEvents.OPEN_ACHIEVEMENTS));
 
-    // Stairs button above the menu button — less frequently used.
-    this._addActionBtn(PAD * 2 + 10, -PAD, 0x554433, 0xccaa88, '▼▼', '#ffcc88',
+    // Stairs — bottom-left corner; less frequently used.
+    this._addActionBtn(-PAD, PAD, 0x554433, 0xccaa88, '▼▼', '#ffcc88',
       () => EventBus.emit(GameEvents.USE_STAIRS));
   }
 
@@ -131,9 +145,7 @@ export class DPad {
    * @param {number} height
    */
   resize(width, height) {
-    const anchorX = BTN_SIZE + 18;
-    const anchorY = height - DPAD_BOTTOM_OFFSET;
-    this._container.setPosition(anchorX, anchorY);
+    this._container.setPosition(DPAD_LEFT_OFFSET, height - DPAD_BOTTOM_OFFSET);
   }
 
   /**
