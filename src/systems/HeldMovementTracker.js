@@ -15,6 +15,7 @@
  * chance to clear the direction before the next move is considered.
  */
 import { DIR } from '../utils/Direction.js';
+import { GameEvents } from '../events/GameEvents.js';
 
 export class HeldMovementTracker {
   /**
@@ -44,6 +45,11 @@ export class HeldMovementTracker {
       // Releasing a key clears the direction only if it is the currently held one.
       keyboard.on(`keyup-${key}`,   () => { if (this._dir === dir) this._dir = null; });
     }
+
+    // Mirror on-screen D-pad hold state so auto-repeat works for mobile too.
+    // DPAD_HOLD_START fires on pointerdown; DPAD_HOLD_END fires on pointerup/pointerout.
+    eventBus.on(GameEvents.DPAD_HOLD_START, (dir) => { this._dir = dir; });
+    eventBus.on(GameEvents.DPAD_HOLD_END,   (dir) => { if (this._dir === dir) this._dir = null; });
 
     // Clear held direction whenever game-stopping events occur.
     eventBus.on('game-over',      () => { this._dir = null; });

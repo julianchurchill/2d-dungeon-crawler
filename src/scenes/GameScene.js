@@ -333,6 +333,8 @@ export class GameScene extends Phaser.Scene {
   _setupEvents() {
     // D-pad presses from UIScene
     EventBus.on(GameEvents.DPAD_PRESS, (dir) => this._handleDir(dir), this);
+    // D-pad double-tap starts a run (equivalent to SHIFT+direction on keyboard).
+    EventBus.on(GameEvents.DPAD_RUN, (dir) => this._startRun(dir), this);
     EventBus.on(GameEvents.TOGGLE_INVENTORY, () => this._toggleInventory(), this);
     EventBus.on(GameEvents.USE_STAIRS, () => this._tryUseStairs(), this);
     EventBus.on(GameEvents.INVENTORY_USE, (index) => this._useInventoryItem(index), this);

@@ -2,9 +2,9 @@
 
 ## Bugs
 
-- [ ] can't run with mobile controls
 - [ ] mobile controls cover message panel - when message panel is expanded it states 'ESC to close' which is not relevant for mobile - should have a X to press
 - [ ] can't access Achievements on mobile - needs a button
+- [x] can't run with mobile controls
 - [x] Inventory window does not change the currently equipped weapon/armour name when clicked (it does change the equipped state, just not the text)
 
 ## General
