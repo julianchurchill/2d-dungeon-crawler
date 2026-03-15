@@ -21,7 +21,8 @@
         "dbaeumer.vscode-eslint",
         "esbenp.prettier-vscode",
         "eamodio.gitlens",
-        "davidanson.vscode-markdownlint"
+        "davidanson.vscode-markdownlint",
+        "alexkrechik.cucumberautocomplete"
       ],
       "settings": {
         "editor.formatOnSave": true,
