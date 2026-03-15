@@ -19,7 +19,7 @@ import { RunMovementController } from '../systems/RunMovementController.js';
 import { applyToGame } from '../systems/DevOptions.js';
 import { EnemySpawner } from '../systems/EnemySpawner.js';
 import { AchievementSystem } from '../achievements/AchievementSystem.js';
-import { handleMobileMenuPress } from '../systems/MobileMenuHandler.js';
+import { handleMobileMenuPress, wrapWithRunCancel } from '../systems/MobileMenuHandler.js';
 
 const TILE_SIZE = 16;
 const FOV_RADIUS = 8;
@@ -332,11 +332,11 @@ export class GameScene extends Phaser.Scene {
   }
 
   _setupEvents() {
-    // D-pad presses from UIScene
-    EventBus.on(GameEvents.DPAD_PRESS, (dir) => this._handleDir(dir), this);
+    // D-pad presses from UIScene — cancel any active run first (mirrors keyboard behaviour).
+    EventBus.on(GameEvents.DPAD_PRESS, wrapWithRunCancel(this._runController, (dir) => this._handleDir(dir)), this);
     // D-pad double-tap starts a run (equivalent to SHIFT+direction on keyboard).
     EventBus.on(GameEvents.DPAD_RUN, (dir) => this._startRun(dir), this);
-    // Mobile menu button (≡): close message log if open, otherwise open Achievements.
+    // Mobile menu button (≡): cancel run, then close message log if open or open Achievements.
     EventBus.on(GameEvents.OPEN_ACHIEVEMENTS, () => {
       this._runController.cancel();
       handleMobileMenuPress(
@@ -345,8 +345,8 @@ export class GameScene extends Phaser.Scene {
         () => this._openAchievements(),
       );
     }, this);
-    EventBus.on(GameEvents.TOGGLE_INVENTORY, () => this._toggleInventory(), this);
-    EventBus.on(GameEvents.USE_STAIRS, () => this._tryUseStairs(), this);
+    EventBus.on(GameEvents.TOGGLE_INVENTORY, wrapWithRunCancel(this._runController, () => this._toggleInventory()), this);
+    EventBus.on(GameEvents.USE_STAIRS, wrapWithRunCancel(this._runController, () => this._tryUseStairs()), this);
     EventBus.on(GameEvents.INVENTORY_USE, (index) => this._useInventoryItem(index), this);
     EventBus.on(GameEvents.FLOOR_CHANGED, (floor) => {
       this.registry.set('floor', floor);
