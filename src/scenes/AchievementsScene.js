@@ -25,6 +25,7 @@ import {
 } from '../achievements/AchievementStore.js';
 import { EventBus } from '../utils/EventBus.js';
 import { isDevEnvironment } from '../utils/Environment.js';
+import { resolveSceneBack } from '../systems/SceneNavigation.js';
 
 /** Rows are this tall in pixels. */
 const ROW_H = 28;
@@ -240,11 +241,14 @@ export class AchievementsScene extends Phaser.Scene {
    * sleep() — it resumes both update and rendering.
    */
   _back() {
-    if (this._fromScene === 'GameScene') {
+    const nav = resolveSceneBack(this._fromScene);
+    if (nav.action === 'wake') {
       this.scene.wake('GameScene');
       this.scene.wake('UIScene');
+    } else if (nav.action === 'launch') {
+      this.scene.launch(nav.scene);
     } else {
-      this.scene.start(this._fromScene);
+      this.scene.start(nav.scene);
     }
     // Stop self last so scene manager calls above can still execute.
     this.scene.stop();

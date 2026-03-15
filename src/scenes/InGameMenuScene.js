@@ -101,20 +101,19 @@ export class InGameMenuScene extends Phaser.Scene {
   }
 
   /**
-   * Launches AchievementsScene and stops this scene.
-   * AchievementsScene's back button already handles waking GameScene + UIScene
-   * when `fromScene` is 'GameScene'.
+   * Launches AchievementsScene with this scene as the origin so that its
+   * Back button returns here rather than directly to the game.
    */
   _openAchievements() {
-    this.scene.launch('AchievementsScene', { fromScene: 'GameScene' });
+    this.scene.launch('AchievementsScene', { fromScene: 'InGameMenuScene' });
     this.scene.stop();
   }
 
   /**
-   * Launches HelpScene and stops this scene.
+   * Launches HelpScene with this scene as the origin.
    */
   _openHelp() {
-    this.scene.launch('HelpScene', { fromScene: 'GameScene' });
+    this.scene.launch('HelpScene', { fromScene: 'InGameMenuScene' });
     this.scene.stop();
   }
 

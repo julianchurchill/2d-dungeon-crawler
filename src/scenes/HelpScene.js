@@ -13,6 +13,7 @@
 import Phaser from 'phaser';
 import { getHelpContent } from '../systems/HelpContent.js';
 import { isTouchDevice } from '../utils/TouchDeviceDetector.js';
+import { resolveSceneBack } from '../systems/SceneNavigation.js';
 
 /** Height of the fixed header area. */
 const HEADER_H = 72;
@@ -133,11 +134,14 @@ export class HelpScene extends Phaser.Scene {
    * Wakes GameScene + UIScene and stops this scene.
    */
   _back() {
-    if (this._fromScene === 'GameScene') {
+    const nav = resolveSceneBack(this._fromScene);
+    if (nav.action === 'wake') {
       this.scene.wake('GameScene');
       this.scene.wake('UIScene');
+    } else if (nav.action === 'launch') {
+      this.scene.launch(nav.scene);
     } else {
-      this.scene.start(this._fromScene);
+      this.scene.start(nav.scene);
     }
     this.scene.stop();
   }
