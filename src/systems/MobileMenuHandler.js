@@ -24,3 +24,4 @@ export function handleMobileMenuPress(messageLogOpen, closeLog, openAchievements
     openAchievements();
   }
 }
+
