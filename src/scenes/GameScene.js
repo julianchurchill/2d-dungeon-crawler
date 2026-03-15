@@ -19,7 +19,8 @@ import { RunMovementController } from '../systems/RunMovementController.js';
 import { applyToGame } from '../systems/DevOptions.js';
 import { EnemySpawner } from '../systems/EnemySpawner.js';
 import { AchievementSystem } from '../achievements/AchievementSystem.js';
-import { handleMobileMenuPress, wrapWithRunCancel } from '../systems/MobileMenuHandler.js';
+import { handleMobileMenuPress } from '../systems/MobileMenuHandler.js';
+import { wrapWithRunCancel } from '../utils/ActionWrapper.js';
 
 const TILE_SIZE = 16;
 const FOV_RADIUS = 8;
@@ -302,33 +303,36 @@ export class GameScene extends Phaser.Scene {
     this.heldMovement = new HeldMovementTracker(this.input.keyboard, EventBus);
     this._holdRepeat  = new HoldRepeatScheduler(this.heldMovement, MOVE_REPEAT_DELAY_MS);
 
-    // Non-movement actions cancel any active run before executing.
-    this.input.keyboard.on('keydown-I',            () => { this._runController.cancel(); this._toggleInventory(); });
-    this.input.keyboard.on('keydown-PERIOD',        () => { this._runController.cancel(); this._tryUseStairs(); });
-    this.input.keyboard.on('keydown-GREATER_THAN',  () => { this._runController.cancel(); this._tryUseStairs(); });
+    // Non-movement actions: cancel any active run before executing.
+    this.input.keyboard.on('keydown-I',           wrapWithRunCancel(this._runController, () => this._toggleInventory()));
+    this.input.keyboard.on('keydown-PERIOD',       wrapWithRunCancel(this._runController, () => this._tryUseStairs()));
+    this.input.keyboard.on('keydown-GREATER_THAN', wrapWithRunCancel(this._runController, () => this._tryUseStairs()));
     // ESC closes the message log history panel when it is open; otherwise
     // it opens the Achievements overlay.
-    this.input.keyboard.on('keydown-ESC', () => {
-      this._runController.cancel();
+    this.input.keyboard.on('keydown-ESC', wrapWithRunCancel(this._runController, () => {
       if (this._messageLogOpen) {
         EventBus.emit(GameEvents.CLOSE_MESSAGE_LOG);
       } else {
         this._openAchievements();
       }
-    });
+    }));
 
     // SHIFT+direction starts a run; a plain direction key cancels any active run
-    // and performs a single step.  Cancelling before _handleDir is safe because
-    // _startRun calls runController.start() directly, which does not depend on
-    // the previous run state.
-    this.input.keyboard.on('keydown-UP',    (e) => { if (e.shiftKey) { this._startRun(DIR.UP);    } else { this._runController.cancel(); this._handleDir(DIR.UP);    } });
-    this.input.keyboard.on('keydown-DOWN',  (e) => { if (e.shiftKey) { this._startRun(DIR.DOWN);  } else { this._runController.cancel(); this._handleDir(DIR.DOWN);  } });
-    this.input.keyboard.on('keydown-LEFT',  (e) => { if (e.shiftKey) { this._startRun(DIR.LEFT);  } else { this._runController.cancel(); this._handleDir(DIR.LEFT);  } });
-    this.input.keyboard.on('keydown-RIGHT', (e) => { if (e.shiftKey) { this._startRun(DIR.RIGHT); } else { this._runController.cancel(); this._handleDir(DIR.RIGHT); } });
-    this.input.keyboard.on('keydown-W',     (e) => { if (e.shiftKey) { this._startRun(DIR.UP);    } else { this._runController.cancel(); this._handleDir(DIR.UP);    } });
-    this.input.keyboard.on('keydown-S',     (e) => { if (e.shiftKey) { this._startRun(DIR.DOWN);  } else { this._runController.cancel(); this._handleDir(DIR.DOWN);  } });
-    this.input.keyboard.on('keydown-A',     (e) => { if (e.shiftKey) { this._startRun(DIR.LEFT);  } else { this._runController.cancel(); this._handleDir(DIR.LEFT);  } });
-    this.input.keyboard.on('keydown-D',     (e) => { if (e.shiftKey) { this._startRun(DIR.RIGHT); } else { this._runController.cancel(); this._handleDir(DIR.RIGHT); } });
+    // and performs a single step.  Pre-build the wrapped step handlers so the
+    // same function instance is reused for arrow keys and WASD.
+    const wUp    = wrapWithRunCancel(this._runController, () => this._handleDir(DIR.UP));
+    const wDown  = wrapWithRunCancel(this._runController, () => this._handleDir(DIR.DOWN));
+    const wLeft  = wrapWithRunCancel(this._runController, () => this._handleDir(DIR.LEFT));
+    const wRight = wrapWithRunCancel(this._runController, () => this._handleDir(DIR.RIGHT));
+
+    this.input.keyboard.on('keydown-UP',    (e) => { if (e.shiftKey) { this._startRun(DIR.UP);    } else { wUp();    } });
+    this.input.keyboard.on('keydown-DOWN',  (e) => { if (e.shiftKey) { this._startRun(DIR.DOWN);  } else { wDown();  } });
+    this.input.keyboard.on('keydown-LEFT',  (e) => { if (e.shiftKey) { this._startRun(DIR.LEFT);  } else { wLeft();  } });
+    this.input.keyboard.on('keydown-RIGHT', (e) => { if (e.shiftKey) { this._startRun(DIR.RIGHT); } else { wRight(); } });
+    this.input.keyboard.on('keydown-W',     (e) => { if (e.shiftKey) { this._startRun(DIR.UP);    } else { wUp();    } });
+    this.input.keyboard.on('keydown-S',     (e) => { if (e.shiftKey) { this._startRun(DIR.DOWN);  } else { wDown();  } });
+    this.input.keyboard.on('keydown-A',     (e) => { if (e.shiftKey) { this._startRun(DIR.LEFT);  } else { wLeft();  } });
+    this.input.keyboard.on('keydown-D',     (e) => { if (e.shiftKey) { this._startRun(DIR.RIGHT); } else { wRight(); } });
   }
 
   _setupEvents() {

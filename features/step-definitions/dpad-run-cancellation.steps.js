@@ -7,7 +7,7 @@
  */
 import { Given, When, Then } from '@cucumber/cucumber';
 import assert from 'node:assert/strict';
-import { wrapWithRunCancel } from '../../src/systems/MobileMenuHandler.js';
+import { wrapWithRunCancel } from '../../src/utils/ActionWrapper.js';
 import { DIR } from '../../src/utils/Direction.js';
 
 // ── Given ─────────────────────────────────────────────────────────────────────

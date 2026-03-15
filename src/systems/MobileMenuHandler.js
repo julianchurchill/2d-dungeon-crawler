@@ -25,18 +25,3 @@ export function handleMobileMenuPress(messageLogOpen, closeLog, openAchievements
   }
 }
 
-/**
- * Wraps a mobile action callback so that any active run is cancelled before
- * the action executes.  This mirrors the keyboard behaviour where every key
- * handler calls `runController.cancel()` before doing anything else.
- *
- * @param {object}   runController - RunMovementController instance.
- * @param {function} action        - The action to execute after cancellation.
- * @returns {function} A new function that cancels the run then calls action.
- */
-export function wrapWithRunCancel(runController, action) {
-  return (...args) => {
-    runController.cancel();
-    action(...args);
-  };
-}
