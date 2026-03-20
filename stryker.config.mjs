@@ -3,22 +3,18 @@ import { execSync } from 'child_process';
 /**
  * Resolves a version string for the Stryker dashboard report.
  *
- * Combines the current git branch name and short commit hash so each run is
- * uniquely identifiable on the dashboard (e.g. "main+a1b2c3d").  Falls back
- * to just the hash if the branch cannot be determined (e.g. detached HEAD in
- * CI), and to "unknown" if git is unavailable entirely.
+ * Returns the current git branch name so reports are grouped by branch on the
+ * dashboard (e.g. "main").  Falls back to the short commit hash if the branch
+ * cannot be determined (e.g. detached HEAD in CI), and to "unknown" if git is
+ * unavailable entirely.
  *
- * @returns {string} A version string in the form "<branch>+<hash>" or "<hash>".
+ * @returns {string} The current branch name, or a short commit hash as fallback.
  */
 function resolveVersion() {
   try {
-    const hash = execSync('git rev-parse --short HEAD', { encoding: 'utf8' }).trim();
-    try {
-      const branch = execSync('git rev-parse --abbrev-ref HEAD', { encoding: 'utf8' }).trim();
-      return branch === 'HEAD' ? hash : `${branch}+${hash}`;
-    } catch {
-      return hash;
-    }
+    const branch = execSync('git rev-parse --abbrev-ref HEAD', { encoding: 'utf8' }).trim();
+    if (branch !== 'HEAD') return branch;
+    return execSync('git rev-parse --short HEAD', { encoding: 'utf8' }).trim();
   } catch {
     return 'unknown';
   }
@@ -83,8 +79,8 @@ export default {
    * Dashboard reporter settings.
    * The API key must be provided via the STRYKER_DASHBOARD_API_KEY environment
    * variable — never hardcode it here.
-   * The version is resolved dynamically as "<branch>+<short-hash>" so each run
-   * is uniquely identifiable on the dashboard.
+   * The version is resolved dynamically as the current branch name so reports
+   * are grouped by branch on the dashboard.
    */
   dashboard: {
     project: 'github.com/julianchurchill/2d-dungeon-crawler',
