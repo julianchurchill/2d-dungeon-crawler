@@ -1,5 +1,7 @@
 # 2D Dungeon Crawler
 
+[![Mutation testing badge](https://img.shields.io/endpoint?style=flat&url=https%3A%2F%2Fbadge-api.stryker-mutator.io%2Fgithub.com%2Fjulianchurchill%2F2d-dungeon-crawler%2Fmain)](https://dashboard.stryker-mutator.io/reports/github.com/julianchurchill/2d-dungeon-crawler/main)
+
 ## Summary
 
 Created using Claude Code - initial request "Create a 2D web browser dungeon crawler game with randomly generated levels, responsive on mobile".
@@ -70,6 +72,25 @@ features/
     phaser-loader.mjs               # ESM hook: replaces Phaser with a Node.js mock
     mocks/phaser.mjs                # minimal Phaser stub for the test environment
 ```
+
+## Mutation Testing
+
+Mutation testing is used to verify the quality of the test suite. [Stryker](https://stryker-mutator.io/) automatically introduces small semantic changes to the source code (mutants) and checks whether the tests catch them. A mutant that is not caught by any test is called a *survivor* and indicates a gap in test coverage.
+
+### Run mutation tests
+
+```bash
+npm run mutate
+```
+
+This generates a full HTML report at `reports/mutation/mutation.html` and a JSON report at `reports/mutation/mutation.json`, prints a clear-text summary to stdout, and uploads the results to the [Stryker Dashboard](https://dashboard.stryker-mutator.io/reports/github.com/julianchurchill/2d-dungeon-crawler).
+
+> **Note:** Uploading to the dashboard requires `STRYKER_DASHBOARD_API_KEY` to be set in the environment. Without it the run still completes and produces local reports; only the upload step is skipped.
+
+### Dashboard
+
+The latest mutation score for the `main` branch is published at:
+<https://dashboard.stryker-mutator.io/reports/github.com/julianchurchill/2d-dungeon-crawler>
 
 ### How it works
 
