@@ -7,3 +7,4 @@ Thumbs.db
 .devcontainer/.env.devcontainer
 src/build-info.js
 .stryker-tmp/
+reports/
