@@ -31,3 +31,46 @@ Feature: Combat
     And a goblin with 100 attack
     When the goblin attacks the player with seed 1
     Then the player should be dead
+
+  Scenario: Attack damage reflects variance correctly for a known seed
+    Given a player with 10 attack power
+    And a goblin with 100 HP and 0 defense
+    When the player attacks the goblin with seed 7
+    Then the attack result damage should be 8
+
+  Scenario: Player non-kill attack message uses correct verbs and names
+    Given a player with 5 attack power
+    And a goblin with 100 HP and 0 defense
+    When the player attacks the goblin with seed 42
+    Then the attack result message should start with "You"
+    And the attack result message should contain "hit"
+    And the attack result message should not contain "kill"
+    And the attack result message should end with "damage."
+
+  Scenario: Enemy non-kill attack message uses correct verbs and names
+    Given a player at full health with 0 defense
+    And a goblin with 5 attack
+    When the goblin attacks the player with seed 42
+    Then the attack result message should contain "Goblin"
+    And the attack result message should contain "hits"
+    And the attack result message should contain "you"
+    And the attack result message should not contain "kill"
+    And the attack result message should end with "damage."
+
+  Scenario: Player kill message uses "kill" and exclamation mark
+    Given a player with 100 attack power
+    And a goblin with 8 HP and 0 defense
+    When the player attacks the goblin with seed 42
+    Then the attack result message should start with "You"
+    And the attack result message should contain "kill"
+    And the attack result message should not contain "kills"
+    And the attack result message should end with "damage!"
+
+  Scenario: Enemy kill message uses "kills" and exclamation mark
+    Given a player with 1 HP and 0 defense
+    And a goblin with 100 attack
+    When the goblin attacks the player with seed 1
+    Then the attack result message should contain "Goblin"
+    And the attack result message should contain "kills"
+    And the attack result message should contain "you"
+    And the attack result message should end with "damage!"

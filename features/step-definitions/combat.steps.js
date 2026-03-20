@@ -93,3 +93,35 @@ Then('the player HP should be lower than before the attack', function () {
 Then('the player should be dead', function () {
   assert.ok(this.player.isDead(), 'Expected player to be dead');
 });
+
+Then('the attack result damage should be {int}', function (expected) {
+  assert.equal(this.result.damage, expected, `Expected damage ${expected}, got ${this.result.damage}`);
+});
+
+Then('the attack result message should start with {string}', function (prefix) {
+  assert.ok(
+    this.result.message.startsWith(prefix),
+    `Expected message to start with "${prefix}", got: "${this.result.message}"`
+  );
+});
+
+Then('the attack result message should contain {string}', function (text) {
+  assert.ok(
+    this.result.message.includes(text),
+    `Expected message to contain "${text}", got: "${this.result.message}"`
+  );
+});
+
+Then('the attack result message should not contain {string}', function (text) {
+  assert.ok(
+    !this.result.message.includes(text),
+    `Expected message not to contain "${text}", got: "${this.result.message}"`
+  );
+});
+
+Then('the attack result message should end with {string}', function (suffix) {
+  assert.ok(
+    this.result.message.endsWith(suffix),
+    `Expected message to end with "${suffix}", got: "${this.result.message}"`
+  );
+});
