@@ -9,6 +9,7 @@ Entries are listed newest-first within each section.
 
 ### Added
 
+- 2026-03-20 — Simplify Stryker dashboard version to branch name only (was branch+git-hash)
 - 2026-03-20 — Configure Stryker dashboard reporter with html, json, clear-text, progress, and dashboard reporters; version set to branch+git-hash
 - 2026-03-20 — Allow dashboard.stryker-mutator.io through the dev container firewall
 - 2026-03-20 — Allow stryker-mutator.io through the dev container firewall
