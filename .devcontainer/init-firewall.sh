@@ -74,7 +74,8 @@ for domain in \
     "vscode.blob.core.windows.net" \
     "update.code.visualstudio.com" \
     "main.vscode-cdn.net" \
-    "mobile.events.data.microsoft.com"; do
+    "mobile.events.data.microsoft.com" \
+    "stryker-mutator.io"; do
     echo "Resolving $domain..."
     ips=$(dig +noall +answer A "$domain" | awk '$4 == "A" {print $5}')
     if [ -z "$ips" ]; then
