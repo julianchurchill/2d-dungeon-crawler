@@ -1,3 +1,29 @@
+import { execSync } from 'child_process';
+
+/**
+ * Resolves a version string for the Stryker dashboard report.
+ *
+ * Combines the current git branch name and short commit hash so each run is
+ * uniquely identifiable on the dashboard (e.g. "main+a1b2c3d").  Falls back
+ * to just the hash if the branch cannot be determined (e.g. detached HEAD in
+ * CI), and to "unknown" if git is unavailable entirely.
+ *
+ * @returns {string} A version string in the form "<branch>+<hash>" or "<hash>".
+ */
+function resolveVersion() {
+  try {
+    const hash = execSync('git rev-parse --short HEAD', { encoding: 'utf8' }).trim();
+    try {
+      const branch = execSync('git rev-parse --abbrev-ref HEAD', { encoding: 'utf8' }).trim();
+      return branch === 'HEAD' ? hash : `${branch}+${hash}`;
+    } catch {
+      return hash;
+    }
+  } catch {
+    return 'unknown';
+  }
+}
+
 /**
  * Stryker mutation testing configuration.
  *
@@ -8,6 +34,14 @@
  * The phaser-loader.mjs ESM hook is passed via testRunnerNodeArgs so that any
  * src/ module that imports 'phaser' is redirected to the test mock, matching
  * the behaviour of the regular `npm test` command.
+ *
+ * Reporters:
+ *   - html       — interactive report at reports/mutation/mutation.html
+ *   - json       — machine-readable report at reports/mutation/mutation.json
+ *   - clear-text — summary printed to stdout after the run
+ *   - progress   — live progress bar during the run
+ *   - dashboard  — uploads results to dashboard.stryker-mutator.io
+ *                  Requires STRYKER_DASHBOARD_API_KEY to be set in the environment.
  *
  * @type {import('@stryker-mutator/api/core').PartialStrykerOptions}
  */
@@ -43,7 +77,24 @@ export default {
   /** Coverage analysis is disabled; Cucumber runner reruns all tests per mutant. */
   coverageAnalysis: 'off',
 
-  reporters: ['html', 'clear-text', 'progress'],
+  reporters: ['html', 'json', 'clear-text', 'progress', 'dashboard'],
+
+  /**
+   * Dashboard reporter settings.
+   * The API key must be provided via the STRYKER_DASHBOARD_API_KEY environment
+   * variable — never hardcode it here.
+   * The version is resolved dynamically as "<branch>+<short-hash>" so each run
+   * is uniquely identifiable on the dashboard.
+   */
+  dashboard: {
+    project: 'github.com/julianchurchill/2d-dungeon-crawler',
+    version: resolveVersion(),
+  },
+
+  /** Write the JSON report to the same directory as the HTML report. */
+  jsonReporter: {
+    fileName: 'reports/mutation/mutation.json',
+  },
 
   thresholds: {
     high: 80,
