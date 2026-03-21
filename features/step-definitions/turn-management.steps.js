@@ -33,7 +33,7 @@ When('the inventory is opened', function () {
 // --- Then ---
 
 Then('the turn state should be {string}', function (expectedState) {
-  assert.equal(this.turnManager.state, TURN_STATE[expectedState]);
+  assert.equal(this.turnManager.state, expectedState);
 });
 
 Then('the game should be accepting player input', function () {
