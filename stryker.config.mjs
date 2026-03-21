@@ -73,6 +73,13 @@ export default {
   /** Coverage analysis is disabled; Cucumber runner reruns all tests per mutant. */
   coverageAnalysis: 'off',
 
+  /**
+   * Incremental mode: reuses results from the previous run stored in
+   * .stryker-tmp/incremental.json, only re-testing mutants that are new or
+   * affected by code changes. Dramatically speeds up repeated runs.
+   */
+  incremental: true,
+
   reporters: ['html', 'json', 'clear-text', 'progress', 'dashboard'],
 
   /**
