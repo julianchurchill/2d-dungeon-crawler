@@ -9,6 +9,7 @@ Entries are listed newest-first within each section.
 
 ### Added
 
+- 2026-03-21 — Improve Enemy.js mutation score from 10% to 94%: add enemy behaviour feature covering construction, isDead, takeDamage, takeTurn (attack, aggro, wander), and _moveToward
 - 2026-03-21 — Enable Stryker incremental mode to speed up repeated mutation test runs
 - 2026-03-20 — Simplify Stryker dashboard version to branch name only (was branch+git-hash)
 - 2026-03-20 — Configure Stryker dashboard reporter with html, json, clear-text, progress, and dashboard reporters; version set to branch+git-hash
