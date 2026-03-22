@@ -171,7 +171,7 @@ export const GameEvents = {
    * Open (or toggle) the skills panel.
    * Emitted by: GameScene (K key or DPad skills button)
    * Subscribed by: UIScene → SkillsPanel
-   * @type {{ skills: object[] }} The player's active skills.
+   * @type {{ skills: object[], forceRefresh?: boolean }} The player's active skills.
    */
   OPEN_SKILLS: 'open-skills',
 
@@ -181,4 +181,20 @@ export const GameEvents = {
    * Subscribed by: GameScene
    */
   TOGGLE_SKILLS: 'toggle-skills',
+
+  /**
+   * Request to upgrade a named skill (dev mode only).
+   * Emitted by: SkillsPanel (upgrade button, dev mode)
+   * Subscribed by: GameScene (_handleUpgradeSkill)
+   * @type {{ skillId: string }}
+   */
+  UPGRADE_SKILL: 'upgrade-skill',
+
+  /**
+   * Request to downgrade a named skill (dev mode only).
+   * Emitted by: SkillsPanel (downgrade button, dev mode)
+   * Subscribed by: GameScene (_handleDowngradeSkill)
+   * @type {{ skillId: string }}
+   */
+  DOWNGRADE_SKILL: 'downgrade-skill',
 };
