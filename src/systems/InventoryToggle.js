@@ -10,26 +10,24 @@ import { TURN_STATE } from './TurnManager.js';
 /**
  * Applies the inventory open/close toggle if the current turn state allows it.
  *
- * - `PLAYER_INPUT`  → opens the inventory (calls setInventory, returns true)
- * - `INVENTORY`     → closes the inventory (calls setPlayerInput, returns true)
+ * - `PLAYER_INPUT` → opens the inventory (transitions to INVENTORY, returns true)
+ * - `INVENTORY`    → closes the inventory (transitions to PLAYER_INPUT, returns true)
  * - Any other state → no-op (returns false)
  *
  * The caller should emit the `OPEN_INVENTORY` event (or equivalent) only
  * when this function returns true, keeping visual and state representations
  * in sync.
  *
- * @param {string}   turnState      - Current value from TURN_STATE.
- * @param {function} setInventory   - Callback to transition into INVENTORY state.
- * @param {function} setPlayerInput - Callback to transition back to PLAYER_INPUT.
+ * @param {TurnManager} turnManager - The active TurnManager instance.
  * @returns {boolean} True if the toggle was applied; false if the state blocked it.
  */
-export function applyInventoryToggle(turnState, setInventory, setPlayerInput) {
-  if (turnState === TURN_STATE.INVENTORY) {
-    setPlayerInput();
+export function applyInventoryToggle(turnManager) {
+  if (turnManager.state === TURN_STATE.INVENTORY) {
+    turnManager.setState(TURN_STATE.PLAYER_INPUT);
     return true;
   }
-  if (turnState === TURN_STATE.PLAYER_INPUT) {
-    setInventory();
+  if (turnManager.state === TURN_STATE.PLAYER_INPUT) {
+    turnManager.setState(TURN_STATE.INVENTORY);
     return true;
   }
   return false;

@@ -6,6 +6,37 @@ import { DoubleTapDetector } from '../systems/DoubleTapDetector.js';
 const BTN_SIZE = 52;
 const PAD = BTN_SIZE + 5;
 
+// ── Colour palette ─────────────────────────────────────────────────────────────
+/** Directional button normal fill colour — dark blue-purple. */
+const COLOR_DIR_FILL    = 0x333355;
+/** Directional button border colour — medium purple. */
+const COLOR_DIR_STROKE  = 0x7777aa;
+/** Directional button fill colour when pressed — bright purple. */
+const COLOR_DIR_PRESSED = 0x5555aa;
+/** Directional button label text colour — light purple. */
+const COLOR_DIR_LABEL   = '#aaaacc';
+
+/** Action button (INV / K) fill colour — dark steel blue. */
+const COLOR_ACTION_FILL   = 0x334455;
+/** Action button border colour — medium steel blue. */
+const COLOR_ACTION_STROKE = 0x88aacc;
+/** Action button label text colour — light blue. */
+const COLOR_ACTION_LABEL  = '#aaccff';
+
+/** Menu button (≡) fill colour — dark olive green. */
+const COLOR_MENU_FILL   = 0x334433;
+/** Menu button border colour — medium sage green. */
+const COLOR_MENU_STROKE = 0x88aa88;
+/** Menu button label text colour — light mint green. */
+const COLOR_MENU_LABEL  = '#aaffaa';
+
+/** Stairs button (▼▼) fill colour — dark brown. */
+const COLOR_STAIRS_FILL   = 0x554433;
+/** Stairs button border colour — medium tan. */
+const COLOR_STAIRS_STROKE = 0xccaa88;
+/** Stairs button label text colour — light amber. */
+const COLOR_STAIRS_LABEL  = '#ffcc88';
+
 /**
  * Pixels from the bottom of the screen to the D-pad anchor (centre of the
  * directional cross).  Must clear the compact message-log strip
@@ -55,17 +86,17 @@ export class DPad {
     ];
 
     for (const { dir, x, y, label } of dirs) {
-      const bg = s.add.rectangle(x, y, BTN_SIZE, BTN_SIZE, 0x333355, 0.75)
-        .setStrokeStyle(1, 0x7777aa)
+      const bg = s.add.rectangle(x, y, BTN_SIZE, BTN_SIZE, COLOR_DIR_FILL, 0.75)
+        .setStrokeStyle(1, COLOR_DIR_STROKE)
         .setInteractive({ useHandCursor: false });
 
       const txt = s.add.text(x, y, label, {
-        fontSize: '22px', color: '#aaaacc', resolution: 2,
+        fontSize: '22px', color: COLOR_DIR_LABEL, resolution: 2,
       }).setOrigin(0.5);
 
       bg.on('pointerdown', (ptr, lx, ly, evt) => {
         evt.stopPropagation();
-        bg.setFillStyle(0x5555aa, 0.9);
+        bg.setFillStyle(COLOR_DIR_PRESSED, 0.9);
         // Notify HeldMovementTracker so auto-repeat kicks in after each turn.
         EventBus.emit(GameEvents.DPAD_HOLD_START, dir);
         if (this._doubleTap.tap(dir)) {
@@ -77,11 +108,11 @@ export class DPad {
       });
 
       bg.on('pointerup', () => {
-        bg.setFillStyle(0x333355, 0.75);
+        bg.setFillStyle(COLOR_DIR_FILL, 0.75);
         EventBus.emit(GameEvents.DPAD_HOLD_END, dir);
       });
       bg.on('pointerout', () => {
-        bg.setFillStyle(0x333355, 0.75);
+        bg.setFillStyle(COLOR_DIR_FILL, 0.75);
         EventBus.emit(GameEvents.DPAD_HOLD_END, dir);
       });
 
@@ -95,16 +126,20 @@ export class DPad {
     //   [▼▼] [▼]  [ ]       (-PAD, PAD)  (0, PAD)  (PAD, PAD)
 
     // INV — centre, thumb-accessible without repositioning the hand.
-    this._addActionBtn(0, 0, 0x334455, 0x88aacc, 'INV', '#aaccff',
+    this._addActionBtn(0, 0, COLOR_ACTION_FILL, COLOR_ACTION_STROKE, 'INV', COLOR_ACTION_LABEL,
       () => EventBus.emit(GameEvents.TOGGLE_INVENTORY));
 
     // Menu (≡) — top-left corner; opens the in-game menu or closes the message log.
-    this._addActionBtn(-PAD, -PAD, 0x334433, 0x88aa88, '≡', '#aaffaa',
+    this._addActionBtn(-PAD, -PAD, COLOR_MENU_FILL, COLOR_MENU_STROKE, '≡', COLOR_MENU_LABEL,
       () => EventBus.emit(GameEvents.OPEN_IN_GAME_MENU));
 
     // Stairs — bottom-left corner; less frequently used.
-    this._addActionBtn(-PAD, PAD, 0x554433, 0xccaa88, '▼▼', '#ffcc88',
+    this._addActionBtn(-PAD, PAD, COLOR_STAIRS_FILL, COLOR_STAIRS_STROKE, '▼▼', COLOR_STAIRS_LABEL,
       () => EventBus.emit(GameEvents.USE_STAIRS));
+
+    // Skills (K) — top-right corner.
+    this._addActionBtn(PAD, -PAD, COLOR_ACTION_FILL, COLOR_ACTION_STROKE, 'K', COLOR_ACTION_LABEL,
+      () => EventBus.emit(GameEvents.TOGGLE_SKILLS));
   }
 
   /**

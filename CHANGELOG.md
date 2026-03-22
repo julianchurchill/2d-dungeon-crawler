@@ -7,8 +7,15 @@ Entries are listed newest-first within each section.
 
 ## [Unreleased]
 
+### Changed
+
+- 2026-03-22 — Reorder CombatSystem messages so skill trigger messages appear before the combat outcome message
+- 2026-03-22 — Refactor CombatSystem to return a single messages array instead of separate message and skillMessages; add colour descriptions to DPad colour constants
+- 2026-03-22 — Refactor TurnManager to use a single setState(state) method; refactor InventoryToggle and SkillsToggle to accept turnManager directly; read skillSystem from attacker in CombatSystem; replace magic colour numbers in DPad with named constants
+
 ### Added
 
+- 2026-03-22 — Add Lucky Strike character skill: SkillSystem with 1% crit chance for 50% bonus damage, viewable via K key or mobile button, with combat integration and SkillsToggle turn-state gate
 - 2026-03-22 — Improve EnemySpawner.js mutation score from 38% to 100%: add scenarios for floor-default max, explicit min, exact spawn coordinates, and occupied-tile skipping
 - 2026-03-21 — Improve TurnManager.js mutation score from 68% to 100%: fix turn-state step to compare against the raw string value rather than via TURN_STATE lookup
 - 2026-03-21 — Add sox and pulseaudio-utils to devcontainer so Claude Code can play an audio bell via the Stop hook

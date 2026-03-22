@@ -11,23 +11,23 @@ Given('a new turn manager', function () {
 // --- When ---
 
 When('the player starts acting', function () {
-  this.turnManager.setPlayerActing();
+  this.turnManager.setState(TURN_STATE.PLAYER_ACTING);
 });
 
 When('the enemy turn begins', function () {
-  this.turnManager.setEnemyActing();
+  this.turnManager.setState(TURN_STATE.ENEMY_ACTING);
 });
 
 When('the enemy turn ends', function () {
-  this.turnManager.setPlayerInput();
+  this.turnManager.setState(TURN_STATE.PLAYER_INPUT);
 });
 
 When('game over occurs', function () {
-  this.turnManager.setGameOver();
+  this.turnManager.setState(TURN_STATE.GAME_OVER);
 });
 
 When('the inventory is opened', function () {
-  this.turnManager.setInventory();
+  this.turnManager.setState(TURN_STATE.INVENTORY);
 });
 
 // --- Then ---

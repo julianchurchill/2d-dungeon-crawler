@@ -4,28 +4,41 @@
  */
 
 /**
- * Resolve a melee attack.
- * @param {object} attacker - has .attackPower or .stats.attack
+ * Resolve a melee attack, applying any on-hit skill effects from the attacker's
+ * skill system if one is present.
+ *
+ * @param {object} attacker - has .attackPower or .stats.attack; optionally .skillSystem
  * @param {object} defender - has .takeDamage(), .isDead(), .name
- * @param {object} rng
- * @returns {{ damage: number, killed: boolean, message: string }}
+ * @param {object} rng      - RNG for variance roll
+ * @returns {{ damage: number, killed: boolean, messages: string[] }}
  */
 export function resolveMeleeAttack(attacker, defender, rng) {
   const atkPower = attacker.attackPower ?? attacker.stats.attack;
   const variance = rng.nextInt(-2, 2);
-  const rawDamage = Math.max(1, atkPower + variance);
-  const actualDamage = defender.takeDamage(rawDamage);
+  let attackDamage = Math.max(1, atkPower + variance);
+
+  // Apply on-hit skill effects (e.g. Lucky Strike) from the attacker's skill system.
+  const messages = [];
+  const skillSystem = attacker.skillSystem ?? null;
+  if (skillSystem) {
+    const skillResult = skillSystem.applyOnHitSkills(attackDamage);
+    attackDamage = skillResult.damage;
+    messages.push(...skillResult.messages);
+  }
+
+  const actualDamage = defender.takeDamage(attackDamage);
   const killed = defender.isDead();
 
   const atkName = attacker.name || 'You';
   const defName = defender.name || 'you';
 
-  let message;
+  // Combat message is always last — skill trigger messages (e.g. "Lucky Strike!") precede it
+  // so the sequence reads naturally: cause first, then outcome.
   if (killed) {
-    message = `${atkName} ${attacker.name ? 'kills' : 'kill'} ${defName} for ${actualDamage} damage!`;
+    messages.push(`${atkName} ${attacker.name ? 'kills' : 'kill'} ${defName} for ${actualDamage} damage!`);
   } else {
-    message = `${atkName} ${attacker.name ? 'hits' : 'hit'} ${defName} for ${actualDamage} damage.`;
+    messages.push(`${atkName} ${attacker.name ? 'hits' : 'hit'} ${defName} for ${actualDamage} damage.`);
   }
 
-  return { damage: actualDamage, killed, message };
+  return { damage: actualDamage, killed, messages };
 }
