@@ -16,7 +16,7 @@ import { createRNG } from '../utils/RNG.js';
 import { HeldMovementTracker } from '../systems/HeldMovementTracker.js';
 import { HoldRepeatScheduler } from '../systems/HoldRepeatScheduler.js';
 import { RunMovementController } from '../systems/RunMovementController.js';
-import { applyToGame } from '../systems/DevOptions.js';
+import { applyToGame, devOptions } from '../systems/DevOptions.js';
 import { EnemySpawner } from '../systems/EnemySpawner.js';
 import { AchievementSystem } from '../achievements/AchievementSystem.js';
 import { handleMobileMenuPress } from '../systems/MobileMenuHandler.js';
@@ -497,7 +497,8 @@ export class GameScene extends Phaser.Scene {
       yoyo: true,
       onComplete: () => {
         const { damage, killed, messages } = resolveMeleeAttack(
-          this.player, target, this.rng
+          this.player, target, this.rng,
+          { defenderIsInvincible: devOptions.enemiesInvincible },
         );
         messages.forEach(msg => EventBus.emit(GameEvents.MESSAGE, msg));
         this._flashSprite(target.sprite, 0xff4444);
@@ -687,7 +688,8 @@ export class GameScene extends Phaser.Scene {
 
       if (result.action === 'attack') {
         const { damage, killed, messages } = resolveMeleeAttack(
-          enemy, this.player, this.rng
+          enemy, this.player, this.rng,
+          { defenderIsInvincible: devOptions.playerInvincible },
         );
         messages.forEach(msg => EventBus.emit(GameEvents.MESSAGE, msg));
         this._flashSprite(this.playerSprite, 0xff0000);
