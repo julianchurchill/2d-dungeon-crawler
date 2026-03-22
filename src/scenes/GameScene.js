@@ -24,7 +24,6 @@ import { wrapWithRunCancel } from '../utils/ActionWrapper.js';
 import { applyInventoryToggle } from '../systems/InventoryToggle.js';
 import { applySkillsToggle } from '../systems/SkillsToggle.js';
 import { SkillSystem } from '../systems/SkillSystem.js';
-import { isDevEnvironment } from '../utils/Environment.js';
 
 const TILE_SIZE = 16;
 const FOV_RADIUS = 8;
