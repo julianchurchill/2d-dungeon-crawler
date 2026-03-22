@@ -1,3 +1,4 @@
+import { FONT_FAMILY } from '../utils/FontConfig.js';
 /**
  * @module SkillLevelUpScene
  * @description A Phaser scene shown when the player levels up, allowing them to
@@ -13,7 +14,6 @@
  * ESC is ignored when choices exist — the player must make a selection.
  */
 
-import { FONT_FAMILY } from '../utils/FontConfig.js';
 import Phaser from 'phaser';
 import { MenuNavigator } from '../utils/MenuNavigator.js';
 

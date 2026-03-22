@@ -1,3 +1,4 @@
+import { FONT_FAMILY } from '../utils/FontConfig.js';
 /**
  * @module MessageLog
  * @description Renders the in-game message log in the bottom-left corner of
@@ -13,7 +14,6 @@
  * is visible).
  */
 
-import { FONT_FAMILY } from '../utils/FontConfig.js';
 import { MessageHistory } from './MessageHistory.js';
 import { EventBus } from '../utils/EventBus.js';
 import { GameEvents } from '../events/GameEvents.js';

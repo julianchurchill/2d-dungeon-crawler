@@ -1,3 +1,4 @@
+import { FONT_FAMILY } from '../utils/FontConfig.js';
 /**
  * @module InGameMenuScene
  * @description A Phaser scene that presents the in-game pause menu.
@@ -13,7 +14,6 @@
  * Keyboard navigation: UP/DOWN (or W/S) move focus; ENTER/SPACE select.
  */
 
-import { FONT_FAMILY } from '../utils/FontConfig.js';
 import Phaser from 'phaser';
 import { isDevEnvironment } from '../utils/Environment.js';
 import { MenuNavigator } from '../utils/MenuNavigator.js';

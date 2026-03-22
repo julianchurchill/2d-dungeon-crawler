@@ -1,3 +1,4 @@
+import { FONT_FAMILY } from '../utils/FontConfig.js';
 /**
  * @module HelpScene
  * @description A Phaser scene that shows in-game control instructions.
@@ -10,7 +11,6 @@
  * The Back button (or ESC) wakes GameScene + UIScene and stops this scene.
  */
 
-import { FONT_FAMILY } from '../utils/FontConfig.js';
 import Phaser from 'phaser';
 import { getHelpContent } from '../systems/HelpContent.js';
 import { isTouchDevice } from '../utils/TouchDeviceDetector.js';

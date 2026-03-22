@@ -1,3 +1,4 @@
+import { FONT_FAMILY } from '../utils/FontConfig.js';
 /**
  * @module DevMenuScene
  * @description Full-screen dev-mode overlay reached from the in-game menu.
@@ -9,7 +10,6 @@
  * Keyboard navigation: UP/DOWN (or W/S) move focus; ENTER/SPACE activate.
  */
 
-import { FONT_FAMILY } from '../utils/FontConfig.js';
 import Phaser from 'phaser';
 import { devOptions } from '../systems/DevOptions.js';
 import { MenuNavigator } from '../utils/MenuNavigator.js';

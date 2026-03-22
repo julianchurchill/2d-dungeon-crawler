@@ -1,3 +1,4 @@
+import { FONT_FAMILY } from '../utils/FontConfig.js';
 /**
  * @module DevOptionsScene
  * A Phaser Scene that presents a UI for configuring developer options
@@ -10,7 +11,6 @@
  * "BACK TO MENU" button or the ESC key.
  */
 
-import { FONT_FAMILY } from '../utils/FontConfig.js';
 import Phaser from 'phaser';
 import { devOptions, isSpawnConfigValid } from '../systems/DevOptions.js';
 import { ITEM_TYPES } from '../items/ItemTypes.js';

@@ -1,3 +1,4 @@
+import { FONT_FAMILY } from '../utils/FontConfig.js';
 /**
  * @module SkillsPanel
  * @description Phaser UI panel that lists the character's active skills.
@@ -7,7 +8,6 @@
  * caps.  Description text wraps within the available text area width.
  */
 
-import { FONT_FAMILY } from '../utils/FontConfig.js';
 import { EventBus } from '../utils/EventBus.js';
 import { GameEvents } from '../events/GameEvents.js';
 import { isTouchDevice } from '../utils/TouchDeviceDetector.js';

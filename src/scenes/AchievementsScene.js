@@ -1,3 +1,4 @@
+import { FONT_FAMILY } from '../utils/FontConfig.js';
 /**
  * @module AchievementsScene
  * @description A Phaser scene that displays all achievements with their
@@ -15,7 +16,6 @@
  *  - `achievementStore` (singleton) for live progress data.
  */
 
-import { FONT_FAMILY } from '../utils/FontConfig.js';
 import Phaser from 'phaser';
 import { ACHIEVEMENTS } from '../achievements/AchievementDefinitions.js';
 import { AchievementSystem } from '../achievements/AchievementSystem.js';
