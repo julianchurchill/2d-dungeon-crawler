@@ -190,7 +190,7 @@ export class AchievementsScene extends Phaser.Scene {
 
       // Show what the achievement grants, if anything.
       if (entry.unlocks) {
-        const unlocksTxt = this.add.text(PAD + 28, y + ROW_H - 2, `→ Unlocks: ${entry.unlocks}`, {
+        const unlocksTxt = this.add.text(PAD + 28, y + 13, `→ Unlocks: ${entry.unlocks}`, {
           fontSize: '10px',
           fontFamily: FONT_FAMILY,
           color: '#88cc88',
