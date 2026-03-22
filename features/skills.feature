@@ -37,6 +37,50 @@ Feature: Character Skills
     Then the combat damage is 10
     And the combat result has no skill messages
 
+  # ── SkillSystem upgrade (dev mode) ──────────────────────────────────────────
+
+  Scenario: Lucky Strike can be upgraded when below the max crit chance
+    Given a new skill system
+    Then Lucky Strike can be upgraded
+
+  Scenario: Upgrading Lucky Strike increments its crit chance by 1%
+    Given a new skill system
+    When Lucky Strike is upgraded
+    Then the Lucky Strike skill has a 2% trigger chance
+
+  Scenario: Upgrading Lucky Strike updates its description to reflect the new chance
+    Given a new skill system
+    When Lucky Strike is upgraded
+    Then the Lucky Strike skill description contains "2%"
+
+  Scenario: upgradeSkill returns true when the skill is upgraded successfully
+    Given a new skill system
+    When Lucky Strike is upgraded
+    Then the upgrade result is true
+
+  Scenario: upgradeSkill returns false when the skill id is not found
+    Given a new skill system
+    When the skill "unknown_skill" is upgraded
+    Then the upgrade result is false
+
+  Scenario: upgradeSkill returns false when Lucky Strike is at the crit cap
+    Given a skill system with Lucky Strike at the crit cap
+    When Lucky Strike is upgraded
+    Then the upgrade result is false
+
+  Scenario: Lucky Strike cannot be upgraded when at the crit cap
+    Given a skill system with Lucky Strike at the crit cap
+    Then Lucky Strike cannot be upgraded
+
+  Scenario: Lucky Strike crit chance stays at 50% after an upgrade attempt at the cap
+    Given a skill system with Lucky Strike at the crit cap
+    When Lucky Strike is upgraded
+    Then the Lucky Strike skill has a 50% trigger chance
+
+  Scenario: getInactiveSkills returns an empty array
+    Given a new skill system
+    Then the inactive skills list is empty
+
   # ── SkillsToggle ─────────────────────────────────────────────────────────
 
   Scenario: Opening the skills panel from player input state

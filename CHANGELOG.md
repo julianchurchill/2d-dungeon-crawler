@@ -15,6 +15,7 @@ Entries are listed newest-first within each section.
 
 ### Added
 
+- 2026-03-22 — Add dev-mode skill upgrades: SkillSystem.upgradeSkill/canUpgrade/getInactiveSkills, UPGRADE_SKILL event, and per-skill upgrade buttons in the skills panel when running in dev mode
 - 2026-03-22 — Add Lucky Strike character skill: SkillSystem with 1% crit chance for 50% bonus damage, viewable via K key or mobile button, with combat integration and SkillsToggle turn-state gate
 - 2026-03-22 — Improve EnemySpawner.js mutation score from 38% to 100%: add scenarios for floor-default max, explicit min, exact spawn coordinates, and occupied-tile skipping
 - 2026-03-21 — Improve TurnManager.js mutation score from 68% to 100%: fix turn-state step to compare against the raw string value rather than via TURN_STATE lookup

@@ -181,4 +181,12 @@ export const GameEvents = {
    * Subscribed by: GameScene
    */
   TOGGLE_SKILLS: 'toggle-skills',
+
+  /**
+   * Request to upgrade a named skill (dev mode only).
+   * Emitted by: SkillsPanel (upgrade button, dev mode)
+   * Subscribed by: GameScene (_handleUpgradeSkill)
+   * @type {{ skillId: string }}
+   */
+  UPGRADE_SKILL: 'upgrade-skill',
 };

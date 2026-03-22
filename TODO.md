@@ -63,9 +63,9 @@
 
 ## Character Skills
 
+- [x] in dev mode the player can upgrade their skills or activate new ones at any time in the skills screen
 - [x] a character can have skills that have dynamic effects. These can be viewed by pressing 'k' or using a button on the mobile interface. Initially the character has one active skill of 'Lucky Strike' which gives a 1% chance for the character to gain 50% damage on a hit during combat and shows a message when it is triggered.
 - [ ] every 1 levels the character can either choose a new skill from the pool of not activated skills to activate or upgrade an existing one. 'Lucky Strike' can be upgraded increasing the chance of activation by 1% on each upgrade to a maximum of 50%.
-- [ ] in dev mode the player can upgrade their skills or activate new ones at any time in the skills screen
 - [ ] the character initially has two deactivated skills. When active 'Ferocity' adds +1 to each attack and does not output a message. When active 'Dodge' gives a 1% chance of completely dodging an attack and shows a message when it is triggered. 'Ferocity' can be upgraded by +1 per upgrade with no maximum. 'Dodge' can be upgraded by +1% per upgrade to a maximum of 50%.
 
 ## Town

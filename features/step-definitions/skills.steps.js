@@ -48,10 +48,13 @@ Then('the skill {string} is active', function (name) {
   assert.ok(skills.some(s => s.name === name), `Expected skill "${name}" to be active`);
 });
 
-Then('the Lucky Strike skill has a 1% trigger chance', function () {
+Then('the Lucky Strike skill has a {int}% trigger chance', function (pct) {
   const skill = state.skillSystem.getSkills().find(s => s.name === 'Lucky Strike');
   assert.ok(skill, 'Lucky Strike skill not found');
-  assert.equal(skill.baseCritChance, 0.01);
+  assert.ok(
+    Math.abs(skill.baseCritChance - pct / 100) < 1e-9,
+    `Expected baseCritChance ~${pct / 100} but got ${skill.baseCritChance}`,
+  );
 });
 
 Then('the Lucky Strike skill has a 1.5x damage multiplier', function () {
@@ -119,6 +122,53 @@ Then('the combat result has no skill messages', function () {
     state.combatResult.messages.length, 1,
     `Expected only the combat message but got [${state.combatResult.messages.join(', ')}]`,
   );
+});
+
+// ─── SkillSystem upgrade steps ───────────────────────────────────────────────
+
+Given('a skill system with Lucky Strike at the crit cap', function () {
+  state.skillSystem = new SkillSystem(unluckyRNG);
+  // Drive baseCritChance to the cap via repeated upgrades.
+  while (state.skillSystem.canUpgrade('lucky_strike')) {
+    state.skillSystem.upgradeSkill('lucky_strike');
+  }
+});
+
+When('Lucky Strike is upgraded', function () {
+  state.upgradeResult = state.skillSystem.upgradeSkill('lucky_strike');
+});
+
+When('the skill {string} is upgraded', function (skillId) {
+  state.upgradeResult = state.skillSystem.upgradeSkill(skillId);
+});
+
+Then('the upgrade result is true', function () {
+  assert.equal(state.upgradeResult, true);
+});
+
+Then('the upgrade result is false', function () {
+  assert.equal(state.upgradeResult, false);
+});
+
+Then('the Lucky Strike skill description contains {string}', function (text) {
+  const skill = state.skillSystem.getSkills().find(s => s.name === 'Lucky Strike');
+  assert.ok(skill, 'Lucky Strike skill not found');
+  assert.ok(
+    skill.description.includes(text),
+    `Expected description to contain "${text}" but got: "${skill.description}"`,
+  );
+});
+
+Then('Lucky Strike can be upgraded', function () {
+  assert.equal(state.skillSystem.canUpgrade('lucky_strike'), true);
+});
+
+Then('Lucky Strike cannot be upgraded', function () {
+  assert.equal(state.skillSystem.canUpgrade('lucky_strike'), false);
+});
+
+Then('the inactive skills list is empty', function () {
+  assert.deepEqual(state.skillSystem.getInactiveSkills(), []);
 });
 
 // ─── SkillsToggle steps ──────────────────────────────────────────────────────

@@ -16,7 +16,9 @@ GameScene                ──► MESSAGE              ──► UIScene → Me
 GameScene                ──► PLAYER_LEVEL_UP      ──► UIScene → _showLevelUpBanner
 GameScene                ──► PLAYER_LEVEL_UP      ──► AchievementSystem → _handlePlayerLevelUp
 GameScene                ──► OPEN_INVENTORY       ──► UIScene → InventoryPanel.toggle
-GameScene                ──► OPEN_SKILLS          ──► UIScene → SkillsPanel.toggle
+GameScene                ──► OPEN_SKILLS          ──► UIScene → SkillsPanel.show/hide
+SkillsPanel (dev mode)   ──► UPGRADE_SKILL        ──► GameScene._handleUpgradeSkill
+GameScene                ──► OPEN_SKILLS          ──► UIScene → SkillsPanel.show (refresh after upgrade)
 GameScene                ──► GAME_OVER            ──► (none — reserved for future use)
 GameScene (once)         ──► RESTART_GAME         ──► GameScene._restart
 GameScene                ──► ENEMY_KILLED         ──► AchievementSystem → _handleEnemyKilled
@@ -73,5 +75,6 @@ GameScene (ESC key)      ──► CLOSE_MESSAGE_LOG    ──► UIScene → Me
 | `ACHIEVEMENT_UNLOCKED` | `'achievement-unlocked'` | `AchievementDefinition` | AchievementSystem | GameScene (message log), UIScene (banner) |
 | `MESSAGE_LOG_TOGGLED` | `'message-log-toggled'` | `boolean` (open) | MessageLog | GameScene (ESC gate) |
 | `CLOSE_MESSAGE_LOG` | `'close-message-log'` | *(none)* | GameScene (ESC key) | UIScene → MessageLog.close() |
-| `OPEN_SKILLS` | `'open-skills'` | `{ skills: object[] }` | GameScene (K key) | UIScene → SkillsPanel |
+| `OPEN_SKILLS` | `'open-skills'` | `{ skills: object[], isDevMode: boolean, forceRefresh?: boolean }` | GameScene (K key, upgrade refresh) | UIScene → SkillsPanel |
 | `TOGGLE_SKILLS` | `'toggle-skills'` | *(none)* | DPad (K button) | GameScene |
+| `UPGRADE_SKILL` | `'upgrade-skill'` | `{ skillId: string }` | SkillsPanel (dev mode upgrade button) | GameScene._handleUpgradeSkill |

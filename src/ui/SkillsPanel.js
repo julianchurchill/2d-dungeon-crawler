@@ -1,7 +1,8 @@
 /**
  * @module SkillsPanel
  * @description Phaser UI panel that lists the character's active skills.
- * Opened/closed via the OPEN_SKILLS EventBus event.
+ * Opened/closed via the OPEN_SKILLS EventBus event.  In dev mode each skill
+ * row shows an upgrade button (⬆) that emits UPGRADE_SKILL when pressed.
  */
 
 import { EventBus } from '../utils/EventBus.js';
@@ -9,7 +10,7 @@ import { GameEvents } from '../events/GameEvents.js';
 import { isTouchDevice } from '../utils/TouchDeviceDetector.js';
 
 const PANEL_PAD = 20;
-const PANEL_W   = 280;
+const PANEL_W   = 300;
 const ROW_H     = 52;
 const HEADER_H  = 36;
 
@@ -27,17 +28,21 @@ export class SkillsPanel {
    * @param {Phaser.Scene} scene - The owning UIScene.
    */
   constructor(scene) {
-    this.scene   = scene;
-    this.visible = false;
-    this._skills = [];
+    this.scene      = scene;
+    this.visible    = false;
+    this._skills    = [];
+    this._isDevMode = false;
     this._build();
 
-    EventBus.on(GameEvents.OPEN_SKILLS, ({ skills }) => {
-      this._skills = skills;
-      if (this.visible) {
-        this.hide();
-      } else {
+    EventBus.on(GameEvents.OPEN_SKILLS, ({ skills, isDevMode = false, forceRefresh = false }) => {
+      this._skills    = skills;
+      this._isDevMode = isDevMode;
+      if (forceRefresh || !this.visible) {
+        // Refresh (skill upgraded) or first open: render/re-render the panel.
         this.show();
+      } else {
+        // User toggled the panel closed.
+        this.hide();
       }
     });
   }
@@ -45,7 +50,6 @@ export class SkillsPanel {
   /** @private */
   _build() {
     const s = this.scene;
-    const { width, height } = s.scale;
 
     this._container = s.add.container(0, 0)
       .setDepth(300).setScrollFactor(0).setVisible(false);
@@ -109,10 +113,42 @@ export class SkillsPanel {
 
       this._container.add([nameTxt, descTxt]);
       this._rows.push(nameTxt, descTxt);
+
+      // In dev mode, show an upgrade button for each skill.
+      if (this._isDevMode) {
+        this._addUpgradeButton(skill, y);
+      }
     });
 
     this._container.setVisible(true);
     this.visible = true;
+  }
+
+  /**
+   * Adds an upgrade button (⬆) for the given skill at the given row y-offset.
+   * The button is greyed out and non-interactive when the skill is at its cap.
+   *
+   * @param {object} skill - The skill object, including a `canUpgrade` boolean flag.
+   * @param {number} y     - Y offset within the panel container.
+   * @private
+   */
+  _addUpgradeButton(skill, y) {
+    const s = this.scene;
+    const canUp = !!skill.canUpgrade;
+    const color = canUp ? '#88ff88' : '#555555';
+
+    const upBtn = s.add.text(PANEL_W - PANEL_PAD, y + ROW_H / 2 - 8, '⬆', {
+      fontSize: '18px', fontFamily: 'monospace', color,
+      stroke: '#000000', strokeThickness: 2, resolution: 2,
+    }).setOrigin(1, 0);
+
+    if (canUp) {
+      upBtn.setInteractive({ useHandCursor: true });
+      upBtn.on('pointerdown', () => EventBus.emit(GameEvents.UPGRADE_SKILL, { skillId: skill.id }));
+    }
+
+    this._container.add(upBtn);
+    this._rows.push(upBtn);
   }
 
   /**

@@ -24,6 +24,7 @@ import { wrapWithRunCancel } from '../utils/ActionWrapper.js';
 import { applyInventoryToggle } from '../systems/InventoryToggle.js';
 import { applySkillsToggle } from '../systems/SkillsToggle.js';
 import { SkillSystem } from '../systems/SkillSystem.js';
+import { isDevEnvironment } from '../utils/Environment.js';
 
 const TILE_SIZE = 16;
 const FOV_RADIUS = 8;
@@ -355,6 +356,7 @@ export class GameScene extends Phaser.Scene {
     }, this);
     EventBus.on(GameEvents.TOGGLE_INVENTORY, wrapWithRunCancel(this._runController, () => this._toggleInventory()), this);
     EventBus.on(GameEvents.TOGGLE_SKILLS,    wrapWithRunCancel(this._runController, () => this._toggleSkills()), this);
+    EventBus.on(GameEvents.UPGRADE_SKILL, ({ skillId }) => this._handleUpgradeSkill(skillId), this);
     EventBus.on(GameEvents.USE_STAIRS, wrapWithRunCancel(this._runController, () => this._tryUseStairs()), this);
     EventBus.on(GameEvents.INVENTORY_USE, (index) => this._useInventoryItem(index), this);
     EventBus.on(GameEvents.FLOOR_CHANGED, (floor) => {
@@ -605,10 +607,40 @@ export class GameScene extends Phaser.Scene {
     // so the visual panel and TurnManager state can never get out of sync.
     const toggled = applySkillsToggle(this.turnManager);
     if (toggled) {
-      EventBus.emit(GameEvents.OPEN_SKILLS, {
-        skills: this.player.skillSystem ? this.player.skillSystem.getSkills() : [],
-      });
+      EventBus.emit(GameEvents.OPEN_SKILLS, this._buildSkillsPayload());
     }
+  }
+
+  /**
+   * Handles a request (from SkillsPanel in dev mode) to upgrade a named skill.
+   * Upgrades the skill via SkillSystem and re-emits OPEN_SKILLS so the panel
+   * refreshes in place without closing.
+   *
+   * @param {string} skillId - The ID of the skill to upgrade.
+   */
+  _handleUpgradeSkill(skillId) {
+    if (this.player.skillSystem) {
+      this.player.skillSystem.upgradeSkill(skillId);
+    }
+    // Re-emit with forceRefresh so the panel re-renders without toggling.
+    EventBus.emit(GameEvents.OPEN_SKILLS, { ...this._buildSkillsPayload(), forceRefresh: true });
+  }
+
+  /**
+   * Builds the payload for the OPEN_SKILLS event, including each skill's
+   * current stats, whether it can be upgraded, and whether dev mode is active.
+   *
+   * @returns {{ skills: object[], isDevMode: boolean }}
+   */
+  _buildSkillsPayload() {
+    const skillSystem = this.player.skillSystem;
+    const skills = skillSystem
+      ? skillSystem.getSkills().map(skill => ({
+          ...skill,
+          canUpgrade: skillSystem.canUpgrade(skill.id),
+        }))
+      : [];
+    return { skills, isDevMode: isDevEnvironment() };
   }
 
   _useInventoryItem(index) {
