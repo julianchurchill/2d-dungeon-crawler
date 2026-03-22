@@ -9,6 +9,7 @@ Entries are listed newest-first within each section.
 
 ### Changed
 
+- 2026-03-22 — Run movement no longer stops for items already visible when the run started; only new items (not visible at run-start) interrupt the run
 - 2026-03-22 — SkillsPanel reads dev mode directly via isDevEnvironment() instead of receiving it in the OPEN_SKILLS event payload
 - 2026-03-22 — Extract Lucky Strike skill logic into LuckyStrikeSkill class; SkillSystem is now fully generic with no skill-specific branches
 - 2026-03-22 — Reorder CombatSystem messages so skill trigger messages appear before the combat outcome message

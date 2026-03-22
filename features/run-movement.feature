@@ -2,8 +2,9 @@ Feature: Run movement
 
   Pressing SHIFT+direction auto-runs the player one tile per turn in that
   direction. Each step is a normal turn. The run stops when the next tile
-  is blocked, an entity occupies the next tile, or any enemy or item is
-  currently visible in the field of view.
+  is blocked, an entity occupies the next tile, any enemy is visible in the
+  field of view, or a new item (not visible when the run started) comes into
+  view. Items that were already visible when the run began do not stop it.
 
   Scenario: Run starts and is active
     Given no run is in progress
@@ -23,13 +24,18 @@ Feature: Run movement
 
   Scenario: Run stops when an enemy is visible
     Given a run to the right is in progress
-    When the run is checked with a clear path and an entity visible
+    When the run is checked with a clear path and an enemy visible
     Then the run should not be active
 
-  Scenario: Run stops when an item is visible
+  Scenario: Run stops when a new item comes into view
     Given a run to the right is in progress
-    When the run is checked with a clear path and an entity visible
+    When the run is checked with a clear path and a new item visible
     Then the run should not be active
+
+  Scenario: Run continues when only known items are visible
+    Given a run to the right is in progress
+    When the run is checked with a clear path and only known items visible
+    Then the run should still be active
 
   Scenario: Cancel stops the run
     Given a run to the right is in progress

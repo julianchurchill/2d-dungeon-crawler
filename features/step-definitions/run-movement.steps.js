@@ -31,15 +31,23 @@ When('the player starts a run upward', function () {
 });
 
 When('the run is checked with a clear path and nothing visible', function () {
-  this.runController.nextDir(false, false);
+  this.runController.nextDir(false, false, false);
 });
 
 When('the run is checked with a blocked path and nothing visible', function () {
-  this.runController.nextDir(true, false);
+  this.runController.nextDir(true, false, false);
 });
 
-When('the run is checked with a clear path and an entity visible', function () {
-  this.runController.nextDir(false, true);
+When('the run is checked with a clear path and an enemy visible', function () {
+  this.runController.nextDir(false, true, false);
+});
+
+When('the run is checked with a clear path and a new item visible', function () {
+  this.runController.nextDir(false, false, true);
+});
+
+When('the run is checked with a clear path and only known items visible', function () {
+  this.runController.nextDir(false, false, false);
 });
 
 When('the run is cancelled', function () {
