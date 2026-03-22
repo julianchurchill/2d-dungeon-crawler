@@ -17,7 +17,7 @@ export function getInventoryPanelTitle(isTouchDev) {
 
 const COLS = 4;
 const ROWS = 5;
-const SLOT_SIZE = 44;
+const SLOT_SIZE = 54;
 const SLOT_PAD = 4;
 const PANEL_PAD = 16;
 
@@ -36,7 +36,7 @@ export class InventoryPanel {
 
     const panelW = COLS * (SLOT_SIZE + SLOT_PAD) + PANEL_PAD * 2;
     // Extra height: 44px header area (title may wrap to 2 lines) + PANEL_PAD footer
-    const panelH = ROWS * (SLOT_SIZE + SLOT_PAD) + PANEL_PAD * 2 + 44;
+    const panelH = ROWS * (SLOT_SIZE + SLOT_PAD) + PANEL_PAD * 2 + 55;
     const panelX = Math.floor((width - panelW) / 2);
     const panelY = Math.floor((height - panelH) / 2);
 
@@ -83,11 +83,12 @@ export class InventoryPanel {
           .setStrokeStyle(1, 0x445566)
           .setInteractive({ useHandCursor: false });
 
-        const icon = s.add.text(sx, sy - 4, '', {
+        const icon = s.add.text(sx, sy - 7, '', {
           fontSize: '18px', resolution: 2,
         }).setOrigin(0.5);
 
-        const label = s.add.text(sx, sy + 14, '', {
+        // Label sits below the icon; word wrap keeps names inside the wider slot.
+        const label = s.add.text(sx, sy + 7, '', {
           fontSize: '10px', fontFamily: FONT_FAMILY, color: '#cccccc',
           wordWrap: { width: SLOT_SIZE - 2 }, align: 'center', resolution: 2,
         }).setOrigin(0.5);
@@ -281,7 +282,7 @@ export class InventoryPanel {
   resize(width, height) {
     const panelW = COLS * (SLOT_SIZE + SLOT_PAD) + PANEL_PAD * 2;
     // Extra height: 44px header area (title may wrap to 2 lines) + PANEL_PAD footer
-    const panelH = ROWS * (SLOT_SIZE + SLOT_PAD) + PANEL_PAD * 2 + 44;
+    const panelH = ROWS * (SLOT_SIZE + SLOT_PAD) + PANEL_PAD * 2 + 55;
     this._container.setPosition(
       Math.floor((width - panelW) / 2),
       Math.floor((height - panelH) / 2)
