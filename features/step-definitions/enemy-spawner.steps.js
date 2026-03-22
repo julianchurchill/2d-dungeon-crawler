@@ -30,6 +30,12 @@ const zeroRNG = {
   pick: (arr) => arr[0],
 };
 
+/** RNG whose nextInt always returns its min argument and pick always returns the first element. */
+const minRNG = {
+  nextInt: (min) => min,
+  pick: (arr) => arr[0],
+};
+
 // ─── getSpawnTable scenarios ──────────────────────────────────────────────
 
 When('the spawn table is requested for floor {int} with no weight override', function (floor) {
@@ -62,6 +68,24 @@ Given('an EnemySpawner with max enemies per room {int}', function (max) {
   });
 });
 
+Given('an EnemySpawner with null max enemies per room and a maximum RNG', function () {
+  this.spawned = [];
+  this.spawner = new EnemySpawner(maxRNG, {
+    spawnWeights: null,
+    minEnemiesPerRoom: null,
+    maxEnemiesPerRoom: null,
+  });
+});
+
+Given('an EnemySpawner with min {int} max {int} and a minimum RNG', function (min, max) {
+  this.spawned = [];
+  this.spawner = new EnemySpawner(minRNG, {
+    spawnWeights: null,
+    minEnemiesPerRoom: min,
+    maxEnemiesPerRoom: max,
+  });
+});
+
 Given('an EnemySpawner with max enemies per room {int} and a maximum RNG', function (max) {
   this.spawned = [];
   this.spawner = new EnemySpawner(maxRNG, {
@@ -83,6 +107,22 @@ When('spawning enemies for {int} room(s) on floor {int}', function (roomCount, f
 
 Then('no enemies should have been spawned', function () {
   assert.equal(this.spawned.length, 0, `Expected no spawns but got ${this.spawned.length}`);
+});
+
+When('spawning enemies for {int} room(s) on floor {int} with all tiles occupied', function (roomCount, floor) {
+  const rooms = makeRooms(roomCount);
+  this.spawner.spawnForRooms(
+    rooms,
+    floor,
+    () => true,
+    (x, y, type) => this.spawned.push({ x, y, type }),
+  );
+});
+
+Then('the first enemy should have been spawned at x {int} y {int}', function (x, y) {
+  assert.ok(this.spawned.length > 0, `Expected at least one enemy but got none`);
+  assert.equal(this.spawned[0].x, x, `Expected x=${x} but got ${this.spawned[0].x}`);
+  assert.equal(this.spawned[0].y, y, `Expected y=${y} but got ${this.spawned[0].y}`);
 });
 
 Then('{int} enemies should have been spawned', function (expected) {
