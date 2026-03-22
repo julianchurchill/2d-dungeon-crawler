@@ -256,7 +256,7 @@ export class MainMenuScene extends Phaser.Scene {
    */
   _buildVersion(width, height) {
     this.add.text(width - 8, height - 8, APP_VERSION_STRING, {
-      fontSize: '9px',
+      fontSize: '11px',
       fontFamily: FONT_FAMILY,
       color: '#445566',
       resolution: 2,

@@ -232,7 +232,7 @@ export class MessageLog {
     // Header label — ESC hint omitted on touch devices.
     this._panelHeader = this.scene.add.text(
       PAD_X + 4, panelY + 4, getMessageLogHeaderText(isTouchDevice()), {
-        fontSize: '10px', fontFamily: FONT_FAMILY, color: '#446688', resolution: 2,
+        fontSize: '11px', fontFamily: FONT_FAMILY, color: '#446688', resolution: 2,
       }
     ).setScrollFactor(0).setDepth(200);
 
@@ -257,7 +257,7 @@ export class MessageLog {
     this._scrollHint = this.scene.add.text(
       PAD_X + 4, rowStartY + EXPANDED_LINES * LINE_H + 2,
       'Wheel to scroll', {
-        fontSize: '9px', fontFamily: FONT_FAMILY, color: '#334455', resolution: 2,
+        fontSize: '11px', fontFamily: FONT_FAMILY, color: '#334455', resolution: 2,
       }
     ).setScrollFactor(0).setDepth(200);
 
