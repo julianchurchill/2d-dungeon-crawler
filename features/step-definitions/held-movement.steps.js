@@ -71,6 +71,10 @@ When('the game over event fires', function () {
   this.mockEventBus.emit('game-over');
 });
 
+When('clear is called on the held movement tracker', function () {
+  this.tracker.clear();
+});
+
 // Arrow keys
 
 When('the UP key is pressed on the keyboard', function () {

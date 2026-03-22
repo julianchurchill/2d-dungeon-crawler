@@ -688,6 +688,10 @@ export class GameScene extends Phaser.Scene {
     const hasUpgradeable = skillSystem.getSkills().some(s => s.canUpgrade);
 
     if (hasInactive || hasUpgradeable) {
+      // Clear movement state before sleeping so missed key-release events
+      // cannot cause phantom auto-repeat or run movement on wake.
+      this.heldMovement.clear();
+      this._runController.cancel();
       this.scene.launch('SkillLevelUpScene', { skillSystem });
       this.scene.sleep('UIScene');
       this.scene.sleep('GameScene');

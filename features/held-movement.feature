@@ -86,6 +86,13 @@ Feature: Hold Key Movement
     When the open inventory event fires
     Then no movement key should be held
 
+  # clear() method
+
+  Scenario: Calling clear() removes any held direction
+    Given the right key is held on the keyboard
+    When clear is called on the held movement tracker
+    Then no movement key should be held
+
   # D-pad events
 
   Scenario: D-pad hold start sets the held direction
