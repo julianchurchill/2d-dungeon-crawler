@@ -13,6 +13,7 @@ Entries are listed newest-first within each section.
 
 ### Changed
 
+- 2026-03-22 — InGameMenuScene keyboard focus indicator changed from text colour to a white outline rectangle around the focused button
 - 2026-03-22 — HUD clarity improvements: larger fonts (10px→12px HP, 10px→11px stats), stats row repositioned below HP bar with gap before XP bar, HP/XP background bars given 1px black outline and filled bars given 1px white outline, bar widths increased to 130px
 - 2026-03-22 — SkillSystem constructor now accepts injected skill instances; GameScene owns the specific skill classes (Dependency Inversion)
 - 2026-03-22 — applyOnDefendSkills returns an `affected` flag; CombatSystem uses it to bypass takeDamage without knowing Dodge-specific semantics
