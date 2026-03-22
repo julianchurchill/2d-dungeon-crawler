@@ -26,7 +26,12 @@ Feature: Achievements screen display list
     When the achievements display list is retrieved
     Then the "goblin_killer" entry should have unlocks "Goblin Hunting skill"
 
+  Scenario: An achievement that grants Night Vision carries the unlocks field
+    Given the achievement system is initialised
+    When the achievements display list is retrieved
+    Then the "burrower" entry should have unlocks "Night Vision skill"
+
   Scenario: An achievement with no unlock has no unlocks field
     Given the achievement system is initialised
     When the achievements display list is retrieved
-    Then the "burrower" entry should have no unlocks
+    Then the "orc_killer" entry should have no unlocks

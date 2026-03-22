@@ -35,4 +35,10 @@ export const SKILLS = Object.freeze({
     targetType: 'goblin',
     bonusMultiplier: 0.10,
   },
+  NIGHT_VISION: {
+    id: 'night_vision',
+    name: 'Night Vision',
+    description: 'Extends your field of view by 1 tile.',
+    fovStep: 1,
+  },
 });
