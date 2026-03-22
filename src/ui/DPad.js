@@ -57,11 +57,20 @@ const DPAD_LEFT_OFFSET = PAD + Math.ceil(BTN_SIZE / 2) + 12; // ≈ 95 px
 const DOUBLE_TAP_MS = 300;
 
 export class DPad {
+  /**
+   * @param {Phaser.Scene} scene - The parent scene that owns this D-pad.
+   */
   constructor(scene) {
     this.scene = scene;
     this._container = null;
     /** @type {DoubleTapDetector} Detects double-taps to trigger runs. */
     this._doubleTap = new DoubleTapDetector(DOUBLE_TAP_MS);
+    /** @type {boolean} Whether the centre sub-menu is currently open. */
+    this._subMenuOpen = false;
+    /** @type {Phaser.GameObjects.Text|null} Label of the centre toggle button. */
+    this._centreTxt = null;
+    /** @type {Array<Phaser.GameObjects.GameObject>} Objects shown only in sub-menu state. */
+    this._subMenuItems = [];
     this._build();
   }
 
@@ -119,15 +128,15 @@ export class DPad {
       this._container.add([bg, txt]);
     }
 
-    // ── Action buttons fill the unused corners of the 3×3 grid ──────────────
+    // ── Action buttons ────────────────────────────────────────────────────────
     //
-    //   [≡]  [▲]  [ ]       (-PAD,-PAD)  (0,-PAD)  (PAD,-PAD)
-    //   [◀] [INV] [▶]   →   (-PAD,  0)   (0,  0)   (PAD,  0)
-    //   [▼▼] [▼]  [ ]       (-PAD, PAD)  (0, PAD)  (PAD, PAD)
+    //   Normal:                Sub-menu open:
+    //   [≡]  [▲]  [ ]         [≡]  [▲] [INV]
+    //   [◀] [···] [▶]    →    [◀]  [✕] [▶]
+    //   [▼▼] [▼]  [ ]         [▼▼] [▼] [ K ]
 
-    // INV — centre, thumb-accessible without repositioning the hand.
-    this._addActionBtn(0, 0, COLOR_ACTION_FILL, COLOR_ACTION_STROKE, 'INV', COLOR_ACTION_LABEL,
-      () => EventBus.emit(GameEvents.TOGGLE_INVENTORY));
+    // Centre ··· — toggles the INV / K sub-menu.
+    this._buildCentreButton();
 
     // Menu (≡) — top-left corner; opens the in-game menu or closes the message log.
     this._addActionBtn(-PAD, -PAD, COLOR_MENU_FILL, COLOR_MENU_STROKE, '≡', COLOR_MENU_LABEL,
@@ -137,9 +146,112 @@ export class DPad {
     this._addActionBtn(-PAD, PAD, COLOR_STAIRS_FILL, COLOR_STAIRS_STROKE, '▼▼', COLOR_STAIRS_LABEL,
       () => EventBus.emit(GameEvents.USE_STAIRS));
 
-    // Skills (K) — top-right corner.
-    this._addActionBtn(PAD, -PAD, COLOR_ACTION_FILL, COLOR_ACTION_STROKE, 'K', COLOR_ACTION_LABEL,
-      () => EventBus.emit(GameEvents.TOGGLE_SKILLS));
+    // Sub-menu buttons — hidden until the centre button is tapped.
+    this._buildSubMenuButtons();
+  }
+
+  /**
+   * Creates the centre ··· / ✕ toggle button.
+   * Tapping it opens or closes the INV / K sub-menu.
+   */
+  _buildCentreButton() {
+    const s = this.scene;
+    const bg = s.add.rectangle(0, 0, BTN_SIZE, BTN_SIZE, COLOR_ACTION_FILL, 0.8)
+      .setStrokeStyle(1, COLOR_ACTION_STROKE)
+      .setInteractive({ useHandCursor: false });
+
+    this._centreTxt = s.add.text(0, 0, '···', {
+      fontSize: '13px', fontFamily: 'monospace', color: COLOR_ACTION_LABEL, resolution: 2,
+    }).setOrigin(0.5);
+
+    bg.on('pointerdown', (ptr, lx, ly, evt) => {
+      evt.stopPropagation();
+      bg.setAlpha(1);
+      this._toggleSubMenu();
+    });
+    bg.on('pointerup',  () => bg.setAlpha(0.8));
+    bg.on('pointerout', () => bg.setAlpha(0.8));
+
+    this._container.add([bg, this._centreTxt]);
+  }
+
+  /**
+   * Creates the INV (top-right) and K (bottom-right) sub-menu buttons and
+   * registers them in _subMenuItems so they can be shown/hidden as a group.
+   * Both buttons are hidden by default.
+   */
+  _buildSubMenuButtons() {
+    const invItems = this._createSubBtn(PAD, -PAD, 'INV', () => {
+      this._closeSubMenu();
+      EventBus.emit(GameEvents.TOGGLE_INVENTORY);
+    });
+    const skillItems = this._createSubBtn(PAD, PAD, 'K', () => {
+      this._closeSubMenu();
+      EventBus.emit(GameEvents.TOGGLE_SKILLS);
+    });
+
+    this._subMenuItems = [...invItems, ...skillItems];
+    for (const obj of this._subMenuItems) obj.setVisible(false);
+    this._container.add(this._subMenuItems);
+  }
+
+  /**
+   * Creates a sub-menu action button and returns the [bg, txt] pair.
+   *
+   * @param {number}   x        - Container-relative X position.
+   * @param {number}   y        - Container-relative Y position.
+   * @param {string}   label    - Button label text.
+   * @param {function} onPress  - Called when the button is tapped.
+   * @returns {Phaser.GameObjects.GameObject[]}
+   */
+  _createSubBtn(x, y, label, onPress) {
+    const s = this.scene;
+    const bg = s.add.rectangle(x, y, BTN_SIZE, BTN_SIZE, COLOR_ACTION_FILL, 0.8)
+      .setStrokeStyle(1, COLOR_ACTION_STROKE)
+      .setInteractive({ useHandCursor: false });
+
+    const txt = s.add.text(x, y, label, {
+      fontSize: '13px', fontFamily: 'monospace', color: COLOR_ACTION_LABEL, resolution: 2,
+    }).setOrigin(0.5);
+
+    bg.on('pointerdown', (ptr, lx, ly, evt) => {
+      evt.stopPropagation();
+      bg.setAlpha(1);
+      onPress();
+    });
+    bg.on('pointerup',  () => bg.setAlpha(0.8));
+    bg.on('pointerout', () => bg.setAlpha(0.8));
+
+    return [bg, txt];
+  }
+
+  /**
+   * Opens the INV / K sub-menu and updates the centre button label to ✕.
+   */
+  _openSubMenu() {
+    this._subMenuOpen = true;
+    this._centreTxt.setText('✕');
+    for (const obj of this._subMenuItems) obj.setVisible(true);
+  }
+
+  /**
+   * Closes the INV / K sub-menu and restores the centre button label to ···.
+   */
+  _closeSubMenu() {
+    this._subMenuOpen = false;
+    this._centreTxt.setText('···');
+    for (const obj of this._subMenuItems) obj.setVisible(false);
+  }
+
+  /**
+   * Toggles the sub-menu open or closed.
+   */
+  _toggleSubMenu() {
+    if (this._subMenuOpen) {
+      this._closeSubMenu();
+    } else {
+      this._openSubMenu();
+    }
   }
 
   /**
