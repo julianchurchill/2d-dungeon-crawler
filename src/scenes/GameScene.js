@@ -24,6 +24,9 @@ import { wrapWithRunCancel } from '../utils/ActionWrapper.js';
 import { applyInventoryToggle } from '../systems/InventoryToggle.js';
 import { applySkillsToggle } from '../systems/SkillsToggle.js';
 import { SkillSystem } from '../systems/SkillSystem.js';
+import { LuckyStrikeSkill } from '../skills/LuckyStrikeSkill.js';
+import { FerocitySkill } from '../skills/FerocitySkill.js';
+import { DodgeSkill } from '../skills/DodgeSkill.js';
 
 const TILE_SIZE = 16;
 const FOV_RADIUS = 8;
@@ -57,7 +60,7 @@ export class GameScene extends Phaser.Scene {
     this.items = [];  // floor items (not in inventory)
 
     // Player
-    this.player = new Player(0, 0, new SkillSystem(this.rng));
+    this.player = new Player(0, 0, new SkillSystem(this.rng, [new LuckyStrikeSkill()], [new FerocitySkill(), new DodgeSkill()]));
 
     // Apply developer options (level, floor, starting items) before generating
     // the first floor so that floorManager.currentFloor is already set when
@@ -800,7 +803,7 @@ export class GameScene extends Phaser.Scene {
     EventBus.removeAllListeners();
 
     this.rng = createRNG(Date.now());
-    this.player = new Player(0, 0, new SkillSystem(this.rng));
+    this.player = new Player(0, 0, new SkillSystem(this.rng, [new LuckyStrikeSkill()], [new FerocitySkill(), new DodgeSkill()]));
     this.floorManager = new FloorManager();
     this.turnManager = new TurnManager();
     this.playerSprite = null;

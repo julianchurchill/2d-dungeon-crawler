@@ -9,6 +9,8 @@ Entries are listed newest-first within each section.
 
 ### Changed
 
+- 2026-03-22 — SkillSystem constructor now accepts injected skill instances; GameScene owns the specific skill classes (Dependency Inversion)
+- 2026-03-22 — applyOnDefendSkills returns an `affected` flag; CombatSystem uses it to bypass takeDamage without knowing Dodge-specific semantics
 - 2026-03-22 — Mobile D-pad centre button is now a ··· toggle that reveals INV and K sub-buttons; tapping either fires the action and collapses the sub-menu
 - 2026-03-22 — Run movement no longer stops for items already visible when the run started; only new items (not visible at run-start) interrupt the run
 - 2026-03-22 — SkillsPanel reads dev mode directly via isDevEnvironment() instead of receiving it in the OPEN_SKILLS event payload

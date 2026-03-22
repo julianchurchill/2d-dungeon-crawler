@@ -1,9 +1,17 @@
 import { Given, When, Then, Before } from '@cucumber/cucumber';
 import assert from 'node:assert/strict';
 import { SkillSystem } from '../../src/systems/SkillSystem.js';
+import { LuckyStrikeSkill } from '../../src/skills/LuckyStrikeSkill.js';
+import { FerocitySkill } from '../../src/skills/FerocitySkill.js';
+import { DodgeSkill } from '../../src/skills/DodgeSkill.js';
 import { applySkillsToggle } from '../../src/systems/SkillsToggle.js';
 import { resolveMeleeAttack } from '../../src/systems/CombatSystem.js';
 import { TurnManager, TURN_STATE } from '../../src/systems/TurnManager.js';
+
+/** Creates a standard SkillSystem matching game defaults: Lucky Strike active, Ferocity+Dodge inactive. */
+function makeSkillSystem(rng) {
+  return new SkillSystem(rng, [new LuckyStrikeSkill()], [new FerocitySkill(), new DodgeSkill()]);
+}
 
 // ─── Shared state ────────────────────────────────────────────────────────────
 
@@ -24,15 +32,15 @@ const unluckyRNG = { nextInt: () => 0, nextBool: () => false };
 // ─── SkillSystem steps ───────────────────────────────────────────────────────
 
 Given('a new skill system', function () {
-  state.skillSystem = new SkillSystem(unluckyRNG);
+  state.skillSystem = makeSkillSystem(unluckyRNG);
 });
 
 Given('a skill system where Lucky Strike always triggers', function () {
-  state.skillSystem = new SkillSystem(luckyRNG);
+  state.skillSystem = makeSkillSystem(luckyRNG);
 });
 
 Given('a skill system where Lucky Strike never triggers', function () {
-  state.skillSystem = new SkillSystem(unluckyRNG);
+  state.skillSystem = makeSkillSystem(unluckyRNG);
 });
 
 When('the skill system processes a hit of {int} damage', function (damage) {
@@ -127,7 +135,7 @@ Then('the combat result has no skill messages', function () {
 // ─── SkillSystem upgrade steps ───────────────────────────────────────────────
 
 Given('a skill system with Lucky Strike at the crit cap', function () {
-  state.skillSystem = new SkillSystem(unluckyRNG);
+  state.skillSystem = makeSkillSystem(unluckyRNG);
   // Drive baseCritChance to the cap via repeated upgrades.
   while (state.skillSystem.canUpgrade('lucky_strike')) {
     state.skillSystem.upgradeSkill('lucky_strike');
@@ -210,7 +218,7 @@ When('Ferocity is activated', function () {
 // ─── Ferocity steps ───────────────────────────────────────────────────────────
 
 Given('a skill system with Ferocity active', function () {
-  state.skillSystem = new SkillSystem(unluckyRNG);
+  state.skillSystem = makeSkillSystem(unluckyRNG);
   state.skillSystem.activateSkill('ferocity');
 });
 
@@ -235,22 +243,22 @@ Then('Ferocity has a bonus of {int}', function (bonus) {
 // ─── Dodge steps ──────────────────────────────────────────────────────────────
 
 Given('a skill system with Dodge active', function () {
-  state.skillSystem = new SkillSystem(unluckyRNG);
+  state.skillSystem = makeSkillSystem(unluckyRNG);
   state.skillSystem.activateSkill('dodge');
 });
 
 Given('a skill system with Dodge active and dodge always triggers', function () {
-  state.skillSystem = new SkillSystem(luckyRNG);
+  state.skillSystem = makeSkillSystem(luckyRNG);
   state.skillSystem.activateSkill('dodge');
 });
 
 Given('a skill system with Dodge active and dodge never triggers', function () {
-  state.skillSystem = new SkillSystem(unluckyRNG);
+  state.skillSystem = makeSkillSystem(unluckyRNG);
   state.skillSystem.activateSkill('dodge');
 });
 
 Given('a skill system with Dodge at the cap', function () {
-  state.skillSystem = new SkillSystem(unluckyRNG);
+  state.skillSystem = makeSkillSystem(unluckyRNG);
   state.skillSystem.activateSkill('dodge');
   while (state.skillSystem.canUpgrade('dodge')) {
     state.skillSystem.upgradeSkill('dodge');

@@ -28,24 +28,19 @@ export function resolveMeleeAttack(attacker, defender, rng, { defenderIsInvincib
     messages.push(...skillResult.messages);
   }
 
-  // Apply on-defend skill effects (e.g. Dodge) from the defender's skill system.
-  let dodged = false;
+  // Apply on-defend skill effects from the defender's skill system.
   const defSkillSystem = defender.skillSystem ?? null;
+  let defResult = null;
   if (defSkillSystem) {
-    const defResult = defSkillSystem.applyOnDefendSkills(attackDamage);
-    // Dodge produces damage === 0; collect its messages (e.g. 'Dodged!').
-    if (defResult.damage === 0) {
-      dodged = true;
-      messages.push(...defResult.messages);
-    } else {
-      attackDamage = defResult.damage;
-      messages.push(...defResult.messages);
-    }
+    defResult = defSkillSystem.applyOnDefendSkills(attackDamage);
+    messages.push(...defResult.messages);
   }
 
-  // When the defender is invincible or a dodge triggers, skip takeDamage entirely so the
-  // entity's minimum-1-damage floor does not apply.
-  const actualDamage = (defenderIsInvincible || dodged) ? 0 : defender.takeDamage(attackDamage);
+  // When a defend skill had an effect, use its damage directly (bypassing the
+  // entity's minimum-1 floor in takeDamage).  Invincibility also skips takeDamage.
+  const actualDamage = defenderIsInvincible ? 0
+    : defResult?.affected        ? defResult.damage
+    : defender.takeDamage(attackDamage);
   const killed = defender.isDead();
 
   const atkName = attacker.name || 'You';

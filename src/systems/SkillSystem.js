@@ -1,32 +1,33 @@
 /**
  * @module SkillSystem
- * @description Manages the character's active skills and applies their on-hit effects
- * during combat.  All state is pure JS — no Phaser dependency.
+ * @description Manages the character's active and inactive skills and applies their
+ * effects during combat.  All state is pure JS — no Phaser dependency.
  *
  * Skills are stored as class instances that each implement:
  *   - canUpgrade()  → boolean
  *   - upgrade()     → boolean
  *   - canDowngrade() → boolean
  *   - downgrade()   → boolean
- *   - applyOnHit(baseDamage, rng) → { damage, messages }
+ *   - applyOnHit(baseDamage, rng)     → { damage, messages }   (optional)
+ *   - applyOnDefend(incomingDamage, rng) → { damage, messages } (optional)
  *   - toData()      → plain-object snapshot for UI
+ *
+ * Skill instances are injected at construction time — SkillSystem has no
+ * dependency on any specific skill class.
  */
-
-import { LuckyStrikeSkill } from '../skills/LuckyStrikeSkill.js';
-import { FerocitySkill } from '../skills/FerocitySkill.js';
-import { DodgeSkill } from '../skills/DodgeSkill.js';
 
 export class SkillSystem {
   /**
-   * Creates a SkillSystem pre-loaded with the default starting skill (Lucky Strike).
-   * @param {object} rng - RNG instance used for chance rolls.
+   * Creates a SkillSystem with the given active and inactive skill instances.
+   *
+   * @param {object}   rng            - RNG instance used for chance rolls.
+   * @param {object[]} activeSkills   - Skill instances that are immediately active.
+   * @param {object[]} inactiveSkills - Skill instances available to activate later.
    */
-  constructor(rng) {
+  constructor(rng, activeSkills = [], inactiveSkills = []) {
     this.rng = rng;
-    // Lucky Strike is always the character's first active skill.
-    this._activeSkills = [new LuckyStrikeSkill()];
-    // Ferocity and Dodge start inactive; they can be activated via activateSkill().
-    this._inactiveSkills = [new FerocitySkill(), new DodgeSkill()];
+    this._activeSkills = activeSkills;
+    this._inactiveSkills = inactiveSkills;
   }
 
   /**
@@ -102,8 +103,12 @@ export class SkillSystem {
    * Applies on-defend skill effects to an incoming damage value, delegating to
    * each active skill that exposes `applyOnDefend`, accumulating damage and messages.
    *
+   * Returns `affected: true` when at least one skill modified the damage, signalling
+   * to the caller that the returned `damage` should be used directly (bypassing any
+   * entity-level damage floor such as `takeDamage`).
+   *
    * @param {number} incomingDamage - The incoming damage before skill modifications.
-   * @returns {{ damage: number, messages: string[] }}
+   * @returns {{ affected: boolean, damage: number, messages: string[] }}
    */
   applyOnDefendSkills(incomingDamage) {
     let damage = incomingDamage;
@@ -117,7 +122,7 @@ export class SkillSystem {
       }
     }
 
-    return { damage, messages };
+    return { affected: damage !== incomingDamage, damage, messages };
   }
 
   /**
