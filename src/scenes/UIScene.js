@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { HUD } from '../ui/HUD.js';
 import { DPad } from '../ui/DPad.js';
 import { InventoryPanel } from '../ui/InventoryPanel.js';
+import { SkillsPanel } from '../ui/SkillsPanel.js';
 import { MessageLog } from '../ui/MessageLog.js';
 import { EventBus } from '../utils/EventBus.js';
 import { GameEvents } from '../events/GameEvents.js';
@@ -21,6 +22,7 @@ export class UIScene extends Phaser.Scene {
     this.hud = new HUD(this);
     this.messageLog = new MessageLog(this);
     this.inventoryPanel = new InventoryPanel(this);
+    this.skillsPanel = new SkillsPanel(this);
     this.dpad = new DPad(this);
     // Show touch controls only on devices that support touch input
     this.dpad.setVisible(isTouchDevice());

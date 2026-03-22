@@ -1,9 +1,16 @@
 import { TILE } from '../utils/TileTypes.js';
 
 export class Player {
-  constructor(x, y) {
+  /**
+   * @param {number} x
+   * @param {number} y
+   * @param {import('../systems/SkillSystem.js').SkillSystem|null} skillSystem
+   */
+  constructor(x, y, skillSystem = null) {
     this.x = x;
     this.y = y;
+    /** @type {import('../systems/SkillSystem.js').SkillSystem|null} */
+    this.skillSystem = skillSystem;
     this.stats = {
       hp: 30,
       maxHp: 30,

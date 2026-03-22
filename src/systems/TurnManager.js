@@ -4,6 +4,7 @@ export const TURN_STATE = Object.freeze({
   ENEMY_ACTING: 'ENEMY_ACTING',
   GAME_OVER: 'GAME_OVER',
   INVENTORY: 'INVENTORY',
+  SKILLS: 'SKILLS',
 });
 
 export class TurnManager {
@@ -33,5 +34,9 @@ export class TurnManager {
 
   setInventory() {
     this.state = TURN_STATE.INVENTORY;
+  }
+
+  setSkills() {
+    this.state = TURN_STATE.SKILLS;
   }
 }

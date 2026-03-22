@@ -105,6 +105,10 @@ export class DPad {
     // Stairs — bottom-left corner; less frequently used.
     this._addActionBtn(-PAD, PAD, 0x554433, 0xccaa88, '▼▼', '#ffcc88',
       () => EventBus.emit(GameEvents.USE_STAIRS));
+
+    // Skills (K) — top-right corner.
+    this._addActionBtn(PAD, -PAD, 0x334455, 0x88aacc, 'K', '#aaccff',
+      () => EventBus.emit(GameEvents.TOGGLE_SKILLS));
   }
 
   /**

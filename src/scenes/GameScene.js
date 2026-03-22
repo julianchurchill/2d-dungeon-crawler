@@ -22,6 +22,8 @@ import { AchievementSystem } from '../achievements/AchievementSystem.js';
 import { handleMobileMenuPress } from '../systems/MobileMenuHandler.js';
 import { wrapWithRunCancel } from '../utils/ActionWrapper.js';
 import { applyInventoryToggle } from '../systems/InventoryToggle.js';
+import { applySkillsToggle } from '../systems/SkillsToggle.js';
+import { SkillSystem } from '../systems/SkillSystem.js';
 
 const TILE_SIZE = 16;
 const FOV_RADIUS = 8;
@@ -55,7 +57,7 @@ export class GameScene extends Phaser.Scene {
     this.items = [];  // floor items (not in inventory)
 
     // Player
-    this.player = new Player(0, 0);
+    this.player = new Player(0, 0, new SkillSystem(this.rng));
 
     // Apply developer options (level, floor, starting items) before generating
     // the first floor so that floorManager.currentFloor is already set when
@@ -306,6 +308,7 @@ export class GameScene extends Phaser.Scene {
 
     // Non-movement actions: cancel any active run before executing.
     this.input.keyboard.on('keydown-I',           wrapWithRunCancel(this._runController, () => this._toggleInventory()));
+    this.input.keyboard.on('keydown-K',           wrapWithRunCancel(this._runController, () => this._toggleSkills()));
     this.input.keyboard.on('keydown-PERIOD',       wrapWithRunCancel(this._runController, () => this._tryUseStairs()));
     this.input.keyboard.on('keydown-GREATER_THAN', wrapWithRunCancel(this._runController, () => this._tryUseStairs()));
     // ESC closes the message log history panel when it is open; otherwise
@@ -351,6 +354,7 @@ export class GameScene extends Phaser.Scene {
       );
     }, this);
     EventBus.on(GameEvents.TOGGLE_INVENTORY, wrapWithRunCancel(this._runController, () => this._toggleInventory()), this);
+    EventBus.on(GameEvents.TOGGLE_SKILLS,    wrapWithRunCancel(this._runController, () => this._toggleSkills()), this);
     EventBus.on(GameEvents.USE_STAIRS, wrapWithRunCancel(this._runController, () => this._tryUseStairs()), this);
     EventBus.on(GameEvents.INVENTORY_USE, (index) => this._useInventoryItem(index), this);
     EventBus.on(GameEvents.FLOOR_CHANGED, (floor) => {
@@ -474,10 +478,11 @@ export class GameScene extends Phaser.Scene {
       duration: 40,
       yoyo: true,
       onComplete: () => {
-        const { damage, killed, message } = resolveMeleeAttack(
-          this.player, target, this.rng
+        const { damage, killed, message, skillMessages } = resolveMeleeAttack(
+          this.player, target, this.rng, this.player.skillSystem
         );
         EventBus.emit(GameEvents.MESSAGE, message);
+        skillMessages.forEach(msg => EventBus.emit(GameEvents.MESSAGE, msg));
         this._flashSprite(target.sprite, 0xff4444);
 
         if (killed) {
@@ -600,6 +605,21 @@ export class GameScene extends Phaser.Scene {
     }
   }
 
+  _toggleSkills() {
+    // Only emit the open/close event when a state transition is actually possible,
+    // so the visual panel and TurnManager state can never get out of sync.
+    const toggled = applySkillsToggle(
+      this.turnManager.state,
+      () => this.turnManager.setSkills(),
+      () => this.turnManager.setPlayerInput(),
+    );
+    if (toggled) {
+      EventBus.emit(GameEvents.OPEN_SKILLS, {
+        skills: this.player.skillSystem ? this.player.skillSystem.getSkills() : [],
+      });
+    }
+  }
+
   _useInventoryItem(index) {
     const msg = InventorySystem.useItem(this.player, index);
     EventBus.emit(GameEvents.MESSAGE, msg);
@@ -694,9 +714,9 @@ export class GameScene extends Phaser.Scene {
     // Clean up event listeners
     EventBus.removeAllListeners();
 
-    this.player = new Player(0, 0);
-    this.floorManager = new FloorManager();
     this.rng = createRNG(Date.now());
+    this.player = new Player(0, 0, new SkillSystem(this.rng));
+    this.floorManager = new FloorManager();
     this.turnManager = new TurnManager();
     this.playerSprite = null;
 

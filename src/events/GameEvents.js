@@ -166,4 +166,19 @@ export const GameEvents = {
    * Subscribed by: UIScene → MessageLog.close()
    */
   CLOSE_MESSAGE_LOG: 'close-message-log',
+
+  /**
+   * Open (or toggle) the skills panel.
+   * Emitted by: GameScene (K key or DPad skills button)
+   * Subscribed by: UIScene → SkillsPanel
+   * @type {{ skills: object[] }} The player's active skills.
+   */
+  OPEN_SKILLS: 'open-skills',
+
+  /**
+   * Toggle the skills panel open or closed.
+   * Emitted by: DPad (skills button)
+   * Subscribed by: GameScene
+   */
+  TOGGLE_SKILLS: 'toggle-skills',
 };
