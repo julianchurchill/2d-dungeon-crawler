@@ -35,17 +35,19 @@ export class SkillsPanel {
    * @param {Phaser.Scene} scene - The owning UIScene.
    */
   constructor(scene) {
-    this.scene      = scene;
-    this.visible    = false;
-    this._skills    = [];
-    this._isDevMode = false;
+    this.scene           = scene;
+    this.visible         = false;
+    this._skills         = [];
+    this._inactiveSkills = [];
+    this._isDevMode      = false;
     this._build();
 
-    EventBus.on(GameEvents.OPEN_SKILLS, ({ skills, forceRefresh = false }) => {
-      this._skills    = skills;
-      this._isDevMode = isDevEnvironment();
+    EventBus.on(GameEvents.OPEN_SKILLS, ({ skills, inactiveSkills = [], forceRefresh = false }) => {
+      this._skills         = skills;
+      this._inactiveSkills = inactiveSkills;
+      this._isDevMode      = isDevEnvironment();
       if (forceRefresh || !this.visible) {
-        // Refresh (skill upgraded/downgraded) or first open: render/re-render the panel.
+        // Refresh (skill upgraded/downgraded/activated) or first open: render/re-render the panel.
         this.show();
       } else {
         // User toggled the panel closed.
@@ -99,7 +101,10 @@ export class SkillsPanel {
     this._rows.forEach(r => r.destroy());
     this._rows = [];
 
-    const panelH = HEADER_H + this._skills.length * ROW_H + PANEL_PAD;
+    // In dev mode, also display inactive skills with an activate button.
+    const inactiveToShow = this._isDevMode ? this._inactiveSkills : [];
+    const totalRows = this._skills.length + inactiveToShow.length;
+    const panelH = HEADER_H + totalRows * ROW_H + PANEL_PAD;
     const panelX = Math.floor((width  - PANEL_W) / 2);
     const panelY = Math.floor((height - panelH)  / 2);
 
@@ -128,10 +133,31 @@ export class SkillsPanel {
       this._container.add([nameTxt, descTxt]);
       this._rows.push(nameTxt, descTxt);
 
-      // In dev mode, show upgrade and downgrade buttons for each skill.
+      // In dev mode, show upgrade and downgrade buttons for each active skill.
       if (this._isDevMode) {
         this._addDevButtons(skill, y);
       }
+    });
+
+    // In dev mode, render inactive skills with an activate (+) button.
+    inactiveToShow.forEach((skill, i) => {
+      const y = HEADER_H + (this._skills.length + i) * ROW_H;
+
+      const nameTxt = s.add.text(PANEL_PAD, y + 6, `${skill.name} (inactive)`, {
+        fontSize: '13px', fontFamily: 'monospace', color: '#888888',
+        stroke: '#000000', strokeThickness: 2, resolution: 2,
+        wordWrap: { width: textW },
+      });
+      const descTxt = s.add.text(PANEL_PAD, y + 24, skill.description, {
+        fontSize: '11px', fontFamily: 'monospace', color: '#666677',
+        stroke: '#000000', strokeThickness: 2, resolution: 2,
+        wordWrap: { width: textW },
+      });
+
+      this._container.add([nameTxt, descTxt]);
+      this._rows.push(nameTxt, descTxt);
+
+      this._addActivateButton(skill, y);
     });
 
     this._container.setVisible(true);
@@ -174,6 +200,29 @@ export class SkillsPanel {
 
     this._container.add([upBtn, downBtn]);
     this._rows.push(upBtn, downBtn);
+  }
+
+  /**
+   * Adds a green "+" activate button for an inactive skill row (dev mode only).
+   *
+   * @param {object} skill - Skill plain-object with `id` and `name`.
+   * @param {number} y     - Y offset within the panel container for this row.
+   * @private
+   */
+  _addActivateButton(skill, y) {
+    const s    = this.scene;
+    const btnX = PANEL_W - PANEL_PAD;
+
+    const btn = s.add.text(btnX, y + ROW_H / 2, '+', {
+      fontSize: '22px', fontFamily: 'monospace', color: '#44ff88',
+      stroke: '#000000', strokeThickness: 2, resolution: 2,
+    }).setOrigin(1, 0.5)
+      .setInteractive({ useHandCursor: true });
+
+    btn.on('pointerdown', () => EventBus.emit(GameEvents.ACTIVATE_SKILL, { skillId: skill.id }));
+
+    this._container.add(btn);
+    this._rows.push(btn);
   }
 
   /**

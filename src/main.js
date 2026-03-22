@@ -6,6 +6,7 @@ import { AchievementsScene } from './scenes/AchievementsScene.js';
 import { InGameMenuScene } from './scenes/InGameMenuScene.js';
 import { HelpScene } from './scenes/HelpScene.js';
 import { DevMenuScene } from './scenes/DevMenuScene.js';
+import { SkillLevelUpScene } from './scenes/SkillLevelUpScene.js';
 import { GameScene } from './scenes/GameScene.js';
 import { UIScene } from './scenes/UIScene.js';
 
@@ -21,7 +22,7 @@ const config = {
     width: window.innerWidth,
     height: window.innerHeight,
   },
-  scene: [BootScene, MainMenuScene, DevOptionsScene, AchievementsScene, InGameMenuScene, HelpScene, DevMenuScene, GameScene, UIScene],
+  scene: [BootScene, MainMenuScene, DevOptionsScene, AchievementsScene, InGameMenuScene, HelpScene, DevMenuScene, SkillLevelUpScene, GameScene, UIScene],
 };
 
 const game = new Phaser.Game(config);

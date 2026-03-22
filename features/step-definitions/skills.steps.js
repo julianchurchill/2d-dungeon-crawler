@@ -191,6 +191,131 @@ Then('the inactive skills list is empty', function () {
   assert.deepEqual(state.skillSystem.getInactiveSkills(), []);
 });
 
+// ─── Inactive skills steps ────────────────────────────────────────────────────
+
+Then('the inactive skills include {string}', function (name) {
+  const skills = state.skillSystem.getInactiveSkills();
+  assert.ok(skills.some(s => s.name === name), `Expected "${name}" in inactive skills`);
+});
+
+Then('the inactive skills do not include {string}', function (name) {
+  const skills = state.skillSystem.getInactiveSkills();
+  assert.ok(!skills.some(s => s.name === name), `Expected "${name}" NOT in inactive skills`);
+});
+
+When('Ferocity is activated', function () {
+  state.skillSystem.activateSkill('ferocity');
+});
+
+// ─── Ferocity steps ───────────────────────────────────────────────────────────
+
+Given('a skill system with Ferocity active', function () {
+  state.skillSystem = new SkillSystem(unluckyRNG);
+  state.skillSystem.activateSkill('ferocity');
+});
+
+Then('Ferocity can be upgraded', function () {
+  assert.equal(state.skillSystem.canUpgrade('ferocity'), true);
+});
+
+Then('Ferocity cannot be downgraded', function () {
+  assert.equal(state.skillSystem.canDowngrade('ferocity'), false);
+});
+
+When('Ferocity is upgraded', function () {
+  state.skillSystem.upgradeSkill('ferocity');
+});
+
+Then('Ferocity has a bonus of {int}', function (bonus) {
+  const skill = state.skillSystem.getSkills().find(s => s.name === 'Ferocity');
+  assert.ok(skill, 'Ferocity not found in active skills');
+  assert.equal(skill.bonus, bonus);
+});
+
+// ─── Dodge steps ──────────────────────────────────────────────────────────────
+
+Given('a skill system with Dodge active', function () {
+  state.skillSystem = new SkillSystem(unluckyRNG);
+  state.skillSystem.activateSkill('dodge');
+});
+
+Given('a skill system with Dodge active and dodge always triggers', function () {
+  state.skillSystem = new SkillSystem(luckyRNG);
+  state.skillSystem.activateSkill('dodge');
+});
+
+Given('a skill system with Dodge active and dodge never triggers', function () {
+  state.skillSystem = new SkillSystem(unluckyRNG);
+  state.skillSystem.activateSkill('dodge');
+});
+
+Given('a skill system with Dodge at the cap', function () {
+  state.skillSystem = new SkillSystem(unluckyRNG);
+  state.skillSystem.activateSkill('dodge');
+  while (state.skillSystem.canUpgrade('dodge')) {
+    state.skillSystem.upgradeSkill('dodge');
+  }
+});
+
+When('on-defend skills are applied to {int} damage', function (damage) {
+  state.defendResult = state.skillSystem.applyOnDefendSkills(damage);
+});
+
+Then('the defend result damage is {int}', function (expected) {
+  assert.equal(state.defendResult.damage, expected);
+});
+
+Then('the defend result includes message {string}', function (message) {
+  assert.ok(
+    state.defendResult.messages.includes(message),
+    `Expected message "${message}" but got [${state.defendResult.messages.join(', ')}]`,
+  );
+});
+
+Then('Dodge can be upgraded', function () {
+  assert.equal(state.skillSystem.canUpgrade('dodge'), true);
+});
+
+Then('Dodge cannot be upgraded', function () {
+  assert.equal(state.skillSystem.canUpgrade('dodge'), false);
+});
+
+Then('Dodge cannot be downgraded', function () {
+  assert.equal(state.skillSystem.canDowngrade('dodge'), false);
+});
+
+When('Dodge is upgraded', function () {
+  state.skillSystem.upgradeSkill('dodge');
+});
+
+Then('Dodge has a dodge chance of {int}%', function (pct) {
+  const skill = state.skillSystem.getSkills().find(s => s.name === 'Dodge');
+  assert.ok(skill, 'Dodge not found in active skills');
+  assert.ok(Math.abs(skill.dodgeChance - pct / 100) < 1e-9,
+    `Expected dodgeChance ~${pct / 100} but got ${skill.dodgeChance}`);
+});
+
+// ─── Combat with Dodge steps ──────────────────────────────────────────────────
+
+When('the player is attacked for {int} base damage with the dodge skill system', function (atkPower) {
+  const attacker = { attackPower: atkPower };
+  const defender = {
+    name: 'you',
+    skillSystem: state.skillSystem,
+    _hp: 100,
+    takeDamage(dmg) { this._hp -= Math.max(1, dmg); return Math.max(1, dmg); },
+    isDead() { return this._hp <= 0; },
+  };
+  state.combatResult = resolveMeleeAttack(attacker, defender, unluckyRNG);
+});
+
+Then('the combat result includes message {string}', function (message) {
+  assert.ok(
+    state.combatResult.messages.includes(message),
+    `Expected message "${message}" but got [${state.combatResult.messages.join(', ')}]`,
+  );
+});
+
 // ─── SkillsToggle steps ──────────────────────────────────────────────────────
 
 Given('the turn state is {string}', function (turnState) {

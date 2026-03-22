@@ -77,9 +77,87 @@ Feature: Character Skills
     When Lucky Strike is upgraded
     Then the Lucky Strike skill has a 50% trigger chance
 
-  Scenario: getInactiveSkills returns an empty array
+  Scenario: Skill system starts with Ferocity and Dodge as inactive skills
     Given a new skill system
-    Then the inactive skills list is empty
+    Then the inactive skills include "Ferocity"
+    And the inactive skills include "Dodge"
+
+  Scenario: Activating Ferocity moves it to active skills
+    Given a new skill system
+    When Ferocity is activated
+    Then the skill "Ferocity" is active
+    And the inactive skills do not include "Ferocity"
+
+  # ── Ferocity skill ───────────────────────────────────────────────────────────
+
+  Scenario: Ferocity adds its bonus to attack damage on hit
+    Given a skill system with Ferocity active
+    When the skill system processes a hit of 10 damage
+    Then the resulting skill damage is 11
+
+  Scenario: Ferocity produces no messages on hit
+    Given a skill system with Ferocity active
+    When the skill system processes a hit of 10 damage
+    Then no skill messages are returned
+
+  Scenario: Ferocity can always be upgraded
+    Given a skill system with Ferocity active
+    Then Ferocity can be upgraded
+
+  Scenario: Upgrading Ferocity increases its bonus by 1
+    Given a skill system with Ferocity active
+    When Ferocity is upgraded
+    Then Ferocity has a bonus of 2
+
+  Scenario: Ferocity cannot be downgraded at its base value
+    Given a skill system with Ferocity active
+    Then Ferocity cannot be downgraded
+
+  Scenario: Ferocity applies increased bonus after upgrade
+    Given a skill system with Ferocity active
+    When Ferocity is upgraded
+    And the skill system processes a hit of 10 damage
+    Then the resulting skill damage is 12
+
+  # ── Dodge skill ──────────────────────────────────────────────────────────────
+
+  Scenario: Dodge reduces incoming damage to zero when triggered
+    Given a skill system with Dodge active and dodge always triggers
+    When on-defend skills are applied to 10 damage
+    Then the defend result damage is 0
+
+  Scenario: Dodge produces a message when triggered
+    Given a skill system with Dodge active and dodge always triggers
+    When on-defend skills are applied to 10 damage
+    Then the defend result includes message "Dodged!"
+
+  Scenario: Dodge passes through damage when not triggered
+    Given a skill system with Dodge active and dodge never triggers
+    When on-defend skills are applied to 10 damage
+    Then the defend result damage is 10
+
+  Scenario: Dodge can be upgraded when below 50%
+    Given a skill system with Dodge active
+    Then Dodge can be upgraded
+
+  Scenario: Dodge cannot be upgraded at the 50% cap
+    Given a skill system with Dodge at the cap
+    Then Dodge cannot be upgraded
+
+  Scenario: Dodge cannot be downgraded at its base 1% value
+    Given a skill system with Dodge active
+    Then Dodge cannot be downgraded
+
+  Scenario: Upgrading Dodge increases its dodge chance by 1%
+    Given a skill system with Dodge active
+    When Dodge is upgraded
+    Then Dodge has a dodge chance of 2%
+
+  Scenario: Dodge triggers during combat negating all damage
+    Given a skill system with Dodge active and dodge always triggers
+    When the player is attacked for 10 base damage with the dodge skill system
+    Then the combat damage is 0
+    And the combat result includes message "Dodged!"
 
   Scenario: Lucky Strike cannot be downgraded when at the minimum crit chance
     Given a new skill system

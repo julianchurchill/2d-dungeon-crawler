@@ -13,6 +13,8 @@
  */
 
 import { LuckyStrikeSkill } from '../skills/LuckyStrikeSkill.js';
+import { FerocitySkill } from '../skills/FerocitySkill.js';
+import { DodgeSkill } from '../skills/DodgeSkill.js';
 
 export class SkillSystem {
   /**
@@ -23,6 +25,8 @@ export class SkillSystem {
     this.rng = rng;
     // Lucky Strike is always the character's first active skill.
     this._activeSkills = [new LuckyStrikeSkill()];
+    // Ferocity and Dodge start inactive; they can be activated via activateSkill().
+    this._inactiveSkills = [new FerocitySkill(), new DodgeSkill()];
   }
 
   /**
@@ -74,11 +78,46 @@ export class SkillSystem {
   }
 
   /**
-   * Returns the list of inactive (not yet activated) skills available to the character.
+   * Returns plain-object snapshots of all inactive skills, suitable for UI rendering.
    * @returns {Array<object>}
    */
   getInactiveSkills() {
-    return [];
+    return this._inactiveSkills.map(s => s.toData());
+  }
+
+  /**
+   * Moves the named skill from inactive to active.
+   * @param {string} skillId
+   * @returns {boolean} true if the skill was found and activated, false otherwise.
+   */
+  activateSkill(skillId) {
+    const idx = this._inactiveSkills.findIndex(s => s.id === skillId);
+    if (idx === -1) return false;
+    const [skill] = this._inactiveSkills.splice(idx, 1);
+    this._activeSkills.push(skill);
+    return true;
+  }
+
+  /**
+   * Applies on-defend skill effects to an incoming damage value, delegating to
+   * each active skill that exposes `applyOnDefend`, accumulating damage and messages.
+   *
+   * @param {number} incomingDamage - The incoming damage before skill modifications.
+   * @returns {{ damage: number, messages: string[] }}
+   */
+  applyOnDefendSkills(incomingDamage) {
+    let damage = incomingDamage;
+    const messages = [];
+
+    for (const skill of this._activeSkills) {
+      if (typeof skill.applyOnDefend === 'function') {
+        const result = skill.applyOnDefend(damage, this.rng);
+        damage = result.damage;
+        messages.push(...result.messages);
+      }
+    }
+
+    return { damage, messages };
   }
 
   /**
@@ -93,9 +132,11 @@ export class SkillSystem {
     const messages = [];
 
     for (const skill of this._activeSkills) {
-      const result = skill.applyOnHit(damage, this.rng);
-      damage = result.damage;
-      messages.push(...result.messages);
+      if (typeof skill.applyOnHit === 'function') {
+        const result = skill.applyOnHit(damage, this.rng);
+        damage = result.damage;
+        messages.push(...result.messages);
+      }
     }
 
     return { damage, messages };

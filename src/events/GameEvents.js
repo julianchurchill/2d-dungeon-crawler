@@ -197,4 +197,12 @@ export const GameEvents = {
    * @type {{ skillId: string }}
    */
   DOWNGRADE_SKILL: 'downgrade-skill',
+
+  /**
+   * Request to activate an inactive skill (dev mode only).
+   * Emitted by: SkillsPanel (activate button, dev mode)
+   * Subscribed by: GameScene (_handleActivateSkill)
+   * @type {{ skillId: string }}
+   */
+  ACTIVATE_SKILL: 'activate-skill',
 };

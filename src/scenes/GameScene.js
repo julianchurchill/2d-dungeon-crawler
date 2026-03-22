@@ -358,6 +358,7 @@ export class GameScene extends Phaser.Scene {
     EventBus.on(GameEvents.TOGGLE_SKILLS,    wrapWithRunCancel(this._runController, () => this._toggleSkills()), this);
     EventBus.on(GameEvents.UPGRADE_SKILL,   ({ skillId }) => this._handleUpgradeSkill(skillId),   this);
     EventBus.on(GameEvents.DOWNGRADE_SKILL, ({ skillId }) => this._handleDowngradeSkill(skillId), this);
+    EventBus.on(GameEvents.ACTIVATE_SKILL,  ({ skillId }) => this._handleActivateSkill(skillId),  this);
     EventBus.on(GameEvents.USE_STAIRS, wrapWithRunCancel(this._runController, () => this._tryUseStairs()), this);
     EventBus.on(GameEvents.INVENTORY_USE, (index) => this._useInventoryItem(index), this);
     EventBus.on(GameEvents.FLOOR_CHANGED, (floor) => {
@@ -513,6 +514,8 @@ export class GameScene extends Phaser.Scene {
             EventBus.emit(GameEvents.PLAYER_LEVEL_UP, this.player.stats.level);
             // Golden flash over the game world to make the moment unmissable.
             this.cameras.main.flash(600, 255, 220, 100);
+            // Offer skill selection if there are choices available.
+            this._tryLaunchSkillLevelUp();
           }
           this.dungeonMap.setEntity(target.x, target.y, null);
           this.enemies = this.enemies.filter(e => e !== target);
@@ -658,15 +661,47 @@ export class GameScene extends Phaser.Scene {
   }
 
   /**
-   * Builds the payload for the OPEN_SKILLS event, including each skill's
-   * current stats, whether it can be upgraded/downgraded, and whether dev mode is active.
+   * Handles a request (from SkillsPanel in dev mode) to activate a named inactive skill.
+   * Activates the skill via SkillSystem and re-emits OPEN_SKILLS so the panel refreshes.
    *
-   * @returns {{ skills: object[], isDevMode: boolean }}
+   * @param {string} skillId - The ID of the skill to activate.
+   */
+  _handleActivateSkill(skillId) {
+    if (this.player.skillSystem) {
+      this.player.skillSystem.activateSkill(skillId);
+    }
+    EventBus.emit(GameEvents.OPEN_SKILLS, { ...this._buildSkillsPayload(), forceRefresh: true });
+  }
+
+  /**
+   * Launches SkillLevelUpScene if there are skills to activate or upgrade.
+   * Sleeps GameScene and UIScene while the choice overlay is shown.
+   */
+  _tryLaunchSkillLevelUp() {
+    const skillSystem = this.player.skillSystem;
+    if (!skillSystem) return;
+
+    const hasInactive   = skillSystem.getInactiveSkills().length > 0;
+    const hasUpgradeable = skillSystem.getSkills().some(s => s.canUpgrade);
+
+    if (hasInactive || hasUpgradeable) {
+      this.scene.launch('SkillLevelUpScene', { skillSystem });
+      this.scene.sleep('UIScene');
+      this.scene.sleep('GameScene');
+    }
+  }
+
+  /**
+   * Builds the payload for the OPEN_SKILLS event, including each skill's
+   * current stats, whether it can be upgraded/downgraded, and inactive skills.
+   *
+   * @returns {{ skills: object[], inactiveSkills: object[] }}
    */
   _buildSkillsPayload() {
     const skillSystem = this.player.skillSystem;
-    const skills = skillSystem ? skillSystem.getSkills() : [];
-    return { skills };
+    const skills         = skillSystem ? skillSystem.getSkills()         : [];
+    const inactiveSkills = skillSystem ? skillSystem.getInactiveSkills() : [];
+    return { skills, inactiveSkills };
   }
 
   _useInventoryItem(index) {

@@ -19,6 +19,7 @@ GameScene                ──► OPEN_INVENTORY       ──► UIScene → In
 GameScene                ──► OPEN_SKILLS          ──► UIScene → SkillsPanel.show/hide
 SkillsPanel (dev mode)   ──► UPGRADE_SKILL        ──► GameScene._handleUpgradeSkill
 SkillsPanel (dev mode)   ──► DOWNGRADE_SKILL      ──► GameScene._handleDowngradeSkill
+SkillsPanel (dev mode)   ──► ACTIVATE_SKILL       ──► GameScene._handleActivateSkill
 GameScene                ──► OPEN_SKILLS          ──► UIScene → SkillsPanel.show (refresh after upgrade)
 GameScene                ──► GAME_OVER            ──► (none — reserved for future use)
 GameScene (once)         ──► RESTART_GAME         ──► GameScene._restart
@@ -76,7 +77,8 @@ GameScene (ESC key)      ──► CLOSE_MESSAGE_LOG    ──► UIScene → Me
 | `ACHIEVEMENT_UNLOCKED` | `'achievement-unlocked'` | `AchievementDefinition` | AchievementSystem | GameScene (message log), UIScene (banner) |
 | `MESSAGE_LOG_TOGGLED` | `'message-log-toggled'` | `boolean` (open) | MessageLog | GameScene (ESC gate) |
 | `CLOSE_MESSAGE_LOG` | `'close-message-log'` | *(none)* | GameScene (ESC key) | UIScene → MessageLog.close() |
-| `OPEN_SKILLS` | `'open-skills'` | `{ skills: object[], forceRefresh?: boolean }` | GameScene (K key, upgrade refresh) | UIScene → SkillsPanel |
+| `OPEN_SKILLS` | `'open-skills'` | `{ skills: object[], inactiveSkills: object[], forceRefresh?: boolean }` | GameScene (K key, upgrade refresh) | UIScene → SkillsPanel |
 | `TOGGLE_SKILLS` | `'toggle-skills'` | *(none)* | DPad (K button) | GameScene |
 | `UPGRADE_SKILL` | `'upgrade-skill'` | `{ skillId: string }` | SkillsPanel (dev mode upgrade button) | GameScene._handleUpgradeSkill |
 | `DOWNGRADE_SKILL` | `'downgrade-skill'` | `{ skillId: string }` | SkillsPanel (dev mode downgrade button) | GameScene._handleDowngradeSkill |
+| `ACTIVATE_SKILL` | `'activate-skill'` | `{ skillId: string }` | SkillsPanel (dev mode activate button) | GameScene._handleActivateSkill |
