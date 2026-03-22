@@ -56,13 +56,15 @@
 - [ ] character graphic
 - [ ] show a character sheet by pressing 'c' which shows all the players stats currently. Provide a button for the mobile interface.
 - [ ] xp bar - make it clearer that it is an XP bar
+- [ ] look - the player can click or touch a cell in the map to see more information about what is in that cell, e.g. for an enemy see the name and hp "goblin 5hp", for items show the name and relevant stat "short sword +x dmg", for other things at least show the name "stone floor" or "stone wall". The information should pop up perhaps in the bottom right or top right of the screen. Position appropriately for mobile devices. Using look does not advance the game turn. Look can only be used on cells that is in the character's line of sight.
+- [ ] look cursor - a cursor can be activated on non-touch devices with 'l' and deactivated with ESC. When activated the player can move the cursor around the map with the direction keys to highlight the thing that is being looked at. The cursor starts on the player.
 - [x] hold keys for continued movement
 - [x] run movement - SHIFT+direction keeps going until an obstacle or visible enemy/item stops them
 
 ## Character Skills
 
 - [ ] a character can have skills that have dynamic effects. These can be viewed by pressing 'k' or using a button on the mobile interface. Initially the character has one active skill of 'Lucky Strike' which gives a 1% chance for the character to gain 50% damage on a hit during combat and shows a message when it is triggered.
-- [ ] every 5 levels the character can either choose a new skill from the pool of not activated skills to activate or upgrade an existing one. 'Lucky Strike' can be upgraded increasing the chance of activation by 1% on each upgrade to a maximum of 50%.
+- [ ] every 1 levels the character can either choose a new skill from the pool of not activated skills to activate or upgrade an existing one. 'Lucky Strike' can be upgraded increasing the chance of activation by 1% on each upgrade to a maximum of 50%.
 - [ ] in dev mode the player can upgrade their skills or activate new ones at any time in the skills screen
 - [ ] the character initially has two deactivated skills. When active 'Ferocity' adds +1 to each attack and does not output a message. When active 'Dodge' gives a 1% chance of completely dodging an attack and shows a message when it is triggered. 'Ferocity' can be upgraded by +1 per upgrade with no maximum. 'Dodge' can be upgraded by +1% per upgrade to a maximum of 50%.
 
