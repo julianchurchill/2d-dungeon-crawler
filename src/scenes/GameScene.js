@@ -428,7 +428,7 @@ export class GameScene extends Phaser.Scene {
       return; // No turn spent on blocked moves
     }
 
-    this.turnManager.setPlayerActing();
+    this.turnManager.setState(TURN_STATE.PLAYER_ACTING);
 
     if (result.action === 'attacked') {
       this._playerAttack(result.target);
@@ -479,7 +479,7 @@ export class GameScene extends Phaser.Scene {
       yoyo: true,
       onComplete: () => {
         const { damage, killed, message, skillMessages } = resolveMeleeAttack(
-          this.player, target, this.rng, this.player.skillSystem
+          this.player, target, this.rng
         );
         EventBus.emit(GameEvents.MESSAGE, message);
         skillMessages.forEach(msg => EventBus.emit(GameEvents.MESSAGE, msg));
@@ -592,11 +592,7 @@ export class GameScene extends Phaser.Scene {
   _toggleInventory() {
     // Only emit the open/close event when a state transition is actually possible,
     // so the visual panel and TurnManager state can never get out of sync.
-    const toggled = applyInventoryToggle(
-      this.turnManager.state,
-      () => this.turnManager.setInventory(),
-      () => this.turnManager.setPlayerInput(),
-    );
+    const toggled = applyInventoryToggle(this.turnManager);
     if (toggled) {
       EventBus.emit(GameEvents.OPEN_INVENTORY, {
         inventory: this.player.inventory,
@@ -608,11 +604,7 @@ export class GameScene extends Phaser.Scene {
   _toggleSkills() {
     // Only emit the open/close event when a state transition is actually possible,
     // so the visual panel and TurnManager state can never get out of sync.
-    const toggled = applySkillsToggle(
-      this.turnManager.state,
-      () => this.turnManager.setSkills(),
-      () => this.turnManager.setPlayerInput(),
-    );
+    const toggled = applySkillsToggle(this.turnManager);
     if (toggled) {
       EventBus.emit(GameEvents.OPEN_SKILLS, {
         skills: this.player.skillSystem ? this.player.skillSystem.getSkills() : [],
@@ -632,7 +624,7 @@ export class GameScene extends Phaser.Scene {
   // ─── Enemy Turns ──────────────────────────────────────────────────────────
 
   _startEnemyTurns() {
-    this.turnManager.setEnemyActing();
+    this.turnManager.setState(TURN_STATE.ENEMY_ACTING);
 
     for (const enemy of this.enemies) {
       const result = enemy.takeTurn(this.player, this.dungeonMap, (x, y) => this._getEntityAt(x, y), this.rng);
@@ -663,7 +655,7 @@ export class GameScene extends Phaser.Scene {
       }
     }
 
-    this.turnManager.setPlayerInput();
+    this.turnManager.setState(TURN_STATE.PLAYER_INPUT);
     this._beginPlayerTurn();
   }
 
@@ -704,7 +696,7 @@ export class GameScene extends Phaser.Scene {
 
   _gameOver() {
     EventBus.emit(GameEvents.GAME_OVER);
-    this.turnManager.setGameOver();
+    this.turnManager.setState(TURN_STATE.GAME_OVER);
     EventBus.emit(GameEvents.MESSAGE, 'You died! Press R to restart.');
     this.input.keyboard.once('keydown-R', () => this._restart());
     EventBus.once(GameEvents.RESTART_GAME, () => this._restart());

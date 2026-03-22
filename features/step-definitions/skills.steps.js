@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { SkillSystem } from '../../src/systems/SkillSystem.js';
 import { applySkillsToggle } from '../../src/systems/SkillsToggle.js';
 import { resolveMeleeAttack } from '../../src/systems/CombatSystem.js';
-import { TURN_STATE } from '../../src/systems/TurnManager.js';
+import { TurnManager, TURN_STATE } from '../../src/systems/TurnManager.js';
 
 // ─── Shared state ────────────────────────────────────────────────────────────
 
@@ -91,9 +91,9 @@ function makeMockDefender() {
 }
 
 When('the player attacks an enemy for {int} base damage using the skill system', function (atkPower) {
-  const attacker = { attackPower: atkPower };
+  const attacker = { attackPower: atkPower, skillSystem: state.skillSystem };
   const defender = makeMockDefender();
-  state.combatResult = resolveMeleeAttack(attacker, defender, unluckyRNG, state.skillSystem);
+  state.combatResult = resolveMeleeAttack(attacker, defender, unluckyRNG);
 });
 
 When('the player attacks an enemy for {int} base damage without a skill system', function (atkPower) {
@@ -123,23 +123,20 @@ Then('the combat result has no skill messages', function () {
 // ─── SkillsToggle steps ──────────────────────────────────────────────────────
 
 Given('the turn state is {string}', function (turnState) {
-  state.turnState = TURN_STATE[turnState];
+  state.turnManager = new TurnManager();
+  state.turnManager.setState(TURN_STATE[turnState]);
 });
 
 When('the skills toggle is applied', function () {
-  state.toggleResult = applySkillsToggle(
-    state.turnState,
-    () => { state.turnState = TURN_STATE.SKILLS; },
-    () => { state.turnState = TURN_STATE.PLAYER_INPUT; },
-  );
+  state.toggleResult = applySkillsToggle(state.turnManager);
 });
 
 Then('the turn state should become {string}', function (expected) {
-  assert.equal(state.turnState, TURN_STATE[expected]);
+  assert.equal(state.turnManager.state, TURN_STATE[expected]);
 });
 
 Then('the turn state should remain {string}', function (expected) {
-  assert.equal(state.turnState, TURN_STATE[expected]);
+  assert.equal(state.turnManager.state, TURN_STATE[expected]);
 });
 
 Then('the skills toggle should return true', function () {

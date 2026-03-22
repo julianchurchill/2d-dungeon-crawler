@@ -4,21 +4,22 @@
  */
 
 /**
- * Resolve a melee attack, optionally applying skill effects from the attacker's skill system.
+ * Resolve a melee attack, applying any on-hit skill effects from the attacker's
+ * skill system if one is present.
  *
- * @param {object}      attacker    - has .attackPower or .stats.attack
- * @param {object}      defender    - has .takeDamage(), .isDead(), .name
- * @param {object}      rng         - RNG for variance roll
- * @param {object|null} skillSystem - Optional SkillSystem; if provided its on-hit effects are applied.
+ * @param {object} attacker - has .attackPower or .stats.attack; optionally .skillSystem
+ * @param {object} defender - has .takeDamage(), .isDead(), .name
+ * @param {object} rng      - RNG for variance roll
  * @returns {{ damage: number, killed: boolean, message: string, skillMessages: string[] }}
  */
-export function resolveMeleeAttack(attacker, defender, rng, skillSystem = null) {
+export function resolveMeleeAttack(attacker, defender, rng) {
   const atkPower = attacker.attackPower ?? attacker.stats.attack;
   const variance = rng.nextInt(-2, 2);
   let attackDamage = Math.max(1, atkPower + variance);
 
-  // Apply on-hit skill effects (e.g. Lucky Strike) before the defender absorbs the blow.
+  // Apply on-hit skill effects (e.g. Lucky Strike) from the attacker's skill system.
   const skillMessages = [];
+  const skillSystem = attacker.skillSystem ?? null;
   if (skillSystem) {
     const skillResult = skillSystem.applyOnHitSkills(attackDamage);
     attackDamage = skillResult.damage;
