@@ -18,9 +18,6 @@ import Phaser from 'phaser';
 import { isDevEnvironment } from '../utils/Environment.js';
 import { MenuNavigator } from '../utils/MenuNavigator.js';
 
-/** Text colour applied to the currently keyboard-focused menu item. */
-const COLOR_FOCUSED = '#ffffff';
-
 /** Height of the fixed header area. */
 const HEADER_H = 80;
 
@@ -116,11 +113,7 @@ export class InGameMenuScene extends Phaser.Scene {
     }).setOrigin(0.5).setInteractive({ useHandCursor: true });
 
     btn.on('pointerover',  () => btn.setColor(hoverColor));
-    btn.on('pointerout',   () => {
-      // Restore to focus colour if this item is keyboard-focused, else normal.
-      const isFocused = this._nav && this._nav.focusedIndex === this._navItems.length - 1;
-      btn.setColor(isFocused ? COLOR_FOCUSED : color);
-    });
+    btn.on('pointerout',   () => btn.setColor(color));
     btn.on('pointerdown',  onPress);
 
     this._navItems.push({ btn, normalColor: color, onPress });
@@ -132,6 +125,8 @@ export class InGameMenuScene extends Phaser.Scene {
    */
   _setupKeyboardNav() {
     this._nav = new MenuNavigator(this._navItems.length);
+    // Graphics object reused each frame to draw the focus outline.
+    this._focusGraphics = this.add.graphics();
     this._updateFocus();
 
     this.input.keyboard.on('keydown-UP',    () => { this._nav.prev(); this._updateFocus(); });
@@ -145,12 +140,16 @@ export class InGameMenuScene extends Phaser.Scene {
   }
 
   /**
-   * Refreshes the colour of every item to reflect the current focus.
+   * Redraws the focus outline rectangle around the currently focused item.
+   * Button text colours are not changed — the outline is the sole focus indicator.
    */
   _updateFocus() {
-    this._navItems.forEach(({ btn, normalColor }, i) => {
-      btn.setColor(i === this._nav.focusedIndex ? COLOR_FOCUSED : normalColor);
-    });
+    this._focusGraphics.clear();
+    const { btn } = this._navItems[this._nav.focusedIndex];
+    const b = btn.getBounds();
+    const pad = 8;
+    this._focusGraphics.lineStyle(2, 0xffffff, 1);
+    this._focusGraphics.strokeRect(b.x - pad, b.y - pad, b.width + pad * 2, b.height + pad * 2);
   }
 
   /**
