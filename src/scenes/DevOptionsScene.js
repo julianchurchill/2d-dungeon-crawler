@@ -1,3 +1,4 @@
+import { FONT_FAMILY } from '../utils/FontConfig.js';
 /**
  * @module DevOptionsScene
  * A Phaser Scene that presents a UI for configuring developer options
@@ -89,7 +90,7 @@ export class DevOptionsScene extends Phaser.Scene {
 
     // Title
     this.add.text(cx, y, 'DEVELOPER OPTIONS', {
-      fontSize: '22px', fontFamily: 'monospace', color: '#ffdd88',
+      fontSize: '22px', fontFamily: FONT_FAMILY, color: '#ffdd88',
       stroke: '#884400', strokeThickness: 4, resolution: 2,
     }).setOrigin(0.5);
 
@@ -103,7 +104,7 @@ export class DevOptionsScene extends Phaser.Scene {
 
     // Items section heading
     this.add.text(cx, y, 'STARTING ITEMS', {
-      fontSize: '13px', fontFamily: 'monospace', color: '#ffdd88', resolution: 2,
+      fontSize: '13px', fontFamily: FONT_FAMILY, color: '#ffdd88', resolution: 2,
     }).setOrigin(0.5);
     y += 28;
 
@@ -117,7 +118,7 @@ export class DevOptionsScene extends Phaser.Scene {
 
     // Spawn table section heading
     this.add.text(cx, y, 'SPAWN TABLE', {
-      fontSize: '13px', fontFamily: 'monospace', color: '#ffdd88', resolution: 2,
+      fontSize: '13px', fontFamily: FONT_FAMILY, color: '#ffdd88', resolution: 2,
     }).setOrigin(0.5);
     y += 28;
 
@@ -133,7 +134,7 @@ export class DevOptionsScene extends Phaser.Scene {
 
     // Validation error — shown when all weights are zero; hidden otherwise.
     this._validationErrorTxt = this.add.text(cx, y, '⚠ At least one weight must be > 0', {
-      fontSize: '11px', fontFamily: 'monospace', color: '#ff6666', resolution: 2,
+      fontSize: '11px', fontFamily: FONT_FAMILY, color: '#ff6666', resolution: 2,
     }).setOrigin(0.5).setVisible(false);
     y += 22;
     this._updateValidationDisplay();
@@ -147,7 +148,7 @@ export class DevOptionsScene extends Phaser.Scene {
 
     // Enemies per room section heading
     this.add.text(cx, y, 'ENEMIES PER ROOM', {
-      fontSize: '13px', fontFamily: 'monospace', color: '#ffdd88', resolution: 2,
+      fontSize: '13px', fontFamily: FONT_FAMILY, color: '#ffdd88', resolution: 2,
     }).setOrigin(0.5);
     y += 28;
 
@@ -182,12 +183,12 @@ export class DevOptionsScene extends Phaser.Scene {
   _makeNumericRow(label, field, min, max, cx, y) {
     // Label (right-aligned, ending at cx - CTRL_OFFSET/2)
     this.add.text(cx - CTRL_OFFSET / 2 - 8, y, label + ':', {
-      fontSize: '13px', fontFamily: 'monospace', color: '#88ccff', resolution: 2,
+      fontSize: '13px', fontFamily: FONT_FAMILY, color: '#88ccff', resolution: 2,
     }).setOrigin(1, 0.5);
 
     // Value display
     const valTxt = this.add.text(cx, y, String(devOptions[field]), {
-      fontSize: '14px', fontFamily: 'monospace', color: '#ffffff', resolution: 2,
+      fontSize: '14px', fontFamily: FONT_FAMILY, color: '#ffffff', resolution: 2,
     }).setOrigin(0.5);
 
     // [-] button
@@ -218,11 +219,11 @@ export class DevOptionsScene extends Phaser.Scene {
     const count = () => devOptions.startItems.filter(k => k === key).length;
 
     this.add.text(cx - CTRL_OFFSET / 2 - 8, y, label + ':', {
-      fontSize: '12px', fontFamily: 'monospace', color: '#aabbcc', resolution: 2,
+      fontSize: '12px', fontFamily: FONT_FAMILY, color: '#aabbcc', resolution: 2,
     }).setOrigin(1, 0.5);
 
     const valTxt = this.add.text(cx, y, String(count()), {
-      fontSize: '13px', fontFamily: 'monospace', color: '#ffffff', resolution: 2,
+      fontSize: '13px', fontFamily: FONT_FAMILY, color: '#ffffff', resolution: 2,
     }).setOrigin(0.5);
 
     this._makeBtn(cx - 40, y, '−', () => {
@@ -251,7 +252,7 @@ export class DevOptionsScene extends Phaser.Scene {
       .setInteractive({ useHandCursor: true });
 
     const txt = this.add.text(x, y, label, {
-      fontSize: '14px', fontFamily: 'monospace', color: '#88ccff', resolution: 2,
+      fontSize: '14px', fontFamily: FONT_FAMILY, color: '#88ccff', resolution: 2,
     }).setOrigin(0.5);
 
     bg.on('pointerover',  () => { bg.setFillStyle(0x336688); txt.setColor('#ffffff'); });
@@ -280,11 +281,11 @@ export class DevOptionsScene extends Phaser.Scene {
       devOptions.spawnWeights === null ? '--' : String(devOptions.spawnWeights[key] ?? 0);
 
     this.add.text(cx - CTRL_OFFSET / 2 - 8, y, label + ' weight:', {
-      fontSize: '12px', fontFamily: 'monospace', color: '#aabbcc', resolution: 2,
+      fontSize: '12px', fontFamily: FONT_FAMILY, color: '#aabbcc', resolution: 2,
     }).setOrigin(1, 0.5);
 
     const valTxt = this.add.text(cx, y, display(), {
-      fontSize: '13px', fontFamily: 'monospace', color: '#ffffff', resolution: 2,
+      fontSize: '13px', fontFamily: FONT_FAMILY, color: '#ffffff', resolution: 2,
     }).setOrigin(0.5);
 
     this._makeBtn(cx - 40, y, '−', () => {
@@ -327,11 +328,11 @@ export class DevOptionsScene extends Phaser.Scene {
     const display = () => devOptions[field] === null ? '--' : String(devOptions[field]);
 
     this.add.text(cx - CTRL_OFFSET / 2 - 8, y, label + ':', {
-      fontSize: '13px', fontFamily: 'monospace', color: '#88ccff', resolution: 2,
+      fontSize: '13px', fontFamily: FONT_FAMILY, color: '#88ccff', resolution: 2,
     }).setOrigin(1, 0.5);
 
     const valTxt = this.add.text(cx, y, display(), {
-      fontSize: '14px', fontFamily: 'monospace', color: '#ffffff', resolution: 2,
+      fontSize: '14px', fontFamily: FONT_FAMILY, color: '#ffffff', resolution: 2,
     }).setOrigin(0.5);
 
     this._makeBtn(cx - 40, y, '−', () => {
@@ -365,7 +366,7 @@ export class DevOptionsScene extends Phaser.Scene {
    */
   _makeResetLink(label, cx, y, onClick) {
     const txt = this.add.text(cx, y, label, {
-      fontSize: '11px', fontFamily: 'monospace', color: '#668899', resolution: 2,
+      fontSize: '11px', fontFamily: FONT_FAMILY, color: '#668899', resolution: 2,
     }).setOrigin(0.5).setInteractive({ useHandCursor: true });
 
     txt.on('pointerover', () => txt.setColor('#aaccdd'));
@@ -385,7 +386,7 @@ export class DevOptionsScene extends Phaser.Scene {
       .setOrigin(0, 0).setScrollFactor(0).setDepth(9);
 
     const btn = this.add.text(width / 2, height - FOOTER_H / 2, 'BACK', {
-      fontSize: '18px', fontFamily: 'monospace',
+      fontSize: '18px', fontFamily: FONT_FAMILY,
       color: '#888888', stroke: '#000000', strokeThickness: 3, resolution: 2,
     }).setOrigin(0.5).setScrollFactor(0).setDepth(10)
       .setInteractive({ useHandCursor: true });

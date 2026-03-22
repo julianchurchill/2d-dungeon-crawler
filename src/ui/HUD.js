@@ -1,3 +1,4 @@
+import { FONT_FAMILY } from '../utils/FontConfig.js';
 const BAR_W = 130;
 const BAR_H = 16;
 const XP_H = 8;
@@ -29,20 +30,20 @@ export class HUD {
       .setStrokeStyle(1, 0xffffff);
 
     this.hpText = s.add.text(10 + BAR_W / 2, HP_Y, 'HP: 30/30', {
-      fontSize: '12px', fontFamily: 'monospace', color: '#ffffff',
+      fontSize: '12px', fontFamily: FONT_FAMILY, color: '#ffffff',
       stroke: '#000000', strokeThickness: 2, resolution: 2,
     }).setScrollFactor(0).setDepth(102).setOrigin(0.5);
 
     // --- Stats row (sits between HP bar and XP bar, no overlap) ---
     this.statsText = s.add.text(10, STATS_Y, 'LVL:1  ATK:5  DEF:2', {
-      fontSize: '11px', fontFamily: 'monospace', color: '#dddddd',
+      fontSize: '11px', fontFamily: FONT_FAMILY, color: '#dddddd',
       stroke: '#000000', strokeThickness: 2, resolution: 2,
     }).setScrollFactor(0).setDepth(100);
 
     // --- Floor indicator (top-right) ---
     this.floorText = s.add.text(
       s.scale.width - 10, HP_Y, 'Floor 1', {
-        fontSize: '12px', fontFamily: 'monospace', color: '#ffdd88',
+        fontSize: '12px', fontFamily: FONT_FAMILY, color: '#ffdd88',
         stroke: '#000000', strokeThickness: 3, resolution: 2,
       }
     ).setScrollFactor(0).setDepth(100).setOrigin(1, 0.5);

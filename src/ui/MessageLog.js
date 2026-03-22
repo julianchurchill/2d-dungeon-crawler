@@ -1,3 +1,4 @@
+import { FONT_FAMILY } from '../utils/FontConfig.js';
 /**
  * @module MessageLog
  * @description Renders the in-game message log in the bottom-left corner of
@@ -190,7 +191,7 @@ export class MessageLog {
     for (let i = 0; i < COMPACT_LINES; i++) {
       const txt = this.scene.add.text(PAD_X, startY + i * LINE_H, '', {
         fontSize: '12px',
-        fontFamily: 'monospace',
+        fontFamily: FONT_FAMILY,
         color: i === COMPACT_LINES - 1 ? '#ffffff' : '#aaaaaa',
         stroke: '#000000',
         strokeThickness: 3,
@@ -231,13 +232,13 @@ export class MessageLog {
     // Header label — ESC hint omitted on touch devices.
     this._panelHeader = this.scene.add.text(
       PAD_X + 4, panelY + 4, getMessageLogHeaderText(isTouchDevice()), {
-        fontSize: '10px', fontFamily: 'monospace', color: '#446688', resolution: 2,
+        fontSize: '11px', fontFamily: FONT_FAMILY, color: '#446688', resolution: 2,
       }
     ).setScrollFactor(0).setDepth(200);
 
     // Close button — always visible so touch users can close the panel.
     this._closeBtn = this.scene.add.text(8 + panelW - 16, panelY + 3, '✕', {
-      fontSize: '12px', fontFamily: 'monospace', color: '#446688', resolution: 2,
+      fontSize: '12px', fontFamily: FONT_FAMILY, color: '#446688', resolution: 2,
     }).setOrigin(0.5, 0).setScrollFactor(0).setDepth(201).setInteractive({ useHandCursor: true });
     this._closeBtn.on('pointerover', () => this._closeBtn.setColor('#88aaff'));
     this._closeBtn.on('pointerout',  () => this._closeBtn.setColor('#446688'));
@@ -246,7 +247,7 @@ export class MessageLog {
     // Text rows for history lines.
     for (let i = 0; i < EXPANDED_LINES; i++) {
       const txt = this.scene.add.text(PAD_X + 4, rowStartY + i * LINE_H, '', {
-        fontSize: '11px', fontFamily: 'monospace', color: '#cccccc',
+        fontSize: '11px', fontFamily: FONT_FAMILY, color: '#cccccc',
         stroke: '#000000', strokeThickness: 2, resolution: 2,
       }).setScrollFactor(0).setDepth(200);
       this._panelTexts.push(txt);
@@ -256,7 +257,7 @@ export class MessageLog {
     this._scrollHint = this.scene.add.text(
       PAD_X + 4, rowStartY + EXPANDED_LINES * LINE_H + 2,
       'Wheel to scroll', {
-        fontSize: '9px', fontFamily: 'monospace', color: '#334455', resolution: 2,
+        fontSize: '11px', fontFamily: FONT_FAMILY, color: '#334455', resolution: 2,
       }
     ).setScrollFactor(0).setDepth(200);
 

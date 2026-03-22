@@ -1,3 +1,4 @@
+import { FONT_FAMILY } from '../utils/FontConfig.js';
 /**
  * @module AchievementsScene
  * @description A Phaser scene that displays all achievements with their
@@ -125,7 +126,7 @@ export class AchievementsScene extends Phaser.Scene {
 
     this.add.text(width / 2, 28, 'ACHIEVEMENTS', {
       fontSize: '28px',
-      fontFamily: 'monospace',
+      fontFamily: FONT_FAMILY,
       color: '#ffdd88',
       stroke: '#884400',
       strokeThickness: 4,
@@ -178,7 +179,7 @@ export class AchievementsScene extends Phaser.Scene {
       const color  = entry.completed ? '#ffdd88' : '#888888';
       const txt = this.add.text(PAD + 16, y, `${prefix}${entry.text}`, {
         fontSize: '11px',
-        fontFamily: 'monospace',
+        fontFamily: FONT_FAMILY,
         color,
         resolution: 2,
       }).setOrigin(0, 0);
@@ -204,7 +205,7 @@ export class AchievementsScene extends Phaser.Scene {
       .setOrigin(0, 0).setScrollFactor(0).setDepth(9);
 
     const btn = this.add.text(width / 2, height - FOOTER_H / 2, 'BACK', {
-      fontSize: '18px', fontFamily: 'monospace',
+      fontSize: '18px', fontFamily: FONT_FAMILY,
       color: '#888888', stroke: '#000000', strokeThickness: 3, resolution: 2,
     }).setOrigin(0.5).setScrollFactor(0).setDepth(10)
       .setInteractive({ useHandCursor: true });
@@ -267,7 +268,7 @@ export class AchievementsScene extends Phaser.Scene {
 
     const cb = this.add.text(4, y, label, {
       fontSize: '11px',
-      fontFamily: 'monospace',
+      fontFamily: FONT_FAMILY,
       color: baseColor,
       resolution: 2,
     }).setOrigin(0, 0).setInteractive({ useHandCursor: true });

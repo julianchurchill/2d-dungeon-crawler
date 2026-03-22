@@ -1,3 +1,4 @@
+import { FONT_FAMILY } from '../utils/FontConfig.js';
 import { EventBus } from '../utils/EventBus.js';
 import { GameEvents } from '../events/GameEvents.js';
 import { DIR } from '../utils/Direction.js';
@@ -161,7 +162,7 @@ export class DPad {
       .setInteractive({ useHandCursor: false });
 
     this._centreTxt = s.add.text(0, 0, '···', {
-      fontSize: '13px', fontFamily: 'monospace', color: COLOR_ACTION_LABEL, resolution: 2,
+      fontSize: '13px', fontFamily: FONT_FAMILY, color: COLOR_ACTION_LABEL, resolution: 2,
     }).setOrigin(0.5);
 
     bg.on('pointerdown', (ptr, lx, ly, evt) => {
@@ -214,7 +215,7 @@ export class DPad {
       .setInteractive({ useHandCursor: false });
 
     const txt = s.add.text(x, y, label, {
-      fontSize, fontFamily: 'monospace', color: COLOR_ACTION_LABEL, resolution: 2,
+      fontSize, fontFamily: FONT_FAMILY, color: COLOR_ACTION_LABEL, resolution: 2,
     }).setOrigin(0.5);
 
     bg.on('pointerdown', (ptr, lx, ly, evt) => {
@@ -274,7 +275,7 @@ export class DPad {
       .setStrokeStyle(1, strokeColor)
       .setInteractive({ useHandCursor: false });
     const txt = s.add.text(x, y, label, {
-      fontSize: '13px', fontFamily: 'monospace', color: textColor, resolution: 2,
+      fontSize: '13px', fontFamily: FONT_FAMILY, color: textColor, resolution: 2,
     }).setOrigin(0.5);
 
     bg.on('pointerdown', (ptr, lx, ly, evt) => {

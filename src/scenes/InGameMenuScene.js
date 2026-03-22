@@ -1,3 +1,4 @@
+import { FONT_FAMILY } from '../utils/FontConfig.js';
 /**
  * @module InGameMenuScene
  * @description A Phaser scene that presents the in-game pause menu.
@@ -68,7 +69,7 @@ export class InGameMenuScene extends Phaser.Scene {
       .setOrigin(0, 0).setScrollFactor(0).setDepth(9);
 
     this.add.text(width / 2, 28, 'MENU', {
-      fontSize: '28px', fontFamily: 'monospace',
+      fontSize: '28px', fontFamily: FONT_FAMILY,
       color: '#ffdd88', stroke: '#884400', strokeThickness: 4, resolution: 2,
     }).setOrigin(0.5, 0).setScrollFactor(0).setDepth(10);
   }
@@ -110,7 +111,7 @@ export class InGameMenuScene extends Phaser.Scene {
    */
   _addMenuButton(x, y, label, color, hoverColor, onPress) {
     const btn = this.add.text(x, y, label, {
-      fontSize: '22px', fontFamily: 'monospace',
+      fontSize: '22px', fontFamily: FONT_FAMILY,
       color, stroke: '#000000', strokeThickness: 3, resolution: 2,
     }).setOrigin(0.5).setInteractive({ useHandCursor: true });
 

@@ -1,3 +1,4 @@
+import { FONT_FAMILY } from '../utils/FontConfig.js';
 /**
  * @module HelpScene
  * @description A Phaser scene that shows in-game control instructions.
@@ -73,7 +74,7 @@ export class HelpScene extends Phaser.Scene {
       .setOrigin(0, 0).setScrollFactor(0).setDepth(9);
 
     this.add.text(width / 2, 24, 'HELP', {
-      fontSize: '28px', fontFamily: 'monospace',
+      fontSize: '28px', fontFamily: FONT_FAMILY,
       color: '#aaddff', stroke: '#004466', strokeThickness: 4, resolution: 2,
     }).setOrigin(0.5, 0).setScrollFactor(0).setDepth(10);
   }
@@ -91,7 +92,7 @@ export class HelpScene extends Phaser.Scene {
     for (const { heading, lines } of sections) {
       // Section heading
       this.add.text(PAD, y, heading, {
-        fontSize: '14px', fontFamily: 'monospace',
+        fontSize: '14px', fontFamily: FONT_FAMILY,
         color: '#ffdd88', stroke: '#000000', strokeThickness: 2, resolution: 2,
       });
       y += 22;
@@ -99,7 +100,7 @@ export class HelpScene extends Phaser.Scene {
       // Content lines
       for (const line of lines) {
         this.add.text(PAD + 16, y, line, {
-          fontSize: '12px', fontFamily: 'monospace',
+          fontSize: '12px', fontFamily: FONT_FAMILY,
           color: '#cccccc', stroke: '#000000', strokeThickness: 1, resolution: 2,
         });
         y += 20;
@@ -120,7 +121,7 @@ export class HelpScene extends Phaser.Scene {
       .setOrigin(0, 0).setScrollFactor(0).setDepth(9);
 
     const btn = this.add.text(width / 2, height - FOOTER_H / 2, 'BACK', {
-      fontSize: '18px', fontFamily: 'monospace',
+      fontSize: '18px', fontFamily: FONT_FAMILY,
       color: '#888888', stroke: '#000000', strokeThickness: 3, resolution: 2,
     }).setOrigin(0.5).setScrollFactor(0).setDepth(10)
       .setInteractive({ useHandCursor: true });
