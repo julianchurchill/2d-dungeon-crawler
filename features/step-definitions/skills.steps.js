@@ -108,15 +108,16 @@ Then('the combat damage is {int}', function (expected) {
 
 Then('the combat result includes skill message {string}', function (message) {
   assert.ok(
-    state.combatResult.skillMessages.includes(message),
-    `Expected skill message "${message}" but got [${state.combatResult.skillMessages.join(', ')}]`,
+    state.combatResult.messages.includes(message),
+    `Expected skill message "${message}" but got [${state.combatResult.messages.join(', ')}]`,
   );
 });
 
 Then('the combat result has no skill messages', function () {
+  // Without a skill system, messages contains only the single combat message.
   assert.equal(
-    state.combatResult.skillMessages.length, 0,
-    `Expected no skill messages but got [${state.combatResult.skillMessages.join(', ')}]`,
+    state.combatResult.messages.length, 1,
+    `Expected only the combat message but got [${state.combatResult.messages.join(', ')}]`,
   );
 });
 

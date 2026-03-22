@@ -478,11 +478,10 @@ export class GameScene extends Phaser.Scene {
       duration: 40,
       yoyo: true,
       onComplete: () => {
-        const { damage, killed, message, skillMessages } = resolveMeleeAttack(
+        const { damage, killed, messages } = resolveMeleeAttack(
           this.player, target, this.rng
         );
-        EventBus.emit(GameEvents.MESSAGE, message);
-        skillMessages.forEach(msg => EventBus.emit(GameEvents.MESSAGE, msg));
+        messages.forEach(msg => EventBus.emit(GameEvents.MESSAGE, msg));
         this._flashSprite(target.sprite, 0xff4444);
 
         if (killed) {
@@ -630,10 +629,10 @@ export class GameScene extends Phaser.Scene {
       const result = enemy.takeTurn(this.player, this.dungeonMap, (x, y) => this._getEntityAt(x, y), this.rng);
 
       if (result.action === 'attack') {
-        const { damage, killed, message } = resolveMeleeAttack(
+        const { damage, killed, messages } = resolveMeleeAttack(
           enemy, this.player, this.rng
         );
-        EventBus.emit(GameEvents.MESSAGE, message);
+        messages.forEach(msg => EventBus.emit(GameEvents.MESSAGE, msg));
         this._flashSprite(this.playerSprite, 0xff0000);
         this._syncRegistry();
 

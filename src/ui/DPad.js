@@ -7,34 +7,34 @@ const BTN_SIZE = 52;
 const PAD = BTN_SIZE + 5;
 
 // ── Colour palette ─────────────────────────────────────────────────────────────
-/** Directional button normal fill colour. */
+/** Directional button normal fill colour — dark blue-purple. */
 const COLOR_DIR_FILL    = 0x333355;
-/** Directional button border colour. */
+/** Directional button border colour — medium purple. */
 const COLOR_DIR_STROKE  = 0x7777aa;
-/** Directional button fill colour when pressed. */
+/** Directional button fill colour when pressed — bright purple. */
 const COLOR_DIR_PRESSED = 0x5555aa;
-/** Directional button label text colour. */
+/** Directional button label text colour — light purple. */
 const COLOR_DIR_LABEL   = '#aaaacc';
 
-/** Action button (INV / K) fill colour. */
+/** Action button (INV / K) fill colour — dark steel blue. */
 const COLOR_ACTION_FILL   = 0x334455;
-/** Action button border colour. */
+/** Action button border colour — medium steel blue. */
 const COLOR_ACTION_STROKE = 0x88aacc;
-/** Action button label text colour. */
+/** Action button label text colour — light blue. */
 const COLOR_ACTION_LABEL  = '#aaccff';
 
-/** Menu button (≡) fill colour. */
+/** Menu button (≡) fill colour — dark olive green. */
 const COLOR_MENU_FILL   = 0x334433;
-/** Menu button border colour. */
+/** Menu button border colour — medium sage green. */
 const COLOR_MENU_STROKE = 0x88aa88;
-/** Menu button label text colour. */
+/** Menu button label text colour — light mint green. */
 const COLOR_MENU_LABEL  = '#aaffaa';
 
-/** Stairs button (▼▼) fill colour. */
+/** Stairs button (▼▼) fill colour — dark brown. */
 const COLOR_STAIRS_FILL   = 0x554433;
-/** Stairs button border colour. */
+/** Stairs button border colour — medium tan. */
 const COLOR_STAIRS_STROKE = 0xccaa88;
-/** Stairs button label text colour. */
+/** Stairs button label text colour — light amber. */
 const COLOR_STAIRS_LABEL  = '#ffcc88';
 
 /**
