@@ -40,6 +40,20 @@ Then('the {string} entry should be marked as completed', function (id) {
     `Expected entry "${id}" to be marked as completed`);
 });
 
+Then('the {string} entry should have unlocks {string}', function (id, unlocks) {
+  const entry = this.displayList.find(e => e.id === id);
+  assert.ok(entry, `No display entry found with id "${id}"`);
+  assert.equal(entry.unlocks, unlocks,
+    `Expected entry "${id}" unlocks to be "${unlocks}" but got "${entry.unlocks}"`);
+});
+
+Then('the {string} entry should have no unlocks', function (id) {
+  const entry = this.displayList.find(e => e.id === id);
+  assert.ok(entry, `No display entry found with id "${id}"`);
+  assert.equal(entry.unlocks, undefined,
+    `Expected entry "${id}" to have no unlocks but got "${entry.unlocks}"`);
+});
+
 Then('the {string} entry should not be marked as completed', function (id) {
   const entry = this.displayList.find(e => e.id === id);
   assert.ok(entry, `No display entry found with id "${id}"`);

@@ -20,3 +20,13 @@ Feature: Achievements screen display list
     And the achievements display list is retrieved
     Then the "goblin_killer" entry should be marked as completed
     And the "goblin_killer" entry should not show "so far"
+
+  Scenario: An achievement that grants an unlock carries the unlocks field
+    Given the achievement system is initialised
+    When the achievements display list is retrieved
+    Then the "goblin_killer" entry should have unlocks "Goblin Hunting skill"
+
+  Scenario: An achievement with no unlock has no unlocks field
+    Given the achievement system is initialised
+    When the achievements display list is retrieved
+    Then the "burrower" entry should have no unlocks

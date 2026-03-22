@@ -28,6 +28,8 @@
  * @property {AchievementCondition} condition
  * @property {string} progressUnit    - Unit label for the progress counter
  *   (e.g. 'killed', 'reached').  Always required — all achievements are count-based.
+ * @property {string} [unlocks]       - Optional: name of what this achievement grants
+ *   (e.g. 'Goblin Hunting skill').  Shown on the achievements screen when present.
  */
 
 /** @type {AchievementDefinition[]} */
@@ -39,6 +41,7 @@ export const ACHIEVEMENTS = [
     description: 'Kill 10 goblins',
     condition: { type: 'kill_type', enemyType: 'goblin', target: 10 },
     progressUnit: 'killed',
+    unlocks: 'Goblin Hunting skill',
   },
   {
     id: 'orc_killer',

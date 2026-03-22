@@ -27,6 +27,7 @@ import { SkillSystem } from '../systems/SkillSystem.js';
 import { LuckyStrikeSkill } from '../skills/LuckyStrikeSkill.js';
 import { FerocitySkill } from '../skills/FerocitySkill.js';
 import { DodgeSkill } from '../skills/DodgeSkill.js';
+import { GoblinHuntingSkill } from '../skills/GoblinHuntingSkill.js';
 
 const TILE_SIZE = 16;
 const FOV_RADIUS = 8;
@@ -368,8 +369,10 @@ export class GameScene extends Phaser.Scene {
       this.registry.set('floor', floor);
     }, this);
     // Log a message when an achievement is unlocked (banner is shown by UIScene).
+    // Some achievements also grant a permanent skill to the player.
     EventBus.on(GameEvents.ACHIEVEMENT_UNLOCKED, (achievement) => {
       EventBus.emit(GameEvents.MESSAGE, `Achievement unlocked: ${achievement.name}!`);
+      this._handleAchievementSkillUnlock(achievement.id);
     }, this);
   }
 
@@ -632,6 +635,28 @@ export class GameScene extends Phaser.Scene {
     if (toggled) {
       EventBus.emit(GameEvents.OPEN_SKILLS, this._buildSkillsPayload());
     }
+  }
+
+  /**
+   * Maps achievement IDs to the permanent skill they unlock, and applies the
+   * unlock to the player's SkillSystem when the achievement is completed.
+   *
+   * @param {string} achievementId - The ID of the completed achievement.
+   */
+  _handleAchievementSkillUnlock(achievementId) {
+    const skillSystem = this.player?.skillSystem;
+    if (!skillSystem) return;
+
+    const ACHIEVEMENT_SKILLS = {
+      goblin_killer: () => new GoblinHuntingSkill(),
+    };
+
+    const factory = ACHIEVEMENT_SKILLS[achievementId];
+    if (!factory) return;
+
+    const skill = factory();
+    skillSystem.unlockPermanentSkill(skill);
+    EventBus.emit(GameEvents.MESSAGE, `Permanent skill unlocked: ${skill.name}!`);
   }
 
   /**

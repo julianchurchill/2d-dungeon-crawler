@@ -7,6 +7,11 @@ Entries are listed newest-first within each section.
 
 ## [Unreleased]
 
+### Added
+
+- 2026-03-22 — Achievements screen now shows an "→ Unlocks: ..." line beneath any achievement that grants a named reward
+- 2026-03-22 — Completing the Goblin Killer achievement unlocks the Goblin Hunting permanent skill (+10% damage against goblins), visible in the skills panel; `SkillSystem.unlockPermanentSkill()` added; `applyOnHitSkills` now receives defender type so enemy-specific skills can apply
+
 ---
 
 ## [0.15.6] - 2026-03-22
