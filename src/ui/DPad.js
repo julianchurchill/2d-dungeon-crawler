@@ -185,10 +185,11 @@ export class DPad {
       this._closeSubMenu();
       EventBus.emit(GameEvents.TOGGLE_INVENTORY);
     });
-    const skillItems = this._createSubBtn(PAD, PAD, 'K', () => {
+    // '10px' keeps 'SKILLS' within the button tile at BTN_SIZE=52.
+    const skillItems = this._createSubBtn(PAD, PAD, 'SKILLS', () => {
       this._closeSubMenu();
       EventBus.emit(GameEvents.TOGGLE_SKILLS);
-    });
+    }, '10px');
 
     this._subMenuItems = [...invItems, ...skillItems];
     for (const obj of this._subMenuItems) obj.setVisible(false);
@@ -198,20 +199,22 @@ export class DPad {
   /**
    * Creates a sub-menu action button and returns the [bg, txt] pair.
    *
-   * @param {number}   x        - Container-relative X position.
-   * @param {number}   y        - Container-relative Y position.
-   * @param {string}   label    - Button label text.
-   * @param {function} onPress  - Called when the button is tapped.
+   * @param {number}   x         - Container-relative X position.
+   * @param {number}   y         - Container-relative Y position.
+   * @param {string}   label     - Button label text.
+   * @param {function} onPress   - Called when the button is tapped.
+   * @param {string}   [fontSize='13px'] - CSS font-size string; pass a smaller
+   *   value for longer labels that must fit within BTN_SIZE.
    * @returns {Phaser.GameObjects.GameObject[]}
    */
-  _createSubBtn(x, y, label, onPress) {
+  _createSubBtn(x, y, label, onPress, fontSize = '13px') {
     const s = this.scene;
     const bg = s.add.rectangle(x, y, BTN_SIZE, BTN_SIZE, COLOR_ACTION_FILL, 0.8)
       .setStrokeStyle(1, COLOR_ACTION_STROKE)
       .setInteractive({ useHandCursor: false });
 
     const txt = s.add.text(x, y, label, {
-      fontSize: '13px', fontFamily: 'monospace', color: COLOR_ACTION_LABEL, resolution: 2,
+      fontSize, fontFamily: 'monospace', color: COLOR_ACTION_LABEL, resolution: 2,
     }).setOrigin(0.5);
 
     bg.on('pointerdown', (ptr, lx, ly, evt) => {
