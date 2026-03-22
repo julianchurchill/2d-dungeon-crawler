@@ -28,3 +28,28 @@ Feature: Enemy spawner
     Given an EnemySpawner with max enemies per room 1 and a maximum RNG
     When spawning enemies for 3 rooms on floor 1
     Then 2 enemies should have been spawned
+
+  Scenario: EnemySpawner uses floor default max when maxEnemiesPerRoom is null
+    Given an EnemySpawner with null max enemies per room and a maximum RNG
+    When spawning enemies for 2 rooms on floor 2
+    Then 2 enemies should have been spawned
+
+  Scenario: EnemySpawner respects explicit minimum enemies per room
+    Given an EnemySpawner with min 2 max 2 and a minimum RNG
+    When spawning enemies for 2 rooms on floor 1
+    Then 2 enemies should have been spawned
+
+  Scenario: EnemySpawner spawns enemies at the maximum x and y position within a room
+    Given an EnemySpawner with max enemies per room 1 and a maximum RNG
+    When spawning enemies for 2 rooms on floor 1
+    Then the first enemy should have been spawned at x 25 y 5
+
+  Scenario: EnemySpawner spawns enemies at the minimum x and y position within a room
+    Given an EnemySpawner with min 1 max 1 and a minimum RNG
+    When spawning enemies for 2 rooms on floor 1
+    Then the first enemy should have been spawned at x 21 y 1
+
+  Scenario: EnemySpawner skips occupied tiles
+    Given an EnemySpawner with max enemies per room 1 and a maximum RNG
+    When spawning enemies for 2 rooms on floor 1 with all tiles occupied
+    Then no enemies should have been spawned
