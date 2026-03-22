@@ -64,4 +64,13 @@ export class HeldMovementTracker {
   getDir() {
     return this._dir;
   }
+
+  /**
+   * Unconditionally clears the held direction.
+   * Call this whenever the game scene is about to sleep so that missed
+   * key-release events cannot cause phantom auto-repeat movement on wake.
+   */
+  clear() {
+    this._dir = null;
+  }
 }

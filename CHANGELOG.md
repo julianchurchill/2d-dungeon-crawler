@@ -7,6 +7,10 @@ Entries are listed newest-first within each section.
 
 ## [Unreleased]
 
+### Fixed
+
+- 2026-03-22 — Movement no longer continues after dismissing the SkillLevelUpScene; held direction and run state are cleared before the scene sleeps
+
 ### Changed
 
 - 2026-03-22 — SkillSystem constructor now accepts injected skill instances; GameScene owns the specific skill classes (Dependency Inversion)
