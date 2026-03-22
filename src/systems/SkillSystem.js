@@ -136,6 +136,29 @@ export class SkillSystem {
   }
 
   /**
+   * Adds a skill to the inactive pool so the player can activate it on a
+   * future level-up.  Used when an achievement unlocks an upgradeable skill.
+   *
+   * @param {object} skill - A skill instance implementing the skill interface.
+   */
+  unlockSkill(skill) {
+    this._inactiveSkills.push(skill);
+  }
+
+  /**
+   * Returns the total FOV bonus granted by all active skills that implement
+   * `getFovBonus()`.
+   *
+   * @returns {number}
+   */
+  getFovBonus() {
+    return this._activeSkills.reduce(
+      (sum, skill) => sum + (typeof skill.getFovBonus === 'function' ? skill.getFovBonus() : 0),
+      0,
+    );
+  }
+
+  /**
    * Applies on-hit skill effects to a damage value, delegating to each active skill
    * in turn and accumulating any triggered effects and messages.
    *

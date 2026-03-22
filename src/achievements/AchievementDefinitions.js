@@ -65,6 +65,7 @@ export const ACHIEVEMENTS = [
     description: 'Reach dungeon floor 10',
     condition: { type: 'floor_reached', target: 10 },
     progressUnit: 'reached',
+    unlocks: 'Night Vision skill',
   },
   {
     id: 'deep_diver',

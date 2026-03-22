@@ -28,6 +28,7 @@ import { LuckyStrikeSkill } from '../skills/LuckyStrikeSkill.js';
 import { FerocitySkill } from '../skills/FerocitySkill.js';
 import { DodgeSkill } from '../skills/DodgeSkill.js';
 import { GoblinHuntingSkill } from '../skills/GoblinHuntingSkill.js';
+import { NightVisionSkill } from '../skills/NightVisionSkill.js';
 
 const TILE_SIZE = 16;
 const FOV_RADIUS = 8;
@@ -275,7 +276,7 @@ export class GameScene extends Phaser.Scene {
     computeFOV(
       this.player.x,
       this.player.y,
-      FOV_RADIUS,
+      FOV_RADIUS + (this.player.skillSystem?.getFovBonus() ?? 0),
       (x, y) => map.isOpaque(x, y),
       (x, y) => {
         if (map.inBounds(x, y)) map.setFovState(x, y, FOV_STATE.VISIBLE);
@@ -647,16 +648,32 @@ export class GameScene extends Phaser.Scene {
     const skillSystem = this.player?.skillSystem;
     if (!skillSystem) return;
 
-    const ACHIEVEMENT_SKILLS = {
+    // Permanent skills are applied immediately and are never shown in the
+    // level-up pool — the player cannot activate or upgrade them.
+    const PERMANENT_SKILLS = {
       goblin_killer: () => new GoblinHuntingSkill(),
     };
 
-    const factory = ACHIEVEMENT_SKILLS[achievementId];
-    if (!factory) return;
+    // Pool skills are added to the inactive skill list so the player can
+    // choose to activate (and later upgrade) them via the level-up screen.
+    const POOL_SKILLS = {
+      burrower: () => new NightVisionSkill(),
+    };
 
-    const skill = factory();
-    skillSystem.unlockPermanentSkill(skill);
-    EventBus.emit(GameEvents.MESSAGE, `Permanent skill unlocked: ${skill.name}!`);
+    const permanentFactory = PERMANENT_SKILLS[achievementId];
+    if (permanentFactory) {
+      const skill = permanentFactory();
+      skillSystem.unlockPermanentSkill(skill);
+      EventBus.emit(GameEvents.MESSAGE, `Permanent skill unlocked: ${skill.name}!`);
+      return;
+    }
+
+    const poolFactory = POOL_SKILLS[achievementId];
+    if (poolFactory) {
+      const skill = poolFactory();
+      skillSystem.unlockSkill(skill);
+      EventBus.emit(GameEvents.MESSAGE, `New skill available: ${skill.name}! Select it on your next level up.`);
+    }
   }
 
   /**
