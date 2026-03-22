@@ -7,12 +7,14 @@
  * Resolve a melee attack, applying any on-hit skill effects from the attacker's
  * skill system if one is present.
  *
- * @param {object} attacker - has .attackPower or .stats.attack; optionally .skillSystem
- * @param {object} defender - has .takeDamage(), .isDead(), .name
- * @param {object} rng      - RNG for variance roll
+ * @param {object}  attacker                         - has .attackPower or .stats.attack; optionally .skillSystem
+ * @param {object}  defender                         - has .takeDamage(), .isDead(), .name
+ * @param {object}  rng                              - RNG for variance roll
+ * @param {object}  [options]
+ * @param {boolean} [options.defenderIsInvincible]   - When true the defender takes 0 damage (dev mode).
  * @returns {{ damage: number, killed: boolean, messages: string[] }}
  */
-export function resolveMeleeAttack(attacker, defender, rng) {
+export function resolveMeleeAttack(attacker, defender, rng, { defenderIsInvincible = false } = {}) {
   const atkPower = attacker.attackPower ?? attacker.stats.attack;
   const variance = rng.nextInt(-2, 2);
   let attackDamage = Math.max(1, atkPower + variance);
@@ -26,7 +28,9 @@ export function resolveMeleeAttack(attacker, defender, rng) {
     messages.push(...skillResult.messages);
   }
 
-  const actualDamage = defender.takeDamage(attackDamage);
+  // When the defender is invincible, skip takeDamage entirely so the
+  // entity's minimum-1-damage floor does not apply.
+  const actualDamage = defenderIsInvincible ? 0 : defender.takeDamage(attackDamage);
   const killed = defender.isDead();
 
   const atkName = attacker.name || 'You';

@@ -16,7 +16,8 @@ import { createRNG } from '../utils/RNG.js';
 import { HeldMovementTracker } from '../systems/HeldMovementTracker.js';
 import { HoldRepeatScheduler } from '../systems/HoldRepeatScheduler.js';
 import { RunMovementController } from '../systems/RunMovementController.js';
-import { applyToGame } from '../systems/DevOptions.js';
+import { applyToGame, devOptions } from '../systems/DevOptions.js';
+import { isDevEnvironment } from '../utils/Environment.js';
 import { EnemySpawner } from '../systems/EnemySpawner.js';
 import { AchievementSystem } from '../achievements/AchievementSystem.js';
 import { handleMobileMenuPress } from '../systems/MobileMenuHandler.js';
@@ -307,6 +308,13 @@ export class GameScene extends Phaser.Scene {
     this.heldMovement = new HeldMovementTracker(this.input.keyboard, EventBus);
     this._holdRepeat  = new HoldRepeatScheduler(this.heldMovement, MOVE_REPEAT_DELAY_MS);
 
+    // Dev panel toggle — only registered in dev mode (backslash key).
+    if (isDevEnvironment()) {
+      this.input.keyboard.on('keydown-BACK_SLASH', wrapWithRunCancel(this._runController, () => {
+        EventBus.emit(GameEvents.TOGGLE_DEV_PANEL);
+      }));
+    }
+
     // Non-movement actions: cancel any active run before executing.
     this.input.keyboard.on('keydown-I',           wrapWithRunCancel(this._runController, () => this._toggleInventory()));
     this.input.keyboard.on('keydown-K',           wrapWithRunCancel(this._runController, () => this._toggleSkills()));
@@ -497,7 +505,8 @@ export class GameScene extends Phaser.Scene {
       yoyo: true,
       onComplete: () => {
         const { damage, killed, messages } = resolveMeleeAttack(
-          this.player, target, this.rng
+          this.player, target, this.rng,
+          { defenderIsInvincible: devOptions.enemiesInvincible },
         );
         messages.forEach(msg => EventBus.emit(GameEvents.MESSAGE, msg));
         this._flashSprite(target.sprite, 0xff4444);
@@ -687,7 +696,8 @@ export class GameScene extends Phaser.Scene {
 
       if (result.action === 'attack') {
         const { damage, killed, messages } = resolveMeleeAttack(
-          enemy, this.player, this.rng
+          enemy, this.player, this.rng,
+          { defenderIsInvincible: devOptions.playerInvincible },
         );
         messages.forEach(msg => EventBus.emit(GameEvents.MESSAGE, msg));
         this._flashSprite(this.playerSprite, 0xff0000);

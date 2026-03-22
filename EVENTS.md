@@ -47,6 +47,7 @@ AchievementSystem        ──► ACHIEVEMENT_UNLOCKED ──► UIScene → _s
 
 MessageLog (click)       ──► MESSAGE_LOG_TOGGLED  ──► GameScene (gates ESC handler)
 GameScene (ESC key)      ──► CLOSE_MESSAGE_LOG    ──► UIScene → MessageLog.close()
+GameScene (\ key)        ──► TOGGLE_DEV_PANEL     ──► UIScene → DevPanel.show/hide
 ───────────────────────────────────────────────────────────────────────
 ```
 
@@ -80,3 +81,4 @@ GameScene (ESC key)      ──► CLOSE_MESSAGE_LOG    ──► UIScene → Me
 | `TOGGLE_SKILLS` | `'toggle-skills'` | *(none)* | DPad (K button) | GameScene |
 | `UPGRADE_SKILL` | `'upgrade-skill'` | `{ skillId: string }` | SkillsPanel (dev mode upgrade button) | GameScene._handleUpgradeSkill |
 | `DOWNGRADE_SKILL` | `'downgrade-skill'` | `{ skillId: string }` | SkillsPanel (dev mode downgrade button) | GameScene._handleDowngradeSkill |
+| `TOGGLE_DEV_PANEL` | `'toggle-dev-panel'` | *(none)* | GameScene (\ key, dev mode) | UIScene → DevPanel.show/hide |

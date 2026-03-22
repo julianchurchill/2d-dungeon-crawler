@@ -26,6 +26,8 @@ import { ITEM_TYPES } from '../items/ItemTypes.js';
  *                                             to use the floor default (0).
  * @property {number|null} maxEnemiesPerRoom  - Maximum enemies spawned per room, or null
  *                                             to use the floor-scaled default.
+ * @property {boolean} enemiesInvincible      - When true, all enemies take zero damage.
+ * @property {boolean} playerInvincible       - When true, the player takes zero damage.
  */
 export const devOptions = {
   startFloor: 1,
@@ -34,6 +36,8 @@ export const devOptions = {
   spawnWeights: null,
   minEnemiesPerRoom: null,
   maxEnemiesPerRoom: null,
+  enemiesInvincible: false,
+  playerInvincible: false,
 };
 
 /**
@@ -46,6 +50,8 @@ export function resetDevOptions() {
   devOptions.spawnWeights = null;
   devOptions.minEnemiesPerRoom = null;
   devOptions.maxEnemiesPerRoom = null;
+  devOptions.enemiesInvincible = false;
+  devOptions.playerInvincible = false;
 }
 
 /**
