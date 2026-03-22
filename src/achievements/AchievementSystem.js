@@ -47,12 +47,15 @@ export class AchievementSystem {
   getDisplayList() {
     return this.definitions.map(def => {
       const { completed } = getProgress(def.id, this.store);
-      return {
+      const entry = {
         id:        def.id,
         name:      def.name,
         completed,
         text:      this.formatProgress(def),
       };
+      // Only include unlocks when the definition declares one.
+      if (def.unlocks !== undefined) entry.unlocks = def.unlocks;
+      return entry;
     });
   }
 

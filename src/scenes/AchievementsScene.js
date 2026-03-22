@@ -28,8 +28,10 @@ import { EventBus } from '../utils/EventBus.js';
 import { isDevEnvironment } from '../utils/Environment.js';
 import { resolveSceneBack } from '../systems/SceneNavigation.js';
 
-/** Rows are this tall in pixels. */
+/** Base row height in pixels for achievements without an unlocks line. */
 const ROW_H = 28;
+/** Extra height added to rows that carry an unlocks line. */
+const UNLOCKS_ROW_EXTRA = 14;
 
 /** Vertical padding below the last row. */
 const PAD = 16;
@@ -164,8 +166,7 @@ export class AchievementsScene extends Phaser.Scene {
     ];
 
     const startY = HEADER_H + 4;
-    this._contentHeight = startY + sorted.length * ROW_H + PAD;
-    this._scrollOffset  = 0;
+    this._scrollOffset = 0;
 
     // All rows live in a single Container so moving container.y scrolls them
     // as a unit without touching the camera.
@@ -173,8 +174,10 @@ export class AchievementsScene extends Phaser.Scene {
 
     const devMode = isDevEnvironment();
 
-    sorted.forEach((entry, i) => {
-      const y = startY + i * ROW_H;
+    // Use cumulative Y so rows with an unlocks line take more vertical space.
+    let currentY = startY;
+    sorted.forEach((entry) => {
+      const y      = currentY;
       const prefix = entry.completed ? '✓ ' : '  ';
       const color  = entry.completed ? '#ffdd88' : '#888888';
       const txt = this.add.text(PAD + 16, y, `${prefix}${entry.text}`, {
@@ -185,12 +188,28 @@ export class AchievementsScene extends Phaser.Scene {
       }).setOrigin(0, 0);
       this._listContainer.add(txt);
 
+      // Show what the achievement grants, if anything.
+      if (entry.unlocks) {
+        const unlocksTxt = this.add.text(PAD + 28, y + ROW_H - 2, `→ Unlocks: ${entry.unlocks}`, {
+          fontSize: '10px',
+          fontFamily: FONT_FAMILY,
+          color: '#88cc88',
+          resolution: 2,
+        }).setOrigin(0, 0);
+        this._listContainer.add(unlocksTxt);
+        currentY += ROW_H + UNLOCKS_ROW_EXTRA;
+      } else {
+        currentY += ROW_H;
+      }
+
       // Dev-mode checkbox: allows force-completing or resetting any achievement.
       // Hidden in production builds so players cannot see or use it.
       if (devMode) {
         this._addDevCheckbox(entry, y);
       }
     });
+
+    this._contentHeight = currentY + PAD;
   }
 
   /**
