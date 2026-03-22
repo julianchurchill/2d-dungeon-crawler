@@ -25,7 +25,8 @@ export class HUD {
       .setStrokeStyle(1, 0x000000);
 
     this.hpBar = s.add.rectangle(10, HP_Y, BAR_W, BAR_H, 0xcc2222)
-      .setScrollFactor(0).setDepth(101).setOrigin(0, 0.5);
+      .setScrollFactor(0).setDepth(101).setOrigin(0, 0.5)
+      .setStrokeStyle(1, 0xffffff);
 
     this.hpText = s.add.text(10 + BAR_W / 2, HP_Y, 'HP: 30/30', {
       fontSize: '12px', fontFamily: 'monospace', color: '#ffffff',
@@ -51,7 +52,8 @@ export class HUD {
       .setScrollFactor(0).setDepth(100).setOrigin(0.5)
       .setStrokeStyle(1, 0x000000);
     this.xpBar = s.add.rectangle(10, XP_Y, 0, XP_H, 0x4444cc)
-      .setScrollFactor(0).setDepth(101).setOrigin(0, 0.5);
+      .setScrollFactor(0).setDepth(101).setOrigin(0, 0.5)
+      .setStrokeStyle(1, 0xffffff);
   }
 
   updateHP(hp, maxHp) {
