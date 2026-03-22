@@ -197,18 +197,4 @@ export const GameEvents = {
    * @type {{ skillId: string }}
    */
   DOWNGRADE_SKILL: 'downgrade-skill',
-
-  /**
-   * Open (or refresh) the in-game dev panel.
-   * Emitted by: GameScene (keyboard shortcut, dev mode only)
-   * Subscribed by: UIScene → DevPanel
-   */
-  OPEN_DEV_PANEL: 'open-dev-panel',
-
-  /**
-   * Toggle the in-game dev panel open or closed.
-   * Emitted by: GameScene (keyboard shortcut)
-   * Subscribed by: UIScene → DevPanel
-   */
-  TOGGLE_DEV_PANEL: 'toggle-dev-panel',
 };

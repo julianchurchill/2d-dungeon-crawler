@@ -17,7 +17,6 @@ import { HeldMovementTracker } from '../systems/HeldMovementTracker.js';
 import { HoldRepeatScheduler } from '../systems/HoldRepeatScheduler.js';
 import { RunMovementController } from '../systems/RunMovementController.js';
 import { applyToGame, devOptions } from '../systems/DevOptions.js';
-import { isDevEnvironment } from '../utils/Environment.js';
 import { EnemySpawner } from '../systems/EnemySpawner.js';
 import { AchievementSystem } from '../achievements/AchievementSystem.js';
 import { handleMobileMenuPress } from '../systems/MobileMenuHandler.js';
@@ -307,13 +306,6 @@ export class GameScene extends Phaser.Scene {
     // HeldMovementTracker self-registers its own keydown/keyup listeners.
     this.heldMovement = new HeldMovementTracker(this.input.keyboard, EventBus);
     this._holdRepeat  = new HoldRepeatScheduler(this.heldMovement, MOVE_REPEAT_DELAY_MS);
-
-    // Dev panel toggle — only registered in dev mode (backslash key).
-    if (isDevEnvironment()) {
-      this.input.keyboard.on('keydown-BACK_SLASH', wrapWithRunCancel(this._runController, () => {
-        EventBus.emit(GameEvents.TOGGLE_DEV_PANEL);
-      }));
-    }
 
     // Non-movement actions: cancel any active run before executing.
     this.input.keyboard.on('keydown-I',           wrapWithRunCancel(this._runController, () => this._toggleInventory()));

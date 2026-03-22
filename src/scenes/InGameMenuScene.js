@@ -12,6 +12,7 @@
  */
 
 import Phaser from 'phaser';
+import { isDevEnvironment } from '../utils/Environment.js';
 
 /** Height of the fixed header area. */
 const HEADER_H = 80;
@@ -72,11 +73,20 @@ export class InGameMenuScene extends Phaser.Scene {
    */
   _buildButtons(width, height) {
     const cx = width / 2;
-    const startY = HEADER_H + (height - HEADER_H) / 2 - 60;
+    const devMode = isDevEnvironment();
+    // Space buttons evenly; an extra row is added in dev mode for DEV OPTIONS.
+    const rowCount = devMode ? 4 : 3;
+    const totalH   = (rowCount - 1) * 60;
+    const startY   = HEADER_H + (height - HEADER_H) / 2 - totalH / 2;
 
-    this._addMenuButton(cx, startY,      'ACHIEVEMENTS', '#ffdd88', '#664400', () => this._openAchievements());
-    this._addMenuButton(cx, startY + 60, 'HELP',         '#aaddff', '#004466', () => this._openHelp());
-    this._addMenuButton(cx, startY + 120, 'BACK',        '#888888', '#333333', () => this._back());
+    this._addMenuButton(cx, startY,       'ACHIEVEMENTS', '#ffdd88', '#664400', () => this._openAchievements());
+    this._addMenuButton(cx, startY + 60,  'HELP',         '#aaddff', '#004466', () => this._openHelp());
+    if (devMode) {
+      this._addMenuButton(cx, startY + 120, 'DEV OPTIONS', '#ff9999', '#660000', () => this._openDevMenu());
+      this._addMenuButton(cx, startY + 180, 'BACK',        '#888888', '#333333', () => this._back());
+    } else {
+      this._addMenuButton(cx, startY + 120, 'BACK',        '#888888', '#333333', () => this._back());
+    }
   }
 
   /**
@@ -114,6 +124,14 @@ export class InGameMenuScene extends Phaser.Scene {
    */
   _openHelp() {
     this.scene.launch('HelpScene', { fromScene: 'InGameMenuScene' });
+    this.scene.stop();
+  }
+
+  /**
+   * Launches DevMenuScene (dev mode only) and stops this scene.
+   */
+  _openDevMenu() {
+    this.scene.launch('DevMenuScene');
     this.scene.stop();
   }
 
