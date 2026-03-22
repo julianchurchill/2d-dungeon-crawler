@@ -7,6 +7,10 @@ Entries are listed newest-first within each section.
 
 ## [Unreleased]
 
+---
+
+## [0.15.6] - 2026-03-22
+
 ### Fixed
 
 - 2026-03-22 — Restore FONT_FAMILY to 'Roboto Mono'; was accidentally reverted to 'monospace'
