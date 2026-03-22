@@ -8,7 +8,9 @@ import { SKILLS } from '../skills/SkillDefinitions.js';
 
 /** Maximum crit chance for Lucky Strike (50%). */
 const LUCKY_STRIKE_MAX_CRIT = 0.50;
-/** Crit chance increment per upgrade for Lucky Strike (1 percentage point). */
+/** Minimum crit chance for Lucky Strike — the initial base value (1%). */
+const LUCKY_STRIKE_MIN_CRIT = SKILLS.LUCKY_STRIKE.baseCritChance;
+/** Crit chance increment/decrement per upgrade step for Lucky Strike (1 percentage point). */
 const LUCKY_STRIKE_CRIT_STEP = 0.01;
 
 export class SkillSystem {
@@ -57,6 +59,39 @@ export class SkillSystem {
     if (skill.id === SKILLS.LUCKY_STRIKE.id) {
       // Round to 2 decimal places to avoid floating-point drift over many upgrades.
       skill.baseCritChance = Math.round((skill.baseCritChance + LUCKY_STRIKE_CRIT_STEP) * 100) / 100;
+      const pct = Math.round(skill.baseCritChance * 100);
+      skill.description = `${pct}% chance to deal 50% bonus damage on a hit.`;
+    }
+    return true;
+  }
+
+  /**
+   * Returns true if the named active skill exists and is above its minimum value.
+   * @param {string} skillId
+   * @returns {boolean}
+   */
+  canDowngrade(skillId) {
+    const skill = this._activeSkills.find(s => s.id === skillId);
+    if (!skill) return false;
+    if (skill.id === SKILLS.LUCKY_STRIKE.id) {
+      return skill.baseCritChance > LUCKY_STRIKE_MIN_CRIT;
+    }
+    return false;
+  }
+
+  /**
+   * Downgrades the named active skill by one step, updating its stats and description.
+   * For Lucky Strike: decrements baseCritChance by 1%, floored at the initial 1%.
+   *
+   * @param {string} skillId
+   * @returns {boolean} true if downgraded, false if at minimum or not found.
+   */
+  downgradeSkill(skillId) {
+    if (!this.canDowngrade(skillId)) return false;
+    const skill = this._activeSkills.find(s => s.id === skillId);
+    if (skill.id === SKILLS.LUCKY_STRIKE.id) {
+      // Round to 2 decimal places to avoid floating-point drift over many steps.
+      skill.baseCritChance = Math.round((skill.baseCritChance - LUCKY_STRIKE_CRIT_STEP) * 100) / 100;
       const pct = Math.round(skill.baseCritChance * 100);
       skill.description = `${pct}% chance to deal 50% bonus damage on a hit.`;
     }

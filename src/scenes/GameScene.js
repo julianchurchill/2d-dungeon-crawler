@@ -356,7 +356,8 @@ export class GameScene extends Phaser.Scene {
     }, this);
     EventBus.on(GameEvents.TOGGLE_INVENTORY, wrapWithRunCancel(this._runController, () => this._toggleInventory()), this);
     EventBus.on(GameEvents.TOGGLE_SKILLS,    wrapWithRunCancel(this._runController, () => this._toggleSkills()), this);
-    EventBus.on(GameEvents.UPGRADE_SKILL, ({ skillId }) => this._handleUpgradeSkill(skillId), this);
+    EventBus.on(GameEvents.UPGRADE_SKILL,   ({ skillId }) => this._handleUpgradeSkill(skillId),   this);
+    EventBus.on(GameEvents.DOWNGRADE_SKILL, ({ skillId }) => this._handleDowngradeSkill(skillId), this);
     EventBus.on(GameEvents.USE_STAIRS, wrapWithRunCancel(this._runController, () => this._tryUseStairs()), this);
     EventBus.on(GameEvents.INVENTORY_USE, (index) => this._useInventoryItem(index), this);
     EventBus.on(GameEvents.FLOOR_CHANGED, (floor) => {
@@ -627,8 +628,22 @@ export class GameScene extends Phaser.Scene {
   }
 
   /**
+   * Handles a request (from SkillsPanel in dev mode) to downgrade a named skill.
+   * Downgrades the skill via SkillSystem and re-emits OPEN_SKILLS so the panel
+   * refreshes in place without closing.
+   *
+   * @param {string} skillId - The ID of the skill to downgrade.
+   */
+  _handleDowngradeSkill(skillId) {
+    if (this.player.skillSystem) {
+      this.player.skillSystem.downgradeSkill(skillId);
+    }
+    EventBus.emit(GameEvents.OPEN_SKILLS, { ...this._buildSkillsPayload(), forceRefresh: true });
+  }
+
+  /**
    * Builds the payload for the OPEN_SKILLS event, including each skill's
-   * current stats, whether it can be upgraded, and whether dev mode is active.
+   * current stats, whether it can be upgraded/downgraded, and whether dev mode is active.
    *
    * @returns {{ skills: object[], isDevMode: boolean }}
    */
@@ -637,7 +652,8 @@ export class GameScene extends Phaser.Scene {
     const skills = skillSystem
       ? skillSystem.getSkills().map(skill => ({
           ...skill,
-          canUpgrade: skillSystem.canUpgrade(skill.id),
+          canUpgrade:   skillSystem.canUpgrade(skill.id),
+          canDowngrade: skillSystem.canDowngrade(skill.id),
         }))
       : [];
     return { skills, isDevMode: isDevEnvironment() };

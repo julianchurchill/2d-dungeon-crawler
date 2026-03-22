@@ -189,4 +189,12 @@ export const GameEvents = {
    * @type {{ skillId: string }}
    */
   UPGRADE_SKILL: 'upgrade-skill',
+
+  /**
+   * Request to downgrade a named skill (dev mode only).
+   * Emitted by: SkillsPanel (downgrade button, dev mode)
+   * Subscribed by: GameScene (_handleDowngradeSkill)
+   * @type {{ skillId: string }}
+   */
+  DOWNGRADE_SKILL: 'downgrade-skill',
 };

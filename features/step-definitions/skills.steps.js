@@ -167,6 +167,26 @@ Then('Lucky Strike cannot be upgraded', function () {
   assert.equal(state.skillSystem.canUpgrade('lucky_strike'), false);
 });
 
+When('Lucky Strike is downgraded', function () {
+  state.downgradeResult = state.skillSystem.downgradeSkill('lucky_strike');
+});
+
+Then('the downgrade result is true', function () {
+  assert.equal(state.downgradeResult, true);
+});
+
+Then('the downgrade result is false', function () {
+  assert.equal(state.downgradeResult, false);
+});
+
+Then('Lucky Strike can be downgraded', function () {
+  assert.equal(state.skillSystem.canDowngrade('lucky_strike'), true);
+});
+
+Then('Lucky Strike cannot be downgraded', function () {
+  assert.equal(state.skillSystem.canDowngrade('lucky_strike'), false);
+});
+
 Then('the inactive skills list is empty', function () {
   assert.deepEqual(state.skillSystem.getInactiveSkills(), []);
 });

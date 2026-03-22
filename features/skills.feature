@@ -81,6 +81,38 @@ Feature: Character Skills
     Given a new skill system
     Then the inactive skills list is empty
 
+  Scenario: Lucky Strike cannot be downgraded when at the minimum crit chance
+    Given a new skill system
+    Then Lucky Strike cannot be downgraded
+
+  Scenario: Lucky Strike can be downgraded after being upgraded
+    Given a new skill system
+    When Lucky Strike is upgraded
+    Then Lucky Strike can be downgraded
+
+  Scenario: Downgrading Lucky Strike decrements its crit chance by 1%
+    Given a new skill system
+    When Lucky Strike is upgraded
+    And Lucky Strike is downgraded
+    Then the Lucky Strike skill has a 1% trigger chance
+
+  Scenario: downgradeSkill returns true when the skill is downgraded successfully
+    Given a new skill system
+    When Lucky Strike is upgraded
+    And Lucky Strike is downgraded
+    Then the downgrade result is true
+
+  Scenario: downgradeSkill returns false when Lucky Strike is at the minimum
+    Given a new skill system
+    When Lucky Strike is downgraded
+    Then the downgrade result is false
+
+  Scenario: Downgrading Lucky Strike updates its description to reflect the new chance
+    Given a new skill system
+    When Lucky Strike is upgraded
+    And Lucky Strike is downgraded
+    Then the Lucky Strike skill description contains "1%"
+
   # ── SkillsToggle ─────────────────────────────────────────────────────────
 
   Scenario: Opening the skills panel from player input state

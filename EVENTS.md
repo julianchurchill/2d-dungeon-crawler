@@ -18,6 +18,7 @@ GameScene                ──► PLAYER_LEVEL_UP      ──► AchievementSys
 GameScene                ──► OPEN_INVENTORY       ──► UIScene → InventoryPanel.toggle
 GameScene                ──► OPEN_SKILLS          ──► UIScene → SkillsPanel.show/hide
 SkillsPanel (dev mode)   ──► UPGRADE_SKILL        ──► GameScene._handleUpgradeSkill
+SkillsPanel (dev mode)   ──► DOWNGRADE_SKILL      ──► GameScene._handleDowngradeSkill
 GameScene                ──► OPEN_SKILLS          ──► UIScene → SkillsPanel.show (refresh after upgrade)
 GameScene                ──► GAME_OVER            ──► (none — reserved for future use)
 GameScene (once)         ──► RESTART_GAME         ──► GameScene._restart
@@ -78,3 +79,4 @@ GameScene (ESC key)      ──► CLOSE_MESSAGE_LOG    ──► UIScene → Me
 | `OPEN_SKILLS` | `'open-skills'` | `{ skills: object[], isDevMode: boolean, forceRefresh?: boolean }` | GameScene (K key, upgrade refresh) | UIScene → SkillsPanel |
 | `TOGGLE_SKILLS` | `'toggle-skills'` | *(none)* | DPad (K button) | GameScene |
 | `UPGRADE_SKILL` | `'upgrade-skill'` | `{ skillId: string }` | SkillsPanel (dev mode upgrade button) | GameScene._handleUpgradeSkill |
+| `DOWNGRADE_SKILL` | `'downgrade-skill'` | `{ skillId: string }` | SkillsPanel (dev mode downgrade button) | GameScene._handleDowngradeSkill |
