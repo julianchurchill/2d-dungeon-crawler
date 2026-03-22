@@ -5,7 +5,8 @@
  *
  * Stop conditions (evaluated each turn before the next step):
  *  - The next tile in the run direction is blocked or occupied by an entity.
- *  - Any enemy or item is currently visible in the field of view.
+ *  - Any enemy is currently visible in the field of view.
+ *  - An item that was not visible when the run started comes into view.
  *
  * This class has no dependency on Phaser or GameScene — all context is
  * provided by the caller as plain arguments, making it fully unit-testable.
@@ -58,16 +59,18 @@ export class RunMovementController {
    *
    * The run stops (and this._dir is cleared) when:
    *  - nextTileIsBlocked is true — wall or entity occupies the next tile.
-   *  - anyEntityVisible is true — an enemy or item is in the player's FOV.
+   *  - anyEnemyVisible is true — an enemy is in the player's FOV.
+   *  - newItemVisible is true — an item not visible at run-start is now in the FOV.
    *
    * @param {boolean} nextTileIsBlocked - True if the next tile cannot be entered.
-   * @param {boolean} anyEntityVisible  - True if any enemy or item is currently visible.
+   * @param {boolean} anyEnemyVisible   - True if any enemy is currently visible.
+   * @param {boolean} newItemVisible    - True if an item unseen at run-start is now visible.
    * @returns {string|null} The direction to move, or null to stop.
    */
-  nextDir(nextTileIsBlocked, anyEntityVisible) {
+  nextDir(nextTileIsBlocked, anyEnemyVisible, newItemVisible) {
     if (!this._dir) return null;
 
-    if (nextTileIsBlocked || anyEntityVisible) {
+    if (nextTileIsBlocked || anyEnemyVisible || newItemVisible) {
       this._dir = null;
       return null;
     }

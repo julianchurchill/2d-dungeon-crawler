@@ -71,7 +71,8 @@ export class GameScene extends Phaser.Scene {
     this._buildFloor(this.floorManager.generateFloor());
 
     // Input
-    this._runController = new RunMovementController();
+    this._runController  = new RunMovementController();
+    this._runStartItems  = new Set();
     this._setupInput();
 
     // Cross-scene events
@@ -391,34 +392,49 @@ export class GameScene extends Phaser.Scene {
       this._handleDir(dir);
       return;
     }
+    // Snapshot items visible now so the run only stops for newly-visible items.
+    this._runStartItems = new Set(
+      this.items.filter(i => this.dungeonMap.getFovState(i.x, i.y) === FOV_STATE.VISIBLE),
+    );
     this._runController.start(dir);
     this._doPlayerMove(dx, dy);
   }
 
   /**
    * Advances one step of an active run.  Evaluates stop conditions before
-   * each step: the run ends if the next tile is blocked (wall or entity) or
-   * if any enemy or item is currently visible in the FOV.
+   * each step: the run ends if the next tile is blocked (wall or entity),
+   * any enemy is visible, or a new item (not visible at run-start) comes into view.
    */
   _continueRun() {
     const { dx, dy } = DIR_DELTA[this._runController.getDir()];
     const nx = this.player.x + dx;
     const ny = this.player.y + dy;
     const blocked = !this.dungeonMap.isWalkable(nx, ny) || this._getEntityAt(nx, ny) !== null;
-    const dir = this._runController.nextDir(blocked, this._anyEntityVisible());
+    const dir = this._runController.nextDir(blocked, this._anyEnemyVisible(), this._anyNewItemVisible());
     if (dir) this._handleDir(dir);
   }
 
   /**
-   * Returns true if any enemy or item occupies a tile that is currently
-   * visible in the player's FOV.  Used by the run system to stop auto-movement
-   * the moment a threat or point of interest comes into view.
+   * Returns true if any enemy occupies a tile currently visible in the FOV.
    *
    * @returns {boolean}
    */
-  _anyEntityVisible() {
-    return this.enemies.some(e => this.dungeonMap.getFovState(e.x, e.y) === FOV_STATE.VISIBLE)
-      || this.items.some(i => this.dungeonMap.getFovState(i.x, i.y) === FOV_STATE.VISIBLE);
+  _anyEnemyVisible() {
+    return this.enemies.some(e => this.dungeonMap.getFovState(e.x, e.y) === FOV_STATE.VISIBLE);
+  }
+
+  /**
+   * Returns true if any item that was not visible when the current run started
+   * is now visible in the FOV.  Items already visible at run-start are ignored
+   * so the player is not interrupted by loot they have already seen.
+   *
+   * @returns {boolean}
+   */
+  _anyNewItemVisible() {
+    return this.items.some(
+      i => this.dungeonMap.getFovState(i.x, i.y) === FOV_STATE.VISIBLE
+        && !this._runStartItems.has(i),
+    );
   }
 
   // ─── Player Actions ───────────────────────────────────────────────────────
