@@ -126,19 +126,30 @@ export class SkillSystem {
   }
 
   /**
+   * Adds a skill directly to the active list, bypassing the inactive queue.
+   * Used when an achievement grants a permanent skill mid-run.
+   *
+   * @param {object} skill - A skill instance implementing the skill interface.
+   */
+  unlockPermanentSkill(skill) {
+    this._activeSkills.push(skill);
+  }
+
+  /**
    * Applies on-hit skill effects to a damage value, delegating to each active skill
    * in turn and accumulating any triggered effects and messages.
    *
-   * @param {number} baseDamage - The base damage before skill modifications.
+   * @param {number}      baseDamage   - The base damage before skill modifications.
+   * @param {string|null} defenderType - The type string of the defender entity, or null.
    * @returns {{ damage: number, messages: string[] }}
    */
-  applyOnHitSkills(baseDamage) {
+  applyOnHitSkills(baseDamage, defenderType = null) {
     let damage = baseDamage;
     const messages = [];
 
     for (const skill of this._activeSkills) {
       if (typeof skill.applyOnHit === 'function') {
-        const result = skill.applyOnHit(damage, this.rng);
+        const result = skill.applyOnHit(damage, this.rng, defenderType);
         damage = result.damage;
         messages.push(...result.messages);
       }

@@ -28,4 +28,11 @@ export const SKILLS = Object.freeze({
     dodgeStep: 0.01,
     triggerMessage: 'Dodged!',
   },
+  GOBLIN_HUNTING: {
+    id: 'goblin_hunting',
+    name: 'Goblin Hunting',
+    description: '+10% damage against goblins.',
+    targetType: 'goblin',
+    bonusMultiplier: 0.10,
+  },
 });

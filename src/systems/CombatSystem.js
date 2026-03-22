@@ -23,7 +23,8 @@ export function resolveMeleeAttack(attacker, defender, rng, { defenderIsInvincib
   const messages = [];
   const skillSystem = attacker.skillSystem ?? null;
   if (skillSystem) {
-    const skillResult = skillSystem.applyOnHitSkills(attackDamage);
+    // Pass the defender's type so enemy-type-specific skills (e.g. Goblin Hunting) can apply.
+    const skillResult = skillSystem.applyOnHitSkills(attackDamage, defender.type ?? null);
     attackDamage = skillResult.damage;
     messages.push(...skillResult.messages);
   }
