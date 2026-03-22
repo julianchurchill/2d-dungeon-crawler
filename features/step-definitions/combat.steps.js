@@ -64,8 +64,8 @@ Then('the goblin should have taken damage', function () {
 
 Then('the attack result message should mention the goblin', function () {
   assert.ok(
-    this.result.messages[0].toLowerCase().includes('goblin'),
-    `Expected message to mention goblin, got: "${this.result.messages[0]}"`
+    this.result.messages.at(-1).toLowerCase().includes('goblin'),
+    `Expected message to mention goblin, got: "${this.result.messages.at(-1)}"`
   );
 });
 
@@ -100,28 +100,28 @@ Then('the attack result damage should be {int}', function (expected) {
 
 Then('the attack result message should start with {string}', function (prefix) {
   assert.ok(
-    this.result.messages[0].startsWith(prefix),
-    `Expected message to start with "${prefix}", got: "${this.result.messages[0]}"`
+    this.result.messages.at(-1).startsWith(prefix),
+    `Expected message to start with "${prefix}", got: "${this.result.messages.at(-1)}"`
   );
 });
 
 Then('the attack result message should contain {string}', function (text) {
   assert.ok(
-    this.result.messages[0].includes(text),
-    `Expected message to contain "${text}", got: "${this.result.messages[0]}"`
+    this.result.messages.at(-1).includes(text),
+    `Expected message to contain "${text}", got: "${this.result.messages.at(-1)}"`
   );
 });
 
 Then('the attack result message should not contain {string}', function (text) {
   assert.ok(
-    !this.result.messages[0].includes(text),
-    `Expected message not to contain "${text}", got: "${this.result.messages[0]}"`
+    !this.result.messages.at(-1).includes(text),
+    `Expected message not to contain "${text}", got: "${this.result.messages.at(-1)}"`
   );
 });
 
 Then('the attack result message should end with {string}', function (suffix) {
   assert.ok(
-    this.result.messages[0].endsWith(suffix),
-    `Expected message to end with "${suffix}", got: "${this.result.messages[0]}"`
+    this.result.messages.at(-1).endsWith(suffix),
+    `Expected message to end with "${suffix}", got: "${this.result.messages.at(-1)}"`
   );
 });

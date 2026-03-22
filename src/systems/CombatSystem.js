@@ -32,11 +32,12 @@ export function resolveMeleeAttack(attacker, defender, rng) {
   const atkName = attacker.name || 'You';
   const defName = defender.name || 'you';
 
-  // Combat message is always first so callers can find it at index 0.
+  // Combat message is always last — skill trigger messages (e.g. "Lucky Strike!") precede it
+  // so the sequence reads naturally: cause first, then outcome.
   if (killed) {
-    messages.unshift(`${atkName} ${attacker.name ? 'kills' : 'kill'} ${defName} for ${actualDamage} damage!`);
+    messages.push(`${atkName} ${attacker.name ? 'kills' : 'kill'} ${defName} for ${actualDamage} damage!`);
   } else {
-    messages.unshift(`${atkName} ${attacker.name ? 'hits' : 'hit'} ${defName} for ${actualDamage} damage.`);
+    messages.push(`${atkName} ${attacker.name ? 'hits' : 'hit'} ${defName} for ${actualDamage} damage.`);
   }
 
   return { damage: actualDamage, killed, messages };

@@ -9,6 +9,7 @@ Entries are listed newest-first within each section.
 
 ### Changed
 
+- 2026-03-22 — Reorder CombatSystem messages so skill trigger messages appear before the combat outcome message
 - 2026-03-22 — Refactor CombatSystem to return a single messages array instead of separate message and skillMessages; add colour descriptions to DPad colour constants
 - 2026-03-22 — Refactor TurnManager to use a single setState(state) method; refactor InventoryToggle and SkillsToggle to accept turnManager directly; read skillSystem from attacker in CombatSystem; replace magic colour numbers in DPad with named constants
 
