@@ -10,6 +10,7 @@
 import { EventBus } from '../utils/EventBus.js';
 import { GameEvents } from '../events/GameEvents.js';
 import { isTouchDevice } from '../utils/TouchDeviceDetector.js';
+import { isDevEnvironment } from '../utils/Environment.js';
 
 const PANEL_PAD  = 16;
 /** Total panel width.  Wide enough for wrapped description text plus dev buttons. */
@@ -40,9 +41,9 @@ export class SkillsPanel {
     this._isDevMode = false;
     this._build();
 
-    EventBus.on(GameEvents.OPEN_SKILLS, ({ skills, isDevMode = false, forceRefresh = false }) => {
+    EventBus.on(GameEvents.OPEN_SKILLS, ({ skills, forceRefresh = false }) => {
       this._skills    = skills;
-      this._isDevMode = isDevMode;
+      this._isDevMode = isDevEnvironment();
       if (forceRefresh || !this.visible) {
         // Refresh (skill upgraded/downgraded) or first open: render/re-render the panel.
         this.show();

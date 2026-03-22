@@ -650,7 +650,7 @@ export class GameScene extends Phaser.Scene {
   _buildSkillsPayload() {
     const skillSystem = this.player.skillSystem;
     const skills = skillSystem ? skillSystem.getSkills() : [];
-    return { skills, isDevMode: isDevEnvironment() };
+    return { skills };
   }
 
   _useInventoryItem(index) {

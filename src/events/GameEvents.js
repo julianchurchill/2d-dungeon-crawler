@@ -171,7 +171,7 @@ export const GameEvents = {
    * Open (or toggle) the skills panel.
    * Emitted by: GameScene (K key or DPad skills button)
    * Subscribed by: UIScene → SkillsPanel
-   * @type {{ skills: object[] }} The player's active skills.
+   * @type {{ skills: object[], forceRefresh?: boolean }} The player's active skills.
    */
   OPEN_SKILLS: 'open-skills',
 

@@ -76,7 +76,7 @@ GameScene (ESC key)      ──► CLOSE_MESSAGE_LOG    ──► UIScene → Me
 | `ACHIEVEMENT_UNLOCKED` | `'achievement-unlocked'` | `AchievementDefinition` | AchievementSystem | GameScene (message log), UIScene (banner) |
 | `MESSAGE_LOG_TOGGLED` | `'message-log-toggled'` | `boolean` (open) | MessageLog | GameScene (ESC gate) |
 | `CLOSE_MESSAGE_LOG` | `'close-message-log'` | *(none)* | GameScene (ESC key) | UIScene → MessageLog.close() |
-| `OPEN_SKILLS` | `'open-skills'` | `{ skills: object[], isDevMode: boolean, forceRefresh?: boolean }` | GameScene (K key, upgrade refresh) | UIScene → SkillsPanel |
+| `OPEN_SKILLS` | `'open-skills'` | `{ skills: object[], forceRefresh?: boolean }` | GameScene (K key, upgrade refresh) | UIScene → SkillsPanel |
 | `TOGGLE_SKILLS` | `'toggle-skills'` | *(none)* | DPad (K button) | GameScene |
 | `UPGRADE_SKILL` | `'upgrade-skill'` | `{ skillId: string }` | SkillsPanel (dev mode upgrade button) | GameScene._handleUpgradeSkill |
 | `DOWNGRADE_SKILL` | `'downgrade-skill'` | `{ skillId: string }` | SkillsPanel (dev mode downgrade button) | GameScene._handleDowngradeSkill |

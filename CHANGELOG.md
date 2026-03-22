@@ -9,6 +9,7 @@ Entries are listed newest-first within each section.
 
 ### Changed
 
+- 2026-03-22 — SkillsPanel reads dev mode directly via isDevEnvironment() instead of receiving it in the OPEN_SKILLS event payload
 - 2026-03-22 — Extract Lucky Strike skill logic into LuckyStrikeSkill class; SkillSystem is now fully generic with no skill-specific branches
 - 2026-03-22 — Reorder CombatSystem messages so skill trigger messages appear before the combat outcome message
 - 2026-03-22 — Refactor CombatSystem to return a single messages array instead of separate message and skillMessages; add colour descriptions to DPad colour constants
