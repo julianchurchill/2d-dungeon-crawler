@@ -35,7 +35,8 @@ export class InventoryPanel {
     const { width, height } = s.scale;
 
     const panelW = COLS * (SLOT_SIZE + SLOT_PAD) + PANEL_PAD * 2;
-    const panelH = ROWS * (SLOT_SIZE + SLOT_PAD) + PANEL_PAD * 2 + 30;
+    // Extra height: 44px header area (title may wrap to 2 lines) + PANEL_PAD footer
+    const panelH = ROWS * (SLOT_SIZE + SLOT_PAD) + PANEL_PAD * 2 + 44;
     const panelX = Math.floor((width - panelW) / 2);
     const panelY = Math.floor((height - panelH) / 2);
 
@@ -48,9 +49,11 @@ export class InventoryPanel {
     this._container.add(bg);
 
     // Title — keyboard hints omitted on touch devices where they are irrelevant.
+    // Word wrap prevents the hint text overflowing the panel width on non-touch.
     const title = s.add.text(panelW / 2, 10, getInventoryPanelTitle(isTouchDevice()), {
       fontSize: '12px', fontFamily: FONT_FAMILY, color: '#aaccff',
       stroke: '#000000', strokeThickness: 2, resolution: 2,
+      wordWrap: { width: panelW - PANEL_PAD * 2 }, align: 'center',
     }).setOrigin(0.5, 0);
     this._container.add(title);
 
@@ -73,7 +76,8 @@ export class InventoryPanel {
       for (let col = 0; col < COLS; col++) {
         const index = row * COLS + col;
         const sx = PANEL_PAD + col * (SLOT_SIZE + SLOT_PAD) + SLOT_SIZE / 2;
-        const sy = PANEL_PAD + 26 + row * (SLOT_SIZE + SLOT_PAD) + SLOT_SIZE / 2;
+        // 38px top offset: enough room for a 2-line wrapped title
+        const sy = PANEL_PAD + 38 + row * (SLOT_SIZE + SLOT_PAD) + SLOT_SIZE / 2;
 
         const slotBg = s.add.rectangle(sx, sy, SLOT_SIZE, SLOT_SIZE, 0x222233, 1)
           .setStrokeStyle(1, 0x445566)
@@ -108,10 +112,11 @@ export class InventoryPanel {
     }
 
     // Equipped display
-    this._equippedText = s.add.text(PANEL_PAD, panelH - 14, 'WPN: -   ARM: -', {
+    // setOrigin(0, 1) anchors to bottom-left, giving PANEL_PAD margin from the panel edge.
+    this._equippedText = s.add.text(PANEL_PAD, panelH - PANEL_PAD, 'WPN: -   ARM: -', {
       fontSize: '11px', fontFamily: FONT_FAMILY, color: '#88aacc',
       stroke: '#000000', strokeThickness: 2, resolution: 2,
-    });
+    }).setOrigin(0, 1);
     this._container.add(this._equippedText);
 
     // Refresh the equipped-name display whenever the inventory changes.
@@ -275,7 +280,8 @@ export class InventoryPanel {
 
   resize(width, height) {
     const panelW = COLS * (SLOT_SIZE + SLOT_PAD) + PANEL_PAD * 2;
-    const panelH = ROWS * (SLOT_SIZE + SLOT_PAD) + PANEL_PAD * 2 + 30;
+    // Extra height: 44px header area (title may wrap to 2 lines) + PANEL_PAD footer
+    const panelH = ROWS * (SLOT_SIZE + SLOT_PAD) + PANEL_PAD * 2 + 44;
     this._container.setPosition(
       Math.floor((width - panelW) / 2),
       Math.floor((height - panelH) / 2)

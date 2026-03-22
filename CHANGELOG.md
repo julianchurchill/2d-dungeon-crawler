@@ -26,6 +26,7 @@ Entries are listed newest-first within each section.
 
 ### Added
 
+- 2026-03-22 — Fix inventory panel layout on non-touch: title uses word wrap to prevent overflow, slots offset increased for wrapped title, equipped text bottom-anchored with PANEL_PAD margin
 - 2026-03-22 — Bump minimum font sizes for Roboto Mono: 7px→10px (inventory slot labels), 9px→11px (inventory equipped text, message log scroll hint, version string), 10px→11px (message log header)
 - 2026-03-22 — Extract font into `src/utils/FontConfig.js` FONT_FAMILY constant; load six candidate Google Fonts (VT323, Press Start 2P, Share Tech Mono, Roboto Mono, Inconsolata, IBM Plex Mono) for review
 - 2026-03-22 — Keyboard navigation in menus: UP/DOWN (or W/S) to move focus, ENTER/SPACE to select — added to MainMenuScene, InGameMenuScene, DevMenuScene, and SkillLevelUpScene
