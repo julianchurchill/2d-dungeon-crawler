@@ -1,3 +1,4 @@
+import { FONT_FAMILY } from '../utils/FontConfig.js';
 import Phaser from 'phaser';
 import { HUD } from '../ui/HUD.js';
 import { DPad } from '../ui/DPad.js';
@@ -92,7 +93,7 @@ export class UIScene extends Phaser.Scene {
     const { width, height } = this.scale;
     const txt = this.add.text(width / 2, height / 3, `LEVEL UP!\nLevel ${level}`, {
       fontSize: '24px',
-      fontFamily: 'monospace',
+      fontFamily: FONT_FAMILY,
       color: '#ffdd88',
       stroke: '#884400',
       strokeThickness: 4,
@@ -132,7 +133,7 @@ export class UIScene extends Phaser.Scene {
       `ACHIEVEMENT UNLOCKED!\n${achievement.name}`,
       {
         fontSize: '20px',
-        fontFamily: 'monospace',
+        fontFamily: FONT_FAMILY,
         color: '#88ffee',
         stroke: '#004433',
         strokeThickness: 4,

@@ -7,6 +7,7 @@
  * caps.  Description text wraps within the available text area width.
  */
 
+import { FONT_FAMILY } from '../utils/FontConfig.js';
 import { EventBus } from '../utils/EventBus.js';
 import { GameEvents } from '../events/GameEvents.js';
 import { isTouchDevice } from '../utils/TouchDeviceDetector.js';
@@ -71,7 +72,7 @@ export class SkillsPanel {
 
     // Title
     this._title = s.add.text(PANEL_W / 2, 10, getSkillsPanelTitle(isTouchDevice()), {
-      fontSize: '12px', fontFamily: 'monospace', color: '#aaccff',
+      fontSize: '12px', fontFamily: FONT_FAMILY, color: '#aaccff',
       stroke: '#000000', strokeThickness: 2, resolution: 2,
     }).setOrigin(0.5, 0);
     this._container.add(this._title);
@@ -79,7 +80,7 @@ export class SkillsPanel {
     // Close button (touch devices only)
     if (isTouchDevice()) {
       const closeBtn = s.add.text(PANEL_W - PANEL_PAD / 2, 10, '✕', {
-        fontSize: '14px', fontFamily: 'monospace', color: '#aaccff',
+        fontSize: '14px', fontFamily: FONT_FAMILY, color: '#aaccff',
         stroke: '#000000', strokeThickness: 2, resolution: 2,
       }).setOrigin(1, 0).setInteractive({ useHandCursor: true });
       closeBtn.on('pointerdown', () => EventBus.emit(GameEvents.TOGGLE_SKILLS));
@@ -120,12 +121,12 @@ export class SkillsPanel {
       const y = HEADER_H + i * ROW_H;
 
       const nameTxt = s.add.text(PANEL_PAD, y + 6, skill.name, {
-        fontSize: '13px', fontFamily: 'monospace', color: '#ffffff',
+        fontSize: '13px', fontFamily: FONT_FAMILY, color: '#ffffff',
         stroke: '#000000', strokeThickness: 2, resolution: 2,
         wordWrap: { width: textW },
       });
       const descTxt = s.add.text(PANEL_PAD, y + 24, skill.description, {
-        fontSize: '11px', fontFamily: 'monospace', color: '#aaaacc',
+        fontSize: '11px', fontFamily: FONT_FAMILY, color: '#aaaacc',
         stroke: '#000000', strokeThickness: 2, resolution: 2,
         wordWrap: { width: textW },
       });
@@ -144,12 +145,12 @@ export class SkillsPanel {
       const y = HEADER_H + (this._skills.length + i) * ROW_H;
 
       const nameTxt = s.add.text(PANEL_PAD, y + 6, `${skill.name} (inactive)`, {
-        fontSize: '13px', fontFamily: 'monospace', color: '#888888',
+        fontSize: '13px', fontFamily: FONT_FAMILY, color: '#888888',
         stroke: '#000000', strokeThickness: 2, resolution: 2,
         wordWrap: { width: textW },
       });
       const descTxt = s.add.text(PANEL_PAD, y + 24, skill.description, {
-        fontSize: '11px', fontFamily: 'monospace', color: '#666677',
+        fontSize: '11px', fontFamily: FONT_FAMILY, color: '#666677',
         stroke: '#000000', strokeThickness: 2, resolution: 2,
         wordWrap: { width: textW },
       });
@@ -179,7 +180,7 @@ export class SkillsPanel {
     // ⬆ Upgrade button — top half of the row.
     const upColor = skill.canUpgrade ? '#88ff88' : '#444444';
     const upBtn = s.add.text(btnX, y + 14, '⬆', {
-      fontSize: '18px', fontFamily: 'monospace', color: upColor,
+      fontSize: '18px', fontFamily: FONT_FAMILY, color: upColor,
       stroke: '#000000', strokeThickness: 2, resolution: 2,
     }).setOrigin(1, 0.5);
     if (skill.canUpgrade) {
@@ -190,7 +191,7 @@ export class SkillsPanel {
     // ⬇ Downgrade button — bottom half of the row.
     const downColor = skill.canDowngrade ? '#ff8888' : '#444444';
     const downBtn = s.add.text(btnX, y + 46, '⬇', {
-      fontSize: '18px', fontFamily: 'monospace', color: downColor,
+      fontSize: '18px', fontFamily: FONT_FAMILY, color: downColor,
       stroke: '#000000', strokeThickness: 2, resolution: 2,
     }).setOrigin(1, 0.5);
     if (skill.canDowngrade) {
@@ -214,7 +215,7 @@ export class SkillsPanel {
     const btnX = PANEL_W - PANEL_PAD;
 
     const btn = s.add.text(btnX, y + ROW_H / 2, '+', {
-      fontSize: '22px', fontFamily: 'monospace', color: '#44ff88',
+      fontSize: '22px', fontFamily: FONT_FAMILY, color: '#44ff88',
       stroke: '#000000', strokeThickness: 2, resolution: 2,
     }).setOrigin(1, 0.5)
       .setInteractive({ useHandCursor: true });

@@ -1,3 +1,4 @@
+import { FONT_FAMILY } from '../utils/FontConfig.js';
 import { EventBus } from '../utils/EventBus.js';
 import { GameEvents } from '../events/GameEvents.js';
 import { InventoryCursor } from '../systems/InventoryCursor.js';
@@ -48,7 +49,7 @@ export class InventoryPanel {
 
     // Title — keyboard hints omitted on touch devices where they are irrelevant.
     const title = s.add.text(panelW / 2, 10, getInventoryPanelTitle(isTouchDevice()), {
-      fontSize: '12px', fontFamily: 'monospace', color: '#aaccff',
+      fontSize: '12px', fontFamily: FONT_FAMILY, color: '#aaccff',
       stroke: '#000000', strokeThickness: 2, resolution: 2,
     }).setOrigin(0.5, 0);
     this._container.add(title);
@@ -56,7 +57,7 @@ export class InventoryPanel {
     // Close button — visible on touch devices only, since keyboard users press I.
     if (isTouchDevice()) {
       const closeBtn = s.add.text(panelW - PANEL_PAD / 2, 10, '✕', {
-        fontSize: '14px', fontFamily: 'monospace', color: '#aaccff',
+        fontSize: '14px', fontFamily: FONT_FAMILY, color: '#aaccff',
         stroke: '#000000', strokeThickness: 2, resolution: 2,
       }).setOrigin(1, 0).setInteractive({ useHandCursor: true });
       closeBtn.on('pointerover', () => closeBtn.setColor('#ffffff'));
@@ -83,7 +84,7 @@ export class InventoryPanel {
         }).setOrigin(0.5);
 
         const label = s.add.text(sx, sy + 14, '', {
-          fontSize: '7px', fontFamily: 'monospace', color: '#cccccc',
+          fontSize: '7px', fontFamily: FONT_FAMILY, color: '#cccccc',
           wordWrap: { width: SLOT_SIZE - 2 }, align: 'center', resolution: 2,
         }).setOrigin(0.5);
 
@@ -108,7 +109,7 @@ export class InventoryPanel {
 
     // Equipped display
     this._equippedText = s.add.text(PANEL_PAD, panelH - 14, 'WPN: -   ARM: -', {
-      fontSize: '9px', fontFamily: 'monospace', color: '#88aacc',
+      fontSize: '9px', fontFamily: FONT_FAMILY, color: '#88aacc',
       stroke: '#000000', strokeThickness: 2, resolution: 2,
     });
     this._container.add(this._equippedText);

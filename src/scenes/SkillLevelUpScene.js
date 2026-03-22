@@ -13,6 +13,7 @@
  * ESC is ignored when choices exist — the player must make a selection.
  */
 
+import { FONT_FAMILY } from '../utils/FontConfig.js';
 import Phaser from 'phaser';
 import { MenuNavigator } from '../utils/MenuNavigator.js';
 
@@ -123,12 +124,12 @@ export class SkillLevelUpScene extends Phaser.Scene {
       .setOrigin(0, 0).setScrollFactor(0).setDepth(9);
 
     this.add.text(width / 2, 28, 'SKILL UPGRADE', {
-      fontSize: '28px', fontFamily: 'monospace',
+      fontSize: '28px', fontFamily: FONT_FAMILY,
       color: '#ffdd88', stroke: '#884400', strokeThickness: 4, resolution: 2,
     }).setOrigin(0.5, 0).setScrollFactor(0).setDepth(10);
 
     this.add.text(width / 2, HEADER_H - 18, 'Choose a skill to activate or upgrade:', {
-      fontSize: '14px', fontFamily: 'monospace',
+      fontSize: '14px', fontFamily: FONT_FAMILY,
       color: '#aaaacc', stroke: '#000000', strokeThickness: 2, resolution: 2,
     }).setOrigin(0.5, 0).setScrollFactor(0).setDepth(10);
   }
@@ -179,13 +180,13 @@ export class SkillLevelUpScene extends Phaser.Scene {
 
     // Label
     this.add.text(cx, y + ROW_PAD + 8, choice.label, {
-      fontSize: '16px', fontFamily: 'monospace',
+      fontSize: '16px', fontFamily: FONT_FAMILY,
       color: labelColor, stroke: '#000000', strokeThickness: 2, resolution: 2,
     }).setOrigin(0.5, 0);
 
     // Description
     this.add.text(cx, y + ROW_PAD + 30, choice.description, {
-      fontSize: '11px', fontFamily: 'monospace',
+      fontSize: '11px', fontFamily: FONT_FAMILY,
       color: '#888899', stroke: '#000000', strokeThickness: 2, resolution: 2,
       wordWrap: { width: ROW_W - ROW_PAD * 2 },
     }).setOrigin(0.5, 0);

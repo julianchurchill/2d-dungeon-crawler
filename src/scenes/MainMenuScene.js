@@ -1,3 +1,4 @@
+import { FONT_FAMILY } from '../utils/FontConfig.js';
 import Phaser from 'phaser';
 import { APP_VERSION_STRING } from '../utils/AppVersion.js';
 import { resetDevOptions } from '../systems/DevOptions.js';
@@ -40,7 +41,7 @@ export class MainMenuScene extends Phaser.Scene {
   _buildTitle(width, height) {
     this.add.text(width / 2, height * 0.22, 'DUNGEON', {
       fontSize: '52px',
-      fontFamily: 'monospace',
+      fontFamily: FONT_FAMILY,
       color: '#ffdd88',
       stroke: '#884400',
       strokeThickness: 6,
@@ -49,7 +50,7 @@ export class MainMenuScene extends Phaser.Scene {
 
     this.add.text(width / 2, height * 0.22 + 56, 'CRAWLER', {
       fontSize: '36px',
-      fontFamily: 'monospace',
+      fontFamily: FONT_FAMILY,
       color: '#cc8844',
       stroke: '#442200',
       strokeThickness: 4,
@@ -58,7 +59,7 @@ export class MainMenuScene extends Phaser.Scene {
 
     this.add.text(width / 2, height * 0.22 + 98, 'A Roguelike Dungeon Adventure', {
       fontSize: '13px',
-      fontFamily: 'monospace',
+      fontFamily: FONT_FAMILY,
       color: '#888888',
       resolution: 2,
     }).setOrigin(0.5);
@@ -73,7 +74,7 @@ export class MainMenuScene extends Phaser.Scene {
       .setInteractive({ useHandCursor: true });
 
     const startTxt = this.add.text(width / 2, btnY, '▶  START GAME', {
-      fontSize: '16px', fontFamily: 'monospace', color: '#88ccff', resolution: 2,
+      fontSize: '16px', fontFamily: FONT_FAMILY, color: '#88ccff', resolution: 2,
     }).setOrigin(0.5);
 
     startBg.on('pointerover', () => {
@@ -110,7 +111,7 @@ export class MainMenuScene extends Phaser.Scene {
       .setInteractive({ useHandCursor: true });
 
     const achTxt = this.add.text(width / 2, achBtnY, '★  ACHIEVEMENTS', {
-      fontSize: '12px', fontFamily: 'monospace', color: '#6699aa', resolution: 2,
+      fontSize: '12px', fontFamily: FONT_FAMILY, color: '#6699aa', resolution: 2,
     }).setOrigin(0.5);
 
     const goAchievements = () => {
@@ -145,7 +146,7 @@ export class MainMenuScene extends Phaser.Scene {
         .setInteractive({ useHandCursor: true });
 
       const devTxt = this.add.text(width / 2, devBtnY, '⚙  DEV OPTIONS', {
-        fontSize: '12px', fontFamily: 'monospace', color: '#6699aa', resolution: 2,
+        fontSize: '12px', fontFamily: FONT_FAMILY, color: '#6699aa', resolution: 2,
       }).setOrigin(0.5);
 
       const goDevOptions = () => {
@@ -239,7 +240,7 @@ export class MainMenuScene extends Phaser.Scene {
     lines.forEach((line, i) => {
       this.add.text(width / 2, startY + i * 16, line, {
         fontSize: i === 0 ? '13px' : '11px',
-        fontFamily: 'monospace',
+        fontFamily: FONT_FAMILY,
         color: i === 0 ? '#ffdd88' : '#888888',
         resolution: 2,
       }).setOrigin(0.5);
@@ -256,7 +257,7 @@ export class MainMenuScene extends Phaser.Scene {
   _buildVersion(width, height) {
     this.add.text(width - 8, height - 8, APP_VERSION_STRING, {
       fontSize: '9px',
-      fontFamily: 'monospace',
+      fontFamily: FONT_FAMILY,
       color: '#445566',
       resolution: 2,
     }).setOrigin(1, 1);

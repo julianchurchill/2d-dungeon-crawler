@@ -9,6 +9,7 @@
  * Keyboard navigation: UP/DOWN (or W/S) move focus; ENTER/SPACE activate.
  */
 
+import { FONT_FAMILY } from '../utils/FontConfig.js';
 import Phaser from 'phaser';
 import { devOptions } from '../systems/DevOptions.js';
 import { MenuNavigator } from '../utils/MenuNavigator.js';
@@ -76,7 +77,7 @@ export class DevMenuScene extends Phaser.Scene {
       .setOrigin(0, 0).setScrollFactor(0).setDepth(9);
 
     this.add.text(width / 2, 28, 'DEV OPTIONS', {
-      fontSize: '28px', fontFamily: 'monospace',
+      fontSize: '28px', fontFamily: FONT_FAMILY,
       color: '#ff9999', stroke: '#660000', strokeThickness: 4, resolution: 2,
     }).setOrigin(0.5, 0).setScrollFactor(0).setDepth(10);
   }
@@ -113,7 +114,7 @@ export class DevMenuScene extends Phaser.Scene {
     const ROW_W = 320;
 
     const labelTxt = this.add.text(cx - ROW_W / 2, y, label, {
-      fontSize: '20px', fontFamily: 'monospace',
+      fontSize: '20px', fontFamily: FONT_FAMILY,
       color: '#cccccc', stroke: '#000000', strokeThickness: 3, resolution: 2,
     }).setOrigin(0, 0.5);
 
@@ -121,7 +122,7 @@ export class DevMenuScene extends Phaser.Scene {
     const getColor = () => devOptions[key] ? '#88ff88' : '#ff8888';
 
     const btn = this.add.text(cx + ROW_W / 2, y, getLabel(), {
-      fontSize: '20px', fontFamily: 'monospace',
+      fontSize: '20px', fontFamily: FONT_FAMILY,
       color: getColor(), stroke: '#000000', strokeThickness: 3, resolution: 2,
     }).setOrigin(1, 0.5).setInteractive({ useHandCursor: true });
 
@@ -148,7 +149,7 @@ export class DevMenuScene extends Phaser.Scene {
       .setOrigin(0, 0).setDepth(9);
 
     const btn = this.add.text(width / 2, height - FOOTER_H / 2, 'BACK', {
-      fontSize: '20px', fontFamily: 'monospace',
+      fontSize: '20px', fontFamily: FONT_FAMILY,
       color: '#888888', stroke: '#000000', strokeThickness: 3, resolution: 2,
     }).setOrigin(0.5).setInteractive({ useHandCursor: true }).setDepth(10);
 
