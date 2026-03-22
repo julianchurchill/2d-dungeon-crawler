@@ -9,10 +9,16 @@
  *
  * Back / ESC returns control to the game without doing anything else.
  * GameScene and UIScene are sleeping while this scene is active.
+ *
+ * Keyboard navigation: UP/DOWN (or W/S) move focus; ENTER/SPACE select.
  */
 
 import Phaser from 'phaser';
 import { isDevEnvironment } from '../utils/Environment.js';
+import { MenuNavigator } from '../utils/MenuNavigator.js';
+
+/** Text colour applied to the currently keyboard-focused menu item. */
+const COLOR_FOCUSED = '#ffffff';
 
 /** Height of the fixed header area. */
 const HEADER_H = 80;
@@ -24,12 +30,14 @@ export class InGameMenuScene extends Phaser.Scene {
 
   create() {
     const { width, height } = this.scale;
+    /** @type {Array<{btn: Phaser.GameObjects.Text, normalColor: string, onPress: function}>} */
+    this._navItems = [];
+
     this._buildBackground(width, height);
     this._buildTitle(width);
     this._buildButtons(width, height);
+    this._setupKeyboardNav();
 
-    // ESC returns to the game.
-    this.input.keyboard.on('keydown-ESC', () => this._back());
     this.scale.on('resize', () => this.scene.restart());
   }
 
@@ -90,12 +98,13 @@ export class InGameMenuScene extends Phaser.Scene {
   }
 
   /**
-   * Creates a centred text button with hover colour feedback.
+   * Creates a centred text button with hover colour feedback and registers
+   * it for keyboard navigation.
    *
    * @param {number}   x
    * @param {number}   y
    * @param {string}   label
-   * @param {string}   color     - Normal text colour.
+   * @param {string}   color      - Normal text colour.
    * @param {string}   hoverColor - Text colour on pointer-over.
    * @param {function} onPress
    */
@@ -106,8 +115,48 @@ export class InGameMenuScene extends Phaser.Scene {
     }).setOrigin(0.5).setInteractive({ useHandCursor: true });
 
     btn.on('pointerover',  () => btn.setColor(hoverColor));
-    btn.on('pointerout',   () => btn.setColor(color));
+    btn.on('pointerout',   () => {
+      // Restore to focus colour if this item is keyboard-focused, else normal.
+      const isFocused = this._nav && this._nav.focusedIndex === this._navItems.length - 1;
+      btn.setColor(isFocused ? COLOR_FOCUSED : color);
+    });
     btn.on('pointerdown',  onPress);
+
+    this._navItems.push({ btn, normalColor: color, onPress });
+  }
+
+  /**
+   * Wires UP/DOWN/W/S for navigation and ENTER/SPACE for selection.
+   * Sets initial focus on the first item.
+   */
+  _setupKeyboardNav() {
+    this._nav = new MenuNavigator(this._navItems.length);
+    this._updateFocus();
+
+    this.input.keyboard.on('keydown-UP',    () => { this._nav.prev(); this._updateFocus(); });
+    this.input.keyboard.on('keydown-W',     () => { this._nav.prev(); this._updateFocus(); });
+    this.input.keyboard.on('keydown-DOWN',  () => { this._nav.next(); this._updateFocus(); });
+    this.input.keyboard.on('keydown-S',     () => { this._nav.next(); this._updateFocus(); });
+    this.input.keyboard.on('keydown-ENTER', () => this._activateFocused());
+    this.input.keyboard.on('keydown-SPACE', () => this._activateFocused());
+    // ESC returns to the game.
+    this.input.keyboard.on('keydown-ESC',   () => this._back());
+  }
+
+  /**
+   * Refreshes the colour of every item to reflect the current focus.
+   */
+  _updateFocus() {
+    this._navItems.forEach(({ btn, normalColor }, i) => {
+      btn.setColor(i === this._nav.focusedIndex ? COLOR_FOCUSED : normalColor);
+    });
+  }
+
+  /**
+   * Activates the currently focused menu item.
+   */
+  _activateFocused() {
+    this._navItems[this._nav.focusedIndex].onPress();
   }
 
   /**

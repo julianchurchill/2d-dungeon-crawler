@@ -38,8 +38,8 @@
 
 ## UI
 
-- [ ] allow arrows and WASD keys to navigate menus and ENTER/SPACE to select buttons
 - [ ] map - press 'm' to show and provide a button for the mobile interface
+- [x] allow arrows and WASD keys to navigate menus and ENTER/SPACE to select buttons
 - [x] mobile controls on mobile only
 - [x] screen effect when you level up during the game
 
