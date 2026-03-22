@@ -649,13 +649,7 @@ export class GameScene extends Phaser.Scene {
    */
   _buildSkillsPayload() {
     const skillSystem = this.player.skillSystem;
-    const skills = skillSystem
-      ? skillSystem.getSkills().map(skill => ({
-          ...skill,
-          canUpgrade:   skillSystem.canUpgrade(skill.id),
-          canDowngrade: skillSystem.canDowngrade(skill.id),
-        }))
-      : [];
+    const skills = skillSystem ? skillSystem.getSkills() : [];
     return { skills, isDevMode: isDevEnvironment() };
   }
 

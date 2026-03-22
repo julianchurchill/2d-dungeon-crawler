@@ -52,8 +52,8 @@ Then('the Lucky Strike skill has a {int}% trigger chance', function (pct) {
   const skill = state.skillSystem.getSkills().find(s => s.name === 'Lucky Strike');
   assert.ok(skill, 'Lucky Strike skill not found');
   assert.ok(
-    Math.abs(skill.baseCritChance - pct / 100) < 1e-9,
-    `Expected baseCritChance ~${pct / 100} but got ${skill.baseCritChance}`,
+    Math.abs(skill.critChance - pct / 100) < 1e-9,
+    `Expected critChance ~${pct / 100} but got ${skill.critChance}`,
   );
 });
 
