@@ -21,6 +21,7 @@ Entries are listed newest-first within each section.
 
 ### Added
 
+- 2026-03-22 — Keyboard navigation in menus: UP/DOWN (or W/S) to move focus, ENTER/SPACE to select — added to MainMenuScene, InGameMenuScene, DevMenuScene, and SkillLevelUpScene
 - 2026-03-22 — Add Ferocity and Dodge inactive skills; add SkillLevelUpScene shown on level-up for skill activation/upgrade choices; add ACTIVATE_SKILL event and dev-mode activate button in SkillsPanel; Dodge defence integration in CombatSystem skips takeDamage on successful dodge
 - 2026-03-22 — Add DEV OPTIONS screen (dev mode only) accessible from the in-game ESC menu with toggles for enemy invincibility and player invincibility; invincible defenders take zero damage and cannot be killed
 - 2026-03-22 — Fix SkillsPanel layout: wider panel, word-wrapped description text, separated upgrade/downgrade buttons; add red ⬇ downgrade button and SkillSystem.downgradeSkill/canDowngrade

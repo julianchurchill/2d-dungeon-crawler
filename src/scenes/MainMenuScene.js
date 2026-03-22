@@ -2,6 +2,10 @@ import Phaser from 'phaser';
 import { APP_VERSION_STRING } from '../utils/AppVersion.js';
 import { resetDevOptions } from '../systems/DevOptions.js';
 import { isDevEnvironment } from '../utils/Environment.js';
+import { MenuNavigator } from '../utils/MenuNavigator.js';
+
+/** Text colour applied to the currently keyboard-focused menu item. */
+const COLOR_FOCUSED = '#ffffff';
 
 export class MainMenuScene extends Phaser.Scene {
   constructor() {
@@ -10,11 +14,15 @@ export class MainMenuScene extends Phaser.Scene {
 
   create() {
     const { width, height } = this.scale;
+    /** @type {Array<{onFocus: function, onBlur: function, onSelect: function}>} */
+    this._navItems = [];
+
     this._buildBackground();
     this._buildTitle(width, height);
     const menuBottomY = this._buildMenu(width, height);
     this._buildControls(width, menuBottomY + 24);
     this._buildVersion(width, height);
+    this._setupKeyboardNav();
 
     this.scale.on('resize', this._onResize, this);
   }
@@ -74,14 +82,15 @@ export class MainMenuScene extends Phaser.Scene {
     });
     startBg.on('pointerout', () => {
       startBg.setFillStyle(0x224466);
-      startTxt.setColor('#88ccff');
+      const isFocused = this._nav && this._nav.focusedIndex === 0;
+      startTxt.setColor(isFocused ? COLOR_FOCUSED : '#88ccff');
     });
-    startBg.on('pointerdown', () => {
-      this.cameras.main.fadeOut(300, 0, 0, 0);
-      this.time.delayedCall(300, () => {
-        this.scene.start('GameScene');
-        this.scene.launch('UIScene');
-      });
+    startBg.on('pointerdown', () => this._startGame());
+
+    this._navItems.push({
+      onFocus:  () => { startBg.setFillStyle(0x336688); startTxt.setColor(COLOR_FOCUSED); },
+      onBlur:   () => { startBg.setFillStyle(0x224466); startTxt.setColor('#88ccff'); },
+      onSelect: () => this._startGame(),
     });
 
     // Pulse animation on start button
@@ -104,18 +113,26 @@ export class MainMenuScene extends Phaser.Scene {
       fontSize: '12px', fontFamily: 'monospace', color: '#6699aa', resolution: 2,
     }).setOrigin(0.5);
 
+    const goAchievements = () => {
+      this.cameras.main.fadeOut(200, 0, 0, 0);
+      this.time.delayedCall(200, () =>
+        this.scene.start('AchievementsScene', { fromScene: 'MainMenuScene' }));
+    };
     achBg.on('pointerover', () => {
       achBg.setFillStyle(0x223344);
       achTxt.setColor('#ffdd88');
     });
     achBg.on('pointerout', () => {
       achBg.setFillStyle(0x1a2a3a);
-      achTxt.setColor('#6699aa');
+      const isFocused = this._nav && this._nav.focusedIndex === this._navItems.length;
+      achTxt.setColor(isFocused ? COLOR_FOCUSED : '#6699aa');
     });
-    achBg.on('pointerdown', () => {
-      this.cameras.main.fadeOut(200, 0, 0, 0);
-      this.time.delayedCall(200, () =>
-        this.scene.start('AchievementsScene', { fromScene: 'MainMenuScene' }));
+    achBg.on('pointerdown', goAchievements);
+
+    this._navItems.push({
+      onFocus:  () => { achBg.setFillStyle(0x223344); achTxt.setColor(COLOR_FOCUSED); },
+      onBlur:   () => { achBg.setFillStyle(0x1a2a3a); achTxt.setColor('#6699aa'); },
+      onSelect: goAchievements,
     });
 
     // DEV OPTIONS button — only shown in development builds
@@ -131,27 +148,63 @@ export class MainMenuScene extends Phaser.Scene {
         fontSize: '12px', fontFamily: 'monospace', color: '#6699aa', resolution: 2,
       }).setOrigin(0.5);
 
+      const goDevOptions = () => {
+        this.cameras.main.fadeOut(200, 0, 0, 0);
+        this.time.delayedCall(200, () => this.scene.start('DevOptionsScene'));
+      };
       devBg.on('pointerover', () => {
         devBg.setFillStyle(0x223344);
         devTxt.setColor('#88ccff');
       });
       devBg.on('pointerout', () => {
         devBg.setFillStyle(0x1a2a3a);
-        devTxt.setColor('#6699aa');
+        const isFocused = this._nav && this._nav.focusedIndex === this._navItems.length;
+        devTxt.setColor(isFocused ? COLOR_FOCUSED : '#6699aa');
       });
-      devBg.on('pointerdown', () => {
-        this.cameras.main.fadeOut(200, 0, 0, 0);
-        this.time.delayedCall(200, () => this.scene.start('DevOptionsScene'));
+      devBg.on('pointerdown', goDevOptions);
+
+      this._navItems.push({
+        onFocus:  () => { devBg.setFillStyle(0x223344); devTxt.setColor(COLOR_FOCUSED); },
+        onBlur:   () => { devBg.setFillStyle(0x1a2a3a); devTxt.setColor('#6699aa'); },
+        onSelect: goDevOptions,
       });
     }
-
-    // Also start on spacebar / enter
-    this.input.keyboard.on('keydown-SPACE', () => this._startGame());
-    this.input.keyboard.on('keydown-ENTER', () => this._startGame());
 
     // Return the bottom edge of the last button so the caller can position
     // content below it without overlapping.
     return lastBtnY + 17;
+  }
+
+  /**
+   * Wires UP/DOWN/W/S for navigation and ENTER/SPACE for selection.
+   * Sets initial focus on the first item (START GAME).
+   */
+  _setupKeyboardNav() {
+    this._nav = new MenuNavigator(this._navItems.length);
+    this._updateFocus();
+
+    this.input.keyboard.on('keydown-UP',    () => { this._nav.prev(); this._updateFocus(); });
+    this.input.keyboard.on('keydown-W',     () => { this._nav.prev(); this._updateFocus(); });
+    this.input.keyboard.on('keydown-DOWN',  () => { this._nav.next(); this._updateFocus(); });
+    this.input.keyboard.on('keydown-S',     () => { this._nav.next(); this._updateFocus(); });
+    this.input.keyboard.on('keydown-ENTER', () => this._activateFocused());
+    this.input.keyboard.on('keydown-SPACE', () => this._activateFocused());
+  }
+
+  /**
+   * Refreshes the visual focus state of every nav item.
+   */
+  _updateFocus() {
+    this._navItems.forEach(({ onFocus, onBlur }, i) => {
+      if (i === this._nav.focusedIndex) { onFocus(); } else { onBlur(); }
+    });
+  }
+
+  /**
+   * Activates the currently focused menu item.
+   */
+  _activateFocused() {
+    this._navItems[this._nav.focusedIndex].onSelect();
   }
 
   _startGame() {

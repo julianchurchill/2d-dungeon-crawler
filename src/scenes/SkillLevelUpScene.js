@@ -14,6 +14,7 @@
  */
 
 import Phaser from 'phaser';
+import { MenuNavigator } from '../utils/MenuNavigator.js';
 
 /** Height of the fixed header area. */
 const HEADER_H = 80;
@@ -50,14 +51,13 @@ export class SkillLevelUpScene extends Phaser.Scene {
       return;
     }
 
+    /** @type {Array<{bg: Phaser.GameObjects.Rectangle, choice: object}>} */
+    this._navBgs = [];
+
     this._buildBackground(width, height);
     this._buildTitle(width);
     this._buildChoiceButtons(width, height);
-
-    // ESC is a no-op when choices exist — the player must choose.
-    this.input.keyboard.on('keydown-ESC', () => {
-      if (this._choices.length === 0) this._finish();
-    });
+    this._setupKeyboardNav();
 
     this.scale.on('resize', () => this.scene.restart());
   }
@@ -168,8 +168,14 @@ export class SkillLevelUpScene extends Phaser.Scene {
       .setInteractive({ useHandCursor: true });
 
     bg.on('pointerover', () => bg.setFillStyle(0x222244));
-    bg.on('pointerout',  () => bg.setFillStyle(0x111122));
+    bg.on('pointerout',  () => {
+      const idx = this._navBgs.findIndex(item => item.bg === bg);
+      const isFocused = this._nav && this._nav.focusedIndex === idx;
+      bg.setFillStyle(isFocused ? 0x222244 : 0x111122);
+    });
     bg.on('pointerdown', () => this._selectChoice(choice));
+
+    this._navBgs.push({ bg, choice });
 
     // Label
     this.add.text(cx, y + ROW_PAD + 8, choice.label, {
@@ -183,6 +189,39 @@ export class SkillLevelUpScene extends Phaser.Scene {
       color: '#888899', stroke: '#000000', strokeThickness: 2, resolution: 2,
       wordWrap: { width: ROW_W - ROW_PAD * 2 },
     }).setOrigin(0.5, 0);
+  }
+
+  /**
+   * Wires UP/DOWN/W/S for navigation and ENTER/SPACE for selection.
+   * Sets initial focus on the first choice.
+   * ESC remains a no-op — the player must choose.
+   */
+  _setupKeyboardNav() {
+    this._nav = new MenuNavigator(this._navBgs.length);
+    this._updateFocus();
+
+    this.input.keyboard.on('keydown-UP',    () => { this._nav.prev(); this._updateFocus(); });
+    this.input.keyboard.on('keydown-W',     () => { this._nav.prev(); this._updateFocus(); });
+    this.input.keyboard.on('keydown-DOWN',  () => { this._nav.next(); this._updateFocus(); });
+    this.input.keyboard.on('keydown-S',     () => { this._nav.next(); this._updateFocus(); });
+    this.input.keyboard.on('keydown-ENTER', () => this._activateFocused());
+    this.input.keyboard.on('keydown-SPACE', () => this._activateFocused());
+  }
+
+  /**
+   * Refreshes the fill colour of each choice row to reflect the current focus.
+   */
+  _updateFocus() {
+    this._navBgs.forEach(({ bg }, i) => {
+      bg.setFillStyle(i === this._nav.focusedIndex ? 0x222244 : 0x111122);
+    });
+  }
+
+  /**
+   * Activates the currently focused choice.
+   */
+  _activateFocused() {
+    this._selectChoice(this._navBgs[this._nav.focusedIndex].choice);
   }
 
   /**
