@@ -40,8 +40,10 @@ export class SkillSystem {
       if (skill.id === SKILLS.LUCKY_STRIKE.id) {
         // Roll against the skill's trigger chance; boost damage if it fires.
         if (this.rng.nextBool(skill.baseCritChance)) {
-          damage = Math.floor(damage * skill.damageMultiplier);
-          messages.push(skill.triggerMessage);
+          const boosted = Math.floor(damage * skill.damageMultiplier);
+          const extra = boosted - damage;
+          damage = boosted;
+          messages.push(`${skill.triggerMessage} (+${extra} damage)`);
         }
       }
     }

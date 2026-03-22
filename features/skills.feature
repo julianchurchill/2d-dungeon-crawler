@@ -16,7 +16,7 @@ Feature: Character Skills
     Given a skill system where Lucky Strike always triggers
     When the skill system processes a hit of 10 damage
     Then the resulting skill damage is 15
-    And the skill message "Lucky Strike!" is returned
+    And the skill message "Lucky Strike! (+5 damage)" is returned
 
   Scenario: Lucky Strike does not trigger when the chance roll fails
     Given a skill system where Lucky Strike never triggers
@@ -30,7 +30,7 @@ Feature: Character Skills
     Given a skill system where Lucky Strike always triggers
     When the player attacks an enemy for 10 base damage using the skill system
     Then the combat damage is 15
-    And the combat result includes skill message "Lucky Strike!"
+    And the combat result includes skill message "Lucky Strike! (+5 damage)"
 
   Scenario: Combat without a skill system returns no skill messages
     When the player attacks an enemy for 10 base damage without a skill system
