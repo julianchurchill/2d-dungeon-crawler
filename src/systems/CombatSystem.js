@@ -28,9 +28,19 @@ export function resolveMeleeAttack(attacker, defender, rng, { defenderIsInvincib
     messages.push(...skillResult.messages);
   }
 
-  // When the defender is invincible, skip takeDamage entirely so the
-  // entity's minimum-1-damage floor does not apply.
-  const actualDamage = defenderIsInvincible ? 0 : defender.takeDamage(attackDamage);
+  // Apply on-defend skill effects from the defender's skill system.
+  const defSkillSystem = defender.skillSystem ?? null;
+  let defResult = null;
+  if (defSkillSystem) {
+    defResult = defSkillSystem.applyOnDefendSkills(attackDamage);
+    messages.push(...defResult.messages);
+  }
+
+  // When a defend skill had an effect, use its damage directly (bypassing the
+  // entity's minimum-1 floor in takeDamage).  Invincibility also skips takeDamage.
+  const actualDamage = defenderIsInvincible ? 0
+    : defResult?.affected        ? defResult.damage
+    : defender.takeDamage(attackDamage);
   const killed = defender.isDead();
 
   const atkName = attacker.name || 'You';

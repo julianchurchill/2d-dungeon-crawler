@@ -13,4 +13,19 @@ export const SKILLS = Object.freeze({
     damageMultiplier: 1.5,
     triggerMessage: 'Lucky Strike!',
   },
+  FEROCITY: {
+    id: 'ferocity',
+    name: 'Ferocity',
+    description: '+1 flat damage on each attack.',
+    baseBonus: 1,
+  },
+  DODGE: {
+    id: 'dodge',
+    name: 'Dodge',
+    description: '1% chance to completely dodge an attack.',
+    baseDodgeChance: 0.01,
+    maxDodgeChance: 0.50,
+    dodgeStep: 0.01,
+    triggerMessage: 'Dodged!',
+  },
 });

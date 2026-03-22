@@ -1,9 +1,17 @@
 import { Given, When, Then, Before } from '@cucumber/cucumber';
 import assert from 'node:assert/strict';
 import { SkillSystem } from '../../src/systems/SkillSystem.js';
+import { LuckyStrikeSkill } from '../../src/skills/LuckyStrikeSkill.js';
+import { FerocitySkill } from '../../src/skills/FerocitySkill.js';
+import { DodgeSkill } from '../../src/skills/DodgeSkill.js';
 import { applySkillsToggle } from '../../src/systems/SkillsToggle.js';
 import { resolveMeleeAttack } from '../../src/systems/CombatSystem.js';
 import { TurnManager, TURN_STATE } from '../../src/systems/TurnManager.js';
+
+/** Creates a standard SkillSystem matching game defaults: Lucky Strike active, Ferocity+Dodge inactive. */
+function makeSkillSystem(rng) {
+  return new SkillSystem(rng, [new LuckyStrikeSkill()], [new FerocitySkill(), new DodgeSkill()]);
+}
 
 // ─── Shared state ────────────────────────────────────────────────────────────
 
@@ -24,15 +32,15 @@ const unluckyRNG = { nextInt: () => 0, nextBool: () => false };
 // ─── SkillSystem steps ───────────────────────────────────────────────────────
 
 Given('a new skill system', function () {
-  state.skillSystem = new SkillSystem(unluckyRNG);
+  state.skillSystem = makeSkillSystem(unluckyRNG);
 });
 
 Given('a skill system where Lucky Strike always triggers', function () {
-  state.skillSystem = new SkillSystem(luckyRNG);
+  state.skillSystem = makeSkillSystem(luckyRNG);
 });
 
 Given('a skill system where Lucky Strike never triggers', function () {
-  state.skillSystem = new SkillSystem(unluckyRNG);
+  state.skillSystem = makeSkillSystem(unluckyRNG);
 });
 
 When('the skill system processes a hit of {int} damage', function (damage) {
@@ -127,7 +135,7 @@ Then('the combat result has no skill messages', function () {
 // ─── SkillSystem upgrade steps ───────────────────────────────────────────────
 
 Given('a skill system with Lucky Strike at the crit cap', function () {
-  state.skillSystem = new SkillSystem(unluckyRNG);
+  state.skillSystem = makeSkillSystem(unluckyRNG);
   // Drive baseCritChance to the cap via repeated upgrades.
   while (state.skillSystem.canUpgrade('lucky_strike')) {
     state.skillSystem.upgradeSkill('lucky_strike');
@@ -189,6 +197,131 @@ Then('Lucky Strike cannot be downgraded', function () {
 
 Then('the inactive skills list is empty', function () {
   assert.deepEqual(state.skillSystem.getInactiveSkills(), []);
+});
+
+// ─── Inactive skills steps ────────────────────────────────────────────────────
+
+Then('the inactive skills include {string}', function (name) {
+  const skills = state.skillSystem.getInactiveSkills();
+  assert.ok(skills.some(s => s.name === name), `Expected "${name}" in inactive skills`);
+});
+
+Then('the inactive skills do not include {string}', function (name) {
+  const skills = state.skillSystem.getInactiveSkills();
+  assert.ok(!skills.some(s => s.name === name), `Expected "${name}" NOT in inactive skills`);
+});
+
+When('Ferocity is activated', function () {
+  state.skillSystem.activateSkill('ferocity');
+});
+
+// ─── Ferocity steps ───────────────────────────────────────────────────────────
+
+Given('a skill system with Ferocity active', function () {
+  state.skillSystem = makeSkillSystem(unluckyRNG);
+  state.skillSystem.activateSkill('ferocity');
+});
+
+Then('Ferocity can be upgraded', function () {
+  assert.equal(state.skillSystem.canUpgrade('ferocity'), true);
+});
+
+Then('Ferocity cannot be downgraded', function () {
+  assert.equal(state.skillSystem.canDowngrade('ferocity'), false);
+});
+
+When('Ferocity is upgraded', function () {
+  state.skillSystem.upgradeSkill('ferocity');
+});
+
+Then('Ferocity has a bonus of {int}', function (bonus) {
+  const skill = state.skillSystem.getSkills().find(s => s.name === 'Ferocity');
+  assert.ok(skill, 'Ferocity not found in active skills');
+  assert.equal(skill.bonus, bonus);
+});
+
+// ─── Dodge steps ──────────────────────────────────────────────────────────────
+
+Given('a skill system with Dodge active', function () {
+  state.skillSystem = makeSkillSystem(unluckyRNG);
+  state.skillSystem.activateSkill('dodge');
+});
+
+Given('a skill system with Dodge active and dodge always triggers', function () {
+  state.skillSystem = makeSkillSystem(luckyRNG);
+  state.skillSystem.activateSkill('dodge');
+});
+
+Given('a skill system with Dodge active and dodge never triggers', function () {
+  state.skillSystem = makeSkillSystem(unluckyRNG);
+  state.skillSystem.activateSkill('dodge');
+});
+
+Given('a skill system with Dodge at the cap', function () {
+  state.skillSystem = makeSkillSystem(unluckyRNG);
+  state.skillSystem.activateSkill('dodge');
+  while (state.skillSystem.canUpgrade('dodge')) {
+    state.skillSystem.upgradeSkill('dodge');
+  }
+});
+
+When('on-defend skills are applied to {int} damage', function (damage) {
+  state.defendResult = state.skillSystem.applyOnDefendSkills(damage);
+});
+
+Then('the defend result damage is {int}', function (expected) {
+  assert.equal(state.defendResult.damage, expected);
+});
+
+Then('the defend result includes message {string}', function (message) {
+  assert.ok(
+    state.defendResult.messages.includes(message),
+    `Expected message "${message}" but got [${state.defendResult.messages.join(', ')}]`,
+  );
+});
+
+Then('Dodge can be upgraded', function () {
+  assert.equal(state.skillSystem.canUpgrade('dodge'), true);
+});
+
+Then('Dodge cannot be upgraded', function () {
+  assert.equal(state.skillSystem.canUpgrade('dodge'), false);
+});
+
+Then('Dodge cannot be downgraded', function () {
+  assert.equal(state.skillSystem.canDowngrade('dodge'), false);
+});
+
+When('Dodge is upgraded', function () {
+  state.skillSystem.upgradeSkill('dodge');
+});
+
+Then('Dodge has a dodge chance of {int}%', function (pct) {
+  const skill = state.skillSystem.getSkills().find(s => s.name === 'Dodge');
+  assert.ok(skill, 'Dodge not found in active skills');
+  assert.ok(Math.abs(skill.dodgeChance - pct / 100) < 1e-9,
+    `Expected dodgeChance ~${pct / 100} but got ${skill.dodgeChance}`);
+});
+
+// ─── Combat with Dodge steps ──────────────────────────────────────────────────
+
+When('the player is attacked for {int} base damage with the dodge skill system', function (atkPower) {
+  const attacker = { attackPower: atkPower };
+  const defender = {
+    name: 'you',
+    skillSystem: state.skillSystem,
+    _hp: 100,
+    takeDamage(dmg) { this._hp -= Math.max(1, dmg); return Math.max(1, dmg); },
+    isDead() { return this._hp <= 0; },
+  };
+  state.combatResult = resolveMeleeAttack(attacker, defender, unluckyRNG);
+});
+
+Then('the combat result includes message {string}', function (message) {
+  assert.ok(
+    state.combatResult.messages.includes(message),
+    `Expected message "${message}" but got [${state.combatResult.messages.join(', ')}]`,
+  );
 });
 
 // ─── SkillsToggle steps ──────────────────────────────────────────────────────
