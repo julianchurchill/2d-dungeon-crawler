@@ -52,6 +52,11 @@ Then('the result should contain {int} goblins and {int} orcs', function (goblins
   assert.equal(this.spawnResult.filter(t => t === 'orc').length, orcs);
 });
 
+Then('the result should contain {int} cockroaches and {int} sprites', function (cockroaches, sprites) {
+  assert.equal(this.spawnResult.filter(t => t === 'cockroach').length, cockroaches);
+  assert.equal(this.spawnResult.filter(t => t === 'sprite').length, sprites);
+});
+
 Then('the result should contain {int} goblins and {int} orc', function (goblins, orcs) {
   assert.equal(this.spawnResult.filter(t => t === 'goblin').length, goblins);
   assert.equal(this.spawnResult.filter(t => t === 'orc').length, orcs);

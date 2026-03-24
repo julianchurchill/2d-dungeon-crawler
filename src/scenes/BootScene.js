@@ -121,6 +121,36 @@ export class BootScene extends Phaser.Scene {
       g.fillRect(T/2 - 1, T/2 - 2, 2, 2);
     });
 
+    // Cockroach — small brown oval with antennae
+    this._genTexture('entity_cockroach', T, T, (g) => {
+      g.fillStyle(0x442211);
+      g.fillEllipse(T/2, T/2 + 1, 7, 10);
+      // Shell sheen
+      g.fillStyle(0x664422, 0.8);
+      g.fillEllipse(T/2, T/2, 5, 7);
+      // Antennae
+      g.fillStyle(0x442211);
+      g.fillRect(T/2 - 3, T/2 - 5, 1, 3);
+      g.fillRect(T/2 + 2, T/2 - 5, 1, 3);
+    });
+
+    // Sprite — small glowing fairy shape
+    this._genTexture('entity_sprite', T, T, (g) => {
+      // Wings
+      g.fillStyle(0xaaccff, 0.6);
+      g.fillEllipse(T/2 - 4, T/2, 5, 8);
+      g.fillEllipse(T/2 + 4, T/2, 5, 8);
+      // Body
+      g.fillStyle(0x88aadd);
+      g.fillEllipse(T/2, T/2 + 1, 5, 7);
+      // Head
+      g.fillStyle(0xaaccff);
+      g.fillEllipse(T/2, T/2 - 3, 5, 5);
+      // Glow dot
+      g.fillStyle(0xffffff, 0.9);
+      g.fillRect(T/2 - 1, T/2 - 4, 2, 2);
+    });
+
     // Goblin — small green blob
     this._genTexture('entity_goblin', T, T, (g) => {
       g.fillStyle(0x338833);
