@@ -16,6 +16,8 @@ export class Enemy {
     this.xp = def.xp;
     this.aggroRange = def.aggroRange;
     this.textureKey = def.textureKey;
+    this.teleportChance = def.teleportChance ?? 0;
+    this.teleportRange = def.teleportRange ?? 0;
     this.sprite = null; // set by GameScene
     this.id = `${type}_${x}_${y}_${Math.random().toString(36).slice(2, 7)}`;
   }
@@ -35,7 +37,8 @@ export class Enemy {
    * @param {Player} player
    * @param {DungeonMap} map
    * @param {function} getEntityAt - (x, y) => entity
-   * @returns {{ action: 'idle'|'move'|'attack', dx?: number, dy?: number, target?: entity }}
+   * @param {object} rng
+   * @returns {{ action: 'idle'|'move'|'attack'|'teleport', dx?: number, dy?: number, x?: number, y?: number, target?: entity }}
    */
   takeTurn(player, map, getEntityAt, rng) {
     const distToPlayer = Math.abs(this.x - player.x) + Math.abs(this.y - player.y);
@@ -43,6 +46,12 @@ export class Enemy {
     // Check if adjacent to player
     if (distToPlayer === 1) {
       return { action: 'attack', target: player };
+    }
+
+    // Teleport chance — substitutes for normal movement when it fires
+    if (this.teleportChance > 0 && rng.next() < this.teleportChance) {
+      const teleport = this._tryTeleport(map, getEntityAt, rng);
+      if (teleport) return teleport;
     }
 
     // If player is within aggro range, move toward them
@@ -65,6 +74,34 @@ export class Enemy {
     }
 
     return { action: 'idle' };
+  }
+
+  /**
+   * Attempt to teleport to a random walkable tile within {@link teleportRange}.
+   * Collects all candidate positions within Manhattan distance teleportRange,
+   * shuffles them, and returns the first unoccupied walkable one.
+   *
+   * @param {DungeonMap} map
+   * @param {function} getEntityAt
+   * @param {object} rng
+   * @returns {{ action: 'teleport', x: number, y: number }|null}
+   */
+  _tryTeleport(map, getEntityAt, rng) {
+    const candidates = [];
+    for (let dx = -this.teleportRange; dx <= this.teleportRange; dx++) {
+      for (let dy = -this.teleportRange; dy <= this.teleportRange; dy++) {
+        const dist = Math.abs(dx) + Math.abs(dy);
+        if (dist === 0 || dist > this.teleportRange) continue;
+        candidates.push({ x: this.x + dx, y: this.y + dy });
+      }
+    }
+    candidates.sort(() => rng.next() - 0.5);
+    for (const { x, y } of candidates) {
+      if (map.isWalkable(x, y) && !getEntityAt(x, y)) {
+        return { action: 'teleport', x, y };
+      }
+    }
+    return null;
   }
 
   _moveToward(targetX, targetY, map, getEntityAt) {

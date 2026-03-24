@@ -190,3 +190,33 @@ Feature: Enemy behaviour
     When the enemy moves toward the player with vertical and horizontal steps blocked
     Then the move dx is 1
     And the move dy is -1
+
+  # Sprite teleport
+  Scenario: Sprite has a teleport chance defined
+    Given an enemy of type "sprite" at position 5, 5
+    Then the enemy teleport chance is greater than 0
+
+  Scenario: Sprite teleports when the teleport roll passes and a valid tile exists
+    Given an enemy of type "sprite" at position 5, 5
+    And an enemy target player at position 0, 0
+    When the enemy takes its turn with teleport forced on an open map
+    Then the action is "teleport"
+    And the teleport destination is within 3 tiles of the enemy origin
+
+  Scenario: Goblin never teleports even when the teleport roll would pass
+    Given an enemy of type "goblin" at position 5, 5
+    And an enemy target player at position 20, 20
+    When the enemy takes its turn with teleport forced on an open map
+    Then the action is not "teleport"
+
+  Scenario: Sprite falls back to normal behaviour when all tiles in range are blocked
+    Given an enemy of type "sprite" at position 5, 5
+    And an enemy target player at position 20, 20
+    When the sprite takes its turn with teleport forced but all range tiles blocked
+    Then the action is not "teleport"
+
+  Scenario: Sprite does not teleport when the teleport roll fails
+    Given an enemy of type "sprite" at position 5, 5
+    And an enemy target player at position 20, 20
+    When the enemy takes its turn with teleport suppressed on an open map
+    Then the action is not "teleport"

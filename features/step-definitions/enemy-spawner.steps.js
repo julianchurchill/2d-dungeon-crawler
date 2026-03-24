@@ -52,6 +52,15 @@ Then('the result should contain {int} goblins and {int} orcs', function (goblins
   assert.equal(this.spawnResult.filter(t => t === 'orc').length, orcs);
 });
 
+Then('the result should contain {int} cockroaches and {int} sprites', function (cockroaches, sprites) {
+  assert.equal(this.spawnResult.filter(t => t === 'cockroach').length, cockroaches);
+  assert.equal(this.spawnResult.filter(t => t === 'sprite').length, sprites);
+});
+
+Then('the result should contain {int} trolls', function (trolls) {
+  assert.equal(this.spawnResult.filter(t => t === 'troll').length, trolls);
+});
+
 Then('the result should contain {int} goblins and {int} orc', function (goblins, orcs) {
   assert.equal(this.spawnResult.filter(t => t === 'goblin').length, goblins);
   assert.equal(this.spawnResult.filter(t => t === 'orc').length, orcs);
@@ -86,6 +95,26 @@ Given('an EnemySpawner with min {int} max {int} and a minimum RNG', function (mi
   });
 });
 
+Given('an EnemySpawner with min {int} max {int} a minimum RNG and troll-only weights', function (min, max) {
+  this.spawned = [];
+  this.spawner = new EnemySpawner(minRNG, {
+    spawnWeights: { cockroach: 0, sprite: 0, goblin: 0, orc: 0, troll: 1 },
+    minEnemiesPerRoom: min,
+    maxEnemiesPerRoom: max,
+  });
+});
+
+Given('an EnemySpawner that only spawns cockroaches with max enemies per room {int} and a maximum RNG',
+  function (max) {
+    this.spawned = [];
+    this.spawner = new EnemySpawner(maxRNG, {
+      spawnWeights: { cockroach: 1, sprite: 0, goblin: 0, orc: 0, troll: 0 },
+      minEnemiesPerRoom: null,
+      maxEnemiesPerRoom: max,
+    });
+  }
+);
+
 Given('an EnemySpawner with max enemies per room {int} and a maximum RNG', function (max) {
   this.spawned = [];
   this.spawner = new EnemySpawner(maxRNG, {
@@ -94,6 +123,22 @@ Given('an EnemySpawner with max enemies per room {int} and a maximum RNG', funct
     maxEnemiesPerRoom: max,
   });
 });
+
+When('spawning cockroaches for {int} rooms on floor {int} with entity-aware tracking',
+  function (roomCount, floor) {
+    this.spawned = [];
+    const rooms = makeRooms(roomCount);
+    const occupied = new Set();
+    this.spawner.spawnForRooms(
+      rooms, floor,
+      (x, y) => occupied.has(`${x},${y}`) ? { x, y } : null,
+      (x, y, type) => {
+        this.spawned.push({ x, y, type });
+        occupied.add(`${x},${y}`);
+      },
+    );
+  }
+);
 
 When('spawning enemies for {int} room(s) on floor {int}', function (roomCount, floor) {
   const rooms = makeRooms(roomCount);
@@ -123,6 +168,25 @@ Then('the first enemy should have been spawned at x {int} y {int}', function (x,
   assert.ok(this.spawned.length > 0, `Expected at least one enemy but got none`);
   assert.equal(this.spawned[0].x, x, `Expected x=${x} but got ${this.spawned[0].x}`);
   assert.equal(this.spawned[0].y, y, `Expected y=${y} but got ${this.spawned[0].y}`);
+});
+
+Then('between {int} and {int} cockroaches should have been spawned', function (min, max) {
+  const count = this.spawned.filter(e => e.type === 'cockroach').length;
+  assert.ok(count >= min && count <= max,
+    `Expected ${min}–${max} cockroaches but got ${count}`);
+});
+
+Then('each cockroach is adjacent to at least one other cockroach', function () {
+  const roaches = this.spawned.filter(e => e.type === 'cockroach');
+  if (roaches.length <= 1) return;
+  const posSet = new Set(roaches.map(r => `${r.x},${r.y}`));
+  for (const r of roaches) {
+    const hasNeighbour = [
+      `${r.x},${r.y - 1}`, `${r.x},${r.y + 1}`,
+      `${r.x - 1},${r.y}`, `${r.x + 1},${r.y}`,
+    ].some(k => posSet.has(k));
+    assert.ok(hasNeighbour, `Cockroach at (${r.x},${r.y}) has no adjacent cockroach`);
+  }
 });
 
 Then('{int} enemies should have been spawned', function (expected) {

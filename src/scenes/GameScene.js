@@ -794,6 +794,17 @@ export class GameScene extends Phaser.Scene {
             enemy.y * TILE_SIZE + TILE_SIZE / 2
           );
         }
+      } else if (result.action === 'teleport') {
+        this.dungeonMap.setEntity(enemy.x, enemy.y, null);
+        enemy.x = result.x;
+        enemy.y = result.y;
+        this.dungeonMap.setEntity(enemy.x, enemy.y, enemy);
+        if (enemy.sprite) {
+          enemy.sprite.setPosition(
+            enemy.x * TILE_SIZE + TILE_SIZE / 2,
+            enemy.y * TILE_SIZE + TILE_SIZE / 2
+          );
+        }
       }
     }
 

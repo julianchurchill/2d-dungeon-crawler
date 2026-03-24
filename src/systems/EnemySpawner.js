@@ -11,7 +11,7 @@
  *   - A caller-supplied `spawnEnemy` callback to actually create each enemy.
  */
 
-import { getSpawnTable, getEnemiesPerRoom } from '../entities/EnemyTypes.js';
+import { getSpawnTable, getEnemiesPerRoom, ENEMY_DEFS } from '../entities/EnemyTypes.js';
 import { devOptions } from '../systems/DevOptions.js';
 
 export class EnemySpawner {
@@ -46,10 +46,64 @@ export class EnemySpawner {
         const type = this.rng.pick(spawnTable);
         const ex   = this.rng.nextInt(room.x + 1, room.x + room.w - 2);
         const ey   = this.rng.nextInt(room.y + 1, room.y + room.h - 2);
-        if (!getEntityAt(ex, ey)) {
+        const def  = ENEMY_DEFS[type];
+        if (def.clusterMin !== undefined) {
+          const size = this.rng.nextInt(def.clusterMin, def.clusterMax);
+          this._spawnCluster(type, ex, ey, size, room, getEntityAt, spawnEnemy);
+        } else if (!getEntityAt(ex, ey)) {
           spawnEnemy(ex, ey, type);
         }
       }
+    }
+  }
+
+  /**
+   * Spawns a connected cluster of `size` enemies of `type` starting at the
+   * anchor tile and expanding to adjacent room tiles.  Each additional enemy
+   * is placed next to an already-placed one, guaranteeing adjacency.
+   * Stops early if no further expansion is possible.
+   *
+   * @param {string}   type         - Enemy type key.
+   * @param {number}   anchorX      - Starting tile X.
+   * @param {number}   anchorY      - Starting tile Y.
+   * @param {number}   size         - Target cluster size.
+   * @param {{x:number,y:number,w:number,h:number}} room
+   * @param {Function} getEntityAt  - `(x, y) => entity|null`
+   * @param {Function} spawnEnemy   - `(x, y, type) => void`
+   */
+  _spawnCluster(type, anchorX, anchorY, size, room, getEntityAt, spawnEnemy) {
+    /** Returns true when (x, y) is inside the room interior. */
+    const inRoom = (x, y) =>
+      x >= room.x + 1 && x <= room.x + room.w - 2 &&
+      y >= room.y + 1 && y <= room.y + room.h - 2;
+
+    const placed = [];
+
+    if (inRoom(anchorX, anchorY) && !getEntityAt(anchorX, anchorY)) {
+      spawnEnemy(anchorX, anchorY, type);
+      placed.push({ x: anchorX, y: anchorY });
+    }
+
+    if (placed.length === 0) return;
+
+    // N / E / S / W — fixed order; parent is picked randomly via rng.pick.
+    const dirs = [{ dx: 0, dy: -1 }, { dx: 1, dy: 0 }, { dx: 0, dy: 1 }, { dx: -1, dy: 0 }];
+
+    for (let i = placed.length; i < size; i++) {
+      const parent = this.rng.pick(placed);
+      let expanded = false;
+      for (const { dx, dy } of dirs) {
+        const nx = parent.x + dx;
+        const ny = parent.y + dy;
+        if (inRoom(nx, ny) && !getEntityAt(nx, ny)) {
+          spawnEnemy(nx, ny, type);
+          placed.push({ x: nx, y: ny });
+          expanded = true;
+          break;
+        }
+      }
+      // Stop if no adjacent tile is free.
+      if (!expanded) break;
     }
   }
 }
