@@ -91,6 +91,18 @@ export class AchievementSystem {
     this.eventBus.off(GameEvents.FLOOR_CHANGED,   this._onFloorChanged);
   }
 
+  /**
+   * Marks an achievement as complete and emits ACHIEVEMENT_UNLOCKED.
+   * Public so callers outside the system (e.g. dev tooling) can trigger an
+   * unlock without going through the normal event-driven flow.
+   *
+   * @param {import('./AchievementDefinitions.js').AchievementDefinition} def
+   */
+  unlock(def) {
+    completeAchievement(def.id, this.store);
+    this.eventBus.emit(GameEvents.ACHIEVEMENT_UNLOCKED, def);
+  }
+
   // ── Private event handlers ───────────────────────────────────────────────
 
   /**
@@ -110,8 +122,7 @@ export class AchievementSystem {
       // Accumulate kills; unlock when the total reaches the target.
       incrementProgress(def.id, 1, this.store);
       if (progress.count >= def.condition.target) {
-        completeAchievement(def.id, this.store);
-        this.eventBus.emit(GameEvents.ACHIEVEMENT_UNLOCKED, def);
+        this.unlock(def);
       }
     }
   }
@@ -132,8 +143,7 @@ export class AchievementSystem {
       // Track the highest floor reached rather than a simple increment.
       setProgressIfHigher(def.id, floor, this.store);
       if (progress.count >= def.condition.target) {
-        completeAchievement(def.id, this.store);
-        this.eventBus.emit(GameEvents.ACHIEVEMENT_UNLOCKED, def);
+        this.unlock(def);
       }
     }
   }
@@ -153,9 +163,9 @@ export class AchievementSystem {
 
       setProgressIfHigher(def.id, level, this.store);
       if (progress.count >= def.condition.target) {
-        completeAchievement(def.id, this.store);
-        this.eventBus.emit(GameEvents.ACHIEVEMENT_UNLOCKED, def);
+        this.unlock(def);
       }
     }
   }
+
 }

@@ -21,7 +21,6 @@ import { ACHIEVEMENTS } from '../achievements/AchievementDefinitions.js';
 import { AchievementSystem } from '../achievements/AchievementSystem.js';
 import {
   achievementStore,
-  completeAchievement,
   uncompleteAchievement,
 } from '../achievements/AchievementStore.js';
 import { EventBus } from '../utils/EventBus.js';
@@ -301,7 +300,12 @@ export class AchievementsScene extends Phaser.Scene {
       if (entry.completed) {
         uncompleteAchievement(entry.id, achievementStore);
       } else {
-        completeAchievement(entry.id, achievementStore);
+        // Create a short-lived system with the real bus, unlock, then immediately
+        // destroy it so no game-event subscriptions are left behind.
+        const def = ACHIEVEMENTS.find(a => a.id === entry.id);
+        const sys = new AchievementSystem(ACHIEVEMENTS, achievementStore, EventBus);
+        sys.unlock(def);
+        sys.destroy();
       }
       // Restart the scene so the list re-sorts and text refreshes.
       this.scene.restart();
