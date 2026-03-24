@@ -44,7 +44,7 @@ Feature: Enemy spawner
     Then 2 enemies should have been spawned
 
   Scenario: EnemySpawner respects explicit minimum enemies per room
-    Given an EnemySpawner with min 2 max 2 and a minimum RNG
+    Given an EnemySpawner with min 2 max 2 a minimum RNG and troll-only weights
     When spawning enemies for 2 rooms on floor 1
     Then 2 enemies should have been spawned
 
@@ -60,5 +60,22 @@ Feature: Enemy spawner
 
   Scenario: EnemySpawner skips occupied tiles
     Given an EnemySpawner with max enemies per room 1 and a maximum RNG
+    When spawning enemies for 2 rooms on floor 1 with all tiles occupied
+    Then no enemies should have been spawned
+
+  # ── Cockroach clustering ──────────────────────────────────────────────────
+
+  Scenario: Cockroaches spawn in a cluster of 2 to 5
+    Given an EnemySpawner that only spawns cockroaches with max enemies per room 1 and a maximum RNG
+    When spawning cockroaches for 2 rooms on floor 1 with entity-aware tracking
+    Then between 2 and 5 cockroaches should have been spawned
+
+  Scenario: Cockroaches in a cluster are each adjacent to at least one other cockroach
+    Given an EnemySpawner that only spawns cockroaches with max enemies per room 1 and a maximum RNG
+    When spawning cockroaches for 2 rooms on floor 1 with entity-aware tracking
+    Then each cockroach is adjacent to at least one other cockroach
+
+  Scenario: Cockroach cluster does not spawn if anchor tile is occupied
+    Given an EnemySpawner that only spawns cockroaches with max enemies per room 1 and a maximum RNG
     When spawning enemies for 2 rooms on floor 1 with all tiles occupied
     Then no enemies should have been spawned

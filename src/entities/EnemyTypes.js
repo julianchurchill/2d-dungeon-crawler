@@ -8,6 +8,8 @@ export const ENEMY_DEFS = {
     textureKey: 'entity_cockroach',
     aggroRange: 2,
     color: 0x664422,
+    clusterMin: 2,
+    clusterMax: 5,
   },
   sprite: {
     name: 'Sprite',
