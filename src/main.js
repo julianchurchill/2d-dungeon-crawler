@@ -25,9 +25,21 @@ const config = {
   scene: [BootScene, MainMenuScene, DevOptionsScene, AchievementsScene, InGameMenuScene, HelpScene, DevMenuScene, SkillLevelUpScene, GameScene, UIScene],
 };
 
-const game = new Phaser.Game(config);
+/**
+ * Starts the Phaser game and wires up the resize listener.
+ */
+function startGame() {
+  const game = new Phaser.Game(config);
 
-// Keep canvas filling window on resize
-window.addEventListener('resize', () => {
-  game.scale.resize(window.innerWidth, window.innerHeight);
-});
+  // Keep canvas filling window on resize
+  window.addEventListener('resize', () => {
+    game.scale.resize(window.innerWidth, window.innerHeight);
+  });
+}
+
+// Wait for Roboto Mono to be in the browser's canvas font cache before Phaser
+// creates any Text objects.  Without this, the initial render may use a fallback
+// font; the first pointer-over triggers a re-render with the now-loaded Roboto
+// Mono, making the font appear to change on hover.
+// Falls back immediately if the font fails to load (e.g. offline).
+document.fonts.load('16px "Roboto Mono"').then(startGame, startGame);
