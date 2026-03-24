@@ -9,6 +9,7 @@ Entries are listed newest-first within each section.
 
 ### Fixed
 
+- 2026-03-24 — Collapsed `goblin-hunting-skill.feature` into the generic `hunting-skills.feature`; deleted redundant feature file and step definitions
 - 2026-03-24 — Kill achievements counted multiple times per kill even on fresh browser load; `AchievementsScene` was creating a full `AchievementSystem` subscribed to the live EventBus each time the screen opened, stacking permanent listeners; fixed by passing a no-op bus to the read-only display instance
 - 2026-03-24 — Kill achievements counted multiple times per kill after restarting a game; fixed by adding `AchievementSystem.destroy()` to remove EventBus listeners when GameScene shuts down
 
