@@ -23,7 +23,6 @@ import {
   achievementStore,
   uncompleteAchievement,
 } from '../achievements/AchievementStore.js';
-import { devCompleteAchievement } from '../achievements/devCompleteAchievement.js';
 import { EventBus } from '../utils/EventBus.js';
 import { isDevEnvironment } from '../utils/Environment.js';
 import { resolveSceneBack } from '../systems/SceneNavigation.js';
@@ -301,8 +300,12 @@ export class AchievementsScene extends Phaser.Scene {
       if (entry.completed) {
         uncompleteAchievement(entry.id, achievementStore);
       } else {
-        // Use the helper so ACHIEVEMENT_UNLOCKED is emitted, triggering skill unlocks.
-        devCompleteAchievement(entry.id, achievementStore, ACHIEVEMENTS, EventBus);
+        // Create a short-lived system with the real bus, unlock, then immediately
+        // destroy it so no game-event subscriptions are left behind.
+        const def = ACHIEVEMENTS.find(a => a.id === entry.id);
+        const sys = new AchievementSystem(ACHIEVEMENTS, achievementStore, EventBus);
+        sys.unlock(def);
+        sys.destroy();
       }
       // Restart the scene so the list re-sorts and text refreshes.
       this.scene.restart();

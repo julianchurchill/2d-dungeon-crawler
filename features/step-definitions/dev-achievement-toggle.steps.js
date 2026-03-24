@@ -5,21 +5,20 @@ import {
   uncompleteAchievement,
 } from '../../src/achievements/AchievementStore.js';
 import { ACHIEVEMENTS } from '../../src/achievements/AchievementDefinitions.js';
-import { devCompleteAchievement } from '../../src/achievements/devCompleteAchievement.js';
-import { GameEvents } from '../../src/events/GameEvents.js';
 
 /**
  * Step definitions for the dev-mode achievement toggle.
  *
  * Reuses the "the achievement system is initialised" Given and kill/event
  * When steps from achievements.steps.js (registered globally in the same run).
- * The steps here simulate exactly what the dev-mode checkbox click handler
- * in AchievementsScene does: call completeAchievement or uncompleteAchievement
- * on the singleton store and assert the resulting state.
+ * The steps here mirror what AchievementsScene._addDevCheckbox does:
+ * call system.unlock(def) to complete and emit ACHIEVEMENT_UNLOCKED, or
+ * uncompleteAchievement to reset.
  */
 
 When('the dev toggle completes the {string} achievement', function (id) {
-  devCompleteAchievement(id, this.store, ACHIEVEMENTS, this.eventBus);
+  const def = ACHIEVEMENTS.find(a => a.id === id);
+  this.system.unlock(def);
 });
 
 When('the dev toggle uncompletes the {string} achievement', function (id) {
