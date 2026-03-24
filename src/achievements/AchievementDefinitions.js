@@ -36,6 +36,22 @@
 export const ACHIEVEMENTS = [
   // ── Kill achievements ────────────────────────────────────────────────────
   {
+    id: 'cockroach_killer',
+    name: 'Cockroach Killer',
+    description: 'Kill 30 cockroaches',
+    condition: { type: 'kill_type', enemyType: 'cockroach', target: 30 },
+    progressUnit: 'killed',
+    unlocks: 'Cockroach Hunting skill',
+  },
+  {
+    id: 'sprite_killer',
+    name: 'Sprite Killer',
+    description: 'Kill 10 sprites',
+    condition: { type: 'kill_type', enemyType: 'sprite', target: 10 },
+    progressUnit: 'killed',
+    unlocks: 'Sprite Hunting skill',
+  },
+  {
     id: 'goblin_killer',
     name: 'Goblin Killer',
     description: 'Kill 10 goblins',
@@ -49,6 +65,7 @@ export const ACHIEVEMENTS = [
     description: 'Kill 10 orcs',
     condition: { type: 'kill_type', enemyType: 'orc', target: 10 },
     progressUnit: 'killed',
+    unlocks: 'Orc Hunting skill',
   },
   {
     id: 'troll_killer',
@@ -56,6 +73,7 @@ export const ACHIEVEMENTS = [
     description: 'Kill 10 trolls',
     condition: { type: 'kill_type', enemyType: 'troll', target: 10 },
     progressUnit: 'killed',
+    unlocks: 'Troll Hunting skill',
   },
 
   // ── Floor achievements ───────────────────────────────────────────────────
