@@ -45,6 +45,7 @@ DPad (≡ menu button)     ──► OPEN_IN_GAME_MENU   ──► GameScene (cl
 
 AchievementSystem        ──► ACHIEVEMENT_UNLOCKED ──► GameScene → MESSAGE log
 AchievementSystem        ──► ACHIEVEMENT_UNLOCKED ──► UIScene → _showAchievementBanner
+AchievementSystem        ──► ACHIEVEMENT_LOCKED   ──► GameScene → _handleAchievementSkillLock
 
 MessageLog (click)       ──► MESSAGE_LOG_TOGGLED  ──► GameScene (gates ESC handler)
 GameScene (ESC key)      ──► CLOSE_MESSAGE_LOG    ──► UIScene → MessageLog.close()
@@ -75,6 +76,7 @@ GameScene (ESC key)      ──► CLOSE_MESSAGE_LOG    ──► UIScene → Me
 | `RESTART_GAME` | `'restart-game'` | *(none)* | GameScene (key handler) | GameScene |
 | `ENEMY_KILLED` | `'enemy-killed'` | `string` (enemy type) | GameScene | AchievementSystem |
 | `ACHIEVEMENT_UNLOCKED` | `'achievement-unlocked'` | `AchievementDefinition` | AchievementSystem | GameScene (message log), UIScene (banner) |
+| `ACHIEVEMENT_LOCKED` | `'achievement-locked'` | `AchievementDefinition` | AchievementSystem | GameScene (skill removal) |
 | `MESSAGE_LOG_TOGGLED` | `'message-log-toggled'` | `boolean` (open) | MessageLog | GameScene (ESC gate) |
 | `CLOSE_MESSAGE_LOG` | `'close-message-log'` | *(none)* | GameScene (ESC key) | UIScene → MessageLog.close() |
 | `OPEN_SKILLS` | `'open-skills'` | `{ skills: object[], inactiveSkills: object[], forceRefresh?: boolean }` | GameScene (K key, upgrade refresh) | UIScene → SkillsPanel |

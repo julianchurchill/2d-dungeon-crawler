@@ -19,10 +19,7 @@ import { FONT_FAMILY } from '../utils/FontConfig.js';
 import Phaser from 'phaser';
 import { ACHIEVEMENTS } from '../achievements/AchievementDefinitions.js';
 import { AchievementSystem } from '../achievements/AchievementSystem.js';
-import {
-  achievementStore,
-  uncompleteAchievement,
-} from '../achievements/AchievementStore.js';
+import { achievementStore } from '../achievements/AchievementStore.js';
 import { EventBus } from '../utils/EventBus.js';
 import { isDevEnvironment } from '../utils/Environment.js';
 import { resolveSceneBack } from '../systems/SceneNavigation.js';
@@ -297,16 +294,16 @@ export class AchievementsScene extends Phaser.Scene {
     cb.on('pointerover', () => cb.setColor('#88aaff'));
     cb.on('pointerout',  () => cb.setColor(baseColor));
     cb.on('pointerdown', () => {
+      // Create a short-lived system with the real bus, call unlock/lock, then
+      // immediately destroy it so no game-event subscriptions are left behind.
+      const def = ACHIEVEMENTS.find(a => a.id === entry.id);
+      const sys = new AchievementSystem(ACHIEVEMENTS, achievementStore, EventBus);
       if (entry.completed) {
-        uncompleteAchievement(entry.id, achievementStore);
+        sys.lock(def);
       } else {
-        // Create a short-lived system with the real bus, unlock, then immediately
-        // destroy it so no game-event subscriptions are left behind.
-        const def = ACHIEVEMENTS.find(a => a.id === entry.id);
-        const sys = new AchievementSystem(ACHIEVEMENTS, achievementStore, EventBus);
         sys.unlock(def);
-        sys.destroy();
       }
+      sys.destroy();
       // Restart the scene so the list re-sorts and text refreshes.
       this.scene.restart();
     });

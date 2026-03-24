@@ -15,6 +15,7 @@ import {
   incrementProgress,
   setProgressIfHigher,
   completeAchievement,
+  uncompleteAchievement,
   achievementStore,
 } from './AchievementStore.js';
 import { EventBus } from '../utils/EventBus.js';
@@ -101,6 +102,18 @@ export class AchievementSystem {
   unlock(def) {
     completeAchievement(def.id, this.store);
     this.eventBus.emit(GameEvents.ACHIEVEMENT_UNLOCKED, def);
+  }
+
+  /**
+   * Resets an achievement to incomplete and emits ACHIEVEMENT_LOCKED so
+   * any associated skill can be removed.  Parallel to unlock().
+   * Used by the dev-mode achievement toggle.
+   *
+   * @param {import('./AchievementDefinitions.js').AchievementDefinition} def
+   */
+  lock(def) {
+    uncompleteAchievement(def.id, this.store);
+    this.eventBus.emit(GameEvents.ACHIEVEMENT_LOCKED, def);
   }
 
   // ── Private event handlers ───────────────────────────────────────────────

@@ -4,6 +4,8 @@ import { SkillSystem } from '../../src/systems/SkillSystem.js';
 import { LuckyStrikeSkill } from '../../src/skills/LuckyStrikeSkill.js';
 import { FerocitySkill } from '../../src/skills/FerocitySkill.js';
 import { DodgeSkill } from '../../src/skills/DodgeSkill.js';
+import { HuntingSkill } from '../../src/skills/HuntingSkill.js';
+import { NightVisionSkill } from '../../src/skills/NightVisionSkill.js';
 import { applySkillsToggle } from '../../src/systems/SkillsToggle.js';
 import { resolveMeleeAttack } from '../../src/systems/CombatSystem.js';
 import { TurnManager, TURN_STATE } from '../../src/systems/TurnManager.js';
@@ -54,6 +56,28 @@ Then('the skill system has {int} active skill(s)', function (count) {
 Then('the skill {string} is active', function (name) {
   const skills = state.skillSystem.getSkills();
   assert.ok(skills.some(s => s.name === name), `Expected skill "${name}" to be active`);
+});
+
+Then('the skill {string} is not active', function (name) {
+  const skills = state.skillSystem.getSkills();
+  assert.ok(!skills.some(s => s.name === name), `Expected skill "${name}" not to be active`);
+});
+
+Given('a skill system with a {string} permanent skill active', function (skillId) {
+  state.skillSystem = new SkillSystem(unluckyRNG,
+    [new LuckyStrikeSkill(), new HuntingSkill('GOBLIN_HUNTING')], []);
+});
+
+Given('a skill system with {string} in the inactive pool', function (skillId) {
+  state.skillSystem = new SkillSystem(unluckyRNG, [new LuckyStrikeSkill()], [new NightVisionSkill()]);
+});
+
+When('the skill {string} is removed', function (skillId) {
+  state.skillSystem.removeSkill(skillId);
+});
+
+Then('the inactive pool is empty', function () {
+  assert.equal(state.skillSystem.getInactiveSkills().length, 0);
 });
 
 Then('the Lucky Strike skill has a {int}% trigger chance', function (pct) {

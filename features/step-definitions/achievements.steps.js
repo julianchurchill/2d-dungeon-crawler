@@ -35,16 +35,20 @@ Given('the achievement system is initialised', function () {
   this.eventBus = makeEventBus();
   this.system = new AchievementSystem(ACHIEVEMENTS, this.store, this.eventBus);
   this.unlockedAchievements = [];
+  this.lockedAchievements = [];
   this.eventBus.on(GameEvents.ACHIEVEMENT_UNLOCKED, (a) => this.unlockedAchievements.push(a));
+  this.eventBus.on(GameEvents.ACHIEVEMENT_LOCKED,   (a) => this.lockedAchievements.push(a));
 });
 
 Given('the Goblin Killer achievement has already been completed', function () {
   this.store = {};
   this.eventBus = makeEventBus();
   this.system = new AchievementSystem(ACHIEVEMENTS, this.store, this.eventBus);
-  // Track new unlocks fired through the bus (not the pre-existing completion).
+  // Track new unlocks/locks fired through the bus (not the pre-existing completion).
   this.unlockedAchievements = [];
+  this.lockedAchievements = [];
   this.eventBus.on(GameEvents.ACHIEVEMENT_UNLOCKED, (a) => this.unlockedAchievements.push(a));
+  this.eventBus.on(GameEvents.ACHIEVEMENT_LOCKED,   (a) => this.lockedAchievements.push(a));
   // Pre-complete the achievement directly so the system skips it on the next event.
   completeAchievement('goblin_killer', this.store);
   // completionCount starts at 1 to represent the already-completed state.

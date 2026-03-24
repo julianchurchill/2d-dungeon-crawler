@@ -146,6 +146,18 @@ export class SkillSystem {
   }
 
   /**
+   * Removes a skill by id from whichever list it is in (active or inactive),
+   * discarding the instance and effectively resetting any upgrades.
+   * Used by the dev-mode achievement toggle to reverse a skill unlock.
+   *
+   * @param {string} skillId
+   */
+  removeSkill(skillId) {
+    this._activeSkills   = this._activeSkills.filter(s => s.id !== skillId);
+    this._inactiveSkills = this._inactiveSkills.filter(s => s.id !== skillId);
+  }
+
+  /**
    * Returns the total FOV bonus granted by all active skills that implement
    * `getFovBonus()`.
    *
