@@ -20,3 +20,13 @@ Feature: Dev mode achievement toggle
     And the dev toggle uncompletes the "goblin_killer" achievement
     And the dev toggle completes the "goblin_killer" achievement
     Then the "goblin_killer" progress should be marked as completed
+
+  Scenario: Dev toggle emits ACHIEVEMENT_UNLOCKED when completing an achievement
+    Given the achievement system is initialised
+    When the dev toggle completes the "goblin_killer" achievement
+    Then an ACHIEVEMENT_UNLOCKED event should have been emitted for "goblin_killer"
+
+  Scenario: Dev toggle does not emit ACHIEVEMENT_UNLOCKED when resetting an achievement
+    Given the Goblin Killer achievement has already been completed
+    When the dev toggle uncompletes the "goblin_killer" achievement
+    Then no ACHIEVEMENT_UNLOCKED event should have been emitted

@@ -21,9 +21,9 @@ import { ACHIEVEMENTS } from '../achievements/AchievementDefinitions.js';
 import { AchievementSystem } from '../achievements/AchievementSystem.js';
 import {
   achievementStore,
-  completeAchievement,
   uncompleteAchievement,
 } from '../achievements/AchievementStore.js';
+import { devCompleteAchievement } from '../achievements/devCompleteAchievement.js';
 import { EventBus } from '../utils/EventBus.js';
 import { isDevEnvironment } from '../utils/Environment.js';
 import { resolveSceneBack } from '../systems/SceneNavigation.js';
@@ -301,7 +301,8 @@ export class AchievementsScene extends Phaser.Scene {
       if (entry.completed) {
         uncompleteAchievement(entry.id, achievementStore);
       } else {
-        completeAchievement(entry.id, achievementStore);
+        // Use the helper so ACHIEVEMENT_UNLOCKED is emitted, triggering skill unlocks.
+        devCompleteAchievement(entry.id, achievementStore, ACHIEVEMENTS, EventBus);
       }
       // Restart the scene so the list re-sorts and text refreshes.
       this.scene.restart();
