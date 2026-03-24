@@ -110,8 +110,7 @@ export class AchievementSystem {
       // Accumulate kills; unlock when the total reaches the target.
       incrementProgress(def.id, 1, this.store);
       if (progress.count >= def.condition.target) {
-        completeAchievement(def.id, this.store);
-        this.eventBus.emit(GameEvents.ACHIEVEMENT_UNLOCKED, def);
+        this._unlock(def);
       }
     }
   }
@@ -132,8 +131,7 @@ export class AchievementSystem {
       // Track the highest floor reached rather than a simple increment.
       setProgressIfHigher(def.id, floor, this.store);
       if (progress.count >= def.condition.target) {
-        completeAchievement(def.id, this.store);
-        this.eventBus.emit(GameEvents.ACHIEVEMENT_UNLOCKED, def);
+        this._unlock(def);
       }
     }
   }
@@ -153,9 +151,18 @@ export class AchievementSystem {
 
       setProgressIfHigher(def.id, level, this.store);
       if (progress.count >= def.condition.target) {
-        completeAchievement(def.id, this.store);
-        this.eventBus.emit(GameEvents.ACHIEVEMENT_UNLOCKED, def);
+        this._unlock(def);
       }
     }
+  }
+
+  /**
+   * Marks an achievement as complete and notifies listeners.
+   *
+   * @param {import('./AchievementDefinitions.js').AchievementDefinition} def
+   */
+  _unlock(def) {
+    completeAchievement(def.id, this.store);
+    this.eventBus.emit(GameEvents.ACHIEVEMENT_UNLOCKED, def);
   }
 }
