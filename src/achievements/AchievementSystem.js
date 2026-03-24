@@ -91,6 +91,18 @@ export class AchievementSystem {
     this.eventBus.off(GameEvents.FLOOR_CHANGED,   this._onFloorChanged);
   }
 
+  /**
+   * Marks an achievement as complete and emits ACHIEVEMENT_UNLOCKED.
+   * Public so callers outside the system (e.g. dev tooling) can trigger an
+   * unlock without going through the normal event-driven flow.
+   *
+   * @param {import('./AchievementDefinitions.js').AchievementDefinition} def
+   */
+  unlock(def) {
+    completeAchievement(def.id, this.store);
+    this.eventBus.emit(GameEvents.ACHIEVEMENT_UNLOCKED, def);
+  }
+
   // ── Private event handlers ───────────────────────────────────────────────
 
   /**
@@ -156,15 +168,4 @@ export class AchievementSystem {
     }
   }
 
-  /**
-   * Marks an achievement as complete and emits ACHIEVEMENT_UNLOCKED.
-   * Public so callers outside the system (e.g. dev tooling) can trigger an
-   * unlock without going through the normal event-driven flow.
-   *
-   * @param {import('./AchievementDefinitions.js').AchievementDefinition} def
-   */
-  unlock(def) {
-    completeAchievement(def.id, this.store);
-    this.eventBus.emit(GameEvents.ACHIEVEMENT_UNLOCKED, def);
-  }
 }
