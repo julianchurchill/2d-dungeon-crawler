@@ -18,6 +18,8 @@ export const ENEMY_DEFS = {
     textureKey: 'entity_sprite',
     aggroRange: 3,
     color: 0x88aadd,
+    teleportChance: 0.25,
+    teleportRange: 3,
   },
   goblin: {
     name: 'Goblin',
@@ -63,14 +65,14 @@ export const ENEMY_DEFS = {
  */
 export function getSpawnTable(floor, spawnWeights = null) {
   if (spawnWeights !== null) return buildSpawnTableFromWeights(spawnWeights);
-  // Early floors: cockroaches and sprites dominate, few goblins.
+  // Early floors: cockroaches and sprites dominate; orcs can appear rarely.
   if (floor <= 3) return [
     'cockroach', 'cockroach', 'cockroach', 'cockroach',
     'sprite', 'sprite', 'sprite',
-    'goblin',
+    'goblin', 'orc',
   ];
-  // Mid floors: cockroaches and sprites taper off, goblins and orcs rise.
-  if (floor <= 5) return ['cockroach', 'cockroach', 'sprite', 'sprite', 'goblin', 'goblin', 'orc'];
+  // Mid floors: cockroaches and sprites taper off; trolls begin to appear.
+  if (floor <= 5) return ['cockroach', 'cockroach', 'sprite', 'sprite', 'goblin', 'goblin', 'orc', 'troll'];
   // Higher floors: cockroaches rare, sprites gone, heavier enemies dominate.
   return ['cockroach', 'goblin', 'goblin', 'orc', 'orc', 'troll'];
 }

@@ -173,6 +173,34 @@ When('the enemy moves toward the player with only horizontal step open', functio
   );
 });
 
+When('the enemy takes its turn with teleport forced on an open map', function () {
+  // nextVal 0.1 < teleportChance 0.25 → teleport roll passes; nextBool false → wander off
+  const rng = makeRng({ nextVal: 0.1, nextBool: false });
+  state.result = state.enemy.takeTurn(state.player, makeMap(), noEntities, rng);
+});
+
+When('the enemy takes its turn with teleport suppressed on an open map', function () {
+  // nextVal 0.9 >= teleportChance 0.25 → teleport roll fails; nextBool false → wander off
+  const rng = makeRng({ nextVal: 0.9, nextBool: false });
+  state.result = state.enemy.takeTurn(state.player, makeMap(), noEntities, rng);
+});
+
+When('the sprite takes its turn with teleport forced but all range tiles blocked', function () {
+  // Block every tile within Manhattan distance 3 of the sprite (excluding origin)
+  const e = state.enemy;
+  const range = 3;
+  const blocked = [];
+  for (let dx = -range; dx <= range; dx++) {
+    for (let dy = -range; dy <= range; dy++) {
+      if (Math.abs(dx) + Math.abs(dy) <= range) {
+        blocked.push({ x: e.x + dx, y: e.y + dy });
+      }
+    }
+  }
+  const rng = makeRng({ nextVal: 0.1, nextBool: false });
+  state.result = state.enemy.takeTurn(state.player, makeMap({ blocked }), noEntities, rng);
+});
+
 When('the enemy moves toward the player with all directions blocked', function () {
   const e = state.enemy;
   const blocked = [
@@ -270,6 +298,17 @@ Then('the move dy is {int}', function (dy) {
 
 Then('no move is returned', function () {
   assert.strictEqual(state.move, null);
+});
+
+Then('the enemy teleport chance is greater than 0', function () {
+  assert.ok(state.enemy.teleportChance > 0,
+    `Expected teleportChance > 0 but got ${state.enemy.teleportChance}`);
+});
+
+Then('the teleport destination is within {int} tiles of the enemy origin', function (range) {
+  const dist = Math.abs(state.result.x - state.enemy.x) + Math.abs(state.result.y - state.enemy.y);
+  assert.ok(dist > 0 && dist <= range,
+    `Expected teleport within ${range} tiles but got dist=${dist}`);
 });
 
 Then('the wander move lands on a tile adjacent to the enemy', function () {

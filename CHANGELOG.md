@@ -9,6 +9,8 @@ Entries are listed newest-first within each section.
 
 ### Added
 
+- 2026-03-24 — Sprites have a 25% chance to teleport up to 3 tiles instead of moving normally
+- 2026-03-24 — Orcs can now appear from floor 1; trolls appear from floor 4 onwards
 - 2026-03-24 — Added Cockroach (1 hp, ATK 1, DEF 1, aggro range 2) and Sprite (3 hp, ATK 2, DEF 1, aggro range 3) enemies; both appear frequently on floors 1–5 and much less often beyond that
 - 2026-03-22 — Night Vision skill (upgradeable, +1 FOV per level) unlocks in the skill pool when the Burrower achievement is completed; `SkillSystem.unlockSkill()` and `getFovBonus()` added
 - 2026-03-22 — Achievements screen now shows an "→ Unlocks: ..." line beneath any achievement that grants a named reward

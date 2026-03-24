@@ -6,8 +6,12 @@ Feature: Enemy spawner
 
   Scenario: getSpawnTable uses floor defaults when no weight override is given
     When the spawn table is requested for floor 1 with no weight override
-    Then the result should contain 1 goblins and 0 orcs
+    Then the result should contain 1 goblins and 1 orcs
     And the result should contain 4 cockroaches and 3 sprites
+
+  Scenario: getSpawnTable includes trolls from floor 4 onwards
+    When the spawn table is requested for floor 4 with no weight override
+    Then the result should contain 1 trolls
 
   Scenario: getSpawnTable has reduced cockroaches and no sprites on higher floors
     When the spawn table is requested for floor 6 with no weight override
