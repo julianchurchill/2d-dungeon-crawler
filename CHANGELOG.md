@@ -9,6 +9,7 @@ Entries are listed newest-first within each section.
 
 ### Fixed
 
+- 2026-03-24 — Dev-mode achievement toggle (uncomplete) did not remove the associated skill or reset upgrades; `AchievementSystem.lock()` now emits `ACHIEVEMENT_LOCKED`, `GameScene._handleAchievementSkillLock()` calls `SkillSystem.removeSkill()` in response; `AchievementsScene` uses `sys.lock(def)` for the reset path
 - 2026-03-24 — Dev-mode achievement toggle did not fire skill unlocks; `_addDevCheckbox` now calls `devCompleteAchievement()` which emits `ACHIEVEMENT_UNLOCKED`, so permanent skills (e.g. Goblin Hunting) are granted just as they would be during normal gameplay
 - 2026-03-24 — Collapsed `goblin-hunting-skill.feature` into the generic `hunting-skills.feature`; deleted redundant feature file and step definitions
 - 2026-03-24 — Kill achievements counted multiple times per kill even on fresh browser load; `AchievementsScene` was creating a full `AchievementSystem` subscribed to the live EventBus each time the screen opened, stacking permanent listeners; fixed by passing a no-op bus to the read-only display instance

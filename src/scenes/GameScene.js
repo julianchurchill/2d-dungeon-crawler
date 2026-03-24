@@ -378,6 +378,11 @@ export class GameScene extends Phaser.Scene {
       EventBus.emit(GameEvents.MESSAGE, `Achievement unlocked: ${achievement.name}!`);
       this._handleAchievementSkillUnlock(achievement.id);
     }, this);
+
+    // Dev-mode only: reset the associated skill when an achievement is re-locked.
+    EventBus.on(GameEvents.ACHIEVEMENT_LOCKED, (achievement) => {
+      this._handleAchievementSkillLock(achievement.id);
+    }, this);
   }
 
   _handleDir(dir) {
@@ -681,6 +686,31 @@ export class GameScene extends Phaser.Scene {
       skillSystem.unlockSkill(skill);
       EventBus.emit(GameEvents.MESSAGE, `New skill available: ${skill.name}! Select it on your next level up.`);
     }
+  }
+
+  /**
+   * Removes the skill associated with a re-locked achievement from the player's
+   * SkillSystem.  Mirrors _handleAchievementSkillUnlock — uses the same maps to
+   * derive the skill id, then delegates to SkillSystem.removeSkill().
+   * Only called via the dev-mode achievement toggle.
+   *
+   * @param {string} achievementId - The ID of the achievement that was reset.
+   */
+  _handleAchievementSkillLock(achievementId) {
+    const skillSystem = this.player?.skillSystem;
+    if (!skillSystem) return;
+
+    const SKILL_IDS = {
+      goblin_killer:    'goblin_hunting',
+      orc_killer:       'orc_hunting',
+      troll_killer:     'troll_hunting',
+      cockroach_killer: 'cockroach_hunting',
+      sprite_killer:    'sprite_hunting',
+      burrower:         'night_vision',
+    };
+
+    const skillId = SKILL_IDS[achievementId];
+    if (skillId) skillSystem.removeSkill(skillId);
   }
 
   /**

@@ -5,6 +5,7 @@ import {
   uncompleteAchievement,
 } from '../../src/achievements/AchievementStore.js';
 import { ACHIEVEMENTS } from '../../src/achievements/AchievementDefinitions.js';
+import { GameEvents } from '../../src/events/GameEvents.js';
 
 /**
  * Step definitions for the dev-mode achievement toggle.
@@ -22,7 +23,8 @@ When('the dev toggle completes the {string} achievement', function (id) {
 });
 
 When('the dev toggle uncompletes the {string} achievement', function (id) {
-  uncompleteAchievement(id, this.store);
+  const def = ACHIEVEMENTS.find(a => a.id === id);
+  this.system.lock(def);
 });
 
 Then('the {string} progress should be marked as completed', function (id) {
@@ -53,4 +55,10 @@ Then('no ACHIEVEMENT_UNLOCKED event should have been emitted', function () {
   const count = (this.unlockedAchievements ?? []).length;
   assert.strictEqual(count, 0,
     `Expected no ACHIEVEMENT_UNLOCKED events but got ${count}`);
+});
+
+Then('an ACHIEVEMENT_LOCKED event should have been emitted for {string}', function (id) {
+  const locked = (this.lockedAchievements ?? []).some(a => a.id === id);
+  assert.strictEqual(locked, true,
+    `Expected ACHIEVEMENT_LOCKED to have been emitted for "${id}"`);
 });

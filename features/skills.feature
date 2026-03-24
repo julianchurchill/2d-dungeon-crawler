@@ -37,6 +37,24 @@ Feature: Character Skills
     Then the combat damage is 10
     And the combat result has no skill messages
 
+  # ── SkillSystem removeSkill ──────────────────────────────────────────────────
+
+  Scenario: removeSkill removes a permanent skill from active skills
+    Given a skill system with a "goblin_hunting" permanent skill active
+    When the skill "goblin_hunting" is removed
+    Then the skill system has 1 active skill
+    And the skill "goblin_hunting" is not active
+
+  Scenario: removeSkill removes a skill from the inactive pool
+    Given a skill system with "night_vision" in the inactive pool
+    When the skill "night_vision" is removed
+    Then the inactive pool is empty
+
+  Scenario: removeSkill is a no-op when the skill id is not found
+    Given a new skill system
+    When the skill "unknown_skill" is removed
+    Then the skill system has 1 active skill
+
   # ── SkillSystem upgrade (dev mode) ──────────────────────────────────────────
 
   Scenario: Lucky Strike can be upgraded when below the max crit chance

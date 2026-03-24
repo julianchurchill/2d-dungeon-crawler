@@ -153,6 +153,14 @@ export const GameEvents = {
   ACHIEVEMENT_UNLOCKED: 'achievement-unlocked',
 
   /**
+   * An achievement has been reset by the dev toggle.
+   * Emitted by: AchievementSystem.lock()
+   * Subscribed by: GameScene (removes the associated skill)
+   * @type {import('../achievements/AchievementDefinitions.js').AchievementDefinition}
+   */
+  ACHIEVEMENT_LOCKED: 'achievement-locked',
+
+  /**
    * The message log history panel has been opened or closed.
    * Emitted by: MessageLog (on every toggle)
    * Subscribed by: GameScene (to gate the ESC → Achievements handler)
