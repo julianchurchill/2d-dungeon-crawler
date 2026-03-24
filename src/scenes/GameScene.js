@@ -27,7 +27,7 @@ import { SkillSystem } from '../systems/SkillSystem.js';
 import { LuckyStrikeSkill } from '../skills/LuckyStrikeSkill.js';
 import { FerocitySkill } from '../skills/FerocitySkill.js';
 import { DodgeSkill } from '../skills/DodgeSkill.js';
-import { GoblinHuntingSkill } from '../skills/GoblinHuntingSkill.js';
+import { HuntingSkill } from '../skills/HuntingSkill.js';
 import { NightVisionSkill } from '../skills/NightVisionSkill.js';
 
 const TILE_SIZE = 16;
@@ -50,7 +50,10 @@ export class GameScene extends Phaser.Scene {
     this.turnManager = new TurnManager();
     this.rng = createRNG(Date.now());
     // AchievementSystem self-registers on the EventBus in its constructor.
-    new AchievementSystem();
+    // Store the reference so listeners can be cleaned up when the scene stops,
+    // preventing stale handlers accumulating if the player starts a new game.
+    this._achievementSystem = new AchievementSystem();
+    this.events.once('shutdown', () => this._achievementSystem.destroy());
 
     // Track whether the message log history panel is open so the ESC handler
     // can close it instead of opening the Achievements screen.
@@ -651,7 +654,11 @@ export class GameScene extends Phaser.Scene {
     // Permanent skills are applied immediately and are never shown in the
     // level-up pool — the player cannot activate or upgrade them.
     const PERMANENT_SKILLS = {
-      goblin_killer: () => new GoblinHuntingSkill(),
+      goblin_killer:    () => new HuntingSkill('GOBLIN_HUNTING'),
+      orc_killer:       () => new HuntingSkill('ORC_HUNTING'),
+      troll_killer:     () => new HuntingSkill('TROLL_HUNTING'),
+      cockroach_killer: () => new HuntingSkill('COCKROACH_HUNTING'),
+      sprite_killer:    () => new HuntingSkill('SPRITE_HUNTING'),
     };
 
     // Pool skills are added to the inactive skill list so the player can

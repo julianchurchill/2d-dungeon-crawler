@@ -5,7 +5,7 @@ Feature: Achievements screen display list
   Scenario: Display list contains an entry for every achievement
     Given the achievement system is initialised
     When the achievements display list is retrieved
-    Then the display list should contain 23 entries
+    Then the display list should contain 25 entries
 
   Scenario: An incomplete achievement entry shows progress text
     Given the achievement system is initialised
@@ -31,7 +31,22 @@ Feature: Achievements screen display list
     When the achievements display list is retrieved
     Then the "burrower" entry should have unlocks "Night Vision skill"
 
-  Scenario: An achievement with no unlock has no unlocks field
+  Scenario: Orc Killer achievement carries the unlocks field
     Given the achievement system is initialised
     When the achievements display list is retrieved
-    Then the "orc_killer" entry should have no unlocks
+    Then the "orc_killer" entry should have unlocks "Orc Hunting skill"
+
+  Scenario: Troll Killer achievement carries the unlocks field
+    Given the achievement system is initialised
+    When the achievements display list is retrieved
+    Then the "troll_killer" entry should have unlocks "Troll Hunting skill"
+
+  Scenario: Cockroach Killer achievement carries the unlocks field
+    Given the achievement system is initialised
+    When the achievements display list is retrieved
+    Then the "cockroach_killer" entry should have unlocks "Cockroach Hunting skill"
+
+  Scenario: Sprite Killer achievement carries the unlocks field
+    Given the achievement system is initialised
+    When the achievements display list is retrieved
+    Then the "sprite_killer" entry should have unlocks "Sprite Hunting skill"

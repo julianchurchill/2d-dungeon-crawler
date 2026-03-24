@@ -140,3 +140,7 @@ Then('the {string} achievement should be completed', function (name) {
   const { completed } = getProgress(def.id, this.store);
   assert.strictEqual(completed, true, `Expected achievement "${name}" to be completed`);
 });
+
+When('the achievement system is destroyed', function () {
+  this.system.destroy();
+});
