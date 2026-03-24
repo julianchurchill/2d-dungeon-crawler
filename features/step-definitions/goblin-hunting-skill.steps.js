@@ -1,9 +1,9 @@
 /**
- * Step definitions for the GoblinHuntingSkill and its SkillSystem integration.
+ * Step definitions for the Goblin Hunting skill and its SkillSystem integration.
  */
 import { Given, When, Then } from '@cucumber/cucumber';
 import assert from 'node:assert/strict';
-import { GoblinHuntingSkill } from '../../src/skills/GoblinHuntingSkill.js';
+import { HuntingSkill } from '../../src/skills/HuntingSkill.js';
 import { SkillSystem } from '../../src/systems/SkillSystem.js';
 
 // Minimal stub RNG — Goblin Hunting uses no RNG rolls.
@@ -12,7 +12,7 @@ const stubRng = {};
 // ── Given ─────────────────────────────────────────────────────────────────────
 
 Given('a Goblin Hunting skill', function () {
-  this.skill = new GoblinHuntingSkill();
+  this.skill = new HuntingSkill('GOBLIN_HUNTING');
 });
 
 Given('a skill system with no skills', function () {
@@ -20,7 +20,7 @@ Given('a skill system with no skills', function () {
 });
 
 Given('a skill system with Goblin Hunting active', function () {
-  const skill = new GoblinHuntingSkill();
+  const skill = new HuntingSkill('GOBLIN_HUNTING');
   this.skillSystem = new SkillSystem(stubRng, [skill], []);
 });
 
@@ -39,7 +39,7 @@ When('it is applied to an attack of {int} damage against an unknown defender', f
 });
 
 When('a Goblin Hunting skill is unlocked as a permanent skill', function () {
-  this.skillSystem.unlockPermanentSkill(new GoblinHuntingSkill());
+  this.skillSystem.unlockPermanentSkill(new HuntingSkill('GOBLIN_HUNTING'));
 });
 
 When('the skill system processes a hit of {int} damage against a goblin', function (damage) {

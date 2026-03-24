@@ -4,8 +4,7 @@
  * specific enemy type.  Instances are configured by passing a key from SKILLS
  * (e.g. 'ORC_HUNTING').  Cannot be upgraded or downgraded.
  *
- * Used for all kill-achievement hunting skills except GoblinHuntingSkill, which
- * predates this generic implementation and is kept unchanged for compatibility.
+ * Used for all kill-achievement hunting skills, including Goblin Hunting.
  */
 
 import { SKILLS } from './SkillDefinitions.js';
