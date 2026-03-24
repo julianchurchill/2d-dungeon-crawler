@@ -156,7 +156,10 @@ export class AchievementsScene extends Phaser.Scene {
    */
   _buildList(width, height) {
     // Build display list using an AchievementSystem wired to the live store.
-    const system  = new AchievementSystem(ACHIEVEMENTS, achievementStore, EventBus);
+    // Pass a no-op bus so this read-only usage never subscribes to game events,
+    // which would stack stale listeners each time the screen is opened.
+    const noOpBus = { on: () => {}, off: () => {} };
+    const system  = new AchievementSystem(ACHIEVEMENTS, achievementStore, noOpBus);
     const entries = system.getDisplayList();
 
     // Sort: completed first, then incomplete.
