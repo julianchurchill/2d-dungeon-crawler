@@ -61,3 +61,10 @@ Feature: Achievement system
     Given the achievement system is initialised
     When the player reaches level 10
     Then the "Apprentice" achievement should be completed
+
+
+  Scenario: Destroying the system stops it from tracking further kills
+    Given the achievement system is initialised
+    When the achievement system is destroyed
+    And the player kills a goblin
+    Then the Goblin Killer achievement progress should be 0

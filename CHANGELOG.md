@@ -7,6 +7,10 @@ Entries are listed newest-first within each section.
 
 ## [Unreleased]
 
+### Fixed
+
+- 2026-03-24 — Kill achievements counted multiple times per kill after restarting a game; fixed by adding `AchievementSystem.destroy()` to remove EventBus listeners when GameScene shuts down
+
 ### Added
 
 - 2026-03-24 — Added Cockroach Killer (30 kills) and Sprite Killer (10 kills) achievements, each unlocking a permanent +10% damage hunting skill; Orc Killer and Troll Killer now also unlock Orc Hunting and Troll Hunting permanent skills; generic HuntingSkill class added to support all four

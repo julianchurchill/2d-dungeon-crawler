@@ -31,10 +31,15 @@ export class AchievementSystem {
     this.store = store;
     this.eventBus = eventBus;
 
+    // Store handler references so they can be removed by destroy().
+    this._onEnemyKilled    = (enemyType) => this._handleEnemyKilled(enemyType);
+    this._onPlayerLevelUp  = (level)     => this._handlePlayerLevelUp(level);
+    this._onFloorChanged   = (floor)     => this._handleFloorReached(floor);
+
     // Subscribe to game events so the system updates itself automatically.
-    this.eventBus.on(GameEvents.ENEMY_KILLED,    (enemyType) => this._handleEnemyKilled(enemyType));
-    this.eventBus.on(GameEvents.PLAYER_LEVEL_UP, (level)     => this._handlePlayerLevelUp(level));
-    this.eventBus.on(GameEvents.FLOOR_CHANGED,   (floor)     => this._handleFloorReached(floor));
+    this.eventBus.on(GameEvents.ENEMY_KILLED,    this._onEnemyKilled);
+    this.eventBus.on(GameEvents.PLAYER_LEVEL_UP, this._onPlayerLevelUp);
+    this.eventBus.on(GameEvents.FLOOR_CHANGED,   this._onFloorChanged);
   }
 
   /**
@@ -74,6 +79,16 @@ export class AchievementSystem {
       return `${base} (${count} ${def.progressUnit} so far)`;
     }
     return base;
+  }
+
+  /**
+   * Removes all EventBus subscriptions.  Call when the owning scene is stopped
+   * to prevent stale listeners accumulating across game restarts.
+   */
+  destroy() {
+    this.eventBus.off(GameEvents.ENEMY_KILLED,    this._onEnemyKilled);
+    this.eventBus.off(GameEvents.PLAYER_LEVEL_UP, this._onPlayerLevelUp);
+    this.eventBus.off(GameEvents.FLOOR_CHANGED,   this._onFloorChanged);
   }
 
   // ── Private event handlers ───────────────────────────────────────────────

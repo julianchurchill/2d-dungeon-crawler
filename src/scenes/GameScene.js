@@ -50,7 +50,10 @@ export class GameScene extends Phaser.Scene {
     this.turnManager = new TurnManager();
     this.rng = createRNG(Date.now());
     // AchievementSystem self-registers on the EventBus in its constructor.
-    new AchievementSystem();
+    // Store the reference so listeners can be cleaned up when the scene stops,
+    // preventing stale handlers accumulating if the player starts a new game.
+    this._achievementSystem = new AchievementSystem();
+    this.events.once('shutdown', () => this._achievementSystem.destroy());
 
     // Track whether the message log history panel is open so the ESC handler
     // can close it instead of opening the Achievements screen.
