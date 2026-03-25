@@ -7,6 +7,10 @@ Entries are listed newest-first within each section.
 
 ## [Unreleased]
 
+### Changed
+
+- 2026-03-25 — Potion of Minor Teleportation spawns less frequently than health and mega potions; potions are now weighted 3× relative to the teleport potion in the loot pool
+
 ### Fixed
 
 - 2026-03-24 — Main menu button font changed on first hover; Phaser was creating Text objects before Roboto Mono was in the canvas font cache — fixed by deferring `new Phaser.Game()` until `document.fonts.load('16px "Roboto Mono"')` resolves

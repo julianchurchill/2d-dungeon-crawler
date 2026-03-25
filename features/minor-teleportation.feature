@@ -63,3 +63,8 @@ Feature: Potion of Minor Teleportation
     Given the sprite_stalker achievement is not unlocked
     When getFloorLoot is called for floor 1
     Then the potion of minor teleportation is not in the loot pool
+
+  Scenario: Potion of Minor Teleportation spawns less often than health potions
+    Given the sprite_stalker achievement is unlocked
+    When getFloorLoot is sampled 300 times on floor 1
+    Then the potion of minor teleportation appears less often than the health potion

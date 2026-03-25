@@ -67,9 +67,18 @@ export const ITEM_TYPES = {
  * @returns {object} An ITEM_TYPES entry.
  */
 export function getFloorLoot(floor, rng, unlockedItems = new Set()) {
-  const pool = [ITEM_TYPES.HEALTH_POTION];
+  // Common items are added multiple times to increase their spawn weight.
+  // Rare/unlocked items are added once for a lower chance of appearing.
+  const pool = [
+    ITEM_TYPES.HEALTH_POTION, ITEM_TYPES.HEALTH_POTION, ITEM_TYPES.HEALTH_POTION,
+  ];
   if (floor >= 1) pool.push(ITEM_TYPES.SWORD, ITEM_TYPES.LEATHER_ARMOR);
-  if (floor >= 2) pool.push(ITEM_TYPES.MEGA_POTION, ITEM_TYPES.LONG_SWORD);
+  if (floor >= 2) {
+    pool.push(
+      ITEM_TYPES.MEGA_POTION, ITEM_TYPES.MEGA_POTION, ITEM_TYPES.MEGA_POTION,
+      ITEM_TYPES.LONG_SWORD,
+    );
+  }
   if (floor >= 3) pool.push(ITEM_TYPES.CHAIN_MAIL);
   if (unlockedItems.has(ITEM_TYPES.POTION_OF_MINOR_TELEPORTATION.id)) {
     pool.push(ITEM_TYPES.POTION_OF_MINOR_TELEPORTATION);
