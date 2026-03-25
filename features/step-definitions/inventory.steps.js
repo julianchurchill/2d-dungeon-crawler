@@ -143,3 +143,22 @@ Then('the dropped item should be at position {int}, {int}', function (x, y) {
   assert.equal(this.result.item.x, x);
   assert.equal(this.result.item.y, y);
 });
+
+Given('the Health Potion item type', function () {
+  this.itemType = ITEM_TYPES.HEALTH_POTION;
+});
+
+Then('the item shortName should be defined', function () {
+  assert.ok(this.itemType.shortName !== undefined,
+    `Expected shortName to be defined on ${this.itemType.name}`);
+});
+
+Then('the item shortName should be shorter than the full name', function () {
+  assert.ok(this.itemType.shortName.length < this.itemType.name.length,
+    `Expected shortName "${this.itemType.shortName}" to be shorter than name "${this.itemType.name}"`);
+});
+
+Then('the item shortName should not be defined', function () {
+  assert.strictEqual(this.itemType.shortName, undefined,
+    `Expected shortName to be undefined on ${this.itemType.name}`);
+});

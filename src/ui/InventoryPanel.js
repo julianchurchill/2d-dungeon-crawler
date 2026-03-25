@@ -265,7 +265,7 @@ export class InventoryPanel {
       if (i < this.inventory.length) {
         const item = this.inventory[i];
         icon.setText(ICONS[item.itemType] || '?');
-        label.setText(item.name);
+        label.setText(item.shortName ?? item.name);
       } else {
         icon.setText('');
         label.setText('');
@@ -273,8 +273,8 @@ export class InventoryPanel {
     }
 
     if (player) {
-      const wpn = player.equippedWeapon?.name || '-';
-      const arm = player.equippedArmor?.name || '-';
+      const wpn = (player.equippedWeapon?.shortName ?? player.equippedWeapon?.name) || '-';
+      const arm = (player.equippedArmor?.shortName  ?? player.equippedArmor?.name)  || '-';
       this._equippedText.setText(`WPN: ${wpn}   ARM: ${arm}`);
     }
   }
