@@ -1,3 +1,10 @@
+---
+name: pr
+description: "Create a pull request for the current branch. TRIGGER when: user says 'make a PR', 'open a PR', 'create a PR', 'submit a PR', 'raise a PR', or 'make a pull request'. Runs the full workflow: changelog, version bump, markdownlint, TODO/EVENTS checks, tests, pre-PR review agent, commit, push, gh pr create."
+version: 1.0.0
+user-invocable: true
+---
+
 # /pr
 
 Create a pull request for the current branch following the project's full PR workflow.
