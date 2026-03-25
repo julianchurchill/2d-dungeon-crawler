@@ -1,16 +1,19 @@
 #!/usr/bin/env bash
 # init-claude-settings.sh
-# Ensures the Claude Code settings file contains the required MCP server
-# configurations. Runs on every container start so that settings survive
-# volume recreation and container rebuilds.
+# Ensures the Claude Code user config file (.claude.json) contains the required
+# MCP server configurations. Runs on every container start so that settings
+# survive volume recreation and container rebuilds.
 #
 # Strategy: merge the required mcpServers entries into the existing
-# settings.json using Node.js (always available in the container),
+# .claude.json using Node.js (always available in the container),
 # preserving any other settings or MCP entries already present.
+#
+# Note: mcpServers must live in .claude.json, NOT settings.json.
+# Claude Code only reads MCP server config from .claude.json.
 
 set -euo pipefail
 
-SETTINGS_FILE="${CLAUDE_CONFIG_DIR:-/home/node/.claude}/settings.json"
+SETTINGS_FILE="${CLAUDE_CONFIG_DIR:-/home/node/.claude}/.claude.json"
 
 # Ensure the directory exists (may not if volume is freshly created).
 mkdir -p "$(dirname "$SETTINGS_FILE")"
