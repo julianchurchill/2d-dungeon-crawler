@@ -69,10 +69,10 @@
 
 ## Town
 
-- [ ] the town is a special level, always appears at level 0 and is the starting place for a new game. It has a non-random layout and combat is disabled there.
 - [ ] the town contains shops that can be entered where items from the players inventory can be sold for currency
 - [ ] the town contains shops that can be entered where the player can buy items with currency. The items will have randomly generated stats and may include occasional rare items that are powerful for the players level. They will not include unique items that can only be found by exploring the dungeon.
 - [ ] the town contains NPCs that can be interacted with for short conversations
+- [x] the town is a special level, always appears at level 0 and is the starting place for a new game. It has a non-random layout and combat is disabled there.
 
 ## Special Levels
 

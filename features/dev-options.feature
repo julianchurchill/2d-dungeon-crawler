@@ -34,7 +34,7 @@ Feature: Developer options
     And the start level should be 1
     And the start items should be empty
 
-  Scenario: applyToGame with defaults does not change player or floor
+  Scenario: applyToGame with defaults sets floor to 1 and does not change player
     Given a new player
     And a new floor manager
     When developer options are applied to the game

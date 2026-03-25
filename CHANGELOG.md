@@ -26,6 +26,7 @@ Entries are listed newest-first within each section.
 
 ### Added
 
+- 2026-03-25 — Add Town level (floor 0): `FloorManager` starts at floor 0, `isTown()` returns true at floor 0, `TownGenerator` produces a fixed non-random 20×20 layout with floor tiles and stairs leading down
 - 2026-03-25 — Add `description` frontmatter to `/pr` command so Claude invokes it automatically when the user asks to make a PR
 - 2026-03-25 — Add `/devserver` custom slash command to start the Vite dev server with automatic port-conflict detection and resolution
 - 2026-03-25 — Add `/sync` and `/pr` custom Claude Code slash commands to automate the pull-from-main and PR-creation workflows

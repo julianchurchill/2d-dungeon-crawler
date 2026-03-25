@@ -1,0 +1,81 @@
+import { Given, When, Then } from '@cucumber/cucumber';
+import assert from 'node:assert/strict';
+import { FloorManager } from '../../src/systems/FloorManager.js';
+import { TownGenerator } from '../../src/dungeon/TownGenerator.js';
+import { TILE } from '../../src/utils/TileTypes.js';
+
+// --- Given ---
+
+Given('a new FloorManager', function () {
+  this.floorManager = new FloorManager();
+});
+
+Given('the town is generated', function () {
+  const generator = new TownGenerator();
+  this.townResult = generator.generate();
+});
+
+// --- When ---
+
+When('the player descends', function () {
+  this.floorManager.descend();
+});
+
+When('the town is generated again', function () {
+  const generator = new TownGenerator();
+  this.townResult2 = generator.generate();
+});
+
+// --- Then ---
+
+Then('the current floor is {int}', function (expected) {
+  assert.equal(this.floorManager.currentFloor, expected,
+    `Expected floor ${expected}, got ${this.floorManager.currentFloor}`);
+});
+
+Then('the floor is the town', function () {
+  assert.ok(this.floorManager.isTown(),
+    'Expected isTown() to return true');
+});
+
+Then('the floor is not the town', function () {
+  assert.ok(!this.floorManager.isTown(),
+    'Expected isTown() to return false');
+});
+
+Then('both town layouts are identical', function () {
+  const t1 = this.townResult.map;
+  const t2 = this.townResult2.map;
+  assert.equal(t1.width, t2.width);
+  assert.equal(t1.height, t2.height);
+  assert.ok(
+    t1.tiles.every((v, i) => v === t2.tiles[i]),
+    'Expected both town layouts to be identical'
+  );
+});
+
+Then('the town map contains floor tiles', function () {
+  const { map } = this.townResult;
+  let hasFloor = false;
+  for (let i = 0; i < map.tiles.length; i++) {
+    if (map.tiles[i] === TILE.FLOOR) { hasFloor = true; break; }
+  }
+  assert.ok(hasFloor, 'Expected town map to contain at least one floor tile');
+});
+
+Then('the town map contains stairs leading down', function () {
+  const { map } = this.townResult;
+  let hasStairs = false;
+  for (let i = 0; i < map.tiles.length; i++) {
+    if (map.tiles[i] === TILE.STAIRS_DOWN) { hasStairs = true; break; }
+  }
+  assert.ok(hasStairs, 'Expected town map to contain stairs leading down');
+});
+
+Then('the town start position is on a walkable tile', function () {
+  const { map, startPos } = this.townResult;
+  assert.ok(
+    map.isWalkable(startPos.x, startPos.y),
+    `Expected start position (${startPos.x}, ${startPos.y}) to be walkable`
+  );
+});

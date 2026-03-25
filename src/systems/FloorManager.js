@@ -5,7 +5,7 @@ import { GameEvents } from '../events/GameEvents.js';
 
 export class FloorManager {
   constructor() {
-    this.currentFloor = 1;
+    this.currentFloor = 0;
     this.generator = new BSPDungeonGenerator();
   }
 
@@ -27,6 +27,14 @@ export class FloorManager {
   }
 
   reset() {
-    this.currentFloor = 1;
+    this.currentFloor = 0;
+  }
+
+  /**
+   * Returns true if the current floor is the town (floor 0).
+   * @returns {boolean}
+   */
+  isTown() {
+    return this.currentFloor === 0;
   }
 }
