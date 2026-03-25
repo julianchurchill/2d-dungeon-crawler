@@ -29,7 +29,6 @@ import { FerocitySkill } from '../skills/FerocitySkill.js';
 import { DodgeSkill } from '../skills/DodgeSkill.js';
 import { HuntingSkill } from '../skills/HuntingSkill.js';
 import { NightVisionSkill } from '../skills/NightVisionSkill.js';
-import { findNearTeleportDestination } from '../systems/NearTeleportation.js';
 import { ITEM_TYPES } from '../items/ItemTypes.js';
 import { getProgress, achievementStore } from '../achievements/AchievementStore.js';
 
@@ -244,7 +243,7 @@ export class GameScene extends Phaser.Scene {
     // Build the set of achievement-unlocked item ids for this run.
     const unlockedItems = new Set();
     if (getProgress('sprite_stalker', achievementStore).completed) {
-      unlockedItems.add(ITEM_TYPES.POTION_OF_NEAR_TELEPORTATION.id);
+      unlockedItems.add(ITEM_TYPES.POTION_OF_MINOR_TELEPORTATION.id);
     }
     // Place 1–2 items per room (skip start room)
     for (let i = 1; i < rooms.length; i++) {
@@ -798,60 +797,54 @@ export class GameScene extends Phaser.Scene {
     return { skills, inactiveSkills };
   }
 
+  /**
+   * Uses the item at the given inventory index.  Passes a world-access context
+   * so items with effects that need map or RNG access (e.g. teleport_near) can
+   * resolve them inside `item.use()`.  If the player's position changed after
+   * the call, the teleport side-effects (sprite snap, FOV update, enemy turns)
+   * are applied and the inventory panel is closed.
+   *
+   * @param {number} index - Inventory slot to use.
+   */
   _useInventoryItem(index) {
-    const item = this.player.inventory[index];
-    if (item?.effect?.type === 'teleport_near') {
-      this._applyNearTeleport(index);
+    const prevX = this.player.x;
+    const prevY = this.player.y;
+
+    const context = {
+      rng: this.rng,
+      isWalkable: (x, y) => this.dungeonMap.isWalkable(x, y),
+      getEntityAt: (x, y) => this._getEntityAt(x, y),
+    };
+
+    const msg = InventorySystem.useItem(this.player, index, context);
+    EventBus.emit(GameEvents.MESSAGE, msg);
+
+    const playerTeleported = this.player.x !== prevX || this.player.y !== prevY;
+    if (playerTeleported) {
+      // Close the inventory panel before enemy turns so the TurnManager state
+      // is PLAYER_INPUT when _startEnemyTurns cycles through ENEMY_ACTING.
+      if (this.turnManager.state === TURN_STATE.INVENTORY) {
+        this.turnManager.setState(TURN_STATE.PLAYER_INPUT);
+        EventBus.emit(GameEvents.OPEN_INVENTORY, {
+          inventory: this.player.inventory,
+          player: this.player,
+        });
+      }
+      this.playerSprite.setPosition(
+        this.player.x * TILE_SIZE + TILE_SIZE / 2,
+        this.player.y * TILE_SIZE + TILE_SIZE / 2,
+      );
+      this._updateFOV();
+      this._checkItemPickup();
+      this._syncRegistry();
+      this._startEnemyTurns();
       return;
     }
-    const msg = InventorySystem.useItem(this.player, index);
-    EventBus.emit(GameEvents.MESSAGE, msg);
+
     this._syncRegistry();
     if (this.player.isDead()) {
       this._gameOver();
     }
-  }
-
-  /**
-   * Consumes the near-teleportation potion at the given inventory index,
-   * finds a valid destination via Chebyshev distance band, and snaps the player
-   * there.  Triggers enemy turns so the teleport costs a game turn.
-   *
-   * @param {number} index - Inventory slot of the Potion of Near Teleportation.
-   */
-  _applyNearTeleport(index) {
-    const item = this.player.inventory[index];
-    const dest = findNearTeleportDestination(
-      this.player.x, this.player.y,
-      (x, y) => this.dungeonMap.isWalkable(x, y),
-      (x, y) => this._getEntityAt(x, y),
-      this.rng,
-      item.effect.minDist,
-      item.effect.maxDist,
-    );
-
-    // Consume the item regardless of whether a destination was found.
-    this.player.removeItem(index);
-    EventBus.emit(GameEvents.INVENTORY_CHANGED, this.player.inventory);
-
-    if (!dest) {
-      EventBus.emit(GameEvents.MESSAGE,
-        `You drink the ${item.name} but nothing happens — no clear space nearby!`);
-      this._syncRegistry();
-      return;
-    }
-
-    this.player.x = dest.x;
-    this.player.y = dest.y;
-    this.playerSprite.setPosition(
-      dest.x * TILE_SIZE + TILE_SIZE / 2,
-      dest.y * TILE_SIZE + TILE_SIZE / 2,
-    );
-    EventBus.emit(GameEvents.MESSAGE, `You drink the ${item.name} and vanish in a flash!`);
-    this._updateFOV();
-    this._checkItemPickup();
-    this._syncRegistry();
-    this._startEnemyTurns();
   }
 
   // ─── Enemy Turns ──────────────────────────────────────────────────────────

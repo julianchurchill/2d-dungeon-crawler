@@ -47,9 +47,9 @@ export const ITEM_TYPES = {
     type: 'armor',
     defenseBonus: 4,
   },
-  POTION_OF_NEAR_TELEPORTATION: {
-    id: 'potion_of_near_teleportation',
-    name: 'Potion of Near Teleportation',
+  POTION_OF_MINOR_TELEPORTATION: {
+    id: 'potion_of_minor_teleportation',
+    name: 'Potion of Minor Teleportation',
     description: 'Teleports you to a random nearby space',
     textureKey: 'item_potion_teleport',
     type: 'consumable',
@@ -71,8 +71,8 @@ export function getFloorLoot(floor, rng, unlockedItems = new Set()) {
   if (floor >= 1) pool.push(ITEM_TYPES.SWORD, ITEM_TYPES.LEATHER_ARMOR);
   if (floor >= 2) pool.push(ITEM_TYPES.MEGA_POTION, ITEM_TYPES.LONG_SWORD);
   if (floor >= 3) pool.push(ITEM_TYPES.CHAIN_MAIL);
-  if (unlockedItems.has(ITEM_TYPES.POTION_OF_NEAR_TELEPORTATION.id)) {
-    pool.push(ITEM_TYPES.POTION_OF_NEAR_TELEPORTATION);
+  if (unlockedItems.has(ITEM_TYPES.POTION_OF_MINOR_TELEPORTATION.id)) {
+    pool.push(ITEM_TYPES.POTION_OF_MINOR_TELEPORTATION);
   }
   return rng.pick(pool);
 }

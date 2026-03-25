@@ -1,6 +1,6 @@
 /**
- * @module NearTeleportation
- * @description Pure logic for the Potion of Near Teleportation.
+ * @module MinorTeleportation
+ * @description Pure logic for the Potion of Minor Teleportation.
  *
  * Finds a random walkable, unoccupied tile that is within a Chebyshev distance
  * range from the source position.  Does not consider walls between the source
@@ -19,7 +19,7 @@
  * @param {number}   maxDist     - Maximum Chebyshev distance from source (inclusive).
  * @returns {{ x: number, y: number } | null} A valid destination, or null if none found.
  */
-export function findNearTeleportDestination(px, py, isWalkable, getEntityAt, rng, minDist, maxDist) {
+export function findMinorTeleportDestination(px, py, isWalkable, getEntityAt, rng, minDist, maxDist) {
   // Collect all candidate tiles in the distance band.
   const candidates = [];
   for (let dx = -maxDist; dx <= maxDist; dx++) {

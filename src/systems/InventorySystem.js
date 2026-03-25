@@ -21,13 +21,18 @@ export class InventorySystem {
 
   /**
    * Use an item from the player's inventory by index.
+   * @param {object} player
+   * @param {number} index
+   * @param {object} [context] - Optional world-access context forwarded to
+   *   `item.use()`.  Required for items with effects that need map or RNG
+   *   access (e.g. `teleport_near`).
    * @returns {string} message
    */
-  static useItem(player, index) {
+  static useItem(player, index, context = {}) {
     const item = player.inventory[index];
     if (!item) return 'Nothing there.';
 
-    const msg = item.use(player);
+    const msg = item.use(player, context);
 
     if (item.isConsumable()) {
       player.removeItem(index);

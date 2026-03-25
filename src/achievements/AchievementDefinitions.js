@@ -57,7 +57,7 @@ export const ACHIEVEMENTS = [
     description: 'Kill 25 sprites',
     condition: { type: 'kill_type', enemyType: 'sprite', target: 25 },
     progressUnit: 'killed',
-    unlocks: 'Potion of Near Teleportation',
+    unlocks: 'Potion of Minor Teleportation',
   },
   {
     id: 'goblin_killer',

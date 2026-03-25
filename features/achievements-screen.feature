@@ -49,7 +49,7 @@ Feature: Achievements screen display list
   Scenario: Sprite Stalker achievement carries the unlocks field
     Given the achievement system is initialised
     When the achievements display list is retrieved
-    Then the "sprite_stalker" entry should have unlocks "Potion of Near Teleportation"
+    Then the "sprite_stalker" entry should have unlocks "Potion of Minor Teleportation"
 
   Scenario: Sprite Killer achievement carries the unlocks field
     Given the achievement system is initialised

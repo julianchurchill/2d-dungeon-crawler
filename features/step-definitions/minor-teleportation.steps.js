@@ -1,10 +1,11 @@
 /**
- * Step definitions for the Potion of Near Teleportation.
+ * Step definitions for the Potion of Minor Teleportation.
  */
 import { Given, When, Then } from '@cucumber/cucumber';
 import assert from 'node:assert/strict';
-import { findNearTeleportDestination } from '../../src/systems/NearTeleportation.js';
+import { findMinorTeleportDestination } from '../../src/systems/MinorTeleportation.js';
 import { ITEM_TYPES, getFloorLoot } from '../../src/items/ItemTypes.js';
+import { Item } from '../../src/items/Item.js';
 
 // Stub RNG that always picks the first element of any array.
 const firstRng = { pick: (arr) => arr[0], next: () => 0 };
@@ -68,12 +69,17 @@ Given('a 20x20 open map where all tiles are occupied with player at position {in
   this.rng = firstRng;
 });
 
-Given('the Potion of Near Teleportation item type', function () {
-  this.itemType = ITEM_TYPES.POTION_OF_NEAR_TELEPORTATION;
+Given('the Potion of Minor Teleportation item type', function () {
+  this.itemType = ITEM_TYPES.POTION_OF_MINOR_TELEPORTATION;
+});
+
+Given('a Potion of Minor Teleportation item instance', function () {
+  this.item = new Item(0, 0, ITEM_TYPES.POTION_OF_MINOR_TELEPORTATION);
+  this.player = { x: this.px, y: this.py };
 });
 
 Given('the sprite_stalker achievement is unlocked', function () {
-  this.unlockedItems = new Set([ITEM_TYPES.POTION_OF_NEAR_TELEPORTATION.id]);
+  this.unlockedItems = new Set([ITEM_TYPES.POTION_OF_MINOR_TELEPORTATION.id]);
 });
 
 Given('the sprite_stalker achievement is not unlocked', function () {
@@ -82,14 +88,23 @@ Given('the sprite_stalker achievement is not unlocked', function () {
 
 // ── When ──────────────────────────────────────────────────────────────────────
 
-When('findNearTeleportDestination is called with minDist {int} and maxDist {int}',
+When('findMinorTeleportDestination is called with minDist {int} and maxDist {int}',
   function (minDist, maxDist) {
     this.minDist = minDist;
     this.maxDist = maxDist;
-    this.destination = findNearTeleportDestination(
+    this.destination = findMinorTeleportDestination(
       this.px, this.py, this.isWalkable, this.getEntityAt, this.rng, minDist, maxDist,
     );
   });
+
+When('the item is used with a teleport context', function () {
+  const context = {
+    rng: this.rng,
+    isWalkable: this.isWalkable,
+    getEntityAt: this.getEntityAt,
+  };
+  this.useMessage = this.item.use(this.player, context);
+});
 
 When('getFloorLoot is called for floor {int}', function (floor) {
   // Sample many times to check whether the potion can appear.
@@ -147,16 +162,38 @@ Then('it has a teleport_near effect', function () {
   assert.strictEqual(this.itemType.effect?.type, 'teleport_near');
 });
 
-Then('the potion of near teleportation is in the loot pool', function () {
+Then('the player position has changed', function () {
+  assert.ok(
+    this.player.x !== this.px || this.player.y !== this.py,
+    `Expected player to move from (${this.px},${this.py}) but position is unchanged`,
+  );
+});
+
+Then('the player position has not changed', function () {
+  assert.strictEqual(this.player.x, this.px);
+  assert.strictEqual(this.player.y, this.py);
+});
+
+Then('the use message mentions vanishing', function () {
+  assert.ok(this.useMessage.includes('vanish'),
+    `Expected message to mention vanishing, got: "${this.useMessage}"`);
+});
+
+Then('the use message mentions nothing happening', function () {
+  assert.ok(this.useMessage.includes('nothing happens'),
+    `Expected message to mention nothing happening, got: "${this.useMessage}"`);
+});
+
+Then('the potion of minor teleportation is in the loot pool', function () {
   const found = this.lootSamples.some(
-    t => t.id === ITEM_TYPES.POTION_OF_NEAR_TELEPORTATION.id,
+    t => t.id === ITEM_TYPES.POTION_OF_MINOR_TELEPORTATION.id,
   );
   assert.ok(found, 'Expected potion to appear in loot samples but it did not');
 });
 
-Then('the potion of near teleportation is not in the loot pool', function () {
+Then('the potion of minor teleportation is not in the loot pool', function () {
   const found = this.lootSamples.some(
-    t => t.id === ITEM_TYPES.POTION_OF_NEAR_TELEPORTATION.id,
+    t => t.id === ITEM_TYPES.POTION_OF_MINOR_TELEPORTATION.id,
   );
   assert.ok(!found, 'Expected potion NOT to appear in loot samples but it did');
 });
