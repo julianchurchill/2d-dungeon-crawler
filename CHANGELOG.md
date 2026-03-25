@@ -13,6 +13,7 @@ Entries are listed newest-first within each section.
 
 ### Fixed
 
+- 2026-03-25 — Developer options labels overflowed off the left edge on narrow mobile viewports; labels now word-wrap at the available horizontal space and row heights grow to fit wrapped text
 - 2026-03-24 — Main menu button font changed on first hover; Phaser was creating Text objects before Roboto Mono was in the canvas font cache — fixed by deferring `new Phaser.Game()` until `document.fonts.load('16px "Roboto Mono"')` resolves
 - 2026-03-24 — Dev-mode achievement toggle (uncomplete) did not remove the associated skill or reset upgrades; `AchievementSystem.lock()` now emits `ACHIEVEMENT_LOCKED`, `GameScene._handleAchievementSkillLock()` calls `SkillSystem.removeSkill()` in response; `AchievementsScene` uses `sys.lock(def)` for the reset path
 - 2026-03-24 — Dev-mode achievement toggle did not fire skill unlocks; `_addDevCheckbox` now calls `devCompleteAchievement()` which emits `ACHIEVEMENT_UNLOCKED`, so permanent skills (e.g. Goblin Hunting) are granted just as they would be during normal gameplay

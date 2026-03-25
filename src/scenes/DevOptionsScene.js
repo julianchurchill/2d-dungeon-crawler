@@ -110,8 +110,7 @@ export class DevOptionsScene extends Phaser.Scene {
 
     // Item count rows (keyed by ITEM_TYPES key, range 0–5 each)
     for (const { label, key } of ITEM_ROWS) {
-      this._makeItemRow(label, key, cx, y);
-      y += 34;
+      y += this._makeItemRow(label, key, cx, y);
     }
 
     y += 16;
@@ -126,10 +125,11 @@ export class DevOptionsScene extends Phaser.Scene {
     // set (transitioning from null → object), all sibling texts update together.
     const allWeightDisplays = {};
     for (const key of ENEMY_KEYS) {
-      allWeightDisplays[key] = this._makeSpawnWeightRow(
+      const { rowH, valTxt } = this._makeSpawnWeightRow(
         ENEMY_DEFS[key].name, key, cx, y, allWeightDisplays,
       );
-      y += 34;
+      allWeightDisplays[key] = valTxt;
+      y += rowH;
     }
 
     // Validation error — shown when all weights are zero; hidden otherwise.
@@ -209,17 +209,24 @@ export class DevOptionsScene extends Phaser.Scene {
    * array.  The count reflects how many times the given key appears in
    * `devOptions.startItems`.
    *
+   * The label wraps at the available horizontal space so it never overflows
+   * off the left edge on narrow (mobile) viewports.
+   *
    * @param {string} label - Human-readable item name.
    * @param {string} key   - ITEM_TYPES key, e.g. 'SWORD'.
    * @param {number} cx    - Horizontal centre of the scene.
    * @param {number} y     - Vertical centre of this row.
+   * @returns {number} Row height in pixels (for the caller to advance `y`).
    */
   _makeItemRow(label, key, cx, y) {
     /** @returns {number} Current count of this key in startItems. */
     const count = () => devOptions.startItems.filter(k => k === key).length;
 
-    this.add.text(cx - CTRL_OFFSET / 2 - 8, y, label + ':', {
+    // Wrap the label within the available space so it never overflows left.
+    const labelMaxW = cx - CTRL_OFFSET / 2 - 8;
+    const labelTxt = this.add.text(cx - CTRL_OFFSET / 2 - 8, y, label + ':', {
       fontSize: '12px', fontFamily: FONT_FAMILY, color: '#aabbcc', resolution: 2,
+      wordWrap: { width: labelMaxW },
     }).setOrigin(1, 0.5);
 
     const valTxt = this.add.text(cx, y, String(count()), {
@@ -236,6 +243,9 @@ export class DevOptionsScene extends Phaser.Scene {
       if (count() < 5) devOptions.startItems.push(key);
       valTxt.setText(String(count()));
     });
+
+    // Row height grows with the label when it wraps on narrow viewports.
+    return Math.max(34, labelTxt.height + 20);
   }
 
   /**
@@ -273,15 +283,18 @@ export class DevOptionsScene extends Phaser.Scene {
    * @param {Object.<string, Phaser.GameObjects.Text>} allWeightDisplays
    *   Shared map of key → text object; populated by the caller as rows are
    *   created.  Used to refresh sibling displays on first weight activation.
-   * @returns {Phaser.GameObjects.Text} The value display text object.
+   * @returns {{ rowH: number, valTxt: Phaser.GameObjects.Text }}
+   *   `rowH` is the row height in pixels; `valTxt` is the value display object.
    */
   _makeSpawnWeightRow(label, key, cx, y, allWeightDisplays) {
     /** @returns {string} Current display value for this key. */
     const display = () =>
       devOptions.spawnWeights === null ? '--' : String(devOptions.spawnWeights[key] ?? 0);
 
-    this.add.text(cx - CTRL_OFFSET / 2 - 8, y, label + ' weight:', {
+    const labelMaxW = cx - CTRL_OFFSET / 2 - 8;
+    const labelTxt = this.add.text(cx - CTRL_OFFSET / 2 - 8, y, label + ' weight:', {
       fontSize: '12px', fontFamily: FONT_FAMILY, color: '#aabbcc', resolution: 2,
+      wordWrap: { width: labelMaxW },
     }).setOrigin(1, 0.5);
 
     const valTxt = this.add.text(cx, y, display(), {
@@ -309,7 +322,7 @@ export class DevOptionsScene extends Phaser.Scene {
       this._updateValidationDisplay();
     });
 
-    return valTxt;
+    return { rowH: Math.max(34, labelTxt.height + 20), valTxt };
   }
 
   /**
