@@ -26,6 +26,7 @@ Entries are listed newest-first within each section.
 
 ### Added
 
+- 2026-03-25 — Add `description` frontmatter to `/pr` command so Claude invokes it automatically when the user asks to make a PR
 - 2026-03-25 — Add `/devserver` custom slash command to start the Vite dev server with automatic port-conflict detection and resolution
 - 2026-03-25 — Add `/sync` and `/pr` custom Claude Code slash commands to automate the pull-from-main and PR-creation workflows
 - 2026-03-25 — Add Serena MCP project config (`.serena/project.yml`, `.serena/.gitignore`) so all collaborators get consistent codebase navigation settings
