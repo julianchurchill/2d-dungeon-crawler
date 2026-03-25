@@ -273,8 +273,8 @@ export class InventoryPanel {
     }
 
     if (player) {
-      const wpn = player.equippedWeapon?.name || '-';
-      const arm = player.equippedArmor?.name || '-';
+      const wpn = (player.equippedWeapon?.shortName ?? player.equippedWeapon?.name) || '-';
+      const arm = (player.equippedArmor?.shortName  ?? player.equippedArmor?.name)  || '-';
       this._equippedText.setText(`WPN: ${wpn}   ARM: ${arm}`);
     }
   }

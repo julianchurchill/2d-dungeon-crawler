@@ -51,6 +51,6 @@ Feature: Inventory Management
     Then the item shortName should be defined
     And the item shortName should be shorter than the full name
 
-  Scenario: Item without a shortName falls back to the full name
+  Scenario: Item without a shortName has no shortName property defined
     Given the Health Potion item type
     Then the item shortName should not be defined
