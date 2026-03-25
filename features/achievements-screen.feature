@@ -5,7 +5,7 @@ Feature: Achievements screen display list
   Scenario: Display list contains an entry for every achievement
     Given the achievement system is initialised
     When the achievements display list is retrieved
-    Then the display list should contain 25 entries
+    Then the display list should contain 26 entries
 
   Scenario: An incomplete achievement entry shows progress text
     Given the achievement system is initialised
@@ -45,6 +45,11 @@ Feature: Achievements screen display list
     Given the achievement system is initialised
     When the achievements display list is retrieved
     Then the "cockroach_killer" entry should have unlocks "Cockroach Hunting skill"
+
+  Scenario: Sprite Stalker achievement carries the unlocks field
+    Given the achievement system is initialised
+    When the achievements display list is retrieved
+    Then the "sprite_stalker" entry should have unlocks "Potion of Minor Teleportation"
 
   Scenario: Sprite Killer achievement carries the unlocks field
     Given the achievement system is initialised

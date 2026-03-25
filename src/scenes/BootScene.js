@@ -236,6 +236,22 @@ export class BootScene extends Phaser.Scene {
       g.fillRect(T/2 - 1, 4, 2, 5);
       g.fillRect(T/2 - 3, 6, 6, 2);
     });
+
+    // Teleport potion — purple vial with sparkle
+    this._genTexture('item_potion_teleport', T, T, (g) => {
+      g.fillStyle(0x8833cc);
+      g.fillEllipse(T/2, T/2 + 2, 8, 9);
+      g.fillStyle(0x551188);
+      g.fillRect(T/2 - 2, T/2 - 5, 4, 4);
+      // Cork
+      g.fillStyle(0xddaa66);
+      g.fillRect(T/2 - 1, T/2 - 7, 2, 3);
+      // Sparkle dots
+      g.fillStyle(0xddaaff, 0.9);
+      g.fillRect(T/2 - 2, T/2 + 1, 1, 1);
+      g.fillRect(T/2 + 1, T/2 - 1, 1, 1);
+      g.fillRect(T/2 - 3, T/2 + 3, 1, 1);
+    });
   }
 
   _createUITextures() {

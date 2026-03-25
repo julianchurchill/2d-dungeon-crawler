@@ -20,9 +20,9 @@
 
 ## Achievements
 
-- [ ] some achievements unlock the availability of new items that can appear from then on in the game based on any other item specific conditions (e.g. only appears after level 10)
 - [ ] 'Goblin Slayer - killed 100 goblins (n killed so far)' grants 'Goblin slaying' permanent skill of an extra 15% damage against goblins (cumulative with 'Goblin hunting').
 - [ ] 'Top Nogg - killed Boss Nogg' grants 'Goblin destroyer' permanent skill of extra 25% damage against goblins (cumulative with 'Goblin hunting' and 'Goblin slaying').
+- [x] some achievements unlock the availability of new items that can appear from then on in the game based on any other item specific conditions (e.g. only appears after level 10)
 - [x] some achievements unlock the availability of new skills that can be selected by the player from then on in the game based on any other skill specific conditions (e.g. only appears after level 10)
 - [x] some achievements unlock the availability of new permanent skills that apply to the player from then such as 'Goblin Killer' achievement unlocks 'Goblin hunting' permanent skill that gives the player an extra 10% damage against goblins
 - [x] when running in dev mode allow the achievements to be completed and uncompleted by a tick box that is otherwise hidden

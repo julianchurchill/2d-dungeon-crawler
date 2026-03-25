@@ -1,3 +1,5 @@
+import { findMinorTeleportDestination } from '../systems/MinorTeleportation.js';
+
 export class Item {
   constructor(x, y, typeDef) {
     this.x = x;
@@ -16,13 +18,29 @@ export class Item {
   /**
    * Use this item on the player.
    * @param {Player} player
+   * @param {object} [context] - Optional runtime context for effects that need
+   *   world access.  For `teleport_near` effects, must contain `rng`,
+   *   `isWalkable(x, y)`, and `getEntityAt(x, y)`.
    * @returns {string} message describing what happened
    */
-  use(player) {
+  use(player, context = {}) {
     if (this.itemType === 'consumable') {
       if (this.effect?.heal) {
         const healed = player.heal(this.effect.heal);
         return `You drink the ${this.name} and restore ${healed} HP.`;
+      }
+      if (this.effect?.type === 'teleport_near') {
+        const { rng, isWalkable, getEntityAt } = context;
+        const dest = findMinorTeleportDestination(
+          player.x, player.y, isWalkable, getEntityAt, rng,
+          this.effect.minDist, this.effect.maxDist,
+        );
+        if (!dest) {
+          return `You drink the ${this.name} but nothing happens — no clear space nearby!`;
+        }
+        player.x = dest.x;
+        player.y = dest.y;
+        return `You drink the ${this.name} and vanish in a flash!`;
       }
     } else if (this.itemType === 'weapon') {
       player.equippedWeapon = this;

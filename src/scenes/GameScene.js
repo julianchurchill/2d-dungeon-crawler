@@ -29,6 +29,8 @@ import { FerocitySkill } from '../skills/FerocitySkill.js';
 import { DodgeSkill } from '../skills/DodgeSkill.js';
 import { HuntingSkill } from '../skills/HuntingSkill.js';
 import { NightVisionSkill } from '../skills/NightVisionSkill.js';
+import { ITEM_TYPES } from '../items/ItemTypes.js';
+import { getProgress, achievementStore } from '../achievements/AchievementStore.js';
 
 const TILE_SIZE = 16;
 const FOV_RADIUS = 8;
@@ -238,6 +240,11 @@ export class GameScene extends Phaser.Scene {
 
   _spawnItems(rooms) {
     const floor = this.floorManager.currentFloor;
+    // Build the set of achievement-unlocked item ids for this run.
+    const unlockedItems = new Set();
+    if (getProgress('sprite_stalker', achievementStore).completed) {
+      unlockedItems.add(ITEM_TYPES.POTION_OF_MINOR_TELEPORTATION.id);
+    }
     // Place 1–2 items per room (skip start room)
     for (let i = 1; i < rooms.length; i++) {
       if (!this.rng.nextBool(0.6)) continue;
@@ -245,7 +252,7 @@ export class GameScene extends Phaser.Scene {
       const ix = this.rng.nextInt(room.x + 1, room.x + room.w - 2);
       const iy = this.rng.nextInt(room.y + 1, room.y + room.h - 2);
       if (!this._getEntityAt(ix, iy)) {
-        const typeDef = getFloorLoot(floor, this.rng);
+        const typeDef = getFloorLoot(floor, this.rng, unlockedItems);
         this._placeItem(ix, iy, typeDef);
       }
     }
@@ -790,9 +797,50 @@ export class GameScene extends Phaser.Scene {
     return { skills, inactiveSkills };
   }
 
+  /**
+   * Uses the item at the given inventory index.  Passes a world-access context
+   * so items with effects that need map or RNG access (e.g. teleport_near) can
+   * resolve them inside `item.use()`.  If the player's position changed after
+   * the call, the teleport side-effects (sprite snap, FOV update, enemy turns)
+   * are applied and the inventory panel is closed.
+   *
+   * @param {number} index - Inventory slot to use.
+   */
   _useInventoryItem(index) {
-    const msg = InventorySystem.useItem(this.player, index);
+    const prevX = this.player.x;
+    const prevY = this.player.y;
+
+    const context = {
+      rng: this.rng,
+      isWalkable: (x, y) => this.dungeonMap.isWalkable(x, y),
+      getEntityAt: (x, y) => this._getEntityAt(x, y),
+    };
+
+    const msg = InventorySystem.useItem(this.player, index, context);
     EventBus.emit(GameEvents.MESSAGE, msg);
+
+    const playerTeleported = this.player.x !== prevX || this.player.y !== prevY;
+    if (playerTeleported) {
+      // Close the inventory panel before enemy turns so the TurnManager state
+      // is PLAYER_INPUT when _startEnemyTurns cycles through ENEMY_ACTING.
+      if (this.turnManager.state === TURN_STATE.INVENTORY) {
+        this.turnManager.setState(TURN_STATE.PLAYER_INPUT);
+        EventBus.emit(GameEvents.OPEN_INVENTORY, {
+          inventory: this.player.inventory,
+          player: this.player,
+        });
+      }
+      this.playerSprite.setPosition(
+        this.player.x * TILE_SIZE + TILE_SIZE / 2,
+        this.player.y * TILE_SIZE + TILE_SIZE / 2,
+      );
+      this._updateFOV();
+      this._checkItemPickup();
+      this._syncRegistry();
+      this._startEnemyTurns();
+      return;
+    }
+
     this._syncRegistry();
     if (this.player.isDead()) {
       this._gameOver();
