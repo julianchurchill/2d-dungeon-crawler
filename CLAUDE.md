@@ -96,6 +96,21 @@ Whenever you change a Markdown file, run markdownlint on it and fix all violatio
 npx markdownlint-cli <file.md>
 ```
 
+## MCP Servers
+
+Two MCP servers are available and should be used automatically when appropriate:
+
+- **context7** — fetch up-to-date documentation for any external library or framework before writing
+  or reviewing code. Use whenever working with Phaser, Vite, Cucumber, Node.js APIs, or any other
+  third-party dependency.
+
+- **serena** — semantic codebase navigation for exploring and editing `src/`. Prefer Serena's symbolic
+  tools over `Grep`/`Read`/`Glob` when working with source files:
+  - `get_symbols_overview` — understand the structure of a file
+  - `find_symbol` — locate and read specific classes, methods, or functions
+  - `find_referencing_symbols` — trace where a symbol is used
+  - `search_for_pattern` — flexible text search across the codebase
+
 ## Running Tests
 
 Whenever you make a change to any application code in `src/`, run the automated acceptance
