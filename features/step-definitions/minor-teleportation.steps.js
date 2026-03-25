@@ -106,6 +106,15 @@ When('the item is used with a teleport context', function () {
   this.useMessage = this.item.use(this.player, context);
 });
 
+When('getFloorLoot is sampled {int} times on floor {int}', function (samples, floor) {
+  const pickRng = { pick: (arr) => arr[Math.floor(Math.random() * arr.length)] };
+  this.lootCounts = {};
+  for (let i = 0; i < samples; i++) {
+    const item = getFloorLoot(floor, pickRng, this.unlockedItems);
+    this.lootCounts[item.id] = (this.lootCounts[item.id] || 0) + 1;
+  }
+});
+
 When('getFloorLoot is called for floor {int}', function (floor) {
   // Sample many times to check whether the potion can appear.
   let count = 0;
@@ -182,6 +191,15 @@ Then('the use message mentions vanishing', function () {
 Then('the use message mentions nothing happening', function () {
   assert.ok(this.useMessage.includes('nothing happens'),
     `Expected message to mention nothing happening, got: "${this.useMessage}"`);
+});
+
+Then('the potion of minor teleportation appears less often than the health potion', function () {
+  const teleportCount = this.lootCounts[ITEM_TYPES.POTION_OF_MINOR_TELEPORTATION.id] || 0;
+  const healthCount   = this.lootCounts[ITEM_TYPES.HEALTH_POTION.id] || 0;
+  assert.ok(
+    teleportCount < healthCount,
+    `Expected teleport potion (${teleportCount}) to appear less often than health potion (${healthCount})`,
+  );
 });
 
 Then('the potion of minor teleportation is in the loot pool', function () {
