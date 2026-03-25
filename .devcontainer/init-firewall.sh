@@ -76,7 +76,12 @@ for domain in \
     "main.vscode-cdn.net" \
     "mobile.events.data.microsoft.com" \
     "stryker-mutator.io" \
-    "dashboard.stryker-mutator.io"; do
+    "dashboard.stryker-mutator.io" \
+    "context7.com" \
+    "mcp.context7.com" \
+    "clerk.context7.com" \
+    "pypi.org" \
+    "files.pythonhosted.org"; do
     echo "Resolving $domain..."
     ips=$(dig +noall +answer A "$domain" | awk '$4 == "A" {print $5}')
     if [ -z "$ips" ]; then
