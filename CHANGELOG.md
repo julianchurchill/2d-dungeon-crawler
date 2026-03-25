@@ -13,6 +13,8 @@ Entries are listed newest-first within each section.
 
 ### Fixed
 
+- 2026-03-25 — Fix MCP servers (Context7, Serena) not loading in Claude Code by writing config to `.claude.json` instead of `settings.json` in `init-claude-settings.sh`
+
 - 2026-03-25 — "Potion of Minor Teleportation" label overflowed its inventory slot; item types now support an optional `shortName` used in the slot label (falling back to `name`), and the potion uses `shortName: 'Teleport Potion'`
 - 2026-03-25 — Developer options labels overflowed off the left edge on narrow mobile viewports; labels now word-wrap at the available horizontal space and row heights grow to fit wrapped text
 - 2026-03-24 — Main menu button font changed on first hover; Phaser was creating Text objects before Roboto Mono was in the canvas font cache — fixed by deferring `new Phaser.Game()` until `document.fonts.load('16px "Roboto Mono"')` resolves
