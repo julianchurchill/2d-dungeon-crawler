@@ -52,6 +52,14 @@ export const ACHIEVEMENTS = [
     unlocks: 'Sprite Hunting skill',
   },
   {
+    id: 'sprite_stalker',
+    name: 'Sprite Stalker',
+    description: 'Kill 25 sprites',
+    condition: { type: 'kill_type', enemyType: 'sprite', target: 25 },
+    progressUnit: 'killed',
+    unlocks: 'Potion of Near Teleportation',
+  },
+  {
     id: 'goblin_killer',
     name: 'Goblin Killer',
     description: 'Kill 10 goblins',

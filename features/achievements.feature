@@ -63,6 +63,11 @@ Feature: Achievement system
     Then the "Apprentice" achievement should be completed
 
 
+  Scenario: Sprite Stalker is unlocked when 25 sprites are killed
+    Given the achievement system is initialised
+    When the player kills 25 sprites
+    Then the "Sprite Stalker" achievement should be completed
+
   Scenario: Destroying the system stops it from tracking further kills
     Given the achievement system is initialised
     When the achievement system is destroyed
