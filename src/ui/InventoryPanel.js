@@ -265,7 +265,7 @@ export class InventoryPanel {
       if (i < this.inventory.length) {
         const item = this.inventory[i];
         icon.setText(ICONS[item.itemType] || '?');
-        label.setText(item.name);
+        label.setText(item.shortName ?? item.name);
       } else {
         icon.setText('');
         label.setText('');

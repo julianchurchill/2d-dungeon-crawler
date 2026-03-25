@@ -6,6 +6,7 @@ export class Item {
     this.y = y;
     this.id = typeDef.id;
     this.name = typeDef.name;
+    this.shortName = typeDef.shortName;
     this.description = typeDef.description;
     this.textureKey = typeDef.textureKey;
     this.itemType = typeDef.type; // 'consumable' | 'weapon' | 'armor'

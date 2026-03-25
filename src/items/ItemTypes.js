@@ -50,6 +50,7 @@ export const ITEM_TYPES = {
   POTION_OF_MINOR_TELEPORTATION: {
     id: 'potion_of_minor_teleportation',
     name: 'Potion of Minor Teleportation',
+    shortName: 'Teleport Potion',
     description: 'Teleports you to a random nearby space',
     textureKey: 'item_potion_teleport',
     type: 'consumable',

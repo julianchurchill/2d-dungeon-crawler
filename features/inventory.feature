@@ -45,3 +45,12 @@ Feature: Inventory Management
     When the player drops the health potion
     Then the inventory should be empty
     And the dropped item should be at position 5, 5
+
+  Scenario: Item with a shortName exposes shortName for display
+    Given the Potion of Minor Teleportation item type
+    Then the item shortName should be defined
+    And the item shortName should be shorter than the full name
+
+  Scenario: Item without a shortName falls back to the full name
+    Given the Health Potion item type
+    Then the item shortName should not be defined
