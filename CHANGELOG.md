@@ -26,6 +26,7 @@ Entries are listed newest-first within each section.
 
 ### Added
 
+- 2026-03-25 — Add `/devserver` custom slash command to start the Vite dev server with automatic port-conflict detection and resolution
 - 2026-03-25 — Add `/sync` and `/pr` custom Claude Code slash commands to automate the pull-from-main and PR-creation workflows
 - 2026-03-25 — Add Serena MCP project config (`.serena/project.yml`, `.serena/.gitignore`) so all collaborators get consistent codebase navigation settings
 - 2026-03-24 — Added Sprite Stalker achievement (25 sprite kills) unlocking the Potion of Minor Teleportation; potion teleports the player to a random walkable tile 3–8 tiles away (Chebyshev distance), bypassing walls; appears in floor loot once achievement is completed
