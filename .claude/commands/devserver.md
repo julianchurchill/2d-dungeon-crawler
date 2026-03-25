@@ -8,34 +8,58 @@ Follow these steps in order:
 
 The default port is **3000** (set in `vite.config.js`).
 
-Run: `lsof -i :3000`
+Run: `fuser 3000/tcp 2>/dev/null && echo "in use" || echo "free"`
 
 - If the port is **free**: proceed to step 3.
 - If the port is **in use**: proceed to step 2.
 
 ## 2. Resolve the port conflict
 
-Inspect the `lsof` output:
+Get the PID holding the port: `fuser 3000/tcp 2>/dev/null`
 
-- If the process is a **stale or orphaned Vite process** (command contains `vite` or `node`):
-  - Kill it: `lsof -ti :3000 | xargs kill -9`
-  - Wait a moment, then verify the port is now free: `lsof -i :3000`
+Check what process it is: `ps -p <PID> -o comm=`
+
+- If the process is a **stale or orphaned Vite/Node process** (command contains `vite` or `node`):
+  - Kill it: `fuser -k 3000/tcp`
+  - Verify the port is now free: `fuser 3000/tcp 2>/dev/null && echo "in use" || echo "free"`
   - If now free, proceed to step 3 using port 3000.
 - If the process is something **unrelated** (e.g. another app):
-  - Use port **3001** as the alternate. Check that too: `lsof -i :3001`
-  - If 3001 is also in use, increment to 3002, and so on until a free port is found.
-  - Proceed to step 3 using the free alternate port.
+  - Find a free alternate port starting from 3001:
+    `fuser 3001/tcp 2>/dev/null && echo "in use" || echo "free"`
+  - Increment until a free port is found (3001, 3002, …).
+  - Proceed to step 3 using that port.
 
 ## 3. Start the dev server
 
-- If using the default port 3000: run `npm run dev` in the background.
-- If using an alternate port N: run `npm run dev -- --port N` in the background.
+Run the server in the background and capture its output to a temp file:
 
-Wait 5 seconds for the server to initialise.
+```bash
+npm run dev -- --port <PORT> > /tmp/vite-dev.log 2>&1 &
+```
 
-## 4. Confirm accessibility
+(Use `--port 3000` even for the default port so the actual port is always explicit.)
 
-Run: `curl -s -o /dev/null -w "%{http_code}" http://localhost:<port>/`
+Wait up to 10 seconds for Vite to print its ready message, polling every second:
 
-- If the response is **200**: report success — include the URL the server is running on.
-- If the response is **not 200**: wait 3 more seconds and retry once. If it still fails, report the error and show the last few lines of server output.
+```bash
+for i in $(seq 1 10); do grep -q "ready in" /tmp/vite-dev.log && break || sleep 1; done
+```
+
+## 4. Confirm the actual port and accessibility
+
+Vite may have auto-switched ports even if you passed `--port`. Read the log to find the real port:
+
+```bash
+grep "Local:" /tmp/vite-dev.log
+```
+
+Extract the port number from that line (e.g. `http://localhost:3001/` → `3001`).
+
+Then confirm accessibility on that exact port:
+
+```bash
+curl -s -o /dev/null -w "%{http_code}" http://localhost:<actual-port>/
+```
+
+- If the response is **200**: report success — state the URL the server is running on.
+- If the response is **not 200**: wait 3 more seconds, retry once. If it still fails, show the full contents of `/tmp/vite-dev.log` and report the error.
