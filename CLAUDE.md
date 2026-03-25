@@ -57,6 +57,16 @@ Add an entry to `CHANGELOG.md` for every new feature or bug fix before committin
 - 2026-03-02 — Short description of what changed
 ```
 
+## Pull Request Review
+
+Before opening a pull request, spawn a review agent to check all changed files for bugs,
+broken references, and side effects on existing functionality. Fix any issues found before
+creating the PR:
+
+```text
+Review all changed files for bugs, broken references, and side effects on existing functionality. Do NOT make any changes — research only. Report your findings.
+```
+
 ## Releasing
 
 1. Bump `version` in `package.json` (see Versioning below).
