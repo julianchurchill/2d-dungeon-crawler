@@ -58,6 +58,9 @@ export class UIScene extends Phaser.Scene {
       this.sellPanel.refresh(inventory);
     }, this);
 
+    // ESC from GameScene closes the sell panel
+    EventBus.on(GameEvents.CLOSE_SELL_PANEL, () => this.sellPanel?.hide(), this);
+
     // Registry → HUD
     this.registry.events.on('changedata-playerHP', (parent, value) => {
       const maxHp = this.registry.get('playerMaxHp') || 30;

@@ -55,6 +55,8 @@ GameScene (ESC key)      ──► CLOSE_MESSAGE_LOG    ──► UIScene → Me
 GameScene                ──► PLAYER_GOLD_CHANGED  ──► UIScene → HUD.updateGold
 GameScene                ──► OPEN_SELL_PANEL      ──► UIScene → SellPanel.show (toggle)
 SellPanel (sell button)  ──► SELL_ITEM            ──► GameScene._handleSellItem
+SellPanel (show/hide)    ──► SELL_PANEL_TOGGLED   ──► GameScene (gates ESC handler)
+GameScene (ESC key)      ──► CLOSE_SELL_PANEL     ──► UIScene → SellPanel.hide()
 ───────────────────────────────────────────────────────────────────────
 ```
 
@@ -93,3 +95,5 @@ SellPanel (sell button)  ──► SELL_ITEM            ──► GameScene._han
 | `PLAYER_GOLD_CHANGED` | `'player-gold-changed'` | `number` (new total) | GameScene (after sell) | UIScene → HUD |
 | `OPEN_SELL_PANEL` | `'open-sell-panel'` | `{ shopType, inventory, player }` | GameScene (door bump) | UIScene → SellPanel |
 | `SELL_ITEM` | `'sell-item'` | `{ shopType: string, item: Item }` | SellPanel (sell button) | GameScene._handleSellItem |
+| `SELL_PANEL_TOGGLED` | `'sell-panel-toggled'` | `boolean` (open) | SellPanel (show/hide) | GameScene (ESC gate) |
+| `CLOSE_SELL_PANEL` | `'close-sell-panel'` | *(none)* | GameScene (ESC key) | UIScene → SellPanel.hide() |

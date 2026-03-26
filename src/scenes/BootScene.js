@@ -149,6 +149,103 @@ export class BootScene extends Phaser.Scene {
       g.fillRect(7, 13, 2, 2);
     });
 
+    // Shop roof tile — wooden plank ceiling visible from below
+    this._genTexture('tile_shop_roof', T, T, (g) => {
+      g.fillStyle(0x3a2810);
+      g.fillRect(0, 0, T, T);
+      // Horizontal plank lines (wood grain)
+      g.fillStyle(0x4e3820, 0.9);
+      g.fillRect(0, 3,  T, 2);
+      g.fillRect(0, 8,  T, 2);
+      g.fillRect(0, 13, T, 2);
+      // Lighter grain highlight
+      g.fillStyle(0x5c4428, 0.5);
+      g.fillRect(0, 4,  T, 1);
+      g.fillRect(0, 9,  T, 1);
+      g.fillRect(0, 14, T, 1);
+      // Knot marks
+      g.fillStyle(0x2a1808, 0.6);
+      g.fillRect(4,  4, 3, 2);
+      g.fillRect(11, 9, 3, 2);
+    });
+
+    // Town accent floor tile — lighter, polished cobblestone around the stairs
+    this._genTexture('tile_town_accent', T, T, (g) => {
+      g.fillStyle(0xa89870);
+      g.fillRect(0, 0, T, T);
+      // Slightly lighter inner face (polished look)
+      g.fillStyle(0xb8a880);
+      g.fillRect(1, 1, T - 2, T - 2);
+      // Cobble mortar lines (same offset as town floor but lighter mortar)
+      g.fillStyle(0x887860, 0.7);
+      g.fillRect(0, T / 2, T, 1);
+      g.fillRect(T / 2, 0, 1, T / 2);
+      // Surface highlight dots (lighter than regular floor)
+      const pts = [[3, 3], [10, 5], [5, 10], [12, 12], [2, 11]];
+      for (const [px, py] of pts) {
+        g.fillStyle(0xc8b890, 0.6);
+        g.fillRect(px, py, 1, 1);
+      }
+    });
+
+    // Potion-shop door — wooden door with a flask icon
+    this._genTexture('tile_door_potion', T, T, (g) => {
+      // Base door (same as tile_door)
+      g.fillStyle(0x5c3a1e);
+      g.fillRect(0, 0, T, T);
+      g.fillStyle(0x7a5030);
+      g.fillRect(2, 1, T - 4, T - 2);
+      // Panel lines
+      g.fillStyle(0x4a2a10, 0.7);
+      g.fillRect(3, 5, T - 6, 1);
+      g.fillRect(3, T - 6, T - 6, 1);
+      // Flask icon (top half of door)
+      g.fillStyle(0xcc4466);         // flask body
+      g.fillEllipse(T / 2, 9, 5, 5);
+      g.fillStyle(0x884422);         // neck
+      g.fillRect(T / 2 - 1, 4, 2, 3);
+      g.fillStyle(0xddaa66);         // cork
+      g.fillRect(T / 2 - 1, 3, 2, 2);
+      g.fillStyle(0xff88aa, 0.6);    // shine
+      g.fillRect(T / 2 - 2, 8, 1, 2);
+    });
+
+    // Weapon-shop door — wooden door with a sword icon
+    this._genTexture('tile_door_weapon', T, T, (g) => {
+      g.fillStyle(0x5c3a1e);
+      g.fillRect(0, 0, T, T);
+      g.fillStyle(0x7a5030);
+      g.fillRect(2, 1, T - 4, T - 2);
+      g.fillStyle(0x4a2a10, 0.7);
+      g.fillRect(3, 5, T - 6, 1);
+      g.fillRect(3, T - 6, T - 6, 1);
+      // Sword icon (centred)
+      g.fillStyle(0xdddddd);         // blade
+      g.fillRect(T / 2 - 1, 3, 2, 7);
+      g.fillStyle(0xddaa44);         // cross-guard
+      g.fillRect(T / 2 - 3, 10, 6, 2);
+      g.fillStyle(0x885533);         // handle
+      g.fillRect(T / 2 - 1, 12, 2, 3);
+    });
+
+    // Armour-shop door — wooden door with a shield icon
+    this._genTexture('tile_door_armour', T, T, (g) => {
+      g.fillStyle(0x5c3a1e);
+      g.fillRect(0, 0, T, T);
+      g.fillStyle(0x7a5030);
+      g.fillRect(2, 1, T - 4, T - 2);
+      g.fillStyle(0x4a2a10, 0.7);
+      g.fillRect(3, 5, T - 6, 1);
+      g.fillRect(3, T - 6, T - 6, 1);
+      // Shield icon (centred)
+      g.fillStyle(0x6688aa);         // shield body
+      g.fillRect(T / 2 - 3, 3, 6, 5);
+      g.fillTriangle(T / 2 - 3, 8, T / 2 + 3, 8, T / 2, 12);
+      g.fillStyle(0xddaa44);         // emblem cross
+      g.fillRect(T / 2 - 1, 4, 2, 4);
+      g.fillRect(T / 2 - 2, 6, 4, 2);
+    });
+
     // Shadow/fog tile — pure black for overlay
     this._genTexture('tile_shadow', T, T, (g) => {
       g.fillStyle(0x000000);

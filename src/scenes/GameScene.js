@@ -63,6 +63,14 @@ export class GameScene extends Phaser.Scene {
     this._messageLogOpen = false;
     EventBus.on(GameEvents.MESSAGE_LOG_TOGGLED, (open) => { this._messageLogOpen = open; }, this);
 
+    // Track whether the sell panel is open so ESC closes it before the game menu.
+    // Also gate player input via TurnManager: block on open, restore on close.
+    this._sellPanelOpen = false;
+    EventBus.on(GameEvents.SELL_PANEL_TOGGLED, (open) => {
+      this._sellPanelOpen = open;
+      if (!open) this.turnManager.setState(TURN_STATE.PLAYER_INPUT);
+    }, this);
+
     // Entities lists
     this.enemies = [];
     this.items = [];  // floor items (not in inventory)
@@ -167,16 +175,20 @@ export class GameScene extends Phaser.Scene {
   }
 
   _buildTilemap(map) {
-    this._buildMapGraphics(map, this.floorManager.isTown());
+    this._buildMapGraphics(map, this.floorManager.isTown(), this.shops);
     this._buildShadowLayer(map);
   }
 
   /**
    * Render all tiles into a RenderTexture.
+   * In town mode the shops array is used to draw type-specific door textures
+   * (tile_door_potion / tile_door_weapon / tile_door_armour) at each shop door.
+   *
    * @param {DungeonMap} map
    * @param {boolean} isTown - Use town tile textures when true.
+   * @param {Array<{type:string,doorX:number,doorY:number}>} shops - Shop metadata for door icons.
    */
-  _buildMapGraphics(map, isTown = false) {
+  _buildMapGraphics(map, isTown = false, shops = []) {
     const mapW = map.width * TILE_SIZE;
     const mapH = map.height * TILE_SIZE;
 
@@ -188,17 +200,31 @@ export class GameScene extends Phaser.Scene {
       [TILE.WALL]:        'tile_town_wall',
       [TILE.DOOR]:        'tile_door',
       [TILE.STAIRS_DOWN]: 'tile_town_stairs',
+      [TILE.TOWN_ACCENT]: 'tile_town_accent',
+      [TILE.SHOP_ROOF]:   'tile_shop_roof',
     } : {
-      [TILE.FLOOR]: 'tile_floor',
-      [TILE.WALL]:  'tile_wall',
-      [TILE.DOOR]:  'tile_door',
+      [TILE.FLOOR]:       'tile_floor',
+      [TILE.WALL]:        'tile_wall',
+      [TILE.DOOR]:        'tile_door',
       [TILE.STAIRS_DOWN]: 'tile_stairs',
     };
+
+    // Build position → texture-key overrides for typed shop doors (town only)
+    const doorTextureAt = {};
+    if (isTown) {
+      for (const shop of shops) {
+        doorTextureAt[`${shop.doorX},${shop.doorY}`] = `tile_door_${shop.type}`;
+      }
+    }
 
     for (let y = 0; y < map.height; y++) {
       for (let x = 0; x < map.width; x++) {
         const tileType = map.getTile(x, y);
-        const key = tileKeys[tileType];
+        let key = tileKeys[tileType];
+        // Use the type-specific door texture when available
+        if (tileType === TILE.DOOR) {
+          key = doorTextureAt[`${x},${y}`] ?? key;
+        }
         if (key) {
           this.mapRT.drawFrame(key, undefined, x * TILE_SIZE, y * TILE_SIZE);
         }
@@ -356,11 +382,13 @@ export class GameScene extends Phaser.Scene {
     this.input.keyboard.on('keydown-K',           wrapWithRunCancel(this._runController, () => this._toggleSkills()));
     this.input.keyboard.on('keydown-PERIOD',       wrapWithRunCancel(this._runController, () => this._tryUseStairs()));
     this.input.keyboard.on('keydown-GREATER_THAN', wrapWithRunCancel(this._runController, () => this._tryUseStairs()));
-    // ESC closes the message log history panel when it is open; otherwise
-    // it opens the in-game menu (Achievements / Help).
+    // ESC closes the sell panel when open, then the message log, then opens
+    // the in-game menu — evaluated in priority order.
     this.input.keyboard.on('keydown-ESC', wrapWithRunCancel(this._runController, () => {
       if (this._messageLogOpen) {
         EventBus.emit(GameEvents.CLOSE_MESSAGE_LOG);
+      } else if (this._sellPanelOpen) {
+        EventBus.emit(GameEvents.CLOSE_SELL_PANEL);
       } else {
         this._openInGameMenu();
       }
@@ -505,6 +533,8 @@ export class GameScene extends Phaser.Scene {
       // Open or toggle the sell panel; no turn spent on door interactions
       const shop = this.shops.find(s => s.doorX === result.doorX && s.doorY === result.doorY);
       if (shop) {
+        // Block player movement while the sell panel is visible
+        this.turnManager.setState(TURN_STATE.INVENTORY);
         EventBus.emit(GameEvents.OPEN_SELL_PANEL, {
           shopType: shop.type,
           inventory: this.player.inventory,

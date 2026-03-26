@@ -6,9 +6,9 @@
  *   - Outer wall border
  *   - Open floor interior
  *   - Three shops along the north wall (potions, weapons, armour),
- *     each 5 tiles wide with a door on the south face
- *   - Stairs down at (18, 18)
- *   - Player start at (9, 10) — centre of the open town square
+ *     each 5 tiles wide with a typed door on the south face and a roof interior
+ *   - Accent floor tiles in the 3×3 area around the centre stairs
+ *   - Player start in the south-west open area
  */
 import { DungeonMap } from './DungeonMap.js';
 import { TILE } from '../utils/TileTypes.js';
@@ -17,20 +17,32 @@ import { TILE } from '../utils/TileTypes.js';
 const TOWN_WIDTH = 20;
 /** Height of the fixed town map in tiles. */
 const TOWN_HEIGHT = 20;
-/** Player start position in the town (centre of the open square). */
-const START_POS = { x: 9, y: 10 };
-/** Stairs-down position in the town. */
-const STAIRS_POS = { x: 18, y: 18 };
+/** Player start position — south-west open area, away from shops and the well. */
+const START_POS = { x: 3, y: 14 };
+/** Stairs-down position — centre of the town square. */
+const STAIRS_POS = { x: 10, y: 10 };
 
 /**
  * Fixed shop definitions. Each shop occupies a 5-tile-wide alcove against
  * the north border wall (y=0).  The west/east walls run from y=1 to y=3;
- * the south wall has a door in the centre (y=3).
+ * the south wall has a typed door in the centre (y=3);
+ * the interior (y=1–2) is rendered as a shop roof.
  */
 const SHOPS = [
   { type: 'potion', left: 2,  right: 6,  doorX: 4,  doorY: 3 },
   { type: 'weapon', left: 8,  right: 12, doorX: 10, doorY: 3 },
   { type: 'armour', left: 14, right: 18, doorX: 16, doorY: 3 },
+];
+
+/**
+ * 3×3 offsets covering all tiles adjacent to STAIRS_POS (including diagonals).
+ * The centre offset (0,0) maps to the stairs tile itself; it is set last so the
+ * stairs tile overwrites the accent floor at that position.
+ */
+const ACCENT_OFFSETS = [
+  [-1,-1],[0,-1],[1,-1],
+  [-1, 0],[0, 0],[1, 0],
+  [-1, 1],[0, 1],[1, 1],
 ];
 
 export class TownGenerator {
@@ -45,12 +57,14 @@ export class TownGenerator {
     // Carve the entire interior as floor (border at 0 and TOWN_WIDTH/HEIGHT-1)
     map.carveRoom(1, 1, TOWN_WIDTH - 2, TOWN_HEIGHT - 2);
 
-    // Carve shop alcoves into the north interior area
+    // Carve shop alcoves (sets walls, typed doors, and roof tiles)
     for (const shop of SHOPS) {
       this._carveShop(map, shop);
     }
 
-    // Place stairs down
+    // Mark the 3×3 block around the stairs with accent floor, then place stairs
+    // (stairs overwrites the centre accent tile so it still renders correctly)
+    this._carveStairsAccent(map);
     map.setTile(STAIRS_POS.x, STAIRS_POS.y, TILE.STAIRS_DOWN);
 
     // Surround empty tiles with walls (builds the outer border)
@@ -66,8 +80,9 @@ export class TownGenerator {
   }
 
   /**
-   * Carve a shop alcove with west/east walls and a south wall with a centre door.
-   * The shop interior (already floor from carveRoom) is left intact.
+   * Carve a shop alcove: west/east walls, south wall with a typed centre door,
+   * and shop-roof tiles filling the interior ceiling (y=1 up to doorY-1).
+   *
    * @param {DungeonMap} map
    * @param {{ left: number, right: number, doorX: number, doorY: number }} shop
    */
@@ -80,9 +95,29 @@ export class TownGenerator {
       map.setTile(right, y, TILE.WALL);
     }
 
-    // South wall with door in centre
+    // South wall with typed door in centre
     for (let x = left + 1; x < right; x++) {
       map.setTile(x, doorY, x === doorX ? TILE.DOOR : TILE.WALL);
+    }
+
+    // Shop roof interior (between the north border wall and the south wall)
+    for (let y = 1; y < doorY; y++) {
+      for (let x = left + 1; x < right; x++) {
+        map.setTile(x, y, TILE.SHOP_ROOF);
+      }
+    }
+  }
+
+  /**
+   * Fill the 3×3 block centred on STAIRS_POS with TILE.TOWN_ACCENT so the
+   * stairs area is visually distinct from the surrounding town floor.
+   * The stairs tile itself is placed afterwards and overwrites the centre.
+   *
+   * @param {DungeonMap} map
+   */
+  _carveStairsAccent(map) {
+    for (const [dx, dy] of ACCENT_OFFSETS) {
+      map.setTile(STAIRS_POS.x + dx, STAIRS_POS.y + dy, TILE.TOWN_ACCENT);
     }
   }
 }

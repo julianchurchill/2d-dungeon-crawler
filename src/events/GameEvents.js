@@ -237,4 +237,19 @@ export const GameEvents = {
    * @type {{ shopType: string, item: Item }}
    */
   SELL_ITEM: 'sell-item',
+
+  /**
+   * The sell panel has been opened or closed.
+   * Emitted by: SellPanel (show → true, hide → false)
+   * Subscribed by: GameScene (to gate the ESC → game-menu handler)
+   * @type {boolean} true = panel opened, false = panel closed.
+   */
+  SELL_PANEL_TOGGLED: 'sell-panel-toggled',
+
+  /**
+   * Request to close the sell panel (ESC key while it is open).
+   * Emitted by: GameScene
+   * Subscribed by: UIScene → SellPanel.hide()
+   */
+  CLOSE_SELL_PANEL: 'close-sell-panel',
 };
