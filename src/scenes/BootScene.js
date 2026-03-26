@@ -98,6 +98,43 @@ export class BootScene extends Phaser.Scene {
       g.fillRect(7, 13, 2, 2);
     });
 
+    // Town floor tile — warm cobblestone, distinct from the dark dungeon floor
+    this._genTexture('tile_town_floor', T, T, (g) => {
+      g.fillStyle(0x8a7a62);
+      g.fillRect(0, 0, T, T);
+      // Slightly darker inner stone face
+      g.fillStyle(0x796a52);
+      g.fillRect(1, 1, T - 2, T - 2);
+      // Cobble mortar lines
+      g.fillStyle(0x6a5c44, 0.6);
+      g.fillRect(0, T / 2, T, 1);
+      g.fillRect(T / 2, 0, 1, T / 2);
+      // Surface texture dots
+      const pts = [[4, 4], [11, 6], [6, 11], [13, 13], [3, 12]];
+      for (const [px, py] of pts) {
+        g.fillStyle(0x5c4e38, 0.5);
+        g.fillRect(px, py, 1, 1);
+      }
+    });
+
+    // Town wall tile — warm light stone, distinct from the dark dungeon wall
+    this._genTexture('tile_town_wall', T, T, (g) => {
+      g.fillStyle(0xb8a88a);
+      g.fillRect(0, 0, T, T);
+      // Bevel highlight (top + left)
+      g.fillStyle(0xd0bca0);
+      g.fillRect(0, 0, T, 1);
+      g.fillRect(0, 0, 1, T);
+      // Bevel shadow (bottom + right)
+      g.fillStyle(0x907060);
+      g.fillRect(0, T - 1, T, 1);
+      g.fillRect(T - 1, 0, 1, T);
+      // Horizontal mortar line (brick coursing)
+      g.fillStyle(0xa09070, 0.7);
+      g.fillRect(1, 5, T - 2, 1);
+      g.fillRect(1, 11, T - 2, 1);
+    });
+
     // Shadow/fog tile — pure black for overlay
     this._genTexture('tile_shadow', T, T, (g) => {
       g.fillStyle(0x000000);

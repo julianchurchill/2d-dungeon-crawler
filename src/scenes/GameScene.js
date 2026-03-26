@@ -164,18 +164,27 @@ export class GameScene extends Phaser.Scene {
   }
 
   _buildTilemap(map) {
-    this._buildMapGraphics(map);
+    this._buildMapGraphics(map, this.floorManager.isTown());
     this._buildShadowLayer(map);
   }
 
-  _buildMapGraphics(map) {
+  /**
+   * Render all tiles into a RenderTexture.
+   * @param {DungeonMap} map
+   * @param {boolean} isTown - Use town tile textures when true.
+   */
+  _buildMapGraphics(map, isTown = false) {
     const mapW = map.width * TILE_SIZE;
     const mapH = map.height * TILE_SIZE;
 
     // Use a RenderTexture for the entire map (draw once)
     this.mapRT = this.add.renderTexture(0, 0, mapW, mapH).setDepth(0).setOrigin(0);
 
-    const tileKeys = {
+    const tileKeys = isTown ? {
+      [TILE.FLOOR]:       'tile_town_floor',
+      [TILE.WALL]:        'tile_town_wall',
+      [TILE.STAIRS_DOWN]: 'tile_stairs',
+    } : {
       [TILE.FLOOR]: 'tile_floor',
       [TILE.WALL]:  'tile_wall',
       [TILE.DOOR]:  'tile_door',
