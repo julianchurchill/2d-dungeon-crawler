@@ -135,6 +135,20 @@ export class BootScene extends Phaser.Scene {
       g.fillRect(1, 11, T - 2, 1);
     });
 
+    // Town stairs down — warm stone steps matching the town palette
+    this._genTexture('tile_town_stairs', T, T, (g) => {
+      g.fillStyle(0x796a52);
+      g.fillRect(0, 0, T, T);
+      // Step lines in warm cream/tan stone
+      g.fillStyle(0xd4b890);
+      for (let i = 0; i < 4; i++) {
+        g.fillRect(2 + i * 2, 3 + i * 3, T - 4 - i * 4, 2);
+      }
+      // Down arrow in warm amber
+      g.fillStyle(0xb89060);
+      g.fillRect(7, 13, 2, 2);
+    });
+
     // Shadow/fog tile — pure black for overlay
     this._genTexture('tile_shadow', T, T, (g) => {
       g.fillStyle(0x000000);

@@ -183,7 +183,7 @@ export class GameScene extends Phaser.Scene {
     const tileKeys = isTown ? {
       [TILE.FLOOR]:       'tile_town_floor',
       [TILE.WALL]:        'tile_town_wall',
-      [TILE.STAIRS_DOWN]: 'tile_stairs',
+      [TILE.STAIRS_DOWN]: 'tile_town_stairs',
     } : {
       [TILE.FLOOR]: 'tile_floor',
       [TILE.WALL]:  'tile_wall',
