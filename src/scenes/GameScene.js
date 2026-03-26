@@ -292,10 +292,9 @@ export class GameScene extends Phaser.Scene {
 
     // Compute new visible set
     if (this.floorManager.isTown()) {
-      // Daylight: all non-opaque tiles are visible, no radius limit
+      // Daylight: all tiles are visible, no radius limit
       computeDaylightFOV(
         map.width, map.height,
-        (x, y) => map.isOpaque(x, y),
         (x, y) => { if (map.inBounds(x, y)) map.setFovState(x, y, FOV_STATE.VISIBLE); }
       );
     } else {

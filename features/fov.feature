@@ -29,15 +29,15 @@ Feature: Field of View
     When FOV is computed from position 30, 10 with radius 3
     Then tile 10, 10 should be explored but not currently visible
 
-  Scenario: Daylight FOV marks all non-opaque tiles visible
+  Scenario: Daylight FOV marks all tiles visible, including floor tiles
     Given an open dungeon map
     When daylight FOV is computed
-    Then every non-opaque tile should be visible
+    Then every tile should be visible
 
-  Scenario: Daylight FOV does not mark opaque tiles visible
+  Scenario: Daylight FOV marks wall tiles visible
     Given an open dungeon map with a wall at 25, 25
     When daylight FOV is computed
-    Then tile 25, 25 should not be visible
+    Then tile 25, 25 should be visible
 
   Scenario: Daylight FOV marks distant tiles visible regardless of player position
     Given an open dungeon map

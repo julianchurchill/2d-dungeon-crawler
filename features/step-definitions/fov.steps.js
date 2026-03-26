@@ -74,19 +74,16 @@ Then('tile {int}, {int} should not be visible', function (x, y) {
 When('daylight FOV is computed', function () {
   computeDaylightFOV(
     MAP_SIZE, MAP_SIZE,
-    (x, y) => this.fovMap.isOpaque(x, y),
     (x, y) => this.fovMap.setFovState(x, y, FOV_STATE.VISIBLE)
   );
 });
 
-Then('every non-opaque tile should be visible', function () {
+Then('every tile should be visible', function () {
   for (let y = 0; y < MAP_SIZE; y++) {
     for (let x = 0; x < MAP_SIZE; x++) {
-      if (!this.fovMap.isOpaque(x, y)) {
-        const state = this.fovMap.getFovState(x, y);
-        assert.equal(state, FOV_STATE.VISIBLE,
-          `Expected non-opaque tile (${x}, ${y}) to be VISIBLE in daylight, got state ${state}`);
-      }
+      const state = this.fovMap.getFovState(x, y);
+      assert.equal(state, FOV_STATE.VISIBLE,
+        `Expected tile (${x}, ${y}) to be VISIBLE in daylight, got state ${state}`);
     }
   }
 });

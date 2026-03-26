@@ -27,22 +27,18 @@ export function computeFOV(originX, originY, radius, isOpaque, markVisible) {
 }
 
 /**
- * Daylight FOV — marks every non-opaque tile within the given bounds as visible.
+ * Daylight FOV — marks every tile within the given bounds as visible.
  * No radius limit or origin is used; this simulates open-sky daylight where all
- * accessible tiles are fully lit regardless of the player's position.
- * Opaque tiles (e.g. walls) are never marked visible.
+ * tiles, including walls, are fully lit regardless of the player's position.
  *
  * @param {number}   width       - Map width in tiles.
  * @param {number}   height      - Map height in tiles.
- * @param {function} isOpaque    - (x, y) => boolean
  * @param {function} markVisible - (x, y) => void
  */
-export function computeDaylightFOV(width, height, isOpaque, markVisible) {
+export function computeDaylightFOV(width, height, markVisible) {
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
-      if (!isOpaque(x, y)) {
-        markVisible(x, y);
-      }
+      markVisible(x, y);
     }
   }
 }
