@@ -65,19 +65,19 @@ export class SellPanel {
     });
     this._container.add(this._title);
 
-    // Close button (touch-friendly; keyboard users press ESC or bump door again)
-    this._closeBtn = s.add.text(PANEL_W - PANEL_PAD, PANEL_PAD, '✕', {
+    // Close button — positioned outside the panel border (up and right) to save space
+    this._closeBtn = s.add.text(PANEL_W, 0, '✕', {
       fontSize: '14px', fontFamily: FONT_FAMILY, color: '#aaccff',
       stroke: '#000000', strokeThickness: 2, resolution: 2,
-    }).setOrigin(1, 0).setInteractive({ useHandCursor: true });
+    }).setOrigin(0, 1).setInteractive({ useHandCursor: true });
     this._closeBtn.on('pointerover', () => this._closeBtn.setColor('#ffffff'));
     this._closeBtn.on('pointerout',  () => this._closeBtn.setColor('#aaccff'));
     this._closeBtn.on('pointerdown', () => this.hide());
     this._container.add(this._closeBtn);
 
-    // "Sell" column header — right-aligned above the price column
-    this._sellColHeader = s.add.text(PANEL_W - PANEL_PAD, TITLE_H - 12, 'Sell', {
-      fontSize: '9px', fontFamily: FONT_FAMILY, color: '#aaaaaa',
+    // "Sell" column header — right-aligned above the price column, same size as item text
+    this._sellColHeader = s.add.text(PANEL_W - PANEL_PAD, TITLE_H - 16, 'Sell', {
+      fontSize: '10px', fontFamily: FONT_FAMILY, color: '#aaaaaa',
       stroke: '#000000', strokeThickness: 1, resolution: 2,
     }).setOrigin(1, 0).setVisible(false);
     this._container.add(this._sellColHeader);
