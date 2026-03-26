@@ -97,7 +97,7 @@ export class DevOptionsScene extends Phaser.Scene {
     y += 52;
 
     // Numeric settings
-    this._makeNumericRow('Start Floor', 'startFloor', 1, 10, cx, y);
+    this._makeNumericRow('Start Floor', 'startFloor', 0, 10, cx, y);
     y += 40;
     this._makeNumericRow('Start Level', 'startLevel', 1, 20, cx, y);
     y += 52;

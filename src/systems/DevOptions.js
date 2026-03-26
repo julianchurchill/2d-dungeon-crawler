@@ -16,7 +16,7 @@ import { ITEM_TYPES } from '../items/ItemTypes.js';
  * Mutable singleton that holds the current developer option values.
  * All fields reset to these defaults when `resetDevOptions()` is called.
  *
- * @property {number}   startFloor           - Dungeon floor to begin on (1-indexed).
+ * @property {number}   startFloor           - Dungeon floor to begin on (0 = town).
  * @property {number}   startLevel           - Player character level at game start.
  * @property {string[]} startItems           - Array of ITEM_TYPES keys to place in the
  *                                             player's inventory at game start.
@@ -30,7 +30,7 @@ import { ITEM_TYPES } from '../items/ItemTypes.js';
  * @property {boolean} playerInvincible       - When true, the player takes zero damage.
  */
 export const devOptions = {
-  startFloor: 1,
+  startFloor: 0,
   startLevel: 1,
   startItems: [],
   spawnWeights: null,
@@ -44,7 +44,7 @@ export const devOptions = {
  * Resets all developer options to their default (vanilla) values.
  */
 export function resetDevOptions() {
-  devOptions.startFloor = 1;
+  devOptions.startFloor = 0;
   devOptions.startLevel = 1;
   devOptions.startItems = [];
   devOptions.spawnWeights = null;
