@@ -7,7 +7,7 @@ import { Player } from '../entities/Player.js';
 import { Enemy } from '../entities/Enemy.js';
 import { Item } from '../items/Item.js';
 import { getFloorLoot } from '../items/ItemTypes.js';
-import { computeFOV } from '../fov/ShadowcastFOV.js';
+import { computeFOV, computeDaylightFOV } from '../fov/ShadowcastFOV.js';
 import { EventBus } from '../utils/EventBus.js';
 import { GameEvents } from '../events/GameEvents.js';
 import { DIR, DIR_DELTA } from '../utils/Direction.js';
@@ -126,9 +126,17 @@ export class GameScene extends Phaser.Scene {
     // Camera
     const mapW = map.width * TILE_SIZE;
     const mapH = map.height * TILE_SIZE;
-    this.cameras.main.setBounds(0, 0, mapW, mapH);
-    this.cameras.main.startFollow(this.playerSprite, true, 0.12, 0.12);
     this.cameras.main.setZoom(2);
+    if (this.floorManager.isTown()) {
+      // Town: show the whole map centred; no player-follow
+      this.cameras.main.stopFollow();
+      // Use wide bounds so centerOn is not clamped to the small map area
+      this.cameras.main.setBounds(-10000, -10000, mapW + 20000, mapH + 20000);
+      this.cameras.main.centerOn(mapW / 2, mapH / 2);
+    } else {
+      this.cameras.main.setBounds(0, 0, mapW, mapH);
+      this.cameras.main.startFollow(this.playerSprite, true, 0.12, 0.12);
+    }
 
     // Spawn enemies (skip start room)
     this._spawnEnemies(rooms);
@@ -283,15 +291,24 @@ export class GameScene extends Phaser.Scene {
     }
 
     // Compute new visible set
-    computeFOV(
-      this.player.x,
-      this.player.y,
-      FOV_RADIUS + (this.player.skillSystem?.getFovBonus() ?? 0),
-      (x, y) => map.isOpaque(x, y),
-      (x, y) => {
-        if (map.inBounds(x, y)) map.setFovState(x, y, FOV_STATE.VISIBLE);
-      }
-    );
+    if (this.floorManager.isTown()) {
+      // Daylight: all non-opaque tiles are visible, no radius limit
+      computeDaylightFOV(
+        map.width, map.height,
+        (x, y) => map.isOpaque(x, y),
+        (x, y) => { if (map.inBounds(x, y)) map.setFovState(x, y, FOV_STATE.VISIBLE); }
+      );
+    } else {
+      computeFOV(
+        this.player.x,
+        this.player.y,
+        FOV_RADIUS + (this.player.skillSystem?.getFovBonus() ?? 0),
+        (x, y) => map.isOpaque(x, y),
+        (x, y) => {
+          if (map.inBounds(x, y)) map.setFovState(x, y, FOV_STATE.VISIBLE);
+        }
+      );
+    }
 
     // Redraw shadow overlay
     this._redrawShadows();
