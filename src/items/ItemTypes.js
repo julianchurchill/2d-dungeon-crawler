@@ -6,6 +6,7 @@ export const ITEM_TYPES = {
     textureKey: 'item_potion_health',
     type: 'consumable',
     effect: { heal: 15 },
+    sellPrice: 5,
   },
   MEGA_POTION: {
     id: 'mega_potion',
@@ -14,6 +15,7 @@ export const ITEM_TYPES = {
     textureKey: 'item_potion_health',
     type: 'consumable',
     effect: { heal: 30 },
+    sellPrice: 10,
   },
   SWORD: {
     id: 'sword',
@@ -22,6 +24,7 @@ export const ITEM_TYPES = {
     textureKey: 'item_weapon',
     type: 'weapon',
     attackBonus: 3,
+    sellPrice: 15,
   },
   LONG_SWORD: {
     id: 'long_sword',
@@ -30,6 +33,7 @@ export const ITEM_TYPES = {
     textureKey: 'item_weapon',
     type: 'weapon',
     attackBonus: 5,
+    sellPrice: 25,
   },
   LEATHER_ARMOR: {
     id: 'leather_armor',
@@ -38,6 +42,7 @@ export const ITEM_TYPES = {
     textureKey: 'item_armor',
     type: 'armor',
     defenseBonus: 2,
+    sellPrice: 12,
   },
   CHAIN_MAIL: {
     id: 'chain_mail',
@@ -46,6 +51,7 @@ export const ITEM_TYPES = {
     textureKey: 'item_armor',
     type: 'armor',
     defenseBonus: 4,
+    sellPrice: 20,
   },
   POTION_OF_MINOR_TELEPORTATION: {
     id: 'potion_of_minor_teleportation',
@@ -55,6 +61,7 @@ export const ITEM_TYPES = {
     textureKey: 'item_potion_teleport',
     type: 'consumable',
     effect: { type: 'teleport_near', minDist: 3, maxDist: 8 },
+    sellPrice: 8,
   },
 };
 

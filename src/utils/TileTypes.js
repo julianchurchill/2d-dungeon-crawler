@@ -4,6 +4,10 @@ export const TILE = Object.freeze({
   WALL: 2,
   DOOR: 3,
   STAIRS_DOWN: 4,
+  /** Accent floor tile — distinct cobblestone used around the town stairs. Walkable. */
+  TOWN_ACCENT: 5,
+  /** Shop roof tile — fills the interior of town shop alcoves. Non-walkable. */
+  SHOP_ROOF: 6,
 });
 
 export const FOV_STATE = Object.freeze({

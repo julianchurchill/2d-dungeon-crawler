@@ -31,6 +31,8 @@ import { HuntingSkill } from '../skills/HuntingSkill.js';
 import { NightVisionSkill } from '../skills/NightVisionSkill.js';
 import { ITEM_TYPES } from '../items/ItemTypes.js';
 import { getProgress, achievementStore } from '../achievements/AchievementStore.js';
+import { ShopSystem } from '../systems/ShopSystem.js';
+import { isTouchDevice } from '../utils/TouchDeviceDetector.js';
 
 const TILE_SIZE = 16;
 const FOV_RADIUS = 8;
@@ -61,6 +63,14 @@ export class GameScene extends Phaser.Scene {
     // can close it instead of opening the Achievements screen.
     this._messageLogOpen = false;
     EventBus.on(GameEvents.MESSAGE_LOG_TOGGLED, (open) => { this._messageLogOpen = open; }, this);
+
+    // Track whether the sell panel is open so ESC closes it before the game menu.
+    // Also gate player input via TurnManager: block on open, restore on close.
+    this._sellPanelOpen = false;
+    EventBus.on(GameEvents.SELL_PANEL_TOGGLED, (open) => {
+      this._sellPanelOpen = open;
+      if (!open) this.turnManager.setState(TURN_STATE.PLAYER_INPUT);
+    }, this);
 
     // Entities lists
     this.enemies = [];
@@ -95,9 +105,11 @@ export class GameScene extends Phaser.Scene {
   // ─── Floor Construction ───────────────────────────────────────────────────
 
   _buildFloor(dungeonData) {
-    const { map, rooms, startPos } = dungeonData;
+    const { map, rooms, startPos, shops } = dungeonData;
     this.dungeonMap = map;
     this.rooms = rooms;
+    // shops is populated by TownGenerator; regular dungeon floors have none
+    this.shops = shops ?? [];
 
     // Clear old sprites
     this._clearFloorEntities();
@@ -127,13 +139,15 @@ export class GameScene extends Phaser.Scene {
     const mapW = map.width * TILE_SIZE;
     const mapH = map.height * TILE_SIZE;
     this.cameras.main.setZoom(2);
-    if (this.floorManager.isTown()) {
-      // Town: show the whole map centred; no player-follow
+    if (this.floorManager.isTown() && !isTouchDevice()) {
+      // Desktop town: show the whole map centred; no player-follow
       this.cameras.main.stopFollow();
-      // Use wide bounds so centerOn is not clamped to the small map area
+      // Wide bounds so centerOn is not clamped to the small map area
       this.cameras.main.setBounds(-10000, -10000, mapW + 20000, mapH + 20000);
       this.cameras.main.centerOn(mapW / 2, mapH / 2);
     } else {
+      // Dungeon (all devices) and town on mobile: follow the player so they
+      // are always centred regardless of screen size
       this.cameras.main.setBounds(0, 0, mapW, mapH);
       this.cameras.main.startFollow(this.playerSprite, true, 0.12, 0.12);
     }
@@ -164,16 +178,20 @@ export class GameScene extends Phaser.Scene {
   }
 
   _buildTilemap(map) {
-    this._buildMapGraphics(map, this.floorManager.isTown());
+    this._buildMapGraphics(map, this.floorManager.isTown(), this.shops);
     this._buildShadowLayer(map);
   }
 
   /**
    * Render all tiles into a RenderTexture.
+   * In town mode the shops array is used to draw type-specific door textures
+   * (tile_door_potion / tile_door_weapon / tile_door_armour) at each shop door.
+   *
    * @param {DungeonMap} map
    * @param {boolean} isTown - Use town tile textures when true.
+   * @param {Array<{type:string,doorX:number,doorY:number}>} shops - Shop metadata for door icons.
    */
-  _buildMapGraphics(map, isTown = false) {
+  _buildMapGraphics(map, isTown = false, shops = []) {
     const mapW = map.width * TILE_SIZE;
     const mapH = map.height * TILE_SIZE;
 
@@ -183,18 +201,33 @@ export class GameScene extends Phaser.Scene {
     const tileKeys = isTown ? {
       [TILE.FLOOR]:       'tile_town_floor',
       [TILE.WALL]:        'tile_town_wall',
+      [TILE.DOOR]:        'tile_door',
       [TILE.STAIRS_DOWN]: 'tile_town_stairs',
+      [TILE.TOWN_ACCENT]: 'tile_town_accent',
+      [TILE.SHOP_ROOF]:   'tile_shop_roof',
     } : {
-      [TILE.FLOOR]: 'tile_floor',
-      [TILE.WALL]:  'tile_wall',
-      [TILE.DOOR]:  'tile_door',
+      [TILE.FLOOR]:       'tile_floor',
+      [TILE.WALL]:        'tile_wall',
+      [TILE.DOOR]:        'tile_door',
       [TILE.STAIRS_DOWN]: 'tile_stairs',
     };
+
+    // Build position → texture-key overrides for typed shop doors (town only)
+    const doorTextureAt = {};
+    if (isTown) {
+      for (const shop of shops) {
+        doorTextureAt[`${shop.doorX},${shop.doorY}`] = `tile_door_${shop.type}`;
+      }
+    }
 
     for (let y = 0; y < map.height; y++) {
       for (let x = 0; x < map.width; x++) {
         const tileType = map.getTile(x, y);
-        const key = tileKeys[tileType];
+        let key = tileKeys[tileType];
+        // Use the type-specific door texture when available
+        if (tileType === TILE.DOOR) {
+          key = doorTextureAt[`${x},${y}`] ?? key;
+        }
         if (key) {
           this.mapRT.drawFrame(key, undefined, x * TILE_SIZE, y * TILE_SIZE);
         }
@@ -352,11 +385,13 @@ export class GameScene extends Phaser.Scene {
     this.input.keyboard.on('keydown-K',           wrapWithRunCancel(this._runController, () => this._toggleSkills()));
     this.input.keyboard.on('keydown-PERIOD',       wrapWithRunCancel(this._runController, () => this._tryUseStairs()));
     this.input.keyboard.on('keydown-GREATER_THAN', wrapWithRunCancel(this._runController, () => this._tryUseStairs()));
-    // ESC closes the message log history panel when it is open; otherwise
-    // it opens the in-game menu (Achievements / Help).
+    // ESC closes the sell panel when open, then the message log, then opens
+    // the in-game menu — evaluated in priority order.
     this.input.keyboard.on('keydown-ESC', wrapWithRunCancel(this._runController, () => {
       if (this._messageLogOpen) {
         EventBus.emit(GameEvents.CLOSE_MESSAGE_LOG);
+      } else if (this._sellPanelOpen) {
+        EventBus.emit(GameEvents.CLOSE_SELL_PANEL);
       } else {
         this._openInGameMenu();
       }
@@ -401,6 +436,7 @@ export class GameScene extends Phaser.Scene {
     EventBus.on(GameEvents.ACTIVATE_SKILL,  ({ skillId }) => this._handleActivateSkill(skillId),  this);
     EventBus.on(GameEvents.USE_STAIRS, wrapWithRunCancel(this._runController, () => this._tryUseStairs()), this);
     EventBus.on(GameEvents.INVENTORY_USE, (index) => this._useInventoryItem(index), this);
+    EventBus.on(GameEvents.SELL_ITEM, ({ shopType, item }) => this._handleSellItem(shopType, item), this);
     EventBus.on(GameEvents.FLOOR_CHANGED, (floor) => {
       this.registry.set('floor', floor);
     }, this);
@@ -492,6 +528,23 @@ export class GameScene extends Phaser.Scene {
 
     if (result.action === 'blocked') {
       return; // No turn spent on blocked moves
+    }
+
+    if (result.action === 'shop') {
+      // Cancel any active run so it doesn't resume into the door on the next turn
+      this._runController.cancel();
+      // Open or toggle the sell panel; no turn spent on door interactions
+      const shop = this.shops.find(s => s.doorX === result.doorX && s.doorY === result.doorY);
+      if (shop) {
+        // Block player movement while the sell panel is visible
+        this.turnManager.setState(TURN_STATE.INVENTORY);
+        EventBus.emit(GameEvents.OPEN_SELL_PANEL, {
+          shopType: shop.type,
+          inventory: this.player.inventory,
+          player: this.player,
+        });
+      }
+      return;
     }
 
     this.turnManager.setState(TURN_STATE.PLAYER_ACTING);
@@ -658,6 +711,8 @@ export class GameScene extends Phaser.Scene {
   }
 
   _toggleInventory() {
+    // Inventory cannot be opened while the sell panel is visible.
+    if (this._sellPanelOpen) return;
     // Only emit the open/close event when a state transition is actually possible,
     // so the visual panel and TurnManager state can never get out of sync.
     const toggled = applyInventoryToggle(this.turnManager);
@@ -872,6 +927,25 @@ export class GameScene extends Phaser.Scene {
     }
   }
 
+  /**
+   * Handles a sell request from the SellPanel.  Creates a ShopSystem for the
+   * given shop type, executes the sale, then broadcasts the updated gold and
+   * inventory so the HUD and SellPanel stay in sync.
+   *
+   * @param {string} shopType - 'potion', 'weapon', or 'armour'.
+   * @param {Item} item - The item to sell (must be in player's inventory).
+   */
+  _handleSellItem(shopType, item) {
+    // Guard against rapid double-clicks: item may already be gone from inventory
+    if (!this.player.inventory.includes(item)) return;
+    const shop = new ShopSystem(shopType);
+    const earned = shop.sell(this.player, item);
+    EventBus.emit(GameEvents.MESSAGE, `Sold ${item.name} for ${earned} gold.`);
+    EventBus.emit(GameEvents.PLAYER_GOLD_CHANGED, this.player.gold);
+    EventBus.emit(GameEvents.INVENTORY_CHANGED, [...this.player.inventory]);
+    this._syncRegistry();
+  }
+
   // ─── Enemy Turns ──────────────────────────────────────────────────────────
 
   _startEnemyTurns() {
@@ -992,5 +1066,6 @@ export class GameScene extends Phaser.Scene {
     this.registry.set('playerStats', { ...s });
     this.registry.set('floor', this.floorManager.currentFloor);
     this.registry.set('inventory', [...this.player.inventory]);
+    this.registry.set('playerGold', this.player.gold);
   }
 }

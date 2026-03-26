@@ -7,6 +7,7 @@ const XP_H = 8;
 const HP_Y    = 16;   // HP bar centre
 const STATS_Y = 36;   // LVL/ATK/DEF text top
 const XP_Y    = 54;   // XP bar centre
+const GOLD_Y  = 70;   // Gold text top
 
 export class HUD {
   /**
@@ -55,6 +56,12 @@ export class HUD {
     this.xpBar = s.add.rectangle(10, XP_Y, 0, XP_H, 0x4444cc)
       .setScrollFactor(0).setDepth(101).setOrigin(0, 0.5)
       .setStrokeStyle(1, 0xffffff);
+
+    // --- Gold indicator ---
+    this.goldText = s.add.text(10, GOLD_Y, '⬡ 0 gold', {
+      fontSize: '11px', fontFamily: FONT_FAMILY, color: '#ffdd44',
+      stroke: '#000000', strokeThickness: 2, resolution: 2,
+    }).setScrollFactor(0).setDepth(100);
   }
 
   updateHP(hp, maxHp) {
@@ -74,6 +81,15 @@ export class HUD {
 
   updateFloor(floor) {
     this.floorText.setText(`Floor ${floor}`);
+  }
+
+  /**
+   * Updates the gold display to reflect the player's current gold total.
+   *
+   * @param {number} gold - The player's current gold amount.
+   */
+  updateGold(gold) {
+    this.goldText.setText(`⬡ ${gold} gold`);
   }
 
   resize(width, height) {

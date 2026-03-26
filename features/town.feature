@@ -38,6 +38,18 @@ Feature: Town Level
     Given the town is generated
     Then the town start position is on a walkable tile
 
+  Scenario: The town map contains 3 shop doors
+    Given the town is generated
+    Then the town map contains 3 door tiles
+
+  Scenario: The town generation result includes 3 shops
+    Given the town is generated
+    Then the town result should include 3 shops
+
+  Scenario: Each town shop has a type and a door position
+    Given the town is generated
+    Then the town shops should be of types potion, weapon and armour
+
   Scenario: FloorManager generates the town map at floor 0
     Given a new FloorManager
     When the floor is generated

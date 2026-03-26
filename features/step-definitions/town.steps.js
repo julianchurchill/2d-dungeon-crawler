@@ -4,6 +4,8 @@ import { FloorManager } from '../../src/systems/FloorManager.js';
 import { TownGenerator } from '../../src/dungeon/TownGenerator.js';
 import { TILE } from '../../src/utils/TileTypes.js';
 
+const SHOP_TYPES = ['potion', 'weapon', 'armour'];
+
 // --- Given ---
 
 Given('a new FloorManager', function () {
@@ -100,6 +102,34 @@ Then('the generated floor map contains stairs leading down', function () {
     if (map.tiles[i] === TILE.STAIRS_DOWN) { hasStairs = true; break; }
   }
   assert.ok(hasStairs, 'Expected generated floor map to contain stairs leading down');
+});
+
+Then('the town map contains {int} door tiles', function (expected) {
+  const { map } = this.townResult;
+  let count = 0;
+  for (let i = 0; i < map.tiles.length; i++) {
+    if (map.tiles[i] === TILE.DOOR) count++;
+  }
+  assert.equal(count, expected,
+    `Expected ${expected} door tile(s) in town map, found ${count}`);
+});
+
+Then('the town result should include {int} shops', function (expected) {
+  const shops = this.townResult.shops;
+  assert.ok(Array.isArray(shops),
+    'Expected townResult.shops to be an array');
+  assert.equal(shops.length, expected,
+    `Expected ${expected} shops, got ${shops.length}`);
+});
+
+Then('the town shops should be of types potion, weapon and armour', function () {
+  assert.ok(Array.isArray(this.townResult.shops),
+    'Expected townResult.shops to be an array');
+  const types = this.townResult.shops.map(s => s.type);
+  for (const expected of SHOP_TYPES) {
+    assert.ok(types.includes(expected),
+      `Expected shops to include type '${expected}', got [${types.join(', ')}]`);
+  }
 });
 
 Then('the generated floor start position is on a walkable tile', function () {
