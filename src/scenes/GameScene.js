@@ -134,20 +134,12 @@ export class GameScene extends Phaser.Scene {
       );
     }
 
-    // Camera
+    // Camera — always follow the player so they're centred on all screen sizes
     const mapW = map.width * TILE_SIZE;
     const mapH = map.height * TILE_SIZE;
     this.cameras.main.setZoom(2);
-    if (this.floorManager.isTown()) {
-      // Town: show the whole map centred; no player-follow
-      this.cameras.main.stopFollow();
-      // Use wide bounds so centerOn is not clamped to the small map area
-      this.cameras.main.setBounds(-10000, -10000, mapW + 20000, mapH + 20000);
-      this.cameras.main.centerOn(mapW / 2, mapH / 2);
-    } else {
-      this.cameras.main.setBounds(0, 0, mapW, mapH);
-      this.cameras.main.startFollow(this.playerSprite, true, 0.12, 0.12);
-    }
+    this.cameras.main.setBounds(0, 0, mapW, mapH);
+    this.cameras.main.startFollow(this.playerSprite, true, 0.12, 0.12);
 
     // Spawn enemies (skip start room)
     this._spawnEnemies(rooms);
