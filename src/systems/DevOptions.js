@@ -11,6 +11,13 @@
 
 import { Item } from '../items/Item.js';
 import { ITEM_TYPES } from '../items/ItemTypes.js';
+import { isDevEnvironment } from '../utils/Environment.js';
+
+/**
+ * Default starting inventory used in development mode.
+ * Gives the developer a representative set of items to test with immediately.
+ */
+const DEV_START_ITEMS = ['HEALTH_POTION', 'HEALTH_POTION', 'MEGA_POTION', 'SWORD', 'LEATHER_ARMOR'];
 
 /**
  * Mutable singleton that holds the current developer option values.
@@ -32,7 +39,7 @@ import { ITEM_TYPES } from '../items/ItemTypes.js';
 export const devOptions = {
   startFloor: 0,
   startLevel: 1,
-  startItems: [],
+  startItems: isDevEnvironment() ? [...DEV_START_ITEMS] : [],
   spawnWeights: null,
   minEnemiesPerRoom: null,
   maxEnemiesPerRoom: null,
@@ -46,7 +53,7 @@ export const devOptions = {
 export function resetDevOptions() {
   devOptions.startFloor = 0;
   devOptions.startLevel = 1;
-  devOptions.startItems = [];
+  devOptions.startItems = isDevEnvironment() ? [...DEV_START_ITEMS] : [];
   devOptions.spawnWeights = null;
   devOptions.minEnemiesPerRoom = null;
   devOptions.maxEnemiesPerRoom = null;
