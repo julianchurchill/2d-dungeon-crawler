@@ -711,6 +711,8 @@ export class GameScene extends Phaser.Scene {
   }
 
   _toggleInventory() {
+    // Inventory cannot be opened while the sell panel is visible.
+    if (this._sellPanelOpen) return;
     // Only emit the open/close event when a state transition is actually possible,
     // so the visual panel and TurnManager state can never get out of sync.
     const toggled = applyInventoryToggle(this.turnManager);
