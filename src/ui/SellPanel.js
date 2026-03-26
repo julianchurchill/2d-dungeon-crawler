@@ -75,12 +75,12 @@ export class SellPanel {
     this._closeBtn.on('pointerdown', () => this.hide());
     this._container.add(this._closeBtn);
 
-    // Keyboard hint — positioned below the single-line title with enough gap
-    this._hintText = s.add.text(PANEL_PAD, PANEL_PAD + 17, '↑↓ navigate  ↵ sell', {
-      fontSize: '9px', fontFamily: FONT_FAMILY, color: '#558855',
+    // "Sell" column header — right-aligned above the price column
+    this._sellColHeader = s.add.text(PANEL_W - PANEL_PAD, TITLE_H - 12, 'Sell', {
+      fontSize: '9px', fontFamily: FONT_FAMILY, color: '#aaaaaa',
       stroke: '#000000', strokeThickness: 1, resolution: 2,
-    });
-    this._container.add(this._hintText);
+    }).setOrigin(1, 0).setVisible(false);
+    this._container.add(this._sellColHeader);
 
     // Cursor highlight bar — repositioned when cursor moves; sits behind row content
     this._cursorBar = s.add.rectangle(0, 0, PANEL_W - 4, ROW_H - 2, 0x1a4a1a, 1)
@@ -159,7 +159,7 @@ export class SellPanel {
     this._acceptableItems = inventory.filter(item => this._shop.accepts(item));
     const hasItems = this._acceptableItems.length > 0;
     this._emptyText.setVisible(!hasItems);
-    this._hintText.setVisible(hasItems);
+    this._sellColHeader.setVisible(hasItems);
     this._cursorBar.setVisible(hasItems);
 
     // Clamp cursor after a sale may have shrunk the list
@@ -189,14 +189,13 @@ export class SellPanel {
         wordWrap: { width: 90 },
       }).setOrigin(0, 0.5);
 
-      // Sell button showing the gold value
+      // Sell price — plain text, right-aligned under the "Sell" column header
       const sellBtn = this.scene.add.text(
         PANEL_W - PANEL_PAD, rowY + ROW_H / 2,
-        `⬡ ${item.sellPrice}g`,
+        `${item.sellPrice}g`,
         {
           fontSize: '10px', fontFamily: FONT_FAMILY, color: '#ffdd44',
           stroke: '#000000', strokeThickness: 2, resolution: 2,
-          backgroundColor: '#222233', padding: { x: 6, y: 3 },
         }
       ).setOrigin(1, 0.5).setInteractive({ useHandCursor: true });
 
