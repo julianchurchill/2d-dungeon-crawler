@@ -116,7 +116,11 @@ export class SellPanel {
     this._refresh(inventory);
     this.visible = true;
     this._container.setVisible(true);
+    // Block navigation for one tick so the keydown event that triggered the
+    // door bump (UP/W) doesn't immediately wrap the cursor to the last item.
+    this._navigationReady = false;
     this._addKeyListeners();
+    this.scene.time.delayedCall(0, () => { this._navigationReady = true; });
     EventBus.emit(GameEvents.SELL_PANEL_TOGGLED, true);
   }
 
@@ -287,7 +291,7 @@ export class SellPanel {
    * @param {number} delta - -1 for up, +1 for down.
    */
   _navigate(delta) {
-    if (this._acceptableItems.length === 0) return;
+    if (!this._navigationReady || this._acceptableItems.length === 0) return;
     const count = this._acceptableItems.length;
     this._cursorIndex = (this._cursorIndex + delta + count) % count;
     this._updateCursorBar();
