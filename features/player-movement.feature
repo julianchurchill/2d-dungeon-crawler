@@ -27,3 +27,10 @@ Feature: Player Movement
     When the player moves right
     Then the player position should be 6, 5
     And the move result should be "stairs"
+
+  Scenario: Moving into a door tile opens a shop without moving the player
+    Given a player at position 5, 5
+    And a door at position 6, 5
+    When the player moves right
+    Then the player position should remain 5, 5
+    And the move result should be "shop"

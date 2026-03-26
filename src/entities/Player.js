@@ -20,6 +20,8 @@ export class Player {
       xp: 0,
       xpToNext: 20,
     };
+    /** @type {number} Gold currency owned by the player. */
+    this.gold = 0;
     this.inventory = [];
     this.maxInventory = 20;
     this.equippedWeapon = null;
@@ -41,6 +43,9 @@ export class Player {
 
     const entity = getEntityAt(nx, ny);
     if (entity) return { action: 'attacked', target: entity };
+
+    // Walking into a door opens the adjacent shop without moving the player
+    if (map.getTile(nx, ny) === TILE.DOOR) return { action: 'shop', doorX: nx, doorY: ny };
 
     if (!map.isWalkable(nx, ny)) return { action: 'blocked' };
 

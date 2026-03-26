@@ -31,6 +31,7 @@ import { HuntingSkill } from '../skills/HuntingSkill.js';
 import { NightVisionSkill } from '../skills/NightVisionSkill.js';
 import { ITEM_TYPES } from '../items/ItemTypes.js';
 import { getProgress, achievementStore } from '../achievements/AchievementStore.js';
+import { ShopSystem } from '../systems/ShopSystem.js';
 
 const TILE_SIZE = 16;
 const FOV_RADIUS = 8;
@@ -95,9 +96,11 @@ export class GameScene extends Phaser.Scene {
   // ─── Floor Construction ───────────────────────────────────────────────────
 
   _buildFloor(dungeonData) {
-    const { map, rooms, startPos } = dungeonData;
+    const { map, rooms, startPos, shops } = dungeonData;
     this.dungeonMap = map;
     this.rooms = rooms;
+    // shops is populated by TownGenerator; regular dungeon floors have none
+    this.shops = shops ?? [];
 
     // Clear old sprites
     this._clearFloorEntities();
@@ -183,6 +186,7 @@ export class GameScene extends Phaser.Scene {
     const tileKeys = isTown ? {
       [TILE.FLOOR]:       'tile_town_floor',
       [TILE.WALL]:        'tile_town_wall',
+      [TILE.DOOR]:        'tile_door',
       [TILE.STAIRS_DOWN]: 'tile_town_stairs',
     } : {
       [TILE.FLOOR]: 'tile_floor',
@@ -401,6 +405,7 @@ export class GameScene extends Phaser.Scene {
     EventBus.on(GameEvents.ACTIVATE_SKILL,  ({ skillId }) => this._handleActivateSkill(skillId),  this);
     EventBus.on(GameEvents.USE_STAIRS, wrapWithRunCancel(this._runController, () => this._tryUseStairs()), this);
     EventBus.on(GameEvents.INVENTORY_USE, (index) => this._useInventoryItem(index), this);
+    EventBus.on(GameEvents.SELL_ITEM, ({ shopType, item }) => this._handleSellItem(shopType, item), this);
     EventBus.on(GameEvents.FLOOR_CHANGED, (floor) => {
       this.registry.set('floor', floor);
     }, this);
@@ -492,6 +497,21 @@ export class GameScene extends Phaser.Scene {
 
     if (result.action === 'blocked') {
       return; // No turn spent on blocked moves
+    }
+
+    if (result.action === 'shop') {
+      // Cancel any active run so it doesn't resume into the door on the next turn
+      this._runController.cancel();
+      // Open or toggle the sell panel; no turn spent on door interactions
+      const shop = this.shops.find(s => s.doorX === result.doorX && s.doorY === result.doorY);
+      if (shop) {
+        EventBus.emit(GameEvents.OPEN_SELL_PANEL, {
+          shopType: shop.type,
+          inventory: this.player.inventory,
+          player: this.player,
+        });
+      }
+      return;
     }
 
     this.turnManager.setState(TURN_STATE.PLAYER_ACTING);
@@ -872,6 +892,25 @@ export class GameScene extends Phaser.Scene {
     }
   }
 
+  /**
+   * Handles a sell request from the SellPanel.  Creates a ShopSystem for the
+   * given shop type, executes the sale, then broadcasts the updated gold and
+   * inventory so the HUD and SellPanel stay in sync.
+   *
+   * @param {string} shopType - 'potion', 'weapon', or 'armour'.
+   * @param {Item} item - The item to sell (must be in player's inventory).
+   */
+  _handleSellItem(shopType, item) {
+    // Guard against rapid double-clicks: item may already be gone from inventory
+    if (!this.player.inventory.includes(item)) return;
+    const shop = new ShopSystem(shopType);
+    const earned = shop.sell(this.player, item);
+    EventBus.emit(GameEvents.MESSAGE, `Sold ${item.name} for ${earned} gold.`);
+    EventBus.emit(GameEvents.PLAYER_GOLD_CHANGED, this.player.gold);
+    EventBus.emit(GameEvents.INVENTORY_CHANGED, [...this.player.inventory]);
+    this._syncRegistry();
+  }
+
   // ─── Enemy Turns ──────────────────────────────────────────────────────────
 
   _startEnemyTurns() {
@@ -992,5 +1031,6 @@ export class GameScene extends Phaser.Scene {
     this.registry.set('playerStats', { ...s });
     this.registry.set('floor', this.floorManager.currentFloor);
     this.registry.set('inventory', [...this.player.inventory]);
+    this.registry.set('playerGold', this.player.gold);
   }
 }

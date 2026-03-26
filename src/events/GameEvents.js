@@ -213,4 +213,28 @@ export const GameEvents = {
    * @type {{ skillId: string }}
    */
   ACTIVATE_SKILL: 'activate-skill',
+
+  /**
+   * The player's gold amount has changed.
+   * Emitted by: GameScene (after a sell transaction)
+   * Subscribed by: UIScene → HUD
+   * @type {number} The new gold total.
+   */
+  PLAYER_GOLD_CHANGED: 'player-gold-changed',
+
+  /**
+   * Open (or close) the sell panel for a town shop.
+   * Emitted by: GameScene (when player bumps a shop door)
+   * Subscribed by: UIScene → SellPanel
+   * @type {{ shopType: string, inventory: Item[], player: Player }}
+   */
+  OPEN_SELL_PANEL: 'open-sell-panel',
+
+  /**
+   * Sell the item at the given inventory index via the active shop.
+   * Emitted by: SellPanel
+   * Subscribed by: GameScene
+   * @type {{ shopType: string, item: Item }}
+   */
+  SELL_ITEM: 'sell-item',
 };

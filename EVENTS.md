@@ -26,6 +26,8 @@ GameScene (once)         ──► RESTART_GAME         ──► GameScene._res
 GameScene                ──► ENEMY_KILLED         ──► AchievementSystem → _handleEnemyKilled
 
 InventorySystem          ──► INVENTORY_CHANGED    ──► InventoryPanel._refresh
+InventorySystem          ──► INVENTORY_CHANGED    ──► UIScene → SellPanel.refresh
+GameScene                ──► INVENTORY_CHANGED    ──► UIScene → SellPanel.refresh (after sell)
 InventorySystem          ──► PLAYER_STATS_CHANGED ──► (none — reserved for future use)
 
 FloorManager             ──► FLOOR_CHANGED        ──► GameScene → registry.set('floor')
@@ -49,6 +51,10 @@ AchievementSystem        ──► ACHIEVEMENT_LOCKED   ──► GameScene → 
 
 MessageLog (click)       ──► MESSAGE_LOG_TOGGLED  ──► GameScene (gates ESC handler)
 GameScene (ESC key)      ──► CLOSE_MESSAGE_LOG    ──► UIScene → MessageLog.close()
+
+GameScene                ──► PLAYER_GOLD_CHANGED  ──► UIScene → HUD.updateGold
+GameScene                ──► OPEN_SELL_PANEL      ──► UIScene → SellPanel.show (toggle)
+SellPanel (sell button)  ──► SELL_ITEM            ──► GameScene._handleSellItem
 ───────────────────────────────────────────────────────────────────────
 ```
 
@@ -62,7 +68,7 @@ GameScene (ESC key)      ──► CLOSE_MESSAGE_LOG    ──► UIScene → Me
 | `PLAYER_LEVEL_UP` | `'player-level-up'` | `number` (new level) | GameScene | UIScene → level-up banner, AchievementSystem |
 | `OPEN_INVENTORY` | `'open-inventory'` | `{ inventory, player }` | GameScene | UIScene → InventoryPanel |
 | `INVENTORY_USE` | `'inventory-use'` | `number` (index) | InventoryPanel | GameScene |
-| `INVENTORY_CHANGED` | `'inventory-changed'` | `Item[]` | InventorySystem | InventoryPanel |
+| `INVENTORY_CHANGED` | `'inventory-changed'` | `Item[]` | InventorySystem, GameScene (after sell) | InventoryPanel, UIScene → SellPanel |
 | `PLAYER_STATS_CHANGED` | `'player-stats-changed'` | `object` (stats) | InventorySystem | *(none)* |
 | `FLOOR_CHANGED` | `'floor-changed'` | `number` (floor) | FloorManager | GameScene, AchievementSystem |
 | `DPAD_PRESS` | `'dpad-press'` | `string` (DIR constant) | DPad | GameScene |
@@ -84,3 +90,6 @@ GameScene (ESC key)      ──► CLOSE_MESSAGE_LOG    ──► UIScene → Me
 | `UPGRADE_SKILL` | `'upgrade-skill'` | `{ skillId: string }` | SkillsPanel (dev mode upgrade button) | GameScene._handleUpgradeSkill |
 | `DOWNGRADE_SKILL` | `'downgrade-skill'` | `{ skillId: string }` | SkillsPanel (dev mode downgrade button) | GameScene._handleDowngradeSkill |
 | `ACTIVATE_SKILL` | `'activate-skill'` | `{ skillId: string }` | SkillsPanel (dev mode activate button) | GameScene._handleActivateSkill |
+| `PLAYER_GOLD_CHANGED` | `'player-gold-changed'` | `number` (new total) | GameScene (after sell) | UIScene → HUD |
+| `OPEN_SELL_PANEL` | `'open-sell-panel'` | `{ shopType, inventory, player }` | GameScene (door bump) | UIScene → SellPanel |
+| `SELL_ITEM` | `'sell-item'` | `{ shopType: string, item: Item }` | SellPanel (sell button) | GameScene._handleSellItem |

@@ -10,6 +10,7 @@ export class Item {
     this.description = typeDef.description;
     this.textureKey = typeDef.textureKey;
     this.itemType = typeDef.type; // 'consumable' | 'weapon' | 'armor'
+    this.sellPrice = typeDef.sellPrice ?? 0;
     this.effect = typeDef.effect || null;
     this.attackBonus = typeDef.attackBonus || 0;
     this.defenseBonus = typeDef.defenseBonus || 0;

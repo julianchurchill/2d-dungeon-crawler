@@ -9,6 +9,7 @@ import { EventBus } from '../utils/EventBus.js';
 import { GameEvents } from '../events/GameEvents.js';
 import { isTouchDevice } from '../utils/TouchDeviceDetector.js';
 import { syncHudFromRegistry } from '../ui/HudRegistrySync.js';
+import { SellPanel } from '../ui/SellPanel.js';
 
 export class UIScene extends Phaser.Scene {
   constructor() {
@@ -24,6 +25,7 @@ export class UIScene extends Phaser.Scene {
     this.messageLog = new MessageLog(this);
     this.inventoryPanel = new InventoryPanel(this);
     this.skillsPanel = new SkillsPanel(this);
+    this.sellPanel = new SellPanel(this);
     this.dpad = new DPad(this);
     // Show touch controls only on devices that support touch input
     this.dpad.setVisible(isTouchDevice());
@@ -43,6 +45,19 @@ export class UIScene extends Phaser.Scene {
       this.inventoryPanel.toggle(inventory, player);
     }, this);
 
+    // Gold changes from sell transactions
+    EventBus.on(GameEvents.PLAYER_GOLD_CHANGED, (gold) => this.hud.updateGold(gold), this);
+
+    // Open (or toggle) the sell panel when the player bumps a shop door
+    EventBus.on(GameEvents.OPEN_SELL_PANEL, ({ shopType, inventory, player }) => {
+      this.sellPanel.show(shopType, inventory, player);
+    }, this);
+
+    // Refresh sell panel when inventory changes after a sale
+    EventBus.on(GameEvents.INVENTORY_CHANGED, (inventory) => {
+      this.sellPanel.refresh(inventory);
+    }, this);
+
     // Registry → HUD
     this.registry.events.on('changedata-playerHP', (parent, value) => {
       const maxHp = this.registry.get('playerMaxHp') || 30;
@@ -55,6 +70,10 @@ export class UIScene extends Phaser.Scene {
 
     this.registry.events.on('changedata-floor', (parent, floor) => {
       this.hud.updateFloor(floor);
+    });
+
+    this.registry.events.on('changedata-playerGold', (parent, gold) => {
+      this.hud.updateGold(gold);
     });
 
     // GameScene.create() runs before UIScene.create(), so the initial
@@ -164,6 +183,7 @@ export class UIScene extends Phaser.Scene {
     this.hud?.resize(width, height);
     this.messageLog?.resize(width, height);
     this.inventoryPanel?.resize(width, height);
+    this.sellPanel?.resize(width, height);
     this.dpad?.resize(width, height);
     // Re-evaluate touch support on resize — handles DevTools device toolbar
     // toggling and detachable touchscreen laptops changing touch capability.

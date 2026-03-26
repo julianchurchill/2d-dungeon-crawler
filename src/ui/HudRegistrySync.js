@@ -16,7 +16,7 @@
  * read the HUD would show stale defaults until the next registry write.
  *
  * @param {{ get: (key: string) => any }} registry - Phaser-compatible registry (or mock).
- * @param {{ updateHP: Function, updateStats: Function, updateFloor: Function }} hud - HUD instance to update.
+ * @param {{ updateHP: Function, updateStats: Function, updateFloor: Function, updateGold: Function }} hud - HUD instance to update.
  */
 export function syncHudFromRegistry(registry, hud) {
   const hp = registry.get('playerHP');
@@ -28,4 +28,7 @@ export function syncHudFromRegistry(registry, hud) {
 
   const floor = registry.get('floor');
   if (floor !== undefined) hud.updateFloor(floor);
+
+  const gold = registry.get('playerGold');
+  if (gold !== undefined) hud.updateGold(gold);
 }

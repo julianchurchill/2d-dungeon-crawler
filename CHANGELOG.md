@@ -26,6 +26,7 @@ Entries are listed newest-first within each section.
 
 ### Added
 
+- 2026-03-26 — Town shops: 3 shops (potion, weapon, armour) with door tiles; bumping a door opens a sell panel showing accepted items with gold prices; player starts with 0 gold displayed in the HUD; `ShopSystem`, `SellPanel` added; `PLAYER_GOLD_CHANGED`, `OPEN_SELL_PANEL`, `SELL_ITEM` events added
 - 2026-03-26 — Town uses distinct tile textures: warm cobblestone floor (`tile_town_floor`) and cream stone wall (`tile_town_wall`), visually separate from the dark dungeon tiles
 - 2026-03-26 — Town floor is now fully lit (daylight FOV): all non-opaque tiles are always visible; `computeDaylightFOV` added to `ShadowcastFOV.js`; town map is centred on screen with no player-follow camera
 - 2026-03-26 — Wire `TownGenerator` into `FloorManager.generateFloor()` so floor 0 returns the fixed town layout; change `devOptions.startFloor` default from 1 to 0 so new games start in the town
