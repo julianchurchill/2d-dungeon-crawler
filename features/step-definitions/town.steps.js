@@ -79,3 +79,33 @@ Then('the town start position is on a walkable tile', function () {
     `Expected start position (${startPos.x}, ${startPos.y}) to be walkable`
   );
 });
+
+When('the floor is generated', function () {
+  this.floorResult = this.floorManager.generateFloor();
+});
+
+Then('the generated floor map contains floor tiles', function () {
+  const { map } = this.floorResult;
+  let hasFloor = false;
+  for (let i = 0; i < map.tiles.length; i++) {
+    if (map.tiles[i] === TILE.FLOOR) { hasFloor = true; break; }
+  }
+  assert.ok(hasFloor, 'Expected generated floor map to contain at least one floor tile');
+});
+
+Then('the generated floor map contains stairs leading down', function () {
+  const { map } = this.floorResult;
+  let hasStairs = false;
+  for (let i = 0; i < map.tiles.length; i++) {
+    if (map.tiles[i] === TILE.STAIRS_DOWN) { hasStairs = true; break; }
+  }
+  assert.ok(hasStairs, 'Expected generated floor map to contain stairs leading down');
+});
+
+Then('the generated floor start position is on a walkable tile', function () {
+  const { map, startPos } = this.floorResult;
+  assert.ok(
+    map.isWalkable(startPos.x, startPos.y),
+    `Expected generated floor start position (${startPos.x}, ${startPos.y}) to be walkable`
+  );
+});

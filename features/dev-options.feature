@@ -6,8 +6,8 @@ Feature: Developer options
   Background:
     Given developer options are reset to defaults
 
-  Scenario: Default options are floor 1, level 1, no items
-    Then the start floor should be 1
+  Scenario: Default options are floor 0, level 1, no items
+    Then the start floor should be 0
     And the start level should be 1
     And the start items should be empty
 
@@ -30,16 +30,16 @@ Feature: Developer options
     And the start level is set to 7
     And a "SWORD" is added to the starting items
     When developer options are reset
-    Then the start floor should be 1
+    Then the start floor should be 0
     And the start level should be 1
     And the start items should be empty
 
-  Scenario: applyToGame with defaults sets floor to 1 and does not change player
+  Scenario: applyToGame with defaults sets floor to 0 (the town)
     Given a new player
     And a new floor manager
     When developer options are applied to the game
     Then the player should be level 1
-    And the floor manager should be on floor 1
+    And the floor manager should be on floor 0
     And the player inventory should be empty
 
   Scenario: applyToGame levels up player to the configured level

@@ -37,3 +37,10 @@ Feature: Town Level
   Scenario: The town start position is on a walkable tile
     Given the town is generated
     Then the town start position is on a walkable tile
+
+  Scenario: FloorManager generates the town map at floor 0
+    Given a new FloorManager
+    When the floor is generated
+    Then the generated floor map contains floor tiles
+    And the generated floor map contains stairs leading down
+    And the generated floor start position is on a walkable tile
