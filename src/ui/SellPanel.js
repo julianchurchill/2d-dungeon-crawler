@@ -65,11 +65,11 @@ export class SellPanel {
     });
     this._container.add(this._title);
 
-    // Close button — positioned outside the panel border (up and right) to save space
-    this._closeBtn = s.add.text(PANEL_W, 0, '✕', {
+    // Close button — same layout as InventoryPanel / SkillsPanel mobile close button
+    this._closeBtn = s.add.text(PANEL_W - PANEL_PAD / 2, 10, '✕', {
       fontSize: '14px', fontFamily: FONT_FAMILY, color: '#aaccff',
       stroke: '#000000', strokeThickness: 2, resolution: 2,
-    }).setOrigin(0, 1).setInteractive({ useHandCursor: true });
+    }).setOrigin(1, 0).setInteractive({ useHandCursor: true });
     this._closeBtn.on('pointerover', () => this._closeBtn.setColor('#ffffff'));
     this._closeBtn.on('pointerout',  () => this._closeBtn.setColor('#aaccff'));
     this._closeBtn.on('pointerdown', () => this.hide());
