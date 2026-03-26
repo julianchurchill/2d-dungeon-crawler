@@ -171,17 +171,16 @@ export class SellPanel {
     this._acceptableItems = inventory.filter(item => this._shop.accepts(item));
 
     // Deduplicate by item name — one row per unique type, showing a count
-    this._groups = [];
     const countByName = new Map();
     for (const item of this._acceptableItems) {
       if (countByName.has(item.name)) {
         countByName.get(item.name).count++;
       } else {
-        const group = { item, count: 1 };
-        countByName.set(item.name, group);
-        this._groups.push(group);
+        countByName.set(item.name, { item, count: 1 });
       }
     }
+    // Sort alphabetically so the list order is stable as items are sold
+    this._groups = [...countByName.values()].sort((a, b) => a.item.name.localeCompare(b.item.name));
 
     const hasItems = this._groups.length > 0;
     this._emptyText.setVisible(!hasItems);
