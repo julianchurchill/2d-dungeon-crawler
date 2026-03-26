@@ -39,7 +39,9 @@ export class SellPanel {
     this._shop = null;
     /** @type {Item[]} Filtered list of items the active shop accepts. */
     this._acceptableItems = [];
-    /** @type {number} Index of the currently highlighted item row. */
+    /** @type {Array<{item: Item, count: number}>} Deduplicated rows — one per unique item name. */
+    this._groups = [];
+    /** @type {number} Index of the currently highlighted row. */
     this._cursorIndex = 0;
     /** @type {Array<Phaser.GameObjects.GameObject[]>} One array of objects per item row. */
     this._rows = [];
@@ -75,7 +77,13 @@ export class SellPanel {
     this._closeBtn.on('pointerdown', () => this.hide());
     this._container.add(this._closeBtn);
 
-    // "Sell" column header — right-aligned above the price column, same size as item text
+    // Column headers — right-aligned above their respective columns
+    this._inBagColHeader = s.add.text(PANEL_W - PANEL_PAD - 38, TITLE_H - 16, 'In bag', {
+      fontSize: '10px', fontFamily: FONT_FAMILY, color: '#aaaaaa',
+      stroke: '#000000', strokeThickness: 1, resolution: 2,
+    }).setOrigin(1, 0).setVisible(false);
+    this._container.add(this._inBagColHeader);
+
     this._sellColHeader = s.add.text(PANEL_W - PANEL_PAD, TITLE_H - 16, 'Sell', {
       fontSize: '10px', fontFamily: FONT_FAMILY, color: '#aaaaaa',
       stroke: '#000000', strokeThickness: 1, resolution: 2,
@@ -161,16 +169,31 @@ export class SellPanel {
     this._title.setText(shopName);
 
     this._acceptableItems = inventory.filter(item => this._shop.accepts(item));
-    const hasItems = this._acceptableItems.length > 0;
+
+    // Deduplicate by item name — one row per unique type, showing a count
+    this._groups = [];
+    const countByName = new Map();
+    for (const item of this._acceptableItems) {
+      if (countByName.has(item.name)) {
+        countByName.get(item.name).count++;
+      } else {
+        const group = { item, count: 1 };
+        countByName.set(item.name, group);
+        this._groups.push(group);
+      }
+    }
+
+    const hasItems = this._groups.length > 0;
     this._emptyText.setVisible(!hasItems);
+    this._inBagColHeader.setVisible(hasItems);
     this._sellColHeader.setVisible(hasItems);
     this._cursorBar.setVisible(hasItems);
 
     // Clamp cursor after a sale may have shrunk the list
-    this._cursorIndex = Math.min(this._cursorIndex, Math.max(0, this._acceptableItems.length - 1));
+    this._cursorIndex = Math.min(this._cursorIndex, Math.max(0, this._groups.length - 1));
 
-    for (let i = 0; i < this._acceptableItems.length; i++) {
-      const item = this._acceptableItems[i];
+    for (let i = 0; i < this._groups.length; i++) {
+      const { item, count } = this._groups[i];
       const rowY = TITLE_H + i * ROW_H;
 
       // Separator line above each row
@@ -186,12 +209,22 @@ export class SellPanel {
         fontSize: '16px', resolution: 2,
       }).setOrigin(0, 0.5);
 
-      // Item name
+      // Item name — narrower to make room for the two right-hand columns
       const nameText = this.scene.add.text(PANEL_PAD + 22, rowY + ROW_H / 2, item.name, {
         fontSize: '10px', fontFamily: FONT_FAMILY, color: '#dddddd',
         stroke: '#000000', strokeThickness: 2, resolution: 2,
-        wordWrap: { width: 90 },
+        wordWrap: { width: 70 },
       }).setOrigin(0, 0.5);
+
+      // "In bag" count — how many of this item the player is carrying
+      const countText = this.scene.add.text(
+        PANEL_W - PANEL_PAD - 38, rowY + ROW_H / 2,
+        String(count),
+        {
+          fontSize: '10px', fontFamily: FONT_FAMILY, color: '#cccccc',
+          stroke: '#000000', strokeThickness: 2, resolution: 2,
+        }
+      ).setOrigin(1, 0.5);
 
       // Sell price — plain text, right-aligned under the "Sell" column header
       const sellBtn = this.scene.add.text(
@@ -211,13 +244,13 @@ export class SellPanel {
         EventBus.emit(GameEvents.SELL_ITEM, { shopType, item: soldItem });
       });
 
-      const rowObjs = [sep, icon, nameText, sellBtn];
+      const rowObjs = [sep, icon, nameText, countText, sellBtn];
       for (const obj of rowObjs) this._container.add(obj);
       this._rows.push(rowObjs);
     }
 
     // Resize background and reposition cursor bar
-    const panelH = TITLE_H + Math.max(1, this._acceptableItems.length) * ROW_H + FOOTER_H;
+    const panelH = TITLE_H + Math.max(1, this._groups.length) * ROW_H + FOOTER_H;
     this._bg.setSize(PANEL_W, panelH);
     this._emptyText.setY(TITLE_H + 10);
     this._updateCursorBar();
@@ -245,7 +278,7 @@ export class SellPanel {
    * Repositions the cursor highlight bar to sit behind the active row.
    */
   _updateCursorBar() {
-    if (this._acceptableItems.length === 0) {
+    if (this._groups.length === 0) {
       this._cursorBar.setVisible(false);
       return;
     }
@@ -291,8 +324,8 @@ export class SellPanel {
    * @param {number} delta - -1 for up, +1 for down.
    */
   _navigate(delta) {
-    if (!this._navigationReady || this._acceptableItems.length === 0) return;
-    const count = this._acceptableItems.length;
+    if (!this._navigationReady || this._groups.length === 0) return;
+    const count = this._groups.length;
     this._cursorIndex = (this._cursorIndex + delta + count) % count;
     this._updateCursorBar();
   }
@@ -301,8 +334,8 @@ export class SellPanel {
    * Emits SELL_ITEM for the currently highlighted item, if any.
    */
   _sellCurrent() {
-    if (this._acceptableItems.length === 0) return;
-    const item = this._acceptableItems[this._cursorIndex];
+    if (this._groups.length === 0) return;
+    const { item } = this._groups[this._cursorIndex];
     EventBus.emit(GameEvents.SELL_ITEM, { shopType: this._shopType, item });
   }
 
