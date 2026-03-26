@@ -18,7 +18,7 @@ const TOWN_WIDTH = 20;
 /** Height of the fixed town map in tiles. */
 const TOWN_HEIGHT = 20;
 /** Player start position — south-west open area, away from shops and the well. */
-const START_POS = { x: 3, y: 14 };
+const START_POS = { x: 5, y: 10 };
 /** Stairs-down position — centre of the town square. */
 const STAIRS_POS = { x: 10, y: 10 };
 

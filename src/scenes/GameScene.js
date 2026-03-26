@@ -32,6 +32,7 @@ import { NightVisionSkill } from '../skills/NightVisionSkill.js';
 import { ITEM_TYPES } from '../items/ItemTypes.js';
 import { getProgress, achievementStore } from '../achievements/AchievementStore.js';
 import { ShopSystem } from '../systems/ShopSystem.js';
+import { isTouchDevice } from '../utils/TouchDeviceDetector.js';
 
 const TILE_SIZE = 16;
 const FOV_RADIUS = 8;
@@ -134,12 +135,22 @@ export class GameScene extends Phaser.Scene {
       );
     }
 
-    // Camera — always follow the player so they're centred on all screen sizes
+    // Camera
     const mapW = map.width * TILE_SIZE;
     const mapH = map.height * TILE_SIZE;
     this.cameras.main.setZoom(2);
-    this.cameras.main.setBounds(0, 0, mapW, mapH);
-    this.cameras.main.startFollow(this.playerSprite, true, 0.12, 0.12);
+    if (this.floorManager.isTown() && !isTouchDevice()) {
+      // Desktop town: show the whole map centred; no player-follow
+      this.cameras.main.stopFollow();
+      // Wide bounds so centerOn is not clamped to the small map area
+      this.cameras.main.setBounds(-10000, -10000, mapW + 20000, mapH + 20000);
+      this.cameras.main.centerOn(mapW / 2, mapH / 2);
+    } else {
+      // Dungeon (all devices) and town on mobile: follow the player so they
+      // are always centred regardless of screen size
+      this.cameras.main.setBounds(0, 0, mapW, mapH);
+      this.cameras.main.startFollow(this.playerSprite, true, 0.12, 0.12);
+    }
 
     // Spawn enemies (skip start room)
     this._spawnEnemies(rooms);
