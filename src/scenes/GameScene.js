@@ -23,6 +23,7 @@ import { handleMobileMenuPress } from '../systems/MobileMenuHandler.js';
 import { wrapWithRunCancel } from '../utils/ActionWrapper.js';
 import { applyInventoryToggle } from '../systems/InventoryToggle.js';
 import { applySkillsToggle } from '../systems/SkillsToggle.js';
+import { applyEscPanelClose } from '../systems/EscPanelClose.js';
 import { SkillSystem } from '../systems/SkillSystem.js';
 import { LuckyStrikeSkill } from '../skills/LuckyStrikeSkill.js';
 import { FerocitySkill } from '../skills/FerocitySkill.js';
@@ -385,15 +386,22 @@ export class GameScene extends Phaser.Scene {
     this.input.keyboard.on('keydown-K',           wrapWithRunCancel(this._runController, () => this._toggleSkills()));
     this.input.keyboard.on('keydown-PERIOD',       wrapWithRunCancel(this._runController, () => this._tryUseStairs()));
     this.input.keyboard.on('keydown-GREATER_THAN', wrapWithRunCancel(this._runController, () => this._tryUseStairs()));
-    // ESC closes the sell panel when open, then the message log, then opens
-    // the in-game menu — evaluated in priority order.
+    // ESC closes whichever panel is open (message log, sell, inventory, skills)
+    // before falling through to the in-game menu — evaluated in priority order.
     this.input.keyboard.on('keydown-ESC', wrapWithRunCancel(this._runController, () => {
       if (this._messageLogOpen) {
         EventBus.emit(GameEvents.CLOSE_MESSAGE_LOG);
       } else if (this._sellPanelOpen) {
         EventBus.emit(GameEvents.CLOSE_SELL_PANEL);
       } else {
-        this._openInGameMenu();
+        const action = applyEscPanelClose(this.turnManager);
+        if (action === 'close-inventory') {
+          EventBus.emit(GameEvents.OPEN_INVENTORY, { inventory: this.player.inventory, player: this.player });
+        } else if (action === 'close-skills') {
+          EventBus.emit(GameEvents.OPEN_SKILLS, this._buildSkillsPayload());
+        } else {
+          this._openInGameMenu();
+        }
       }
     }));
 

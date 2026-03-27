@@ -9,6 +9,7 @@ Entries are listed newest-first within each section.
 
 ### Changed
 
+- 2026-03-27 — ESC now closes the inventory and skills panels directly rather than opening the game menu
 - 2026-03-27 — Shop panel rows now require two clicks/taps: first selects the row, second sells the item
 - 2026-03-27 — Dev mode now defaults starting inventory to 2× Health Potion, 1× Mega Potion, 1× Short Sword, 1× Leather Armor for convenient testing
 
