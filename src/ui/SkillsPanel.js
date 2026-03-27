@@ -28,7 +28,7 @@ const BTN_COL_W  = 48;
  * @returns {string}
  */
 export function getSkillsPanelTitle(isTouchDev) {
-  return isTouchDev ? 'SKILLS' : 'SKILLS  [K] close';
+  return isTouchDev ? 'Skills' : 'Skills  [K] close';
 }
 
 export class SkillsPanel {
