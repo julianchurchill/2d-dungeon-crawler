@@ -9,6 +9,8 @@ Entries are listed newest-first within each section.
 
 ### Changed
 
+- 2026-03-27 — Inventory and Skills panel titles changed from all-caps to title case
+- 2026-03-27 — Inventory and Skills panel titles changed from all-caps to title case
 - 2026-03-27 — ESC now closes the inventory and skills panels directly rather than opening the game menu
 - 2026-03-27 — Panel key handling consolidated via TURN_STATE.SHOP so 'I'/'K' are silently ignored while the shop is open
 - 2026-03-27 — Shop panel rows now require two clicks/taps: first selects the row, second sells the item

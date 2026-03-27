@@ -12,7 +12,7 @@ import { isTouchDevice } from '../utils/TouchDeviceDetector.js';
  * @returns {string}
  */
 export function getInventoryPanelTitle(isTouchDev) {
-  return isTouchDev ? 'INVENTORY' : 'INVENTORY  [I] close  [↵] use/equip';
+  return isTouchDev ? 'Inventory' : 'Inventory  [I] close  [↵] use/equip';
 }
 
 const COLS = 4;
