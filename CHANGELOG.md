@@ -10,7 +10,6 @@ Entries are listed newest-first within each section.
 ### Changed
 
 - 2026-03-27 — Inventory and Skills panel titles changed from all-caps to title case
-- 2026-03-27 — Inventory and Skills panel titles changed from all-caps to title case
 - 2026-03-27 — ESC now closes the inventory and skills panels directly rather than opening the game menu
 - 2026-03-27 — Panel key handling consolidated via TURN_STATE.SHOP so 'I'/'K' are silently ignored while the shop is open
 - 2026-03-27 — Shop panel rows now require two clicks/taps: first selects the row, second sells the item
@@ -33,6 +32,7 @@ Entries are listed newest-first within each section.
 
 ### Added
 
+- 2026-03-27 — UI_STYLE_GUIDE.md: style guide for panel background, title, close button, ESC behaviour, and TurnManager integration
 - 2026-03-26 — Town shops: 3 shops (potion, weapon, armour) with door tiles; bumping a door opens a sell panel showing accepted items with gold prices; player starts with 0 gold displayed in the HUD; `ShopSystem`, `SellPanel` added; `PLAYER_GOLD_CHANGED`, `OPEN_SELL_PANEL`, `SELL_ITEM` events added
 - 2026-03-26 — Town uses distinct tile textures: warm cobblestone floor (`tile_town_floor`) and cream stone wall (`tile_town_wall`), visually separate from the dark dungeon tiles
 - 2026-03-26 — Town floor is now fully lit (daylight FOV): all non-opaque tiles are always visible; `computeDaylightFOV` added to `ShadowcastFOV.js`; town map is centred on screen with no player-follow camera

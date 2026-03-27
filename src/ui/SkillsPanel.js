@@ -83,6 +83,8 @@ export class SkillsPanel {
         fontSize: '14px', fontFamily: FONT_FAMILY, color: '#aaccff',
         stroke: '#000000', strokeThickness: 2, resolution: 2,
       }).setOrigin(1, 0).setInteractive({ useHandCursor: true });
+      closeBtn.on('pointerover', () => closeBtn.setColor('#ffffff'));
+      closeBtn.on('pointerout',  () => closeBtn.setColor('#aaccff'));
       closeBtn.on('pointerdown', () => EventBus.emit(GameEvents.TOGGLE_SKILLS));
       this._container.add(closeBtn);
     }
