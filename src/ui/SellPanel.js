@@ -225,7 +225,7 @@ export class SellPanel {
         }
       ).setOrigin(1, 0.5);
 
-      // Sell price — plain text, right-aligned under the "Sell" column header
+      // Sell price — visual only; interaction is handled by the row hit area below
       const sellBtn = this.scene.add.text(
         PANEL_W - PANEL_PAD, rowY + ROW_H / 2,
         `${item.sellPrice}g`,
@@ -233,17 +233,26 @@ export class SellPanel {
           fontSize: '10px', fontFamily: FONT_FAMILY, color: '#ffdd44',
           stroke: '#000000', strokeThickness: 2, resolution: 2,
         }
-      ).setOrigin(1, 0.5).setInteractive({ useHandCursor: true });
+      ).setOrigin(1, 0.5);
 
-      sellBtn.on('pointerover', () => { this._setCursor(i); sellBtn.setColor('#ffffff'); });
-      sellBtn.on('pointerout',  () => sellBtn.setColor('#ffdd44'));
+      // Transparent hit area covering the full row — sits on top of all row content
+      // so it captures all pointer events for this row.
+      // First click highlights the row; a second click on the already-highlighted row sells.
       const soldItem = item;
       const shopType = this._shopType;
-      sellBtn.on('pointerdown', () => {
-        EventBus.emit(GameEvents.SELL_ITEM, { shopType, item: soldItem });
+      const rowHit = this.scene.add.rectangle(2, rowY + 1, PANEL_W - 4, ROW_H - 2, 0xffffff, 0)
+        .setOrigin(0, 0).setInteractive({ useHandCursor: true });
+      rowHit.on('pointerover', () => sellBtn.setColor('#ffffff'));
+      rowHit.on('pointerout',  () => sellBtn.setColor('#ffdd44'));
+      rowHit.on('pointerdown', () => {
+        if (this._cursorIndex === i) {
+          EventBus.emit(GameEvents.SELL_ITEM, { shopType, item: soldItem });
+        } else {
+          this._setCursor(i);
+        }
       });
 
-      const rowObjs = [sep, icon, nameText, countText, sellBtn];
+      const rowObjs = [sep, icon, nameText, countText, sellBtn, rowHit];
       for (const obj of rowObjs) this._container.add(obj);
       this._rows.push(rowObjs);
     }
