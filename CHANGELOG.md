@@ -9,6 +9,8 @@ Entries are listed newest-first within each section.
 
 ### Changed
 
+- 2026-03-27 — Dev mode now defaults starting inventory to 2× Health Potion, 1× Mega Potion, 1× Short Sword, 1× Leather Armor for convenient testing
+
 - 2026-03-25 — Potion of Minor Teleportation spawns less frequently than health and mega potions; potions are now weighted 3× relative to the teleport potion in the loot pool
 
 ### Fixed
