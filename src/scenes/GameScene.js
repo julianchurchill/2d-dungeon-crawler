@@ -65,11 +65,8 @@ export class GameScene extends Phaser.Scene {
     this._messageLogOpen = false;
     EventBus.on(GameEvents.MESSAGE_LOG_TOGGLED, (open) => { this._messageLogOpen = open; }, this);
 
-    // Track whether the sell panel is open so ESC closes it before the game menu.
-    // Also gate player input via TurnManager: block on open, restore on close.
-    this._sellPanelOpen = false;
+    // Restore player input when the sell panel closes.
     EventBus.on(GameEvents.SELL_PANEL_TOGGLED, (open) => {
-      this._sellPanelOpen = open;
       if (!open) this.turnManager.setState(TURN_STATE.PLAYER_INPUT);
     }, this);
 
@@ -391,7 +388,7 @@ export class GameScene extends Phaser.Scene {
     this.input.keyboard.on('keydown-ESC', wrapWithRunCancel(this._runController, () => {
       if (this._messageLogOpen) {
         EventBus.emit(GameEvents.CLOSE_MESSAGE_LOG);
-      } else if (this._sellPanelOpen) {
+      } else if (this.turnManager.state === TURN_STATE.SHOP) {
         EventBus.emit(GameEvents.CLOSE_SELL_PANEL);
       } else {
         const action = applyEscPanelClose(this.turnManager);
@@ -544,8 +541,8 @@ export class GameScene extends Phaser.Scene {
       // Open or toggle the sell panel; no turn spent on door interactions
       const shop = this.shops.find(s => s.doorX === result.doorX && s.doorY === result.doorY);
       if (shop) {
-        // Block player movement while the sell panel is visible
-        this.turnManager.setState(TURN_STATE.INVENTORY);
+        // Use TURN_STATE.SHOP so the state machine blocks I/K panel keys naturally
+        this.turnManager.setState(TURN_STATE.SHOP);
         EventBus.emit(GameEvents.OPEN_SELL_PANEL, {
           shopType: shop.type,
           inventory: this.player.inventory,
@@ -719,10 +716,10 @@ export class GameScene extends Phaser.Scene {
   }
 
   _toggleInventory() {
-    // Inventory cannot be opened while the sell panel is visible.
-    if (this._sellPanelOpen) return;
     // Only emit the open/close event when a state transition is actually possible,
     // so the visual panel and TurnManager state can never get out of sync.
+    // applyInventoryToggle only allows PLAYER_INPUT↔INVENTORY, so any other
+    // active panel state (SHOP, SKILLS, …) is silently rejected.
     const toggled = applyInventoryToggle(this.turnManager);
     if (toggled) {
       EventBus.emit(GameEvents.OPEN_INVENTORY, {

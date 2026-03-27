@@ -8,7 +8,7 @@
  *  - Toggled open/closed by bumping the shop door (or pressing ESC / ✕ to close).
  *  - UP/DOWN (or W/S) navigate items; ENTER sells the highlighted item.
  *  - Direction keys are blocked for player movement while the panel is open
- *    (GameScene sets TurnManager to INVENTORY state when it opens).
+ *    (GameScene sets TurnManager to SHOP state when it opens).
  */
 import { FONT_FAMILY } from '../utils/FontConfig.js';
 import { EventBus } from '../utils/EventBus.js';
