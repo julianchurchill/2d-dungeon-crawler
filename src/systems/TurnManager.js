@@ -12,6 +12,7 @@ export const TURN_STATE = Object.freeze({
   GAME_OVER:     'GAME_OVER',
   INVENTORY:     'INVENTORY',
   SKILLS:        'SKILLS',
+  SHOP:          'SHOP',
 });
 
 export class TurnManager {
