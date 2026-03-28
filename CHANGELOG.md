@@ -33,6 +33,7 @@ Entries are listed newest-first within each section.
 
 ### Added
 
+- 2026-03-28 — Inventory panel shows item description (stats) below the grid when a slot is highlighted; first pointer tap selects a slot, second tap uses/equips the item
 - 2026-03-27 — UI_STYLE_GUIDE.md: style guide for panel background, title, close button, ESC behaviour, and TurnManager integration
 - 2026-03-26 — Town shops: 3 shops (potion, weapon, armour) with door tiles; bumping a door opens a sell panel showing accepted items with gold prices; player starts with 0 gold displayed in the HUD; `ShopSystem`, `SellPanel` added; `PLAYER_GOLD_CHANGED`, `OPEN_SELL_PANEL`, `SELL_ITEM` events added
 - 2026-03-26 — Town uses distinct tile textures: warm cobblestone floor (`tile_town_floor`) and cream stone wall (`tile_town_wall`), visually separate from the dark dungeon tiles
