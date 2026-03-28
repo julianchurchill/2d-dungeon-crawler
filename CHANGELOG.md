@@ -7,6 +7,10 @@ Entries are listed newest-first within each section.
 
 ## [Unreleased]
 
+---
+
+## [0.21.0] - 2026-03-28
+
 ### Changed
 
 - 2026-03-27 — Inventory and Skills panel titles changed from all-caps to title case
