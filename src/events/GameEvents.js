@@ -247,8 +247,8 @@ export const GameEvents = {
   SELL_PANEL_TOGGLED: 'sell-panel-toggled',
 
   /**
-   * Request to close the sell panel (ESC key while it is open).
-   * Emitted by: GameScene
+   * Request to close the sell panel.
+   * Emitted by: GameScene (ESC key), SellPanel (✕ button)
    * Subscribed by: UIScene → SellPanel.hide()
    */
   CLOSE_SELL_PANEL: 'close-sell-panel',
