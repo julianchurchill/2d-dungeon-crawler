@@ -2,6 +2,7 @@ import { FONT_FAMILY } from '../utils/FontConfig.js';
 import { EventBus } from '../utils/EventBus.js';
 import { GameEvents } from '../events/GameEvents.js';
 import { InventoryCursor } from '../systems/InventoryCursor.js';
+import { applySlotPointerDown } from '../systems/InventorySlotPointer.js';
 import { isTouchDevice } from '../utils/TouchDeviceDetector.js';
 
 /**
@@ -35,8 +36,9 @@ export class InventoryPanel {
     const { width, height } = s.scale;
 
     const panelW = COLS * (SLOT_SIZE + SLOT_PAD) + PANEL_PAD * 2;
-    // Extra height: 44px header area (title may wrap to 2 lines) + PANEL_PAD footer
-    const panelH = ROWS * (SLOT_SIZE + SLOT_PAD) + PANEL_PAD * 2 + 55;
+    // Extra height: 44px header area (title may wrap to 2 lines) + 16px description
+    // line + PANEL_PAD footer gap between description and equipped bar.
+    const panelH = ROWS * (SLOT_SIZE + SLOT_PAD) + PANEL_PAD * 2 + 72;
     const panelX = Math.floor((width - panelW) / 2);
     const panelY = Math.floor((height - panelH) / 2);
 
@@ -94,10 +96,12 @@ export class InventoryPanel {
         }).setOrigin(0.5);
 
         slotBg.on('pointerdown', () => {
-          if (index < this.inventory.length) {
-            // Move cursor to the clicked slot so the highlight stays consistent.
-            this._cursor.setIndex(index);
+          const action = applySlotPointerDown(this._cursor, index, this.inventory.length);
+          if (action === 'select') {
+            // First tap: move cursor and show stats without using the item.
             this._highlightCursor();
+          } else if (action === 'use') {
+            // Second tap on the already-selected slot: use/equip the item.
             EventBus.emit(GameEvents.INVENTORY_USE, index);
           }
         });
@@ -112,6 +116,15 @@ export class InventoryPanel {
       }
     }
 
+    // Item description — updates when the cursor moves; empty when slot is empty.
+    // Positioned above the equipped bar; word wrap prevents overflow on longer descriptions.
+    this._descText = s.add.text(PANEL_PAD, panelH - PANEL_PAD - 16, '', {
+      fontSize: '11px', fontFamily: FONT_FAMILY, color: '#ddddaa',
+      stroke: '#000000', strokeThickness: 2, resolution: 2,
+      wordWrap: { width: panelW - PANEL_PAD * 2 },
+    }).setOrigin(0, 1);
+    this._container.add(this._descText);
+
     // Equipped display
     // setOrigin(0, 1) anchors to bottom-left, giving PANEL_PAD margin from the panel edge.
     this._equippedText = s.add.text(PANEL_PAD, panelH - PANEL_PAD, 'WPN: -   ARM: -', {
@@ -125,6 +138,9 @@ export class InventoryPanel {
     EventBus.on(GameEvents.INVENTORY_CHANGED, () => {
       if (this.visible) {
         this._refresh(this._player);
+        // Re-run cursor highlight so description updates if the highlighted item
+        // was just consumed (and the slot is now empty).
+        this._highlightCursor();
       }
     });
   }
@@ -161,7 +177,8 @@ export class InventoryPanel {
 
   /**
    * Restores the previous slot's stroke and applies a bright highlight to the
-   * current cursor slot.
+   * current cursor slot. Also updates the description bar with the highlighted
+   * item's description, or clears it if the slot is empty.
    */
   _highlightCursor() {
     if (this._prevCursorIndex !== undefined) {
@@ -170,6 +187,8 @@ export class InventoryPanel {
     const idx = this._cursor.index;
     this._slots[idx].bg.setStrokeStyle(2, 0xffdd44);
     this._prevCursorIndex = idx;
+    const item = this.inventory[idx];
+    this._descText.setText(item ? item.description : '');
   }
 
   /**
@@ -180,6 +199,7 @@ export class InventoryPanel {
       this._slots[this._prevCursorIndex].bg.setStrokeStyle(1, 0x445566);
       this._prevCursorIndex = undefined;
     }
+    this._descText.setText('');
   }
 
   // ─── Keyboard navigation ──────────────────────────────────────────────────
@@ -281,8 +301,7 @@ export class InventoryPanel {
 
   resize(width, height) {
     const panelW = COLS * (SLOT_SIZE + SLOT_PAD) + PANEL_PAD * 2;
-    // Extra height: 44px header area (title may wrap to 2 lines) + PANEL_PAD footer
-    const panelH = ROWS * (SLOT_SIZE + SLOT_PAD) + PANEL_PAD * 2 + 55;
+    const panelH = ROWS * (SLOT_SIZE + SLOT_PAD) + PANEL_PAD * 2 + 72;
     this._container.setPosition(
       Math.floor((width - panelW) / 2),
       Math.floor((height - panelH) / 2)
