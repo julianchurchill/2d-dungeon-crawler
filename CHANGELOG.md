@@ -19,6 +19,7 @@ Entries are listed newest-first within each section.
 
 ### Fixed
 
+- 2026-03-28 — SellPanel ✕ button now emits CLOSE_SELL_PANEL event instead of calling hide() directly, consistent with the UI style guide convention
 - 2026-03-25 — Fix MCP servers (Context7, Serena) not loading in Claude Code by writing config to `.claude.json` instead of `settings.json` in `init-claude-settings.sh`
 
 - 2026-03-25 — "Potion of Minor Teleportation" label overflowed its inventory slot; item types now support an optional `shortName` used in the slot label (falling back to `name`), and the potion uses `shortName: 'Teleport Potion'`

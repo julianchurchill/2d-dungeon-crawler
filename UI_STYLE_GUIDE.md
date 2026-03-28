@@ -104,11 +104,6 @@ On **non-touch** devices the keyboard shortcut replaces the close button.
 Show the ✕ button unconditionally only on panels that have no keyboard
 shortcut (e.g. the sell panel, which closes with ESC).
 
-> **Note — `SellPanel` exception:** `SellPanel` predates this convention and
-> calls `this.hide()` directly from the close button. Its `hide()` method
-> emits `SELL_PANEL_TOGGLED` which `GameScene` uses to reset `TurnManager`
-> state. New panels should follow the EventBus-emit pattern above.
-
 ---
 
 ## ESC Key Behaviour

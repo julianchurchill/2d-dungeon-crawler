@@ -74,7 +74,7 @@ export class SellPanel {
     }).setOrigin(1, 0).setInteractive({ useHandCursor: true });
     this._closeBtn.on('pointerover', () => this._closeBtn.setColor('#ffffff'));
     this._closeBtn.on('pointerout',  () => this._closeBtn.setColor('#aaccff'));
-    this._closeBtn.on('pointerdown', () => this.hide());
+    this._closeBtn.on('pointerdown', () => EventBus.emit(GameEvents.CLOSE_SELL_PANEL));
     this._container.add(this._closeBtn);
 
     // Column headers — right-aligned above their respective columns
