@@ -19,7 +19,7 @@ const PANEL_W = 220;
 const PANEL_PAD = 14;
 const ROW_H = 36;
 const TITLE_H = 46;
-const FOOTER_H = 20;
+const FOOTER_H = 32;
 
 /** Maps itemType to emoji icon. */
 const ICON_MAP = { consumable: '🧪', weapon: '⚔️', armor: '🛡️' };
@@ -102,6 +102,15 @@ export class SellPanel {
       stroke: '#000000', strokeThickness: 2, resolution: 2,
     }).setOrigin(0.5, 0).setVisible(false);
     this._container.add(this._emptyText);
+
+    // Item description — updates when the cursor moves; y is set dynamically in
+    // _updateCursorBar() since the panel height varies with the item count.
+    this._descText = s.add.text(PANEL_PAD, 0, '', {
+      fontSize: '11px', fontFamily: FONT_FAMILY, color: '#ddddaa',
+      stroke: '#000000', strokeThickness: 2, resolution: 2,
+      wordWrap: { width: PANEL_W - PANEL_PAD * 2 },
+    }).setOrigin(0, 0.5);
+    this._container.add(this._descText);
   }
 
   /**
@@ -286,12 +295,20 @@ export class SellPanel {
    * Repositions the cursor highlight bar to sit behind the active row.
    */
   _updateCursorBar() {
+    // Position the description text in the centre of the footer area regardless
+    // of whether there are items, so it stays anchored to the panel bottom.
+    const panelH = this._bg.height;
+    this._descText.setY(panelH - FOOTER_H / 2);
+
     if (this._groups.length === 0) {
       this._cursorBar.setVisible(false);
+      this._descText.setText('');
       return;
     }
     const rowY = TITLE_H + this._cursorIndex * ROW_H;
     this._cursorBar.setPosition(2, rowY + 1).setVisible(true);
+    const item = this._groups[this._cursorIndex]?.item;
+    this._descText.setText(item ? item.description : '');
   }
 
   // ─── Keyboard navigation ──────────────────────────────────────────────────
