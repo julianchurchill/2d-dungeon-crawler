@@ -252,4 +252,35 @@ export const GameEvents = {
    * Subscribed by: UIScene → SellPanel.hide()
    */
   CLOSE_SELL_PANEL: 'close-sell-panel',
+
+  /**
+   * Open (or toggle) the buy panel for a town shop.
+   * Emitted by: GameScene (when player bumps a shop door)
+   * Subscribed by: UIScene → BuyPanel
+   * @type {{ shopType: string, shopStock: Array<{item: Item, buyPrice: number}>, player: Player }}
+   */
+  OPEN_BUY_PANEL: 'open-buy-panel',
+
+  /**
+   * Buy an item from the active shop.
+   * Emitted by: BuyPanel (on purchase)
+   * Subscribed by: GameScene → _handleBuyItem
+   * @type {{ shopType: string, shopItem: {item: Item, buyPrice: number} }}
+   */
+  BUY_ITEM: 'buy-item',
+
+  /**
+   * The buy panel has been opened or closed.
+   * Emitted by: BuyPanel (show → true, hide → false)
+   * Subscribed by: (internal state tracking)
+   * @type {boolean} true = panel opened, false = panel closed.
+   */
+  BUY_PANEL_TOGGLED: 'buy-panel-toggled',
+
+  /**
+   * Request to close the buy panel.
+   * Emitted by: GameScene (ESC key), BuyPanel (✕ button)
+   * Subscribed by: UIScene → BuyPanel.hide()
+   */
+  CLOSE_BUY_PANEL: 'close-buy-panel',
 };
