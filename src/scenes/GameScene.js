@@ -550,13 +550,9 @@ export class GameScene extends Phaser.Scene {
       if (shop) {
         // Use TURN_STATE.SHOP so the state machine blocks I/K panel keys naturally
         this.turnManager.setState(TURN_STATE.SHOP);
-        EventBus.emit(GameEvents.OPEN_BUY_PANEL, {
+        EventBus.emit(GameEvents.OPEN_SHOP_PANEL, {
           shopType: shop.type,
           shopStock: shop.stock,
-          player: this.player,
-        });
-        EventBus.emit(GameEvents.OPEN_SELL_PANEL, {
-          shopType: shop.type,
           inventory: this.player.inventory,
           player: this.player,
         });

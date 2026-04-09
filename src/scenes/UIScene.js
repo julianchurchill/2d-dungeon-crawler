@@ -9,15 +9,7 @@ import { EventBus } from '../utils/EventBus.js';
 import { GameEvents } from '../events/GameEvents.js';
 import { isTouchDevice } from '../utils/TouchDeviceDetector.js';
 import { syncHudFromRegistry } from '../ui/HudRegistrySync.js';
-import { SellPanel } from '../ui/SellPanel.js';
-import { BuyPanel } from '../ui/BuyPanel.js';
-
-/**
- * Horizontal pixel offset from screen centre applied to each shop panel so
- * they appear side-by-side. Each panel shifts away from centre by this amount.
- * Total combined panel width = PANEL_W * 2 + PANEL_GAP = ~450px.
- */
-const SHOP_PANEL_OFFSET = 115;
+import { ShopPanel } from '../ui/ShopPanel.js';
 
 export class UIScene extends Phaser.Scene {
   constructor() {
@@ -33,19 +25,10 @@ export class UIScene extends Phaser.Scene {
     this.messageLog = new MessageLog(this);
     this.inventoryPanel = new InventoryPanel(this);
     this.skillsPanel = new SkillsPanel(this);
-    this.sellPanel = new SellPanel(this);
-    this.buyPanel = new BuyPanel(this);
+    this.shopPanel = new ShopPanel(this);
     this.dpad = new DPad(this);
     // Show touch controls only on devices that support touch input
     this.dpad.setVisible(isTouchDevice());
-
-    /**
-     * Which shop panel currently owns keyboard focus.
-     * 'buy'  → BuyPanel responds to UP/DOWN/ENTER
-     * 'sell' → SellPanel responds to UP/DOWN/ENTER
-     * @type {'buy'|'sell'}
-     */
-    this._shopFocus = 'buy';
 
     this._setupShopKeyboard();
 
@@ -64,46 +47,25 @@ export class UIScene extends Phaser.Scene {
       this.inventoryPanel.toggle(inventory, player);
     }, this);
 
-    // Gold changes — update HUD and refresh BuyPanel (stock may have changed after a purchase)
+    // Gold changes — update HUD and the shop panel gold display
     EventBus.on(GameEvents.PLAYER_GOLD_CHANGED, (gold) => {
       this.hud.updateGold(gold);
-      this.buyPanel.updateGold(gold);
-      // Refresh the buy panel so it shows the updated stock and gold balance
-      this.buyPanel.refresh();
+      this.shopPanel.updateGold(gold);
     }, this);
 
-    // Open (or toggle) the buy panel when the player bumps a shop door.
-    // Positioned to the LEFT of centre; sell panel goes to the RIGHT.
-    EventBus.on(GameEvents.OPEN_BUY_PANEL, ({ shopType, shopStock, player }) => {
-      this._shopFocus = 'buy';
-      this.buyPanel.show(shopType, shopStock, player, -SHOP_PANEL_OFFSET);
+    // Open the combined shop panel when the player bumps a shop door.
+    EventBus.on(GameEvents.OPEN_SHOP_PANEL, ({ shopType, shopStock, inventory, player }) => {
+      this.shopPanel.show(shopType, shopStock, inventory, player);
     }, this);
 
-    // Open (or toggle) the sell panel when the player bumps a shop door.
-    EventBus.on(GameEvents.OPEN_SELL_PANEL, ({ shopType, inventory, player }) => {
-      this.sellPanel.show(shopType, inventory, player, SHOP_PANEL_OFFSET);
-    }, this);
-
-    // Refresh sell panel when inventory changes after a sale or purchase
+    // Refresh sell section when inventory changes after a sale or purchase
     EventBus.on(GameEvents.INVENTORY_CHANGED, (inventory) => {
-      this.sellPanel.refresh(inventory);
+      this.shopPanel.refresh(inventory);
     }, this);
 
-    // Closing the sell panel also closes the buy panel (they open/close together).
+    // Close the shop panel
     EventBus.on(GameEvents.CLOSE_SELL_PANEL, () => {
-      this.sellPanel?.hide();
-      this.buyPanel?.hide();
-    }, this);
-
-    // Closing the buy panel also closes the sell panel.
-    EventBus.on(GameEvents.CLOSE_BUY_PANEL, () => {
-      this.buyPanel?.hide();
-      this.sellPanel?.hide();
-    }, this);
-
-    // Refresh buy panel stock after a purchase
-    EventBus.on(GameEvents.BUY_PANEL_TOGGLED, () => {
-      // No-op currently; BuyPanel manages its own stock via shopStock reference.
+      this.shopPanel?.hide();
     }, this);
 
     // Registry → HUD
@@ -152,69 +114,35 @@ export class UIScene extends Phaser.Scene {
   /**
    * Registers keyboard handlers for shop panel navigation.
    *
-   * When a shop is open:
-   *  - LEFT arrow  → focus BuyPanel
-   *  - RIGHT arrow → focus SellPanel
-   *  - UP / W      → navigate up in the focused panel
-   *  - DOWN / S    → navigate down in the focused panel
-   *  - ENTER       → buy / sell the highlighted item in the focused panel
+   * When the shop panel is open:
+   *  - UP / W    → navigate up
+   *  - DOWN / S  → navigate down
+   *  - ENTER     → buy or sell the highlighted item
    *
-   * These listeners are always registered; they only act when a shop panel
+   * These listeners are always registered; they only act when the shop panel
    * is visible (GameScene sets TurnManager to SHOP state, blocking movement).
    */
   _setupShopKeyboard() {
     const kb = this.input.keyboard;
 
-    kb.on('keydown-LEFT', () => {
-      if (this.buyPanel.visible || this.sellPanel.visible) {
-        this._shopFocus = 'buy';
-      }
-    });
-
-    kb.on('keydown-RIGHT', () => {
-      if (this.buyPanel.visible || this.sellPanel.visible) {
-        this._shopFocus = 'sell';
-      }
-    });
-
     kb.on('keydown-UP', () => {
-      if (this._shopFocus === 'buy' && this.buyPanel.visible) {
-        this.buyPanel.navigate(-1);
-      } else if (this._shopFocus === 'sell' && this.sellPanel.visible) {
-        this.sellPanel.navigate(-1);
-      }
+      if (this.shopPanel.visible) this.shopPanel.navigate(-1);
     });
 
     kb.on('keydown-DOWN', () => {
-      if (this._shopFocus === 'buy' && this.buyPanel.visible) {
-        this.buyPanel.navigate(1);
-      } else if (this._shopFocus === 'sell' && this.sellPanel.visible) {
-        this.sellPanel.navigate(1);
-      }
+      if (this.shopPanel.visible) this.shopPanel.navigate(1);
     });
 
     kb.on('keydown-W', () => {
-      if (this._shopFocus === 'buy' && this.buyPanel.visible) {
-        this.buyPanel.navigate(-1);
-      } else if (this._shopFocus === 'sell' && this.sellPanel.visible) {
-        this.sellPanel.navigate(-1);
-      }
+      if (this.shopPanel.visible) this.shopPanel.navigate(-1);
     });
 
     kb.on('keydown-S', () => {
-      if (this._shopFocus === 'buy' && this.buyPanel.visible) {
-        this.buyPanel.navigate(1);
-      } else if (this._shopFocus === 'sell' && this.sellPanel.visible) {
-        this.sellPanel.navigate(1);
-      }
+      if (this.shopPanel.visible) this.shopPanel.navigate(1);
     });
 
     kb.on('keydown-ENTER', () => {
-      if (this._shopFocus === 'buy' && this.buyPanel.visible) {
-        this.buyPanel.select();
-      } else if (this._shopFocus === 'sell' && this.sellPanel.visible) {
-        this.sellPanel.select();
-      }
+      if (this.shopPanel.visible) this.shopPanel.select();
     });
   }
 
@@ -300,8 +228,7 @@ export class UIScene extends Phaser.Scene {
     this.hud?.resize(width, height);
     this.messageLog?.resize(width, height);
     this.inventoryPanel?.resize(width, height);
-    this.sellPanel?.resize(width, height);
-    this.buyPanel?.resize(width, height);
+    this.shopPanel?.resize(width, height);
     this.dpad?.resize(width, height);
     // Re-evaluate touch support on resize — handles DevTools device toolbar
     // toggling and detachable touchscreen laptops changing touch capability.
