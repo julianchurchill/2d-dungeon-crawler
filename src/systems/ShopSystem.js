@@ -31,6 +31,24 @@ export class ShopSystem {
   }
 
   /**
+   * Buy an item from the shop, deducting the buy price from the player's gold
+   * and adding the item to their inventory.
+   * Returns false if the player cannot afford it or their inventory is full.
+   *
+   * @param {import('../entities/Player.js').Player} player
+   * @param {import('../items/Item.js').Item} item - The item to purchase.
+   * @param {number} buyPrice - The gold cost to buy this item.
+   * @returns {boolean} True if the purchase succeeded.
+   */
+  buy(player, item, buyPrice) {
+    if (player.gold < buyPrice) return false;
+    if (!player.canPickUp()) return false;
+    player.gold -= buyPrice;
+    player.addItem(item);
+    return true;
+  }
+
+  /**
    * Sell an item from the player's inventory at this shop.
    * The item is removed from the inventory and its sell price is added to
    * the player's gold. Returns 0 if the item is not in the inventory or if

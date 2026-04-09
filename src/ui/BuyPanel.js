@@ -1,20 +1,19 @@
 /**
- * @module SellPanel
- * @description A UI panel displayed in town shops, showing the items in the
- * player's inventory that the shop accepts and allowing the player to sell them
- * for gold currency.
+ * @module BuyPanel
+ * @description A UI panel displayed in town shops, showing the items the shop
+ * has for sale and allowing the player to purchase them with gold.
  *
  * Interaction:
- *  - Toggled open/closed by bumping the shop door (or pressing ESC / ✕ to close).
+ *  - Opens alongside the SellPanel when the player bumps a shop door.
  *  - Keyboard navigation is delegated to UIScene's shop keyboard controller.
- *    Call navigate(delta) and select() from outside; do NOT call _addKeyListeners.
- *  - Direction keys are blocked for player movement while the panel is open
- *    (GameScene sets TurnManager to SHOP state when it opens).
+ *    Call navigate(delta) and select() from outside.
+ *  - UP/DOWN navigate the item list; ENTER buys the highlighted item.
+ *  - LEFT/RIGHT switch keyboard focus between BuyPanel and SellPanel.
+ *  - Direction keys are blocked for player movement while in SHOP state.
  */
 import { FONT_FAMILY } from '../utils/FontConfig.js';
 import { EventBus } from '../utils/EventBus.js';
 import { GameEvents } from '../events/GameEvents.js';
-import { ShopSystem } from '../systems/ShopSystem.js';
 
 const PANEL_W = 220;
 const PANEL_PAD = 14;
@@ -27,7 +26,7 @@ const ICON_MAP = { consumable: '🧪', weapon: '⚔️', armor: '🛡️' };
 /** Maps shopType to display name. */
 const SHOP_NAMES = { potion: 'Potion Shop', weapon: 'Weapon Shop', armour: 'Armour Shop' };
 
-export class SellPanel {
+export class BuyPanel {
   /**
    * @param {Phaser.Scene} scene - UIScene instance.
    */
@@ -36,22 +35,20 @@ export class SellPanel {
     /** @type {boolean} Whether the panel is currently visible. */
     this.visible = false;
     this._shopType = null;
-    this._player = null;
-    this._shop = null;
-    /** @type {Item[]} Filtered list of items the active shop accepts. */
-    this._acceptableItems = [];
-    /** @type {Array<{item: Item, count: number}>} Deduplicated rows — one per unique item name. */
-    this._groups = [];
+    /** @type {Array<{item: import('../items/Item.js').Item, buyPrice: number}>} Current shop stock. */
+    this._shopStock = [];
     /** @type {number} Index of the currently highlighted row. */
     this._cursorIndex = 0;
     /** @type {Array<Phaser.GameObjects.GameObject[]>} One array of objects per item row. */
     this._rows = [];
     /** @type {number} Horizontal offset from the centered position, in pixels. */
     this._xOffset = 0;
+    /** @type {import('../entities/Player.js').Player|null} The current player instance. */
+    this._player = null;
     this._build();
   }
 
-  /** Constructs the static panel chrome (background, title, close button, empty message). */
+  /** Constructs the static panel chrome (background, title, close button, headers). */
   _build() {
     const s = this.scene;
 
@@ -70,95 +67,106 @@ export class SellPanel {
     });
     this._container.add(this._title);
 
-    // Close button — same layout as InventoryPanel / SkillsPanel mobile close button
+    // Close button
     this._closeBtn = s.add.text(PANEL_W - PANEL_PAD / 2, 10, '✕', {
       fontSize: '14px', fontFamily: FONT_FAMILY, color: '#aaccff',
       stroke: '#000000', strokeThickness: 2, resolution: 2,
     }).setOrigin(1, 0).setInteractive({ useHandCursor: true });
     this._closeBtn.on('pointerover', () => this._closeBtn.setColor('#ffffff'));
     this._closeBtn.on('pointerout',  () => this._closeBtn.setColor('#aaccff'));
+    // Closing the buy panel closes the whole shop
     this._closeBtn.on('pointerdown', () => EventBus.emit(GameEvents.CLOSE_SELL_PANEL));
     this._container.add(this._closeBtn);
 
-    // Column headers — right-aligned above their respective columns
-    this._inBagColHeader = s.add.text(PANEL_W - PANEL_PAD - 38, TITLE_H - 16, 'In bag', {
+    // Column headers
+    this._stockColHeader = s.add.text(PANEL_W - PANEL_PAD - 38, TITLE_H - 16, 'Stock', {
       fontSize: '10px', fontFamily: FONT_FAMILY, color: '#aaaaaa',
       stroke: '#000000', strokeThickness: 1, resolution: 2,
     }).setOrigin(1, 0).setVisible(false);
-    this._container.add(this._inBagColHeader);
+    this._container.add(this._stockColHeader);
 
-    this._sellColHeader = s.add.text(PANEL_W - PANEL_PAD, TITLE_H - 16, 'Sell', {
+    this._buyColHeader = s.add.text(PANEL_W - PANEL_PAD, TITLE_H - 16, 'Buy', {
       fontSize: '10px', fontFamily: FONT_FAMILY, color: '#aaaaaa',
       stroke: '#000000', strokeThickness: 1, resolution: 2,
     }).setOrigin(1, 0).setVisible(false);
-    this._container.add(this._sellColHeader);
+    this._container.add(this._buyColHeader);
 
-    // Cursor highlight bar — repositioned when cursor moves; sits behind row content
-    this._cursorBar = s.add.rectangle(0, 0, PANEL_W - 4, ROW_H - 2, 0x1a4a1a, 1)
-      .setStrokeStyle(1, 0x44cc44)
+    // Cursor highlight bar
+    this._cursorBar = s.add.rectangle(0, 0, PANEL_W - 4, ROW_H - 2, 0x1a3a4a, 1)
+      .setStrokeStyle(1, 0x44aacc)
       .setOrigin(0, 0).setVisible(false);
     this._container.add(this._cursorBar);
 
-    // Message shown when the player has no acceptable items
-    this._emptyText = s.add.text(PANEL_W / 2, TITLE_H + 10, 'Nothing to sell here.', {
+    // Message shown when the shop has nothing for sale
+    this._emptyText = s.add.text(PANEL_W / 2, TITLE_H + 10, 'Nothing for sale.', {
       fontSize: '11px', fontFamily: FONT_FAMILY, color: '#888888',
       stroke: '#000000', strokeThickness: 2, resolution: 2,
     }).setOrigin(0.5, 0).setVisible(false);
     this._container.add(this._emptyText);
 
-    // Item description — updates when the cursor moves; y is set dynamically in
-    // _updateCursorBar() since the panel height varies with the item count.
+    // Item description footer
     this._descText = s.add.text(PANEL_PAD, 0, '', {
       fontSize: '11px', fontFamily: FONT_FAMILY, color: '#ddddaa',
       stroke: '#000000', strokeThickness: 2, resolution: 2,
       wordWrap: { width: PANEL_W - PANEL_PAD * 2 },
     }).setOrigin(0, 0.5);
     this._container.add(this._descText);
+
+    // Gold indicator label — shown in footer to remind the player of their balance
+    this._goldLabel = s.add.text(PANEL_W - PANEL_PAD, 0, '', {
+      fontSize: '10px', fontFamily: FONT_FAMILY, color: '#ffdd44',
+      stroke: '#000000', strokeThickness: 1, resolution: 2,
+    }).setOrigin(1, 0.5);
+    this._container.add(this._goldLabel);
   }
 
   /**
-   * Opens the panel for the given shop type.
-   * Bumping the same door again closes it (toggle).
+   * Opens the buy panel for the given shop type.
    *
    * @param {string} shopType - 'potion', 'weapon', or 'armour'.
-   * @param {Item[]} inventory - The player's full inventory.
-   * @param {Player} player - The player instance.
+   * @param {Array<{item: import('../items/Item.js').Item, buyPrice: number}>} shopStock
+   * @param {import('../entities/Player.js').Player} player
    * @param {number} [xOffset=0] - Horizontal pixel offset from screen centre.
    */
-  show(shopType, inventory, player, xOffset = 0) {
-    if (this.visible && this._shopType === shopType) {
-      this.hide();
-      return;
-    }
+  show(shopType, shopStock, player, xOffset = 0) {
     this._shopType = shopType;
+    this._shopStock = shopStock;
     this._player = player;
-    this._shop = new ShopSystem(shopType);
     this._xOffset = xOffset;
     this._cursorIndex = 0;
-    this._refresh(inventory);
+    this._refresh();
     this.visible = true;
     this._container.setVisible(true);
-    EventBus.emit(GameEvents.SELL_PANEL_TOGGLED, true);
+    EventBus.emit(GameEvents.BUY_PANEL_TOGGLED, true);
   }
 
-  /** Hides the sell panel and clears shop state. */
+  /** Hides the buy panel and clears shop state. */
   hide() {
     if (!this.visible) return;
     this.visible = false;
     this._container.setVisible(false);
     this._shopType = null;
-    EventBus.emit(GameEvents.SELL_PANEL_TOGGLED, false);
+    EventBus.emit(GameEvents.BUY_PANEL_TOGGLED, false);
   }
 
   /**
-   * Rebuilds the item list after a sale so the panel reflects the updated inventory.
-   * Clamps the cursor to the new item count so it never points out of bounds.
-   *
-   * @param {Item[]} inventory - The player's updated inventory.
+   * Refreshes the panel after a purchase so the stock count stays accurate.
+   * The cursor is clamped so it never points out of bounds.
    */
-  refresh(inventory) {
+  refresh() {
     if (!this.visible) return;
-    this._refresh(inventory);
+    this._refresh();
+  }
+
+  /**
+   * Updates the gold display in the panel footer.
+   * Called after the player's gold changes (e.g. after buying or selling).
+   *
+   * @param {number} gold
+   */
+  updateGold(gold) {
+    if (!this.visible) return;
+    this._goldLabel.setText(`⬡ ${gold}g`);
   }
 
   /**
@@ -168,62 +176,44 @@ export class SellPanel {
    * @param {number} delta - -1 for up, +1 for down.
    */
   navigate(delta) {
-    if (this._groups.length === 0) return;
-    const count = this._groups.length;
+    if (this._shopStock.length === 0) return;
+    const count = this._shopStock.length;
     this._cursorIndex = (this._cursorIndex + delta + count) % count;
     this._updateCursorBar();
   }
 
   /**
-   * Sells the currently highlighted item.
+   * Emits BUY_ITEM for the currently highlighted shop item, if any.
    * Called by UIScene's shop keyboard controller when this panel has focus.
    */
   select() {
-    if (this._groups.length === 0) return;
-    const { item } = this._groups[this._cursorIndex];
-    EventBus.emit(GameEvents.SELL_ITEM, { shopType: this._shopType, item });
+    if (this._shopStock.length === 0) return;
+    const shopItem = this._shopStock[this._cursorIndex];
+    EventBus.emit(GameEvents.BUY_ITEM, { shopType: this._shopType, shopItem });
   }
 
   /**
-   * Tears down old item rows and rebuilds them from the given inventory,
-   * showing only items the active shop accepts.
-   *
-   * @param {Item[]} inventory - Inventory to render.
+   * Rebuilds the item rows from the current shop stock.
    */
-  _refresh(inventory) {
+  _refresh() {
     for (const row of this._rows) {
       for (const obj of row) this._container.remove(obj, true);
     }
     this._rows = [];
 
-    const shopName = SHOP_NAMES[this._shopType] ?? 'Shop';
-    this._title.setText(shopName);
+    this._title.setText(SHOP_NAMES[this._shopType] ?? 'Shop');
 
-    this._acceptableItems = inventory.filter(item => this._shop.accepts(item));
-
-    // Deduplicate by item name — one row per unique type, showing a count
-    const countByName = new Map();
-    for (const item of this._acceptableItems) {
-      if (countByName.has(item.name)) {
-        countByName.get(item.name).count++;
-      } else {
-        countByName.set(item.name, { item, count: 1 });
-      }
-    }
-    // Sort alphabetically so the list order is stable as items are sold
-    this._groups = [...countByName.values()].sort((a, b) => a.item.name.localeCompare(b.item.name));
-
-    const hasItems = this._groups.length > 0;
+    const hasItems = this._shopStock.length > 0;
     this._emptyText.setVisible(!hasItems);
-    this._inBagColHeader.setVisible(hasItems);
-    this._sellColHeader.setVisible(hasItems);
+    this._stockColHeader.setVisible(hasItems);
+    this._buyColHeader.setVisible(hasItems);
     this._cursorBar.setVisible(hasItems);
 
-    // Clamp cursor after a sale may have shrunk the list
-    this._cursorIndex = Math.min(this._cursorIndex, Math.max(0, this._groups.length - 1));
+    // Clamp cursor after a purchase may have shrunk the list
+    this._cursorIndex = Math.min(this._cursorIndex, Math.max(0, this._shopStock.length - 1));
 
-    for (let i = 0; i < this._groups.length; i++) {
-      const { item, count } = this._groups[i];
+    for (let i = 0; i < this._shopStock.length; i++) {
+      const { item, buyPrice } = this._shopStock[i];
       const rowY = TITLE_H + i * ROW_H;
 
       // Separator line above each row
@@ -239,67 +229,69 @@ export class SellPanel {
         fontSize: '16px', resolution: 2,
       }).setOrigin(0, 0.5);
 
-      // Item name — narrower to make room for the two right-hand columns
+      // Item name
       const nameText = this.scene.add.text(PANEL_PAD + 22, rowY + ROW_H / 2, item.name, {
         fontSize: '10px', fontFamily: FONT_FAMILY, color: '#dddddd',
         stroke: '#000000', strokeThickness: 2, resolution: 2,
         wordWrap: { width: 70 },
       }).setOrigin(0, 0.5);
 
-      // "In bag" count — how many of this item the player is carrying
-      const countText = this.scene.add.text(
-        PANEL_W - PANEL_PAD - 38, rowY + ROW_H / 2,
-        String(count),
+      // Stock count — always 1 (generated items are unique; potions have individual entries)
+      const stockText = this.scene.add.text(
+        PANEL_W - PANEL_PAD - 38, rowY + ROW_H / 2, '1',
         {
           fontSize: '10px', fontFamily: FONT_FAMILY, color: '#cccccc',
           stroke: '#000000', strokeThickness: 2, resolution: 2,
         }
       ).setOrigin(1, 0.5);
 
-      // Sell price — visual only; interaction is handled by the row hit area below
-      const sellBtn = this.scene.add.text(
+      // Buy price
+      const priceText = this.scene.add.text(
         PANEL_W - PANEL_PAD, rowY + ROW_H / 2,
-        `${item.sellPrice}g`,
+        `${buyPrice}g`,
         {
-          fontSize: '10px', fontFamily: FONT_FAMILY, color: '#ffdd44',
+          fontSize: '10px', fontFamily: FONT_FAMILY, color: '#44ddff',
           stroke: '#000000', strokeThickness: 2, resolution: 2,
         }
       ).setOrigin(1, 0.5);
 
-      // Transparent hit area covering the full row — sits on top of all row content
-      // so it captures all pointer events for this row.
-      // First click highlights the row; a second click on the already-highlighted row sells.
-      const soldItem = item;
+      // Transparent hit area covering the full row
+      const rowShopItem = { item, buyPrice };
       const shopType = this._shopType;
       const rowHit = this.scene.add.rectangle(2, rowY + 1, PANEL_W - 4, ROW_H - 2, 0xffffff, 0)
         .setOrigin(0, 0).setInteractive({ useHandCursor: true });
-      rowHit.on('pointerover', () => sellBtn.setColor('#ffffff'));
-      rowHit.on('pointerout',  () => sellBtn.setColor('#ffdd44'));
+      rowHit.on('pointerover', () => priceText.setColor('#88eeff'));
+      rowHit.on('pointerout',  () => priceText.setColor('#44ddff'));
       rowHit.on('pointerdown', () => {
         if (this._cursorIndex === i) {
-          EventBus.emit(GameEvents.SELL_ITEM, { shopType, item: soldItem });
+          EventBus.emit(GameEvents.BUY_ITEM, { shopType, shopItem: rowShopItem });
         } else {
           this._setCursor(i);
         }
       });
 
-      const rowObjs = [sep, icon, nameText, countText, sellBtn, rowHit];
+      const rowObjs = [sep, icon, nameText, stockText, priceText, rowHit];
       for (const obj of rowObjs) this._container.add(obj);
       this._rows.push(rowObjs);
     }
 
-    // Resize background and reposition cursor bar
-    const panelH = TITLE_H + Math.max(1, this._groups.length) * ROW_H + FOOTER_H;
+    // Resize background
+    const panelH = TITLE_H + Math.max(1, this._shopStock.length) * ROW_H + FOOTER_H;
     this._bg.setSize(PANEL_W, panelH);
     this._emptyText.setY(TITLE_H + 10);
     this._updateCursorBar();
 
-    // Re-centre panel vertically on screen with horizontal offset applied
+    // Re-centre panel with horizontal offset
     const { width, height } = this.scene.scale;
     this._container.setPosition(
       Math.floor((width - PANEL_W) / 2) + this._xOffset,
       Math.floor((height - panelH) / 2),
     );
+
+    // Show current gold balance
+    if (this._player) {
+      this._goldLabel.setText(`⬡ ${this._player.gold}g`);
+    }
   }
 
   // ─── Cursor ───────────────────────────────────────────────────────────────
@@ -313,24 +305,21 @@ export class SellPanel {
     this._updateCursorBar();
   }
 
-  /**
-   * Repositions the cursor highlight bar to sit behind the active row.
-   */
+  /** Repositions the cursor highlight bar to sit behind the active row. */
   _updateCursorBar() {
-    // Position the description text in the centre of the footer area regardless
-    // of whether there are items, so it stays anchored to the panel bottom.
     const panelH = this._bg.height;
     this._descText.setY(panelH - FOOTER_H / 2);
+    this._goldLabel.setY(panelH - FOOTER_H / 2);
 
-    if (this._groups.length === 0) {
+    if (this._shopStock.length === 0) {
       this._cursorBar.setVisible(false);
       this._descText.setText('');
       return;
     }
     const rowY = TITLE_H + this._cursorIndex * ROW_H;
     this._cursorBar.setPosition(2, rowY + 1).setVisible(true);
-    const item = this._groups[this._cursorIndex]?.item;
-    this._descText.setText(item ? item.description : '');
+    const shopItem = this._shopStock[this._cursorIndex];
+    this._descText.setText(shopItem ? shopItem.item.description : '');
   }
 
   /**

@@ -223,33 +223,41 @@ export const GameEvents = {
   PLAYER_GOLD_CHANGED: 'player-gold-changed',
 
   /**
-   * Open (or close) the sell panel for a town shop.
+   * Open the combined shop panel for a town shop.
    * Emitted by: GameScene (when player bumps a shop door)
-   * Subscribed by: UIScene → SellPanel
-   * @type {{ shopType: string, inventory: Item[], player: Player }}
+   * Subscribed by: UIScene → ShopPanel
+   * @type {{ shopType: string, shopStock: Array<{item: Item, buyPrice: number}>, inventory: Item[], player: Player }}
    */
-  OPEN_SELL_PANEL: 'open-sell-panel',
+  OPEN_SHOP_PANEL: 'open-shop-panel',
 
   /**
-   * Sell the item at the given inventory index via the active shop.
-   * Emitted by: SellPanel
-   * Subscribed by: GameScene
+   * Sell the highlighted item via the active shop.
+   * Emitted by: ShopPanel (sell section, on ENTER or tap)
+   * Subscribed by: GameScene → _handleSellItem
    * @type {{ shopType: string, item: Item }}
    */
   SELL_ITEM: 'sell-item',
 
   /**
-   * The sell panel has been opened or closed.
-   * Emitted by: SellPanel (show → true, hide → false)
+   * Buy an item from the active shop.
+   * Emitted by: ShopPanel (buy section, on ENTER or tap)
+   * Subscribed by: GameScene → _handleBuyItem
+   * @type {{ shopType: string, shopItem: {item: Item, buyPrice: number} }}
+   */
+  BUY_ITEM: 'buy-item',
+
+  /**
+   * The shop panel has been opened or closed.
+   * Emitted by: ShopPanel (show → true, hide → false)
    * Subscribed by: GameScene (to gate the ESC → game-menu handler)
    * @type {boolean} true = panel opened, false = panel closed.
    */
   SELL_PANEL_TOGGLED: 'sell-panel-toggled',
 
   /**
-   * Request to close the sell panel.
-   * Emitted by: GameScene (ESC key), SellPanel (✕ button)
-   * Subscribed by: UIScene → SellPanel.hide()
+   * Request to close the shop panel.
+   * Emitted by: GameScene (ESC key), ShopPanel (✕ button)
+   * Subscribed by: UIScene → ShopPanel.hide()
    */
   CLOSE_SELL_PANEL: 'close-sell-panel',
 };

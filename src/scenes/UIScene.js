@@ -9,7 +9,7 @@ import { EventBus } from '../utils/EventBus.js';
 import { GameEvents } from '../events/GameEvents.js';
 import { isTouchDevice } from '../utils/TouchDeviceDetector.js';
 import { syncHudFromRegistry } from '../ui/HudRegistrySync.js';
-import { SellPanel } from '../ui/SellPanel.js';
+import { ShopPanel } from '../ui/ShopPanel.js';
 
 export class UIScene extends Phaser.Scene {
   constructor() {
@@ -25,10 +25,12 @@ export class UIScene extends Phaser.Scene {
     this.messageLog = new MessageLog(this);
     this.inventoryPanel = new InventoryPanel(this);
     this.skillsPanel = new SkillsPanel(this);
-    this.sellPanel = new SellPanel(this);
+    this.shopPanel = new ShopPanel(this);
     this.dpad = new DPad(this);
     // Show touch controls only on devices that support touch input
     this.dpad.setVisible(isTouchDevice());
+
+    this._setupShopKeyboard();
 
     // Messages from game
     EventBus.on(GameEvents.MESSAGE, (text) => this.messageLog.addMessage(text), this);
@@ -45,21 +47,26 @@ export class UIScene extends Phaser.Scene {
       this.inventoryPanel.toggle(inventory, player);
     }, this);
 
-    // Gold changes from sell transactions
-    EventBus.on(GameEvents.PLAYER_GOLD_CHANGED, (gold) => this.hud.updateGold(gold), this);
-
-    // Open (or toggle) the sell panel when the player bumps a shop door
-    EventBus.on(GameEvents.OPEN_SELL_PANEL, ({ shopType, inventory, player }) => {
-      this.sellPanel.show(shopType, inventory, player);
+    // Gold changes — update HUD and the shop panel gold display
+    EventBus.on(GameEvents.PLAYER_GOLD_CHANGED, (gold) => {
+      this.hud.updateGold(gold);
+      this.shopPanel.updateGold(gold);
     }, this);
 
-    // Refresh sell panel when inventory changes after a sale
+    // Open the combined shop panel when the player bumps a shop door.
+    EventBus.on(GameEvents.OPEN_SHOP_PANEL, ({ shopType, shopStock, inventory, player }) => {
+      this.shopPanel.show(shopType, shopStock, inventory, player);
+    }, this);
+
+    // Refresh sell section when inventory changes after a sale or purchase
     EventBus.on(GameEvents.INVENTORY_CHANGED, (inventory) => {
-      this.sellPanel.refresh(inventory);
+      this.shopPanel.refresh(inventory);
     }, this);
 
-    // ESC from GameScene closes the sell panel
-    EventBus.on(GameEvents.CLOSE_SELL_PANEL, () => this.sellPanel?.hide(), this);
+    // Close the shop panel
+    EventBus.on(GameEvents.CLOSE_SELL_PANEL, () => {
+      this.shopPanel?.hide();
+    }, this);
 
     // Registry → HUD
     this.registry.events.on('changedata-playerHP', (parent, value) => {
@@ -101,6 +108,41 @@ export class UIScene extends Phaser.Scene {
     // Clean up DOM listener when the scene shuts down (e.g. game over).
     this.events.once('shutdown', () => {
       window.removeEventListener('wheel', this._onWheel);
+    });
+  }
+
+  /**
+   * Registers keyboard handlers for shop panel navigation.
+   *
+   * When the shop panel is open:
+   *  - UP / W    → navigate up
+   *  - DOWN / S  → navigate down
+   *  - ENTER     → buy or sell the highlighted item
+   *
+   * These listeners are always registered; they only act when the shop panel
+   * is visible (GameScene sets TurnManager to SHOP state, blocking movement).
+   */
+  _setupShopKeyboard() {
+    const kb = this.input.keyboard;
+
+    kb.on('keydown-UP', () => {
+      if (this.shopPanel.visible) this.shopPanel.navigate(-1);
+    });
+
+    kb.on('keydown-DOWN', () => {
+      if (this.shopPanel.visible) this.shopPanel.navigate(1);
+    });
+
+    kb.on('keydown-W', () => {
+      if (this.shopPanel.visible) this.shopPanel.navigate(-1);
+    });
+
+    kb.on('keydown-S', () => {
+      if (this.shopPanel.visible) this.shopPanel.navigate(1);
+    });
+
+    kb.on('keydown-ENTER', () => {
+      if (this.shopPanel.visible) this.shopPanel.select();
     });
   }
 
@@ -186,7 +228,7 @@ export class UIScene extends Phaser.Scene {
     this.hud?.resize(width, height);
     this.messageLog?.resize(width, height);
     this.inventoryPanel?.resize(width, height);
-    this.sellPanel?.resize(width, height);
+    this.shopPanel?.resize(width, height);
     this.dpad?.resize(width, height);
     // Re-evaluate touch support on resize — handles DevTools device toolbar
     // toggling and detachable touchscreen laptops changing touch capability.

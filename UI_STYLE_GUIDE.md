@@ -161,6 +161,21 @@ const title = scene.add.text(panelW / 2, 10, getMyPanelTitle(isTouchDevice()), {
 
 ---
 
+## Avoiding Overlapping Elements
+
+UI elements must never overlap each other. Overlapping elements obscure
+information and make the panel difficult to read.
+
+- Calculate positions explicitly so adjacent elements have a clear gap.
+- When placing elements near the close button (top-right corner), offset
+  them left by at least the close button's width plus a small margin so they
+  do not collide. A dedicated pixel constant (e.g. `CLOSE_BTN_CLEARANCE`)
+  makes the intent clear and prevents drift when either element changes size.
+- After adding or resizing any element, visually verify that no two elements
+  share the same screen space at any realistic panel size.
+
+---
+
 ## Checklist for New Panels
 
 - [ ] `FONT_FAMILY` used for all text; `resolution: 2` set on all text objects

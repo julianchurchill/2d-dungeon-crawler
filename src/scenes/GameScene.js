@@ -33,6 +33,7 @@ import { NightVisionSkill } from '../skills/NightVisionSkill.js';
 import { ITEM_TYPES } from '../items/ItemTypes.js';
 import { getProgress, achievementStore } from '../achievements/AchievementStore.js';
 import { ShopSystem } from '../systems/ShopSystem.js';
+import { generateShopItems } from '../items/ShopInventory.js';
 import { isTouchDevice } from '../utils/TouchDeviceDetector.js';
 
 const TILE_SIZE = 16;
@@ -65,7 +66,7 @@ export class GameScene extends Phaser.Scene {
     this._messageLogOpen = false;
     EventBus.on(GameEvents.MESSAGE_LOG_TOGGLED, (open) => { this._messageLogOpen = open; }, this);
 
-    // Restore player input when the sell panel closes.
+    // Restore player input when the sell panel closes (both panels close together).
     EventBus.on(GameEvents.SELL_PANEL_TOGGLED, (open) => {
       if (!open) this.turnManager.setState(TURN_STATE.PLAYER_INPUT);
     }, this);
@@ -106,8 +107,12 @@ export class GameScene extends Phaser.Scene {
     const { map, rooms, startPos, shops } = dungeonData;
     this.dungeonMap = map;
     this.rooms = rooms;
-    // shops is populated by TownGenerator; regular dungeon floors have none
-    this.shops = shops ?? [];
+    // shops is populated by TownGenerator; regular dungeon floors have none.
+    // Each shop gets a generated stock of items to sell, keyed by player level.
+    this.shops = (shops ?? []).map(s => ({
+      ...s,
+      stock: generateShopItems(s.type, this.player.stats.level, this.rng),
+    }));
 
     // Clear old sprites
     this._clearFloorEntities();
@@ -389,6 +394,7 @@ export class GameScene extends Phaser.Scene {
       if (this._messageLogOpen) {
         EventBus.emit(GameEvents.CLOSE_MESSAGE_LOG);
       } else if (this.turnManager.state === TURN_STATE.SHOP) {
+        // Close both shop panels together — UIScene handles the cascade
         EventBus.emit(GameEvents.CLOSE_SELL_PANEL);
       } else {
         const action = applyEscPanelClose(this.turnManager);
@@ -442,6 +448,7 @@ export class GameScene extends Phaser.Scene {
     EventBus.on(GameEvents.USE_STAIRS, wrapWithRunCancel(this._runController, () => this._tryUseStairs()), this);
     EventBus.on(GameEvents.INVENTORY_USE, (index) => this._useInventoryItem(index), this);
     EventBus.on(GameEvents.SELL_ITEM, ({ shopType, item }) => this._handleSellItem(shopType, item), this);
+    EventBus.on(GameEvents.BUY_ITEM, ({ shopType, shopItem }) => this._handleBuyItem(shopType, shopItem), this);
     EventBus.on(GameEvents.FLOOR_CHANGED, (floor) => {
       this.registry.set('floor', floor);
     }, this);
@@ -538,13 +545,14 @@ export class GameScene extends Phaser.Scene {
     if (result.action === 'shop') {
       // Cancel any active run so it doesn't resume into the door on the next turn
       this._runController.cancel();
-      // Open or toggle the sell panel; no turn spent on door interactions
+      // Open both buy and sell panels; no turn spent on door interactions
       const shop = this.shops.find(s => s.doorX === result.doorX && s.doorY === result.doorY);
       if (shop) {
         // Use TURN_STATE.SHOP so the state machine blocks I/K panel keys naturally
         this.turnManager.setState(TURN_STATE.SHOP);
-        EventBus.emit(GameEvents.OPEN_SELL_PANEL, {
+        EventBus.emit(GameEvents.OPEN_SHOP_PANEL, {
           shopType: shop.type,
+          shopStock: shop.stock,
           inventory: this.player.inventory,
           player: this.player,
         });
@@ -946,6 +954,41 @@ export class GameScene extends Phaser.Scene {
     const shop = new ShopSystem(shopType);
     const earned = shop.sell(this.player, item);
     EventBus.emit(GameEvents.MESSAGE, `Sold ${item.name} for ${earned} gold.`);
+    EventBus.emit(GameEvents.PLAYER_GOLD_CHANGED, this.player.gold);
+    EventBus.emit(GameEvents.INVENTORY_CHANGED, [...this.player.inventory]);
+    this._syncRegistry();
+  }
+
+  /**
+   * Handles a buy request from the BuyPanel.  Validates the purchase via
+   * ShopSystem.buy(), removes the item from the shop's stock, and broadcasts
+   * updated gold and inventory so the HUD, BuyPanel, and SellPanel stay in sync.
+   *
+   * @param {string} shopType - 'potion', 'weapon', or 'armour'.
+   * @param {{item: import('../items/Item.js').Item, buyPrice: number}} shopItem
+   */
+  _handleBuyItem(shopType, shopItem) {
+    if (!shopItem || !shopItem.item) return;
+    // Find the shop whose stock still contains this shopItem reference
+    const shop = this.shops.find(s => s.type === shopType && s.stock.includes(shopItem));
+    if (!shop) return;
+
+    const system = new ShopSystem(shopType);
+    const success = system.buy(this.player, shopItem.item, shopItem.buyPrice);
+    if (!success) {
+      if (this.player.gold < shopItem.buyPrice) {
+        EventBus.emit(GameEvents.MESSAGE, `You can't afford the ${shopItem.item.name} (${shopItem.buyPrice}g needed).`);
+      } else {
+        EventBus.emit(GameEvents.MESSAGE, 'Your inventory is full!');
+      }
+      return;
+    }
+
+    // Remove the purchased item from the shop's persistent stock
+    const idx = shop.stock.indexOf(shopItem);
+    if (idx !== -1) shop.stock.splice(idx, 1);
+
+    EventBus.emit(GameEvents.MESSAGE, `Bought ${shopItem.item.name} for ${shopItem.buyPrice} gold.`);
     EventBus.emit(GameEvents.PLAYER_GOLD_CHANGED, this.player.gold);
     EventBus.emit(GameEvents.INVENTORY_CHANGED, [...this.player.inventory]);
     this._syncRegistry();
