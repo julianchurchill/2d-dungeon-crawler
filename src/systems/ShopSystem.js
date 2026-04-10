@@ -49,6 +49,30 @@ export class ShopSystem {
   }
 
   /**
+   * Returns the price at which this shop will re-sell an item the player sold
+   * to it: the item's sell price rounded up to the nearest gold after a 10%
+   * mark-up.
+   *
+   * @param {import('../items/Item.js').Item} item
+   * @returns {number} Buy-back price in gold.
+   */
+  buyBackPrice(item) {
+    return Math.ceil(item.sellPrice * 1.1);
+  }
+
+  /**
+   * Creates a shop stock entry for an item that the player has sold, priced at
+   * the buy-back rate. The entry has the same shape as regular shop stock so it
+   * can be pushed directly onto a shop's stock array.
+   *
+   * @param {import('../items/Item.js').Item} item
+   * @returns {{ item: import('../items/Item.js').Item, buyPrice: number }}
+   */
+  createBuyBackEntry(item) {
+    return { item, buyPrice: this.buyBackPrice(item) };
+  }
+
+  /**
    * Sell an item from the player's inventory at this shop.
    * The item is removed from the inventory and its sell price is added to
    * the player's gold. Returns 0 if the item is not in the inventory or if

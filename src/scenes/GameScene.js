@@ -64,11 +64,16 @@ export class GameScene extends Phaser.Scene {
     // Track whether the message log history panel is open so the ESC handler
     // can close it instead of opening the Achievements screen.
     this._messageLogOpen = false;
+    /** @type {object|null} The shop object currently open in the ShopPanel, or null. */
+    this._activeShop = null;
     EventBus.on(GameEvents.MESSAGE_LOG_TOGGLED, (open) => { this._messageLogOpen = open; }, this);
 
-    // Restore player input when the sell panel closes (both panels close together).
+    // Restore player input when the shop panel closes; clear the active shop reference.
     EventBus.on(GameEvents.SELL_PANEL_TOGGLED, (open) => {
-      if (!open) this.turnManager.setState(TURN_STATE.PLAYER_INPUT);
+      if (!open) {
+        this.turnManager.setState(TURN_STATE.PLAYER_INPUT);
+        this._activeShop = null;
+      }
     }, this);
 
     // Entities lists
@@ -550,6 +555,8 @@ export class GameScene extends Phaser.Scene {
       if (shop) {
         // Use TURN_STATE.SHOP so the state machine blocks I/K panel keys naturally
         this.turnManager.setState(TURN_STATE.SHOP);
+        // Track which shop is active so _handleSellItem can add buy-back stock
+        this._activeShop = shop;
         EventBus.emit(GameEvents.OPEN_SHOP_PANEL, {
           shopType: shop.type,
           shopStock: shop.stock,
@@ -951,8 +958,15 @@ export class GameScene extends Phaser.Scene {
   _handleSellItem(shopType, item) {
     // Guard against rapid double-clicks: item may already be gone from inventory
     if (!this.player.inventory.includes(item)) return;
-    const shop = new ShopSystem(shopType);
-    const earned = shop.sell(this.player, item);
+    const system = new ShopSystem(shopType);
+    const earned = system.sell(this.player, item);
+    // Add the sold item back to the shop's stock at a 10% mark-up so the player
+    // can buy it back if they change their mind.
+    // Only push the buy-back entry when the sale actually succeeded (earned > 0)
+    // to guard against mismatched shopType emits or other edge cases.
+    if (earned > 0 && this._activeShop) {
+      this._activeShop.stock.push(system.createBuyBackEntry(item));
+    }
     EventBus.emit(GameEvents.MESSAGE, `Sold ${item.name} for ${earned} gold.`);
     EventBus.emit(GameEvents.PLAYER_GOLD_CHANGED, this.player.gold);
     EventBus.emit(GameEvents.INVENTORY_CHANGED, [...this.player.inventory]);
