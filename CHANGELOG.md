@@ -7,15 +7,16 @@ Entries are listed newest-first within each section.
 
 ## [Unreleased]
 
-### Changed
-
-- 2026-04-09 — Combined BuyPanel and SellPanel into a single ShopPanel: player-owned sellable items appear at the top, shop stock for purchase below, and the player's gold balance is always visible in the panel header; UP/DOWN navigate all rows, ENTER buys or sells depending on which section is highlighted
-
 ### Added
 
+- 2026-04-10 — Sold items are added back to the shop's buy stock at 10% above their sell price (rounded up), so the player can buy back anything they sold during the same visit
 - 2026-04-09 — Town shops now sell items: each shop generates a stock of items with randomly generated stats; weapons and armour have random bonus values within a tier-appropriate range with a small chance of a rare high-stat item; potions are always available at fixed quantities
 - 2026-04-09 — ShopSystem.buy() validates purchase (sufficient gold, inventory space), deducts gold, and adds the item to the player's inventory
 - 2026-04-09 — Purchased items are removed from the shop's persistent stock for the remainder of the run
+
+### Changed
+
+- 2026-04-09 — Combined BuyPanel and SellPanel into a single ShopPanel: player-owned sellable items appear at the top, shop stock for purchase below, and the player's gold balance is always visible in the panel header; UP/DOWN navigate all rows, ENTER buys or sells depending on which section is highlighted
 
 ---
 
