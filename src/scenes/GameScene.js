@@ -36,6 +36,7 @@ import { getProgress, achievementStore } from '../achievements/AchievementStore.
 import { ShopSystem } from '../systems/ShopSystem.js';
 import { generateShopItems } from '../items/ShopInventory.js';
 import { isTouchDevice } from '../utils/TouchDeviceDetector.js';
+import { NpcRoamController } from '../systems/NpcRoamController.js';
 
 const TILE_SIZE = 16;
 const FOV_RADIUS = 8;
@@ -85,6 +86,7 @@ export class GameScene extends Phaser.Scene {
     // Entities lists
     this.enemies = [];
     this.npcs = [];
+    this._npcRoamControllers = [];
     this.items = [];  // floor items (not in inventory)
 
     // Player
@@ -190,6 +192,7 @@ export class GameScene extends Phaser.Scene {
       if (npc.sprite) npc.sprite.destroy();
     }
     this.npcs = [];
+    this._npcRoamControllers = [];
 
     for (const item of this.items) {
       if (item.sprite) item.sprite.destroy();
@@ -361,6 +364,39 @@ export class GameScene extends Phaser.Scene {
       ).setDepth(8).setVisible(true);
       npc.sprite = sprite;
       this.npcs.push(npc);
+      // Register in the entity map so setEntity null/npc is consistent from the first move.
+      this.dungeonMap.setEntity(npc.x, npc.y, npc);
+      // Give each NPC its own roam controller; NPCs step every 3 player turns.
+      this._npcRoamControllers.push(new NpcRoamController(npc, { interval: 3, rng: () => this.rng() }));
+    }
+  }
+
+  /**
+   * Processes one turn of roaming for a single NPC.  If the controller returns
+   * a move action the NPC's logical position is updated, the entity map is
+   * patched, and the sprite is repositioned instantly (no tween — NPCs move
+   * infrequently and a snap avoids interfering with the player's move tween).
+   *
+   * @param {NpcRoamController} roamer
+   */
+  _tickNpcRoam(roamer) {
+    const result = roamer.tick(this.dungeonMap, (x, y) => this._getEntityAt(x, y));
+    if (result.action !== 'move') return;
+
+    const npc = roamer.npc;
+    const destTile = this.dungeonMap.getTile(npc.x + result.dx, npc.y + result.dy);
+    // Never roam onto a shop door tile — the player must be able to enter shops freely.
+    if (destTile === TILE.DOOR) return;
+
+    this.dungeonMap.setEntity(npc.x, npc.y, null);
+    npc.x += result.dx;
+    npc.y += result.dy;
+    this.dungeonMap.setEntity(npc.x, npc.y, npc);
+    if (npc.sprite) {
+      npc.sprite.setPosition(
+        npc.x * TILE_SIZE + TILE_SIZE / 2,
+        npc.y * TILE_SIZE + TILE_SIZE / 2,
+      );
     }
   }
 
@@ -1100,6 +1136,11 @@ export class GameScene extends Phaser.Scene {
           );
         }
       }
+    }
+
+    // Tick NPC roam controllers — NPCs wander slowly around town.
+    for (const roamer of this._npcRoamControllers) {
+      this._tickNpcRoam(roamer);
     }
 
     this.turnManager.setState(TURN_STATE.PLAYER_INPUT);

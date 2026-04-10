@@ -8,6 +8,7 @@ import { Given, When, Then } from '@cucumber/cucumber';
 import assert from 'node:assert/strict';
 import { TOWN_NPCS } from '../../src/entities/NpcDefinitions.js';
 import { Npc } from '../../src/entities/Npc.js';
+import { NpcRoamController } from '../../src/systems/NpcRoamController.js';
 import { Player } from '../../src/entities/Player.js';
 import { DungeonMap } from '../../src/dungeon/DungeonMap.js';
 import { TILE } from '../../src/utils/TileTypes.js';
@@ -126,4 +127,70 @@ Then('the dialogue should show the second line', function () {
 
 Then('the dialogue should show the first line again', function () {
   assert.strictEqual(this.dialogue, 'First line.');
+});
+
+// ── Distinctive sprites ───────────────────────────────────────────────────────
+
+Then('every NPC should have a unique sprite key', function () {
+  const keys = new Set();
+  for (const npc of this.townNpcs) {
+    assert.ok(npc.spriteKey && npc.spriteKey.trim().length > 0, `NPC "${npc.name}" has no spriteKey`);
+    assert.ok(!keys.has(npc.spriteKey), `Duplicate spriteKey "${npc.spriteKey}"`);
+    keys.add(npc.spriteKey);
+  }
+});
+
+// ── NPC roaming ───────────────────────────────────────────────────────────────
+
+Given('an NPC roam controller with interval {int}', function (interval) {
+  // 3×3 floor map; NPC at centre (1,1)
+  this.roamMap = new DungeonMap(3, 3);
+  for (let y = 0; y < 3; y++) for (let x = 0; x < 3; x++) this.roamMap.setTile(x, y, TILE.FLOOR);
+  this.roamNpc = new Npc(1, 1, { name: 'Wanderer', lines: ['Hi.'] });
+  // Deterministic rng always returns 0 (picks first shuffled candidate)
+  this.roamController = new NpcRoamController(this.roamNpc, { interval, rng: () => 0 });
+});
+
+Given('an NPC roam controller with interval {int} surrounded by walls on three sides', function (interval) {
+  // 3×3 map; only (1,0) is a floor tile — NPC at (1,1) which is also floor; rest walls
+  this.roamMap = new DungeonMap(3, 3);
+  // All wall by default; make (1,1) and (1,0) floor
+  this.roamMap.setTile(1, 1, TILE.FLOOR);
+  this.roamMap.setTile(1, 0, TILE.FLOOR);
+  this.roamNpc = new Npc(1, 1, { name: 'Wanderer', lines: ['Hi.'] });
+  this.roamController = new NpcRoamController(this.roamNpc, { interval, rng: () => 0 });
+});
+
+Given('an NPC roam controller with interval {int} and all neighbours occupied', function (interval) {
+  // 3×3 floor map; NPC at centre; all cardinal neighbours occupied
+  this.roamMap = new DungeonMap(3, 3);
+  for (let y = 0; y < 3; y++) for (let x = 0; x < 3; x++) this.roamMap.setTile(x, y, TILE.FLOOR);
+  this.roamNpc = new Npc(1, 1, { name: 'Wanderer', lines: ['Hi.'] });
+  this.roamController = new NpcRoamController(this.roamNpc, { interval, rng: () => 0 });
+  // Simulate all neighbours blocked by always returning an entity
+  this.roamGetEntityAt = (x, y) => ({ x, y }); // always occupied
+});
+
+When('the roam controller is ticked once on a walkable floor', function () {
+  this.roamResult = this.roamController.tick(this.roamMap, () => null);
+});
+
+When('the roam controller is ticked once', function () {
+  const getEntity = this.roamGetEntityAt ?? (() => null);
+  this.roamResult = this.roamController.tick(this.roamMap, getEntity);
+});
+
+Then('the roam result should be {string}', function (expected) {
+  assert.strictEqual(this.roamResult.action, expected);
+});
+
+Then('the roam result action should be {string}', function (expected) {
+  assert.strictEqual(this.roamResult.action, expected);
+});
+
+Then('the roam result should indicate movement to the open side or stay', function () {
+  // With only (1,0) open, a move must go up (dy=-1) or stay
+  const valid = this.roamResult.action === 'stay'
+    || (this.roamResult.action === 'move' && this.roamResult.dy === -1 && this.roamResult.dx === 0);
+  assert.ok(valid, `Unexpected roam result: ${JSON.stringify(this.roamResult)}`);
 });
