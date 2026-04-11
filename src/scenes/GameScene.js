@@ -367,7 +367,7 @@ export class GameScene extends Phaser.Scene {
       // Register in the entity map so setEntity null/npc is consistent from the first move.
       this.dungeonMap.setEntity(npc.x, npc.y, npc);
       // Give each NPC its own roam controller; NPCs step every 3 player turns.
-      this._npcRoamControllers.push(new NpcRoamController(npc, { interval: 3, rng: () => this.rng() }));
+      this._npcRoamControllers.push(new NpcRoamController(npc, { interval: 3, rng: () => this.rng.next() }));
     }
   }
 

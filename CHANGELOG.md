@@ -7,6 +7,10 @@ Entries are listed newest-first within each section.
 
 ## [Unreleased]
 
+### Fixed
+
+- 2026-04-11 — NPC roaming crash: `this.rng` is an object, not a function — fixed to call `this.rng.next()` instead of `this.rng()`
+
 ### Added
 
 - 2026-04-10 — Town NPCs roam slowly around town: each NPC takes a random step every 3 player turns, staying clear of walls and other entities; each NPC (Elder, Guard, Merchant) has a distinctive procedurally-generated sprite
