@@ -77,7 +77,7 @@ export class TownGenerator {
       startPos: { ...START_POS },
       stairsPos: { ...STAIRS_POS },
       shops: SHOPS.map(s => ({ type: s.type, doorX: s.doorX, doorY: s.doorY })),
-      npcs: TOWN_NPCS.map(n => ({ name: n.name, x: n.x, y: n.y, spriteKey: n.spriteKey, lines: n.lines })),
+      npcs: TOWN_NPCS.map(n => ({ name: n.name, x: n.x, y: n.y, spriteKey: n.spriteKey, lines: n.lines, contextualLines: n.contextualLines })),
     };
   }
 
