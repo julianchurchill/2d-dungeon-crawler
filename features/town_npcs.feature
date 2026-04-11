@@ -57,6 +57,30 @@ Feature: Town NPCs
     When the NPC is talked to three times
     Then the dialogue should show the first line again
 
+  # --- Contextual dialogue ---
+
+  Scenario: NPC returns a contextual line when condition matches and rng triggers it
+    Given an NPC with a contextual line triggered when player has a weapon
+    And a player carrying a weapon named "Long Sword (+7)"
+    When the player talks to the NPC with an rng that always triggers contextual dialogue
+    Then the dialogue should be the contextual line referencing the weapon
+
+  Scenario: NPC falls back to a regular line when rng does not trigger contextual dialogue
+    Given an NPC with a contextual line triggered when player has a weapon
+    And a player carrying a weapon named "Long Sword (+7)"
+    When the player talks to the NPC with an rng that never triggers contextual dialogue
+    Then the dialogue should be the NPC's first fixed line
+
+  Scenario: NPC falls back to a regular line when no contextual condition applies
+    Given an NPC with a contextual line triggered when player has a weapon
+    And a player with no items
+    When the player talks to the NPC with an rng that always triggers contextual dialogue
+    Then the dialogue should be the NPC's first fixed line
+
+  Scenario: Town NPCs include contextual lines in their definitions
+    Given the town NPCs are defined
+    Then every NPC should have at least one contextual line defined
+
   # --- Distinctive sprites ---
 
   Scenario: Each town NPC has a unique sprite key

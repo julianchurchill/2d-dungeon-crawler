@@ -7,11 +7,13 @@ Entries are listed newest-first within each section.
 
 ## [Unreleased]
 
+### Added
+
+- 2026-04-11 — NPC dialogue is now partially contextual: with a 40% chance per interaction the NPC picks a line that reacts to the player's current state (equipped weapon/armour, level, gold, inventory); falls back to the normal cycling lines otherwise
+
 ### Fixed
 
 - 2026-04-11 — NPC roaming crash: `this.rng` is an object, not a function — fixed to call `this.rng.next()` instead of `this.rng()`
-
-### Added
 
 - 2026-04-10 — Town NPCs roam slowly around town: each NPC takes a random step every 3 player turns, staying clear of walls and other entities; each NPC (Elder, Guard, Merchant) has a distinctive procedurally-generated sprite
 - 2026-04-10 — Town NPCs: three characters (Elder, Guard, Merchant) stand in the town square; bumping into one opens a dialogue panel showing their name and a cycling line of conversation; dismissed with ENTER, ESC, or the ✕ button

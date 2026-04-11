@@ -626,7 +626,7 @@ export class GameScene extends Phaser.Scene {
       // Cancel any active run and open the dialogue panel; no turn spent
       this._runController.cancel();
       this.turnManager.setState(TURN_STATE.DIALOGUE);
-      const line = result.npc.talk();
+      const line = result.npc.talk(this.player, () => this.rng.next());
       EventBus.emit(GameEvents.OPEN_DIALOGUE, { npcName: result.npc.name, line });
       return;
     }

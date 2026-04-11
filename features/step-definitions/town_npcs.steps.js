@@ -194,3 +194,58 @@ Then('the roam result should indicate movement to the open side or stay', functi
     || (this.roamResult.action === 'move' && this.roamResult.dy === -1 && this.roamResult.dx === 0);
   assert.ok(valid, `Unexpected roam result: ${JSON.stringify(this.roamResult)}`);
 });
+
+// ── Contextual dialogue ───────────────────────────────────────────────────────
+
+Given('an NPC with a contextual line triggered when player has a weapon', function () {
+  this.contextualLine = (p) => p.equippedWeapon
+    ? `That's a fancy looking ${p.equippedWeapon.name} — do you know where I can get one?`
+    : null;
+  this.npc = new Npc(0, 0, {
+    name: 'Guard',
+    lines: ['Move along, citizen.'],
+    contextualLines: [this.contextualLine],
+  });
+});
+
+Given('a player carrying a weapon named {string}', function (weaponName) {
+  this.talkPlayer = new Player(0, 0);
+  this.talkPlayer.equippedWeapon = { name: weaponName, itemType: 'weapon' };
+});
+
+Given('a player with no items', function () {
+  this.talkPlayer = new Player(0, 0);
+});
+
+When('the player talks to the NPC with an rng that always triggers contextual dialogue', function () {
+  // rng() returning 0 is < any positive threshold, so contextual fires
+  this.dialogue = this.npc.talk(this.talkPlayer, () => 0);
+});
+
+When('the player talks to the NPC with an rng that never triggers contextual dialogue', function () {
+  // rng() returning 1 is >= threshold, so contextual never fires
+  this.dialogue = this.npc.talk(this.talkPlayer, () => 1);
+});
+
+Then('the dialogue should be the contextual line referencing the weapon', function () {
+  const expected = this.contextualLine(this.talkPlayer);
+  assert.strictEqual(this.dialogue, expected);
+});
+
+Then("the dialogue should be the NPC's first fixed line", function () {
+  assert.strictEqual(this.dialogue, this.npc._lines[0]);
+});
+
+// ── Town NPC definitions have contextual lines ────────────────────────────────
+
+Then('every NPC should have at least one contextual line defined', function () {
+  for (const npc of this.townNpcs) {
+    assert.ok(
+      Array.isArray(npc.contextualLines) && npc.contextualLines.length > 0,
+      `NPC "${npc.name}" has no contextualLines`,
+    );
+    for (const fn of npc.contextualLines) {
+      assert.strictEqual(typeof fn, 'function', `NPC "${npc.name}" has a non-function contextualLine`);
+    }
+  }
+});
