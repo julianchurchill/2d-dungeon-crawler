@@ -9,6 +9,7 @@ Entries are listed newest-first within each section.
 
 ### Added
 
+- 2026-04-10 — Town NPCs roam slowly around town: each NPC takes a random step every 3 player turns, staying clear of walls and other entities; each NPC (Elder, Guard, Merchant) has a distinctive procedurally-generated sprite
 - 2026-04-10 — Town NPCs: three characters (Elder, Guard, Merchant) stand in the town square; bumping into one opens a dialogue panel showing their name and a cycling line of conversation; dismissed with ENTER, ESC, or the ✕ button
 - 2026-04-10 — Sold items are added back to the shop's buy stock at 10% above their sell price (rounded up), so the player can buy back anything they sold during the same visit
 - 2026-04-09 — Town shops now sell items: each shop generates a stock of items with randomly generated stats; weapons and armour have random bonus values within a tier-appropriate range with a small chance of a rare high-stat item; potions are always available at fixed quantities

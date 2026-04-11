@@ -56,3 +56,31 @@ Feature: Town NPCs
     Given an NPC with two dialogue lines
     When the NPC is talked to three times
     Then the dialogue should show the first line again
+
+  # --- Distinctive sprites ---
+
+  Scenario: Each town NPC has a unique sprite key
+    Given the town NPCs are defined
+    Then every NPC should have a unique sprite key
+
+  # --- NPC roaming ---
+
+  Scenario: NpcRoamController stays when interval has not been reached
+    Given an NPC roam controller with interval 3
+    When the roam controller is ticked once on a walkable floor
+    Then the roam result should be "stay"
+
+  Scenario: NpcRoamController attempts to move when the interval is reached
+    Given an NPC roam controller with interval 1
+    When the roam controller is ticked once on a walkable floor
+    Then the roam result action should be "move"
+
+  Scenario: NpcRoamController does not move into a wall
+    Given an NPC roam controller with interval 1 surrounded by walls on three sides
+    When the roam controller is ticked once
+    Then the roam result should indicate movement to the open side or stay
+
+  Scenario: NpcRoamController does not move into an occupied tile
+    Given an NPC roam controller with interval 1 and all neighbours occupied
+    When the roam controller is ticked once
+    Then the roam result should be "stay"
