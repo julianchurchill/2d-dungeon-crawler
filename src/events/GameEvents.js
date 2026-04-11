@@ -260,4 +260,27 @@ export const GameEvents = {
    * Subscribed by: UIScene → ShopPanel.hide()
    */
   CLOSE_SELL_PANEL: 'close-sell-panel',
+
+  /**
+   * Open the dialogue panel for an NPC conversation.
+   * Emitted by: GameScene (when player bumps an NPC)
+   * Subscribed by: UIScene → DialoguePanel.show()
+   * @type {{ npcName: string, line: string }}
+   */
+  OPEN_DIALOGUE: 'open-dialogue',
+
+  /**
+   * Close the dialogue panel.
+   * Emitted by: GameScene (ESC key while dialogue open), DialoguePanel (✕ or ENTER)
+   * Subscribed by: UIScene → DialoguePanel.hide()
+   */
+  CLOSE_DIALOGUE: 'close-dialogue',
+
+  /**
+   * The dialogue panel has been opened or closed.
+   * Emitted by: DialoguePanel (show → true, hide → false)
+   * Subscribed by: GameScene (to gate ESC handler)
+   * @type {boolean}
+   */
+  DIALOGUE_TOGGLED: 'dialogue-toggled',
 };

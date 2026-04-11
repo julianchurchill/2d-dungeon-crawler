@@ -5,6 +5,7 @@ import { resolveMeleeAttack } from '../systems/CombatSystem.js';
 import { InventorySystem } from '../systems/InventorySystem.js';
 import { Player } from '../entities/Player.js';
 import { Enemy } from '../entities/Enemy.js';
+import { Npc } from '../entities/Npc.js';
 import { Item } from '../items/Item.js';
 import { getFloorLoot } from '../items/ItemTypes.js';
 import { computeFOV, computeDaylightFOV } from '../fov/ShadowcastFOV.js';
@@ -35,6 +36,7 @@ import { getProgress, achievementStore } from '../achievements/AchievementStore.
 import { ShopSystem } from '../systems/ShopSystem.js';
 import { generateShopItems } from '../items/ShopInventory.js';
 import { isTouchDevice } from '../utils/TouchDeviceDetector.js';
+import { NpcRoamController } from '../systems/NpcRoamController.js';
 
 const TILE_SIZE = 16;
 const FOV_RADIUS = 8;
@@ -76,8 +78,15 @@ export class GameScene extends Phaser.Scene {
       }
     }, this);
 
+    // Restore player input when the dialogue panel closes.
+    EventBus.on(GameEvents.DIALOGUE_TOGGLED, (open) => {
+      if (!open) this.turnManager.setState(TURN_STATE.PLAYER_INPUT);
+    }, this);
+
     // Entities lists
     this.enemies = [];
+    this.npcs = [];
+    this._npcRoamControllers = [];
     this.items = [];  // floor items (not in inventory)
 
     // Player
@@ -109,7 +118,7 @@ export class GameScene extends Phaser.Scene {
   // ─── Floor Construction ───────────────────────────────────────────────────
 
   _buildFloor(dungeonData) {
-    const { map, rooms, startPos, shops } = dungeonData;
+    const { map, rooms, startPos, shops, npcs: npcDefs } = dungeonData;
     this.dungeonMap = map;
     this.rooms = rooms;
     // shops is populated by TownGenerator; regular dungeon floors have none.
@@ -166,6 +175,9 @@ export class GameScene extends Phaser.Scene {
     // Spawn items
     this._spawnItems(rooms);
 
+    // Spawn NPCs (town only — npcDefs is populated by TownGenerator)
+    this._spawnNpcs(npcDefs ?? []);
+
     // Update FOV
     this._updateFOV();
   }
@@ -175,6 +187,12 @@ export class GameScene extends Phaser.Scene {
       if (e.sprite) e.sprite.destroy();
     }
     this.enemies = [];
+
+    for (const npc of this.npcs) {
+      if (npc.sprite) npc.sprite.destroy();
+    }
+    this.npcs = [];
+    this._npcRoamControllers = [];
 
     for (const item of this.items) {
       if (item.sprite) item.sprite.destroy();
@@ -327,6 +345,61 @@ export class GameScene extends Phaser.Scene {
     this.items.push(item);
   }
 
+  /**
+   * Spawns NPC entities from their definitions and adds them to this.npcs.
+   * Each NPC gets a sprite placed at its tile position (always visible — NPCs
+   * are only present in the town which is fully lit).
+   *
+   * @param {Array<{name:string,x:number,y:number,spriteKey:string,lines:string[]}>} npcDefs
+   */
+  _spawnNpcs(npcDefs) {
+    for (const def of npcDefs) {
+      const npc = new Npc(def.x, def.y, def);
+      // Fall back to the player sprite if the NPC texture is not loaded.
+      const textureKey = this.textures.exists(def.spriteKey) ? def.spriteKey : 'entity_player';
+      const sprite = this.add.sprite(
+        def.x * TILE_SIZE + TILE_SIZE / 2,
+        def.y * TILE_SIZE + TILE_SIZE / 2,
+        textureKey,
+      ).setDepth(8).setVisible(true);
+      npc.sprite = sprite;
+      this.npcs.push(npc);
+      // Register in the entity map so setEntity null/npc is consistent from the first move.
+      this.dungeonMap.setEntity(npc.x, npc.y, npc);
+      // Give each NPC its own roam controller; NPCs step every 3 player turns.
+      this._npcRoamControllers.push(new NpcRoamController(npc, { interval: 3, rng: () => this.rng() }));
+    }
+  }
+
+  /**
+   * Processes one turn of roaming for a single NPC.  If the controller returns
+   * a move action the NPC's logical position is updated, the entity map is
+   * patched, and the sprite is repositioned instantly (no tween — NPCs move
+   * infrequently and a snap avoids interfering with the player's move tween).
+   *
+   * @param {NpcRoamController} roamer
+   */
+  _tickNpcRoam(roamer) {
+    const result = roamer.tick(this.dungeonMap, (x, y) => this._getEntityAt(x, y));
+    if (result.action !== 'move') return;
+
+    const npc = roamer.npc;
+    const destTile = this.dungeonMap.getTile(npc.x + result.dx, npc.y + result.dy);
+    // Never roam onto a shop door tile — the player must be able to enter shops freely.
+    if (destTile === TILE.DOOR) return;
+
+    this.dungeonMap.setEntity(npc.x, npc.y, null);
+    npc.x += result.dx;
+    npc.y += result.dy;
+    this.dungeonMap.setEntity(npc.x, npc.y, npc);
+    if (npc.sprite) {
+      npc.sprite.setPosition(
+        npc.x * TILE_SIZE + TILE_SIZE / 2,
+        npc.y * TILE_SIZE + TILE_SIZE / 2,
+      );
+    }
+  }
+
   // ─── FOV ─────────────────────────────────────────────────────────────────
 
   _updateFOV() {
@@ -398,6 +471,8 @@ export class GameScene extends Phaser.Scene {
     this.input.keyboard.on('keydown-ESC', wrapWithRunCancel(this._runController, () => {
       if (this._messageLogOpen) {
         EventBus.emit(GameEvents.CLOSE_MESSAGE_LOG);
+      } else if (this.turnManager.state === TURN_STATE.DIALOGUE) {
+        EventBus.emit(GameEvents.CLOSE_DIALOGUE);
       } else if (this.turnManager.state === TURN_STATE.SHOP) {
         // Close both shop panels together — UIScene handles the cascade
         EventBus.emit(GameEvents.CLOSE_SELL_PANEL);
@@ -545,6 +620,15 @@ export class GameScene extends Phaser.Scene {
 
     if (result.action === 'blocked') {
       return; // No turn spent on blocked moves
+    }
+
+    if (result.action === 'npc') {
+      // Cancel any active run and open the dialogue panel; no turn spent
+      this._runController.cancel();
+      this.turnManager.setState(TURN_STATE.DIALOGUE);
+      const line = result.npc.talk();
+      EventBus.emit(GameEvents.OPEN_DIALOGUE, { npcName: result.npc.name, line });
+      return;
     }
 
     if (result.action === 'shop') {
@@ -1054,6 +1138,11 @@ export class GameScene extends Phaser.Scene {
       }
     }
 
+    // Tick NPC roam controllers — NPCs wander slowly around town.
+    for (const roamer of this._npcRoamControllers) {
+      this._tickNpcRoam(roamer);
+    }
+
     this.turnManager.setState(TURN_STATE.PLAYER_INPUT);
     this._beginPlayerTurn();
   }
@@ -1088,7 +1177,9 @@ export class GameScene extends Phaser.Scene {
 
   _getEntityAt(x, y) {
     if (this.player && this.player.x === x && this.player.y === y) return this.player;
-    return this.enemies.find(e => e.x === x && e.y === y) || null;
+    return this.enemies.find(e => e.x === x && e.y === y)
+      || this.npcs.find(n => n.x === x && n.y === y)
+      || null;
   }
 
   // ─── Game Over ────────────────────────────────────────────────────────────

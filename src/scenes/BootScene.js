@@ -345,6 +345,66 @@ export class BootScene extends Phaser.Scene {
       g.fillRect(4, 0, 2, 3);
       g.fillRect(10, 0, 2, 3);
     });
+
+    // Elder — white-robed sage with a brown staff
+    this._genTexture('entity_npc_elder', T, T, (g) => {
+      // Robe — wide white/grey base
+      g.fillStyle(0xddddcc);
+      g.fillTriangle(T/2, T - 2, 2, T - 2, T/2 - 2, T/2);
+      g.fillTriangle(T/2, T - 2, T - 2, T - 2, T/2 + 2, T/2);
+      // Body
+      g.fillStyle(0xccccbb);
+      g.fillRect(T/2 - 3, T/2 - 1, 6, 7);
+      // Head
+      g.fillStyle(0xffddbf);
+      g.fillEllipse(T/2, T/2 - 3, 7, 7);
+      // White beard
+      g.fillStyle(0xeeeeee);
+      g.fillTriangle(T/2 - 2, T/2, T/2 + 2, T/2, T/2, T/2 + 4);
+      // Staff — brown vertical line on the right
+      g.fillStyle(0x885533);
+      g.fillRect(T/2 + 4, 1, 2, T - 2);
+    });
+
+    // Guard — armoured soldier with a blue helmet visor
+    this._genTexture('entity_npc_guard', T, T, (g) => {
+      // Armour body — dark grey
+      g.fillStyle(0x556677);
+      g.fillRect(3, T/2, 10, 7);
+      // Helmet
+      g.fillStyle(0x445566);
+      g.fillRect(3, T/2 - 7, 10, 8);
+      // Visor slit — cyan
+      g.fillStyle(0x44ccff);
+      g.fillRect(4, T/2 - 4, 8, 2);
+      // Armour trim — lighter grey
+      g.fillStyle(0x8899aa);
+      g.fillRect(3, T/2, 10, 2);
+      // Spear handle
+      g.fillStyle(0x885533);
+      g.fillRect(T - 3, 1, 2, T - 2);
+      // Spear tip
+      g.fillStyle(0xaabbcc);
+      g.fillTriangle(T - 2, 0, T, 0, T - 1, 4);
+    });
+
+    // Merchant — stocky figure in green cloak with a gold coin bag
+    this._genTexture('entity_npc_merchant', T, T, (g) => {
+      // Cloak body — deep green
+      g.fillStyle(0x336633);
+      g.fillRect(3, T/2 - 1, 10, 8);
+      // Hood
+      g.fillStyle(0x225522);
+      g.fillRect(3, T/2 - 7, 10, 7);
+      // Face
+      g.fillStyle(0xffddbf);
+      g.fillEllipse(T/2, T/2 - 3, 6, 6);
+      // Gold coin bag — yellow circle bottom-right
+      g.fillStyle(0xddaa00);
+      g.fillEllipse(T/2 + 4, T - 3, 6, 6);
+      g.fillStyle(0xffcc44);
+      g.fillEllipse(T/2 + 4, T - 4, 4, 4);
+    });
   }
 
   _createItemTextures() {

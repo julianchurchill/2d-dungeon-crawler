@@ -42,6 +42,8 @@ export class Player {
     const ny = this.y + dy;
 
     const entity = getEntityAt(nx, ny);
+    // NPCs have a talk() method — bumping them starts a conversation, not combat.
+    if (entity && typeof entity.talk === 'function') return { action: 'npc', npc: entity };
     if (entity) return { action: 'attacked', target: entity };
 
     // Walking into a door opens the adjacent shop without moving the player

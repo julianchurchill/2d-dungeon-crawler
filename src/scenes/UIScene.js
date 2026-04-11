@@ -10,6 +10,7 @@ import { GameEvents } from '../events/GameEvents.js';
 import { isTouchDevice } from '../utils/TouchDeviceDetector.js';
 import { syncHudFromRegistry } from '../ui/HudRegistrySync.js';
 import { ShopPanel } from '../ui/ShopPanel.js';
+import { DialoguePanel } from '../ui/DialoguePanel.js';
 
 export class UIScene extends Phaser.Scene {
   constructor() {
@@ -26,6 +27,7 @@ export class UIScene extends Phaser.Scene {
     this.inventoryPanel = new InventoryPanel(this);
     this.skillsPanel = new SkillsPanel(this);
     this.shopPanel = new ShopPanel(this);
+    this.dialoguePanel = new DialoguePanel(this);
     this.dpad = new DPad(this);
     // Show touch controls only on devices that support touch input
     this.dpad.setVisible(isTouchDevice());
@@ -66,6 +68,16 @@ export class UIScene extends Phaser.Scene {
     // Close the shop panel
     EventBus.on(GameEvents.CLOSE_SELL_PANEL, () => {
       this.shopPanel?.hide();
+    }, this);
+
+    // Open dialogue panel when the player talks to an NPC
+    EventBus.on(GameEvents.OPEN_DIALOGUE, ({ npcName, line }) => {
+      this.dialoguePanel.show(npcName, line);
+    }, this);
+
+    // Close dialogue panel
+    EventBus.on(GameEvents.CLOSE_DIALOGUE, () => {
+      this.dialoguePanel?.hide();
     }, this);
 
     // Registry → HUD
@@ -142,7 +154,11 @@ export class UIScene extends Phaser.Scene {
     });
 
     kb.on('keydown-ENTER', () => {
-      if (this.shopPanel.visible) this.shopPanel.select();
+      if (this.dialoguePanel.visible) {
+        EventBus.emit(GameEvents.CLOSE_DIALOGUE);
+      } else if (this.shopPanel.visible) {
+        this.shopPanel.select();
+      }
     });
   }
 
@@ -229,6 +245,7 @@ export class UIScene extends Phaser.Scene {
     this.messageLog?.resize(width, height);
     this.inventoryPanel?.resize(width, height);
     this.shopPanel?.resize(width, height);
+    this.dialoguePanel?.resize(width, height);
     this.dpad?.resize(width, height);
     // Re-evaluate touch support on resize — handles DevTools device toolbar
     // toggling and detachable touchscreen laptops changing touch capability.

@@ -12,6 +12,7 @@
  */
 import { DungeonMap } from './DungeonMap.js';
 import { TILE } from '../utils/TileTypes.js';
+import { TOWN_NPCS } from '../entities/NpcDefinitions.js';
 
 /** Width of the fixed town map in tiles. */
 const TOWN_WIDTH = 20;
@@ -76,6 +77,7 @@ export class TownGenerator {
       startPos: { ...START_POS },
       stairsPos: { ...STAIRS_POS },
       shops: SHOPS.map(s => ({ type: s.type, doorX: s.doorX, doorY: s.doorY })),
+      npcs: TOWN_NPCS.map(n => ({ name: n.name, x: n.x, y: n.y, spriteKey: n.spriteKey, lines: n.lines })),
     };
   }
 

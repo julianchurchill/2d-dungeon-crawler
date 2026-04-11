@@ -58,6 +58,10 @@ ShopPanel (sell section) ──► SELL_ITEM            ──► GameScene._han
 ShopPanel (buy section)  ──► BUY_ITEM             ──► GameScene._handleBuyItem
 ShopPanel (show/hide)    ──► SELL_PANEL_TOGGLED   ──► GameScene (gates ESC handler)
 GameScene / ShopPanel ✕  ──► CLOSE_SELL_PANEL     ──► UIScene → ShopPanel.hide()
+
+GameScene (NPC bump)     ──► OPEN_DIALOGUE        ──► UIScene → DialoguePanel.show
+GameScene / UIScene ENTER──► CLOSE_DIALOGUE       ──► UIScene → DialoguePanel.hide
+DialoguePanel (show/hide)──► DIALOGUE_TOGGLED     ──► GameScene (gates ESC handler)
 ───────────────────────────────────────────────────────────────────────
 ```
 
@@ -99,3 +103,6 @@ GameScene / ShopPanel ✕  ──► CLOSE_SELL_PANEL     ──► UIScene → 
 | `BUY_ITEM` | `'buy-item'` | `{ shopType: string, shopItem: {item, buyPrice} }` | ShopPanel (buy section) | GameScene._handleBuyItem |
 | `SELL_PANEL_TOGGLED` | `'sell-panel-toggled'` | `boolean` (open) | ShopPanel (show/hide) | GameScene (ESC gate) |
 | `CLOSE_SELL_PANEL` | `'close-sell-panel'` | *(none)* | GameScene (ESC key), ShopPanel (✕ button) | UIScene → ShopPanel.hide() |
+| `OPEN_DIALOGUE` | `'open-dialogue'` | `{ npcName: string, line: string }` | GameScene (NPC bump) | UIScene → DialoguePanel.show() |
+| `CLOSE_DIALOGUE` | `'close-dialogue'` | *(none)* | GameScene (ESC/ENTER), DialoguePanel (✕) | UIScene → DialoguePanel.hide() |
+| `DIALOGUE_TOGGLED` | `'dialogue-toggled'` | `boolean` (open) | DialoguePanel (show/hide) | GameScene (ESC gate) |
