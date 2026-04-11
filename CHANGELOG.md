@@ -9,6 +9,7 @@ Entries are listed newest-first within each section.
 
 ### Added
 
+- 2026-04-11 — Floor 1 now contains up-stairs (pale blue `<`) leading back to the town; using them returns the player to the dungeon staircase in the town square
 - 2026-04-11 — NPC dialogue is now partially contextual: with a 40% chance per interaction the NPC picks a line that reacts to the player's current state (equipped weapon/armour, level, gold, inventory); falls back to the normal cycling lines otherwise
 
 ### Fixed

@@ -56,6 +56,7 @@ export class Player {
     this.y = ny;
 
     if (tileType === TILE.STAIRS_DOWN) return { action: 'stairs' };
+    if (tileType === TILE.STAIRS_UP) return { action: 'stairs_up' };
     return { action: 'moved' };
   }
 

@@ -98,6 +98,20 @@ export class BootScene extends Phaser.Scene {
       g.fillRect(7, 13, 2, 2);
     });
 
+    // Stairs up — ascending pattern (inverted step lines, upward arrow)
+    this._genTexture('tile_stairs_up', T, T, (g) => {
+      g.fillStyle(0x1a1a2e);
+      g.fillRect(0, 0, T, T);
+      // Draw step lines ascending (widest at bottom)
+      g.fillStyle(0x44aadd);
+      for (let i = 0; i < 4; i++) {
+        g.fillRect(2 + i * 2, 3 + (3 - i) * 3, T - 4 - i * 4, 2);
+      }
+      // Arrow up
+      g.fillStyle(0x88ccff);
+      g.fillRect(7, 3, 2, 2);
+    });
+
     // Town floor tile — warm cobblestone, distinct from the dark dungeon floor
     this._genTexture('tile_town_floor', T, T, (g) => {
       g.fillStyle(0x8a7a62);

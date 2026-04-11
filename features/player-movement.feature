@@ -28,6 +28,13 @@ Feature: Player Movement
     Then the player position should be 6, 5
     And the move result should be "stairs"
 
+  Scenario: Moving onto up-stairs triggers floor ascent
+    Given a player at position 5, 5
+    And up-stairs at position 6, 5
+    When the player moves right
+    Then the player position should be 6, 5
+    And the move result should be "stairs_up"
+
   Scenario: Moving into a door tile opens a shop without moving the player
     Given a player at position 5, 5
     And a door at position 6, 5

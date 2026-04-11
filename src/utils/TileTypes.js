@@ -8,6 +8,8 @@ export const TILE = Object.freeze({
   TOWN_ACCENT: 5,
   /** Shop roof tile — fills the interior of town shop alcoves. Non-walkable. */
   SHOP_ROOF: 6,
+  /** Stairs leading up — present on floor 1 only, returns the player to the town. */
+  STAIRS_UP: 7,
 });
 
 export const FOV_STATE = Object.freeze({
