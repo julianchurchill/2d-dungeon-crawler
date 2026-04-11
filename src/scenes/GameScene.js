@@ -236,6 +236,7 @@ export class GameScene extends Phaser.Scene {
       [TILE.WALL]:        'tile_wall',
       [TILE.DOOR]:        'tile_door',
       [TILE.STAIRS_DOWN]: 'tile_stairs',
+      [TILE.STAIRS_UP]:   'tile_stairs_up',
     };
 
     // Build position → texture-key overrides for typed shop doors (town only)
@@ -655,7 +656,7 @@ export class GameScene extends Phaser.Scene {
 
     if (result.action === 'attacked') {
       this._playerAttack(result.target);
-    } else if (result.action === 'moved' || result.action === 'stairs') {
+    } else if (result.action === 'moved' || result.action === 'stairs' || result.action === 'stairs_up') {
       // Update entity map
       this.dungeonMap.setEntity(this.player.x - dx, this.player.y - dy, null);
       // Animate
@@ -681,6 +682,8 @@ export class GameScene extends Phaser.Scene {
     this._checkItemPickup();
     if (action === 'stairs') {
       this._showStairsPrompt();
+    } else if (action === 'stairs_up') {
+      this._showStairsUpPrompt();
     }
     this._syncRegistry();
     this._startEnemyTurns();
@@ -768,6 +771,13 @@ export class GameScene extends Phaser.Scene {
   }
 
   /**
+   * Shows a message when the player steps onto up-stairs.
+   */
+  _showStairsUpPrompt() {
+    EventBus.emit(GameEvents.MESSAGE, 'You stand on the stairs leading up. Press > or tap ▼▼ to ascend.');
+  }
+
+  /**
    * Pauses the game and UI scenes and opens the AchievementsScene overlay.
    * The AchievementsScene will resume both scenes when the player closes it.
    */
@@ -798,6 +808,8 @@ export class GameScene extends Phaser.Scene {
     const tileType = this.dungeonMap.getTile(this.player.x, this.player.y);
     if (tileType === TILE.STAIRS_DOWN) {
       this._descend();
+    } else if (tileType === TILE.STAIRS_UP) {
+      this._ascend();
     } else {
       EventBus.emit(GameEvents.MESSAGE, 'No stairs here.');
     }
@@ -810,6 +822,34 @@ export class GameScene extends Phaser.Scene {
       this._buildFloor(dungeonData);
       this._syncRegistry();
       EventBus.emit(GameEvents.MESSAGE, `You descend to floor ${this.floorManager.currentFloor}.`);
+      this.cameras.main.fadeIn(300, 0, 0, 0);
+    });
+  }
+
+  /**
+   * Move the player back up one floor (to the town when on floor 1).
+   * The player is placed at the stairsPos of the destination floor so they
+   * land near the stairs they arrived from.
+   */
+  _ascend() {
+    this.cameras.main.fadeOut(300, 0, 0, 0);
+    this.time.delayedCall(300, () => {
+      const dungeonData = this.floorManager.ascend();
+      this._buildFloor(dungeonData);
+      // Place the player at the stairs position of the destination floor,
+      // and sync the sprite so the camera centres on the correct tile.
+      this.player.x = dungeonData.stairsPos.x;
+      this.player.y = dungeonData.stairsPos.y;
+      this.playerSprite.setPosition(
+        dungeonData.stairsPos.x * TILE_SIZE + TILE_SIZE / 2,
+        dungeonData.stairsPos.y * TILE_SIZE + TILE_SIZE / 2,
+      );
+      this._syncRegistry();
+      if (this.floorManager.isTown()) {
+        EventBus.emit(GameEvents.MESSAGE, 'You ascend back to town.');
+      } else {
+        EventBus.emit(GameEvents.MESSAGE, `You ascend to floor ${this.floorManager.currentFloor}.`);
+      }
       this.cameras.main.fadeIn(300, 0, 0, 0);
     });
   }

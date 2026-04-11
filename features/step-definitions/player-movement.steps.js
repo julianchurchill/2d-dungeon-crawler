@@ -35,6 +35,10 @@ Given('a door at position {int}, {int}', function (x, y) {
   this.map.setTile(x, y, TILE.DOOR);
 });
 
+Given('up-stairs at position {int}, {int}', function (x, y) {
+  this.map.setTile(x, y, TILE.STAIRS_UP);
+});
+
 // --- When ---
 
 When('the player moves right', function () {

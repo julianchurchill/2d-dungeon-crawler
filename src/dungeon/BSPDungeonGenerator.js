@@ -112,10 +112,11 @@ class BSPNode {
 
 export class BSPDungeonGenerator {
   /**
-   * @param {object} rng - Seeded RNG instance from createRNG()
-   * @returns {{ map: DungeonMap, rooms: Array, startPos: {x,y}, stairsPos: {x,y} }}
+   * @param {object} rng   - Seeded RNG instance from createRNG()
+   * @param {number} [floor=2] - Dungeon floor number; floor 1 receives up-stairs in the start room.
+   * @returns {{ map: DungeonMap, rooms: Array, startPos: {x,y}, stairsPos: {x,y}, stairsUpPos?: {x,y} }}
    */
-  generate(rng) {
+  generate(rng, floor = 2) {
     const map = new DungeonMap(MAP_WIDTH, MAP_HEIGHT);
 
     const root = new BSPNode(1, 1, MAP_WIDTH - 2, MAP_HEIGHT - 2);
@@ -131,7 +132,7 @@ export class BSPDungeonGenerator {
     root.connectChildren(map);
     map.buildWalls();
 
-    // Place stairs in room farthest from start (Manhattan distance)
+    // Place down-stairs in the room farthest from the start room (Manhattan distance).
     const startRoom = rooms[0];
     let farthestRoom = rooms[0];
     let maxDist = 0;
@@ -144,11 +145,20 @@ export class BSPDungeonGenerator {
     }
     map.setTile(farthestRoom.cx, farthestRoom.cy, TILE.STAIRS_DOWN);
 
+    // Floor 1 connects back to the town — place up-stairs in the start room,
+    // offset one tile from centre so it doesn't overlap the player spawn point.
+    let stairsUpPos;
+    if (floor === 1) {
+      stairsUpPos = { x: startRoom.cx + 1, y: startRoom.cy };
+      map.setTile(stairsUpPos.x, stairsUpPos.y, TILE.STAIRS_UP);
+    }
+
     return {
       map,
       rooms,
       startPos: { x: startRoom.cx, y: startRoom.cy },
       stairsPos: { x: farthestRoom.cx, y: farthestRoom.cy },
+      stairsUpPos,
     };
   }
 
