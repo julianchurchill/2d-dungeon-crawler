@@ -360,6 +360,58 @@ export class BootScene extends Phaser.Scene {
       g.fillRect(10, 0, 2, 3);
     });
 
+    // Skeleton — pale bone-white warrior with hollow eyes
+    this._genTexture('entity_skeleton', T, T, (g) => {
+      // Ribcage / torso
+      g.fillStyle(0xddddcc);
+      g.fillRect(4, 6, 8, 7);
+      // Ribs
+      g.fillStyle(0xbbbbaa);
+      g.fillRect(5, 7, 2, 1);
+      g.fillRect(9, 7, 2, 1);
+      g.fillRect(5, 9, 2, 1);
+      g.fillRect(9, 9, 2, 1);
+      // Head
+      g.fillStyle(0xeeeecc);
+      g.fillRect(5, 1, 6, 5);
+      // Hollow eye sockets
+      g.fillStyle(0x111111);
+      g.fillRect(6, 2, 2, 2);
+      g.fillRect(9, 2, 2, 2);
+      // Legs
+      g.fillStyle(0xddddcc);
+      g.fillRect(5, 13, 2, 3);
+      g.fillRect(9, 13, 2, 3);
+    });
+
+    // Old Bones — imposing ivory skeleton boss with glowing eyes
+    this._genTexture('entity_old_bones', T, T, (g) => {
+      // Large torso
+      g.fillStyle(0xeeeecc);
+      g.fillRect(3, 5, 10, 9);
+      // Ribcage details
+      g.fillStyle(0xccccaa);
+      g.fillRect(4, 6, 2, 2);
+      g.fillRect(4, 9, 2, 2);
+      g.fillRect(10, 6, 2, 2);
+      g.fillRect(10, 9, 2, 2);
+      // Large skull head
+      g.fillStyle(0xf0f0dd);
+      g.fillRect(3, 0, 10, 6);
+      // Glowing eye sockets — amber to suggest malevolence
+      g.fillStyle(0xff9900);
+      g.fillRect(5, 1, 2, 2);
+      g.fillRect(9, 1, 2, 2);
+      // Crown of bone spikes
+      g.fillStyle(0xddddcc);
+      g.fillRect(4, 0, 1, 2);
+      g.fillRect(7, 0, 2, 2);
+      g.fillRect(11, 0, 1, 2);
+      // Legs
+      g.fillRect(4, 14, 3, 2);
+      g.fillRect(9, 14, 3, 2);
+    });
+
     // Creeping Mass — an amorphous blob of dark green ooze
     this._genTexture('entity_creeping_mass', T, T, (g) => {
       // Outer blob body
@@ -474,6 +526,40 @@ export class BootScene extends Phaser.Scene {
       g.fillStyle(0xddaa44);
       g.fillRect(T/2 - 1, 4, 2, 5);
       g.fillRect(T/2 - 3, 6, 6, 2);
+    });
+
+    // Bone Blade — serrated ivory weapon with golden pommel
+    this._genTexture('item_bone_blade', T, T, (g) => {
+      // Blade — off-white bone colour
+      g.fillStyle(0xeeeecc);
+      g.fillRect(T/2 - 1, 1, 2, 10);
+      // Serrated teeth on right edge
+      g.fillStyle(0xccccaa);
+      g.fillRect(T/2 + 1, 2, 1, 1);
+      g.fillRect(T/2 + 1, 5, 1, 1);
+      g.fillRect(T/2 + 1, 8, 1, 1);
+      // Guard — ivory with brown accent
+      g.fillStyle(0xddaa44);
+      g.fillRect(T/2 - 4, 11, 8, 2);
+      // Handle wrapped in bone
+      g.fillStyle(0xbbbbaa);
+      g.fillRect(T/2 - 1, 13, 2, 3);
+    });
+
+    // Skeleton Shield — interlocked bone segments, blue-tinted
+    this._genTexture('item_skeleton_shield', T, T, (g) => {
+      // Outer bone rim
+      g.fillStyle(0xddddcc);
+      g.fillRect(3, 2, 10, 9);
+      g.fillTriangle(3, 11, 13, 11, T/2, 15);
+      // Inner hollow
+      g.fillStyle(0xccccaa);
+      g.fillRect(5, 4, 6, 6);
+      // Bone cross — horizontal
+      g.fillStyle(0xeeeecc);
+      g.fillRect(4, 7, 8, 2);
+      // Bone cross — vertical
+      g.fillRect(T/2 - 1, 3, 2, 9);
     });
 
     // Teleport potion — purple vial with sparkle
