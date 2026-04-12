@@ -175,8 +175,12 @@ export class GameScene extends Phaser.Scene {
     // Spawn enemies (skip start room)
     this._spawnEnemies(rooms);
 
-    // Spawn Old Bones boss on eligible floors (10–15, once per game)
-    this._trySpawnOldBones(rooms);
+    // Boss spawning: dev override takes priority over normal floor logic
+    if (devOptions.bossQuantities !== null) {
+      this._spawnDevBosses(rooms, devOptions.bossQuantities);
+    } else {
+      this._trySpawnOldBones(rooms);
+    }
 
     // Spawn items
     this._spawnItems(rooms);
@@ -343,6 +347,30 @@ export class GameScene extends Phaser.Scene {
     // handled in one place, regardless of whether the boss was placed here or
     // via the dev spawn-weight override.
     this._spawnEnemy(cx, cy, 'old_bones');
+  }
+
+  /**
+   * Dev-only: spawns an exact number of each boss type specified in the
+   * `bossQuantities` map, ignoring normal floor-range and achievement gates.
+   * Bosses are placed at the centre of non-start rooms (first-fit order).
+   *
+   * @param {Array<{x:number,y:number,w:number,h:number}>} rooms
+   * @param {Object.<string,number>} quantities - Map of boss type → total count.
+   */
+  _spawnDevBosses(rooms, quantities) {
+    const candidates = rooms.slice(1);
+    for (const [type, count] of Object.entries(quantities)) {
+      let spawned = 0;
+      for (const room of candidates) {
+        if (spawned >= count) break;
+        const cx = Math.floor(room.x + room.w / 2);
+        const cy = Math.floor(room.y + room.h / 2);
+        if (!this._getEntityAt(cx, cy)) {
+          this._spawnEnemy(cx, cy, type);
+          spawned++;
+        }
+      }
+    }
   }
 
   _spawnEnemy(x, y, type) {

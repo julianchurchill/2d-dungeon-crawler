@@ -36,10 +36,16 @@ const ITEM_ROWS = Object.entries(ITEM_TYPES).map(([key, typeDef]) => ({
 }));
 
 /**
- * Enemy types shown in the SPAWN TABLE section, derived from ENEMY_DEFS so
- * that new enemy types are automatically included.
+ * Enemy types shown in the SPAWN TABLE section — regular (non-boss) enemies
+ * only.  Boss types are controlled separately in the BOSSES section.
  */
-const ENEMY_KEYS = Object.keys(ENEMY_DEFS);
+const SPAWN_TABLE_KEYS = Object.keys(ENEMY_DEFS).filter(k => !ENEMY_DEFS[k].isBoss);
+
+/**
+ * Boss types shown in the BOSSES section — enemies flagged with `isBoss: true`
+ * in ENEMY_DEFS.
+ */
+const BOSS_KEYS = Object.keys(ENEMY_DEFS).filter(k => ENEMY_DEFS[k].isBoss);
 
 export class DevOptionsScene extends Phaser.Scene {
   constructor() {
@@ -124,7 +130,7 @@ export class DevOptionsScene extends Phaser.Scene {
     // allWeightDisplays is shared across rows so that when the first weight is
     // set (transitioning from null → object), all sibling texts update together.
     const allWeightDisplays = {};
-    for (const key of ENEMY_KEYS) {
+    for (const key of SPAWN_TABLE_KEYS) {
       const { rowH, valTxt } = this._makeSpawnWeightRow(
         ENEMY_DEFS[key].name, key, cx, y, allWeightDisplays,
       );
@@ -161,6 +167,29 @@ export class DevOptionsScene extends Phaser.Scene {
     this._makeResetLink('Reset enemies to floor defaults', cx, y, () => {
       devOptions.minEnemiesPerRoom = null;
       devOptions.maxEnemiesPerRoom = null;
+      this.scene.restart();
+    });
+    y += 32;
+
+    // Bosses section heading
+    this.add.text(cx, y, 'BOSSES', {
+      fontSize: '13px', fontFamily: FONT_FAMILY, color: '#ffdd88', resolution: 2,
+    }).setOrigin(0.5);
+    y += 8;
+
+    this.add.text(cx, y + 10, 'Total per level (overrides normal boss logic)', {
+      fontSize: '10px', fontFamily: FONT_FAMILY, color: '#668899', resolution: 2,
+    }).setOrigin(0.5);
+    y += 28;
+
+    for (const key of BOSS_KEYS) {
+      this._makeBossQuantityRow(ENEMY_DEFS[key].name, key, cx, y);
+      y += 36;
+    }
+
+    // "Reset to defaults" link for boss quantities
+    this._makeResetLink('Reset bosses to normal logic', cx, y, () => {
+      devOptions.bossQuantities = null;
       this.scene.restart();
     });
     y += 32;
@@ -312,7 +341,7 @@ export class DevOptionsScene extends Phaser.Scene {
       if (devOptions.spawnWeights === null) {
         // First weight edit — initialise all enemy weights to 0 and refresh
         // every sibling's "--" text so the UI stays consistent.
-        devOptions.spawnWeights = Object.fromEntries(ENEMY_KEYS.map(k => [k, 0]));
+        devOptions.spawnWeights = Object.fromEntries(SPAWN_TABLE_KEYS.map(k => [k, 0]));
         for (const [k, txt] of Object.entries(allWeightDisplays)) {
           txt.setText(String(devOptions.spawnWeights[k]));
         }
@@ -364,6 +393,55 @@ export class DevOptionsScene extends Phaser.Scene {
       } else {
         devOptions[field] = Math.min(max, devOptions[field] + 1);
       }
+      valTxt.setText(display());
+    });
+  }
+
+  /**
+   * Creates a labelled +/− control for a boss type's total-per-level quantity
+   * in `devOptions.bossQuantities`.  Displays "--" while `bossQuantities` is
+   * null (normal boss logic active).  The first [+] press initialises all boss
+   * quantities to 0 then increments this type.  [−] from 0 on the last
+   * remaining non-zero boss resets the whole map to null.
+   *
+   * @param {string} label - Human-readable boss name.
+   * @param {string} key   - ENEMY_DEFS key, e.g. 'old_bones'.
+   * @param {number} cx    - Horizontal centre of the scene.
+   * @param {number} y     - Vertical centre of this row.
+   */
+  _makeBossQuantityRow(label, key, cx, y) {
+    const display = () =>
+      devOptions.bossQuantities === null ? '--' : String(devOptions.bossQuantities[key] ?? 0);
+
+    const labelMaxW = cx - CTRL_OFFSET / 2 - 8;
+    this.add.text(cx - CTRL_OFFSET / 2 - 8, y, label + ' count:', {
+      fontSize: '12px', fontFamily: FONT_FAMILY, color: '#aabbcc', resolution: 2,
+      wordWrap: { width: labelMaxW },
+    }).setOrigin(1, 0.5);
+
+    const valTxt = this.add.text(cx, y, display(), {
+      fontSize: '13px', fontFamily: FONT_FAMILY, color: '#ffffff', resolution: 2,
+    }).setOrigin(0.5);
+
+    this._makeBtn(cx - 40, y, '−', () => {
+      if (devOptions.bossQuantities === null) return;
+      const current = devOptions.bossQuantities[key] ?? 0;
+      if (current > 0) {
+        devOptions.bossQuantities[key] = current - 1;
+      }
+      // If all bosses are now 0, revert to null (normal logic)
+      if (Object.values(devOptions.bossQuantities).every(v => v === 0)) {
+        devOptions.bossQuantities = null;
+      }
+      valTxt.setText(display());
+    });
+
+    this._makeBtn(cx + 40, y, '+', () => {
+      if (devOptions.bossQuantities === null) {
+        // First edit — initialise all boss quantities to 0
+        devOptions.bossQuantities = Object.fromEntries(BOSS_KEYS.map(k => [k, 0]));
+      }
+      devOptions.bossQuantities[key] = Math.min(5, (devOptions.bossQuantities[key] ?? 0) + 1);
       valTxt.setText(display());
     });
   }
