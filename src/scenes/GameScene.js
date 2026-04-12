@@ -684,7 +684,13 @@ export class GameScene extends Phaser.Scene {
    * @returns {boolean}
    */
   _anyEnemyVisible() {
-    return this.enemies.some(e => this.dungeonMap.getFovState(e.x, e.y) === FOV_STATE.VISIBLE);
+    return this.enemies.some(e => {
+      // Multi-segment enemies (e.g. Creeping Mass): visible if ANY segment tile is in FOV
+      if (e.segments) {
+        return e.segments.some(s => this.dungeonMap.getFovState(s.x, s.y) === FOV_STATE.VISIBLE);
+      }
+      return this.dungeonMap.getFovState(e.x, e.y) === FOV_STATE.VISIBLE;
+    });
   }
 
   /**
