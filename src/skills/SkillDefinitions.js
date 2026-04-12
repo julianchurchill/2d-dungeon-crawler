@@ -63,6 +63,13 @@ export const SKILLS = Object.freeze({
     targetType: 'sprite',
     bonusMultiplier: 0.10,
   },
+  CREEPING_MASS_HUNTING: {
+    id: 'creeping_mass_hunting',
+    name: 'Creeping Mass Hunting',
+    description: '+10% damage against creeping masses.',
+    targetType: 'creeping_mass',
+    bonusMultiplier: 0.10,
+  },
   NIGHT_VISION: {
     id: 'night_vision',
     name: 'Night Vision',

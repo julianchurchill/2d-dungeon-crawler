@@ -1046,6 +1046,7 @@ export class GameScene extends Phaser.Scene {
       troll_killer:     () => new HuntingSkill('TROLL_HUNTING'),
       cockroach_killer: () => new HuntingSkill('COCKROACH_HUNTING'),
       sprite_killer:    () => new HuntingSkill('SPRITE_HUNTING'),
+      mass_slayer:      () => new HuntingSkill('CREEPING_MASS_HUNTING'),
     };
 
     // Pool skills are added to the inactive skill list so the player can
@@ -1088,6 +1089,7 @@ export class GameScene extends Phaser.Scene {
       troll_killer:     'troll_hunting',
       cockroach_killer: 'cockroach_hunting',
       sprite_killer:    'sprite_hunting',
+      mass_slayer:      'creeping_mass_hunting',
       burrower:         'night_vision',
     };
 

@@ -9,6 +9,7 @@ Entries are listed newest-first within each section.
 
 ### Added
 
+- 2026-04-12 — Achievement: **Mass Slayer** — kill 5 Creeping Masses to permanently unlock the **Creeping Mass Hunting** skill (+10% damage against Creeping Masses)
 - 2026-04-12 — Creeping Mass is now solitary — at most one may spawn per room (the `solitary` flag is enforced by the EnemySpawner)
 - 2026-04-12 — New enemy: **Creeping Mass** — a multi-tile amorphous creature appearing from floor 10. It has 3–5 connected segments (each occupying one tile) and moves by removing a tail segment and re-placing it adjacent to the body. HP is proportional to segment count; segments are lost as the mass takes damage, keeping the body connected at all times.
 - 2026-04-11 — Floor 1 now contains up-stairs (pale blue `<`) leading back to the town; using them returns the player to the dungeon staircase in the town square

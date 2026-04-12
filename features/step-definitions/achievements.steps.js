@@ -140,6 +140,12 @@ When('the player kills {int} sprites', function (count) {
   }
 });
 
+When('the player kills {int} creeping_masses', function (count) {
+  for (let i = 0; i < count; i++) {
+    this.eventBus.emit(GameEvents.ENEMY_KILLED, 'creeping_mass');
+  }
+});
+
 When('the player reaches level {int}', function (level) {
   this.eventBus.emit(GameEvents.PLAYER_LEVEL_UP, level);
 });

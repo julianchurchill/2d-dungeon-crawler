@@ -83,6 +83,14 @@ export const ACHIEVEMENTS = [
     progressUnit: 'killed',
     unlocks: 'Troll Hunting skill',
   },
+  {
+    id: 'mass_slayer',
+    name: 'Mass Slayer',
+    description: 'Kill 5 Creeping Masses',
+    condition: { type: 'kill_type', enemyType: 'creeping_mass', target: 5 },
+    progressUnit: 'killed',
+    unlocks: 'Creeping Mass Hunting skill',
+  },
 
   // ── Floor achievements ───────────────────────────────────────────────────
   {
