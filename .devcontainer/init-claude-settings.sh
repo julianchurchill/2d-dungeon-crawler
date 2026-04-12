@@ -13,10 +13,23 @@
 
 set -euo pipefail
 
+# PS4 is set for debugging purposes; it prefixes each command with the line number.
+#PS4='${LINENO}: '
+# set -x is enabled to print each command before execution
+#set -x
+
 SETTINGS_FILE="${CLAUDE_CONFIG_DIR:-/home/node/.claude}/.claude.json"
 
 # Ensure the directory exists (may not if volume is freshly created).
-mkdir -p "$(dirname "$SETTINGS_FILE")"
+SETTINGS_DIR="$(dirname "$SETTINGS_FILE")"
+echo "Ensuring Claude settings directory exists at $SETTINGS_DIR..."
+mkdir -p "$SETTINGS_DIR"
+echo "Ensuring Claude settings directory $SETTINGS_DIR has 755 permissions and node:node ownership"
+chmod 755 "$SETTINGS_DIR"
+chown node:node "$SETTINGS_DIR"
+echo "Ensuring Claude settings file $SETTINGS_FILE has 755 permissions and node:node ownership"
+chmod 644 "$SETTINGS_FILE" 2>/dev/null || true
+chown node:node "$SETTINGS_FILE" 2>/dev/null || true
 
 # Define all required MCP server entries as a single JSON object.
 # Add new servers here to have them automatically provisioned on rebuild.
@@ -38,6 +51,7 @@ REQUIRED_MCP_SERVERS='{
   }
 }'
 
+echo "Provisioning required MCP server settings to $SETTINGS_FILE..."
 node -e "
   const fs = require('fs');
   const settingsPath = '$SETTINGS_FILE';
