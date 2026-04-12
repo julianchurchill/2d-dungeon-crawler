@@ -6,6 +6,7 @@ import { InventorySystem } from '../systems/InventorySystem.js';
 import { Player } from '../entities/Player.js';
 import { Enemy } from '../entities/Enemy.js';
 import { CreepingMass } from '../entities/CreepingMass.js';
+import { OldBones } from '../entities/OldBones.js';
 import { Npc } from '../entities/Npc.js';
 import { Item } from '../items/Item.js';
 import { getFloorLoot } from '../items/ItemTypes.js';
@@ -174,6 +175,9 @@ export class GameScene extends Phaser.Scene {
     // Spawn enemies (skip start room)
     this._spawnEnemies(rooms);
 
+    // Spawn Old Bones boss on eligible floors (10–15, once per game)
+    this._trySpawnOldBones(rooms);
+
     // Spawn items
     this._spawnItems(rooms);
 
@@ -312,12 +316,43 @@ export class GameScene extends Phaser.Scene {
     );
   }
 
+  /**
+   * Attempts to place the Old Bones boss on the current floor.
+   * Conditions: floor 10–15, boss not yet defeated (achievement incomplete),
+   * and a 50% random chance per floor visit.  Spawns in a random non-start room.
+   *
+   * @param {Array<{x:number,y:number,w:number,h:number}>} rooms
+   */
+  _trySpawnOldBones(rooms) {
+    const floor = this.floorManager.currentFloor;
+    if (floor < 10 || floor > 15) return;
+    if (getProgress('old_bones_slayer', achievementStore).completed) return;
+    if (!this.rng.nextBool(0.5)) return;
+
+    // Pick a random non-start room (index 1+)
+    const candidates = rooms.slice(1);
+    if (candidates.length === 0) return;
+    const room = this.rng.pick(candidates);
+
+    // Place boss near room centre, avoiding occupied tiles
+    const cx = Math.floor(room.x + room.w / 2);
+    const cy = Math.floor(room.y + room.h / 2);
+    if (this._getEntityAt(cx, cy)) return;
+
+    // Delegate to _spawnEnemy so the hint message and boss construction are
+    // handled in one place, regardless of whether the boss was placed here or
+    // via the dev spawn-weight override.
+    this._spawnEnemy(cx, cy, 'old_bones');
+  }
+
   _spawnEnemy(x, y, type) {
     if (type === 'creeping_mass') {
       this._spawnCreepingMass(x, y);
       return;
     }
-    const enemy = new Enemy(x, y, type);
+    // Old Bones must be constructed as OldBones (not plain Enemy) so that boss
+    // properties — isBoss, minionsSpawned, dropGold, dropItem — are present.
+    const enemy = type === 'old_bones' ? new OldBones(x, y, this.rng) : new Enemy(x, y, type);
     const sprite = this.add.sprite(
       x * TILE_SIZE + TILE_SIZE / 2,
       y * TILE_SIZE + TILE_SIZE / 2,
@@ -326,6 +361,15 @@ export class GameScene extends Phaser.Scene {
     enemy.sprite = sprite;
     this.enemies.push(enemy);
     this.dungeonMap.setEntity(x, y, enemy);
+
+    // Emit the boss hint after a short delay so the UIScene's message log is
+    // guaranteed to be listening (messages emitted synchronously during scene
+    // creation are dropped before the subscriber is registered).
+    if (type === 'old_bones') {
+      this.time.delayedCall(200, () => {
+        EventBus.emit(GameEvents.MESSAGE, 'An eerie silence hangs over this level… something powerful stirs in the dark.');
+      });
+    }
   }
 
   /**
@@ -813,9 +857,22 @@ export class GameScene extends Phaser.Scene {
         // Handle segments removed by damage (proportional HP loss for Creeping Mass)
         this._applyPendingRemovedSegments(target);
 
+        // First-hit minion spawning for bosses that support it
+        if (target.isBoss && target.shouldSpawnMinions && !target.minionsSpawned && damage > 0) {
+          this._spawnBossMinions(target);
+          // Immediately reveal minions — without this call their sprites stay
+          // hidden (setVisible(false) at spawn) until the player's next action.
+          this._updateFOV();
+        }
+
         if (killed) {
           // Notify achievement system via event so it can update kill-based progress.
           EventBus.emit(GameEvents.ENEMY_KILLED, target.type);
+
+          // Boss-specific loot: gold and a unique item drop
+          if (target.isBoss) {
+            this._applyBossLoot(target);
+          }
 
           const leveled = this.player.gainXP(target.xp);
           if (leveled) {
@@ -890,6 +947,52 @@ export class GameScene extends Phaser.Scene {
           onComplete: () => target.sprite?.destroy(),
         });
       }
+    }
+  }
+
+  /**
+   * Spawns up to `boss.maxMinions` minions of `boss.minionType` adjacent to
+   * the boss on its first hit.  Marks `minionsSpawned` so this only triggers
+   * once per encounter.
+   *
+   * @param {object} boss - A boss entity with minionType, maxMinions, and minionSpawnMessage fields.
+   */
+  _spawnBossMinions(boss) {
+    boss.minionsSpawned = true;
+    const count = this.rng.nextInt(0, boss.maxMinions);
+    if (count === 0) return;
+
+    const dirs = [{ dx: 0, dy: -1 }, { dx: 1, dy: 0 }, { dx: 0, dy: 1 }, { dx: -1, dy: 0 }];
+    let spawned = 0;
+    for (const { dx, dy } of dirs) {
+      if (spawned >= count) break;
+      const nx = boss.x + dx;
+      const ny = boss.y + dy;
+      if (this.dungeonMap.isWalkable(nx, ny) && !this._getEntityAt(nx, ny)) {
+        this._spawnEnemy(nx, ny, boss.minionType);
+        spawned++;
+      }
+    }
+    // Only announce if at least one minion actually materialised
+    if (spawned > 0) {
+      EventBus.emit(GameEvents.MESSAGE, boss.minionSpawnMessage);
+    }
+  }
+
+  /**
+   * Awards the player the boss's gold and places its unique item drop on the floor.
+   *
+   * @param {OldBones} boss
+   */
+  _applyBossLoot(boss) {
+    if (boss.dropGold > 0) {
+      this.player.gold = (this.player.gold ?? 0) + boss.dropGold;
+      EventBus.emit(GameEvents.PLAYER_GOLD_CHANGED, this.player.gold);
+      EventBus.emit(GameEvents.MESSAGE, `You find ${boss.dropGold} gold on the remains!`);
+    }
+    if (boss.dropItem) {
+      this._placeItem(boss.x, boss.y, boss.dropItem);
+      EventBus.emit(GameEvents.MESSAGE, `${boss.name} dropped: ${boss.dropItem.name}!`);
     }
   }
 

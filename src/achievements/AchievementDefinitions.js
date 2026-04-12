@@ -91,6 +91,13 @@ export const ACHIEVEMENTS = [
     progressUnit: 'killed',
     unlocks: 'Creeping Mass Hunting skill',
   },
+  {
+    id: 'old_bones_slayer',
+    name: 'Bone Breaker',
+    description: 'Defeat Old Bones',
+    condition: { type: 'kill_type', enemyType: 'old_bones', target: 1 },
+    progressUnit: 'killed',
+  },
 
   // ── Floor achievements ───────────────────────────────────────────────────
   {

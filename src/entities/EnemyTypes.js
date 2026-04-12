@@ -54,6 +54,36 @@ export const ENEMY_DEFS = {
     color: 0x443333,
   },
   /**
+   * Skeleton — a frail but relentless undead warrior.
+   * Spawned as a minion by the Old Bones boss; does not appear in the regular
+   * spawn table.
+   */
+  skeleton: {
+    name: 'Skeleton',
+    hp: 12,
+    attack: 4,
+    defense: 2,
+    xp: 15,
+    textureKey: 'entity_skeleton',
+    aggroRange: 7,
+    color: 0xddddcc,
+  },
+  /**
+   * Old Bones — unique boss; appears on floors 10–15 until defeated once.
+   * Not in the regular spawn table; placed separately by boss-spawn logic.
+   */
+  old_bones: {
+    name: 'Old Bones',
+    hp: 40,
+    attack: 10,
+    defense: 3,
+    xp: 100,
+    textureKey: 'entity_old_bones',
+    aggroRange: 10,
+    color: 0xeeeecc,
+    solitary: true,   // at most one per room (enforced by EnemySpawner)
+  },
+  /**
    * Creeping Mass — multi-tile amorphous enemy.
    * Spawned via CreepingMass class, not directly via the Enemy constructor.
    * Fields here are used by the EnemySpawner (type lookup) and developer tools.
