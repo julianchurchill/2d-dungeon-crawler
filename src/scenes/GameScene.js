@@ -355,7 +355,9 @@ export class GameScene extends Phaser.Scene {
       this._spawnCreepingMass(x, y);
       return;
     }
-    const enemy = new Enemy(x, y, type);
+    // Old Bones must be constructed as OldBones (not plain Enemy) so that boss
+    // properties — isBoss, minionsSpawned, dropGold, dropItem — are present.
+    const enemy = type === 'old_bones' ? new OldBones(x, y, this.rng) : new Enemy(x, y, type);
     const sprite = this.add.sprite(
       x * TILE_SIZE + TILE_SIZE / 2,
       y * TILE_SIZE + TILE_SIZE / 2,

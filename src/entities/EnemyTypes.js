@@ -81,6 +81,7 @@ export const ENEMY_DEFS = {
     textureKey: 'entity_old_bones',
     aggroRange: 10,
     color: 0xeeeecc,
+    solitary: true,   // at most one per room (enforced by EnemySpawner)
   },
   /**
    * Creeping Mass — multi-tile amorphous enemy.
