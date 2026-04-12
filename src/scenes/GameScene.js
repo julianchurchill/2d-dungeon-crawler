@@ -856,6 +856,9 @@ export class GameScene extends Phaser.Scene {
         // First-hit minion spawning for Old Bones boss
         if (target.isBoss && !target.minionsSpawned && damage > 0) {
           this._spawnOldBossMinions(target);
+          // Immediately reveal minions — without this call their sprites stay
+          // hidden (setVisible(false) at spawn) until the player's next action.
+          this._updateFOV();
         }
 
         if (killed) {
