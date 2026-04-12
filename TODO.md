@@ -45,11 +45,11 @@
 
 ## Enemies
 
-- [ ] boss spawn developer options - add to developer options to spawn unique bosses, alongside enemy spawning controls.
 - [ ] enemy health - perhaps a health bar
 - [ ] enemy types
 - [ ] associate enemies with a chance of appearing based on the dungeon level. Record that against their enemy stats as their level. This can then be used for Hall of Legends information when players die for the highest level enemy they have defeated.
 - [ ] have an optional max dungeon level below which enemies will appear
+- [x] boss spawn developer options - add to developer options to spawn unique bosses, alongside enemy spawning controls.
 - [x] Boss - Old Bones, the first boss the player can encounter. Will randomly appear between level 10 and 15 until the player defeats it. As it is a unique boss it can only appear once in a level. Gives player an achievement on defeating. Drops 1 unique weapon or piece of armour with a bone/skeleton theme. Drops some gold. Is quite aggressive. May spawn up to 2 skeleton minions nearby once combat starts.
 - [x] new enemy - Creeping Mass, appears from level 10, is solitary. It has 3-5 segments which each cover 1 tile. The segments are always connected by at least one other segment. The whole enemy moves one tile at a time by removing one outer segment and placing it on a free adjacent tile to any other segment. A Creeping Mass has hp relative to the number of segments it has. As it gets damaged it loses segments in proportion to it's remaining hp.
 
