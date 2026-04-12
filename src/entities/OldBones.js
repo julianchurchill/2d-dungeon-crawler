@@ -17,7 +17,11 @@ export class OldBones extends Enemy {
   constructor(x, y, rng) {
     super(x, y, 'old_bones');
     this.isBoss = true;
+    this.shouldSpawnMinions = true;
     this.minionsSpawned = false;
+    this.minionType = 'skeleton';
+    this.maxMinions = 2;
+    this.minionSpawnMessage = `${this.name} stirs, summoning skeletal minions!`;
     this.dropGold = 25;
     // Randomly drop one of the two unique boss items.
     this.dropItem = rng.nextBool(0.5) ? ITEM_TYPES.BONE_BLADE : ITEM_TYPES.SKELETON_SHIELD;

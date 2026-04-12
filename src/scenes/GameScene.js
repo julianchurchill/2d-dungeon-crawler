@@ -857,9 +857,9 @@ export class GameScene extends Phaser.Scene {
         // Handle segments removed by damage (proportional HP loss for Creeping Mass)
         this._applyPendingRemovedSegments(target);
 
-        // First-hit minion spawning for Old Bones boss
-        if (target.isBoss && !target.minionsSpawned && damage > 0) {
-          this._spawnOldBossMinions(target);
+        // First-hit minion spawning for bosses that support it
+        if (target.isBoss && target.shouldSpawnMinions && !target.minionsSpawned && damage > 0) {
+          this._spawnBossMinions(target);
           // Immediately reveal minions — without this call their sprites stay
           // hidden (setVisible(false) at spawn) until the player's next action.
           this._updateFOV();
@@ -951,14 +951,15 @@ export class GameScene extends Phaser.Scene {
   }
 
   /**
-   * Spawns 0–2 skeleton minions adjacent to the Old Bones boss on its first hit.
-   * Marks `minionsSpawned` so this only triggers once per boss encounter.
+   * Spawns up to `boss.maxMinions` minions of `boss.minionType` adjacent to
+   * the boss on its first hit.  Marks `minionsSpawned` so this only triggers
+   * once per encounter.
    *
-   * @param {OldBones} boss
+   * @param {object} boss - A boss entity with minionType, maxMinions, and minionSpawnMessage fields.
    */
-  _spawnOldBossMinions(boss) {
+  _spawnBossMinions(boss) {
     boss.minionsSpawned = true;
-    const count = this.rng.nextInt(0, 2);
+    const count = this.rng.nextInt(0, boss.maxMinions);
     if (count === 0) return;
 
     const dirs = [{ dx: 0, dy: -1 }, { dx: 1, dy: 0 }, { dx: 0, dy: 1 }, { dx: -1, dy: 0 }];
@@ -968,13 +969,13 @@ export class GameScene extends Phaser.Scene {
       const nx = boss.x + dx;
       const ny = boss.y + dy;
       if (this.dungeonMap.isWalkable(nx, ny) && !this._getEntityAt(nx, ny)) {
-        this._spawnEnemy(nx, ny, 'skeleton');
+        this._spawnEnemy(nx, ny, boss.minionType);
         spawned++;
       }
     }
     // Only announce if at least one minion actually materialised
     if (spawned > 0) {
-      EventBus.emit(GameEvents.MESSAGE, 'Old Bones stirs, summoning skeletal minions!');
+      EventBus.emit(GameEvents.MESSAGE, boss.minionSpawnMessage);
     }
   }
 
@@ -991,7 +992,7 @@ export class GameScene extends Phaser.Scene {
     }
     if (boss.dropItem) {
       this._placeItem(boss.x, boss.y, boss.dropItem);
-      EventBus.emit(GameEvents.MESSAGE, `Old Bones dropped: ${boss.dropItem.name}!`);
+      EventBus.emit(GameEvents.MESSAGE, `${boss.name} dropped: ${boss.dropItem.name}!`);
     }
   }
 
