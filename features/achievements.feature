@@ -68,6 +68,11 @@ Feature: Achievement system
     When the player kills 25 sprites
     Then the "Sprite Stalker" achievement should be completed
 
+  Scenario: Mass Slayer is unlocked when 10 creeping masses are killed
+    Given the achievement system is initialised
+    When the player kills 10 creeping_masses
+    Then the "Mass Slayer" achievement should be completed
+
   Scenario: Destroying the system stops it from tracking further kills
     Given the achievement system is initialised
     When the achievement system is destroyed
