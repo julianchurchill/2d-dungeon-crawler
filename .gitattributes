@@ -1,0 +1,4 @@
+# Shell scripts always use LF
+*.sh text eol=lf
+init-firewall.sh text eol=lf
+init-claude-settings.sh text eol=lf
