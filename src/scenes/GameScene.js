@@ -348,6 +348,9 @@ export class GameScene extends Phaser.Scene {
     boss.sprite = sprite;
     this.enemies.push(boss);
     this.dungeonMap.setEntity(cx, cy, boss);
+
+    // Hint that a boss is lurking somewhere on this floor.
+    EventBus.emit(GameEvents.MESSAGE, 'An eerie silence hangs over this level… something powerful stirs in the dark.');
   }
 
   _spawnEnemy(x, y, type) {

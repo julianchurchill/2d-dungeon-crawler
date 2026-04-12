@@ -46,7 +46,6 @@
 ## Enemies
 
 - [ ] boss spawn developer options - add to developer options to spawn unique bosses, alongside enemy spawning controls.
-- [ ] boss indicator - if a boss is present on a level when the player starts that level then a clue should appear in the messages to indicate a boss is present somewhere on that level
 - [ ] enemy health - perhaps a health bar
 - [ ] enemy types
 - [ ] associate enemies with a chance of appearing based on the dungeon level. Record that against their enemy stats as their level. This can then be used for Hall of Legends information when players die for the highest level enemy they have defeated.
