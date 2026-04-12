@@ -339,18 +339,10 @@ export class GameScene extends Phaser.Scene {
     const cy = Math.floor(room.y + room.h / 2);
     if (this._getEntityAt(cx, cy)) return;
 
-    const boss = new OldBones(cx, cy, this.rng);
-    const sprite = this.add.sprite(
-      cx * TILE_SIZE + TILE_SIZE / 2,
-      cy * TILE_SIZE + TILE_SIZE / 2,
-      boss.textureKey,
-    ).setDepth(8).setVisible(false);
-    boss.sprite = sprite;
-    this.enemies.push(boss);
-    this.dungeonMap.setEntity(cx, cy, boss);
-
-    // Hint that a boss is lurking somewhere on this floor.
-    EventBus.emit(GameEvents.MESSAGE, 'An eerie silence hangs over this level… something powerful stirs in the dark.');
+    // Delegate to _spawnEnemy so the hint message and boss construction are
+    // handled in one place, regardless of whether the boss was placed here or
+    // via the dev spawn-weight override.
+    this._spawnEnemy(cx, cy, 'old_bones');
   }
 
   _spawnEnemy(x, y, type) {
@@ -369,6 +361,15 @@ export class GameScene extends Phaser.Scene {
     enemy.sprite = sprite;
     this.enemies.push(enemy);
     this.dungeonMap.setEntity(x, y, enemy);
+
+    // Emit the boss hint after a short delay so the UIScene's message log is
+    // guaranteed to be listening (messages emitted synchronously during scene
+    // creation are dropped before the subscriber is registered).
+    if (type === 'old_bones') {
+      this.time.delayedCall(200, () => {
+        EventBus.emit(GameEvents.MESSAGE, 'An eerie silence hangs over this level… something powerful stirs in the dark.');
+      });
+    }
   }
 
   /**
