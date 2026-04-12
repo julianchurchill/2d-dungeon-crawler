@@ -42,15 +42,24 @@ export class EnemySpawner {
       const room  = rooms[i];
       const count = this.rng.nextInt(minPerRoom, maxPerRoom);
 
+      // Track solitary types already placed in this room so they are never
+      // duplicated (e.g. Creeping Mass — one per room).
+      const placedSolitaryTypes = new Set();
+
       for (let j = 0; j < count; j++) {
         const type = this.rng.pick(spawnTable);
+        const def  = ENEMY_DEFS[type];
+
+        // Solitary enemies may appear at most once per room
+        if (def.solitary && placedSolitaryTypes.has(type)) continue;
+
         const ex   = this.rng.nextInt(room.x + 1, room.x + room.w - 2);
         const ey   = this.rng.nextInt(room.y + 1, room.y + room.h - 2);
-        const def  = ENEMY_DEFS[type];
         if (def.clusterMin !== undefined) {
           const size = this.rng.nextInt(def.clusterMin, def.clusterMax);
           this._spawnCluster(type, ex, ey, size, room, getEntityAt, spawnEnemy);
         } else if (!getEntityAt(ex, ey)) {
+          if (def.solitary) placedSolitaryTypes.add(type);
           spawnEnemy(ex, ey, type);
         }
       }

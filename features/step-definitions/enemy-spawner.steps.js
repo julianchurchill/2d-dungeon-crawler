@@ -193,3 +193,25 @@ Then('{int} enemies should have been spawned', function (expected) {
   assert.equal(this.spawned.length, expected,
     `Expected ${expected} spawns but got ${this.spawned.length}`);
 });
+
+Given('an EnemySpawner that only spawns creeping_mass with min {int} max {int} and a minimum RNG',
+  function (min, max) {
+    this.spawned = [];
+    this.spawner = new EnemySpawner(minRNG, {
+      spawnWeights: { creeping_mass: 1 },
+      minEnemiesPerRoom: min,
+      maxEnemiesPerRoom: max,
+    });
+  },
+);
+
+Then('at most {int} creeping_mass should have been spawned per room', function (maxPerRoom) {
+  // With 2 rooms (room 0 = start, skipped; room 1 = non-start), the total cap
+  // is maxPerRoom × 1 non-start room.  We verify solitary enforcement by
+  // checking the total count never exceeds that cap.
+  const count = this.spawned.filter(e => e.type === 'creeping_mass').length;
+  assert.ok(
+    count <= maxPerRoom,
+    `Expected at most ${maxPerRoom} creeping_mass but got ${count}`,
+  );
+});

@@ -79,3 +79,10 @@ Feature: Enemy spawner
     Given an EnemySpawner that only spawns cockroaches with max enemies per room 1 and a maximum RNG
     When spawning enemies for 2 rooms on floor 1 with all tiles occupied
     Then no enemies should have been spawned
+
+  # ── Solitary enemies ──────────────────────────────────────────────────────────
+
+  Scenario: A solitary enemy type spawns at most once per room
+    Given an EnemySpawner that only spawns creeping_mass with min 3 max 3 and a minimum RNG
+    When spawning enemies for 2 rooms on floor 10
+    Then at most 1 creeping_mass should have been spawned per room
