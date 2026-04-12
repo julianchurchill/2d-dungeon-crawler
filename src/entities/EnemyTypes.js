@@ -53,6 +53,24 @@ export const ENEMY_DEFS = {
     aggroRange: 8,
     color: 0x443333,
   },
+  /**
+   * Creeping Mass — multi-tile amorphous enemy.
+   * Spawned via CreepingMass class, not directly via the Enemy constructor.
+   * Fields here are used by the EnemySpawner (type lookup) and developer tools.
+   */
+  creeping_mass: {
+    name: 'Creeping Mass',
+    hp: 30,      // representative (actual HP = segmentCount * HP_PER_SEGMENT)
+    attack: 6,
+    defense: 1,
+    xp: 60,
+    textureKey: 'entity_creeping_mass',
+    aggroRange: 5,
+    color: 0x2a5a2a,
+    solitary: true,
+    segmentMin: 3,
+    segmentMax: 5,
+  },
 };
 
 /**
@@ -75,8 +93,10 @@ export function getSpawnTable(floor, spawnWeights = null) {
   ];
   // Mid floors: cockroaches and sprites taper off; trolls begin to appear.
   if (floor <= 5) return ['cockroach', 'cockroach', 'sprite', 'sprite', 'goblin', 'goblin', 'orc', 'troll'];
-  // Higher floors: cockroaches rare, sprites gone, heavier enemies dominate.
-  return ['cockroach', 'goblin', 'goblin', 'orc', 'orc', 'troll'];
+  // High floors (6–9): cockroaches rare, sprites gone, heavier enemies dominate.
+  if (floor <= 9) return ['cockroach', 'goblin', 'goblin', 'orc', 'orc', 'troll'];
+  // Floor 10+: Creeping Mass joins the roster as a solitary threat.
+  return ['goblin', 'orc', 'orc', 'troll', 'troll', 'creeping_mass'];
 }
 
 export function getEnemiesPerRoom(floor) {

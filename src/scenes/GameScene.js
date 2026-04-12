@@ -5,6 +5,7 @@ import { resolveMeleeAttack } from '../systems/CombatSystem.js';
 import { InventorySystem } from '../systems/InventorySystem.js';
 import { Player } from '../entities/Player.js';
 import { Enemy } from '../entities/Enemy.js';
+import { CreepingMass } from '../entities/CreepingMass.js';
 import { Npc } from '../entities/Npc.js';
 import { Item } from '../items/Item.js';
 import { getFloorLoot } from '../items/ItemTypes.js';
@@ -19,6 +20,7 @@ import { HoldRepeatScheduler } from '../systems/HoldRepeatScheduler.js';
 import { RunMovementController } from '../systems/RunMovementController.js';
 import { applyToGame, devOptions } from '../systems/DevOptions.js';
 import { EnemySpawner } from '../systems/EnemySpawner.js';
+import { ENEMY_DEFS } from '../entities/EnemyTypes.js';
 import { AchievementSystem } from '../achievements/AchievementSystem.js';
 import { handleMobileMenuPress } from '../systems/MobileMenuHandler.js';
 import { wrapWithRunCancel } from '../utils/ActionWrapper.js';
@@ -184,7 +186,14 @@ export class GameScene extends Phaser.Scene {
 
   _clearFloorEntities() {
     for (const e of this.enemies) {
-      if (e.sprite) e.sprite.destroy();
+      if (e.segments) {
+        // Multi-segment enemy: destroy every segment sprite
+        for (const seg of e.segments) {
+          if (seg.sprite) seg.sprite.destroy();
+        }
+      } else if (e.sprite) {
+        e.sprite.destroy();
+      }
     }
     this.enemies = [];
 
@@ -304,6 +313,10 @@ export class GameScene extends Phaser.Scene {
   }
 
   _spawnEnemy(x, y, type) {
+    if (type === 'creeping_mass') {
+      this._spawnCreepingMass(x, y);
+      return;
+    }
     const enemy = new Enemy(x, y, type);
     const sprite = this.add.sprite(
       x * TILE_SIZE + TILE_SIZE / 2,
@@ -313,6 +326,72 @@ export class GameScene extends Phaser.Scene {
     enemy.sprite = sprite;
     this.enemies.push(enemy);
     this.dungeonMap.setEntity(x, y, enemy);
+  }
+
+  /**
+   * Spawns a Creeping Mass with 3–5 connected segments anchored at (anchorX, anchorY).
+   * Each segment gets its own sprite; all segment tiles are registered in the entity map.
+   *
+   * @param {number} anchorX
+   * @param {number} anchorY
+   */
+  _spawnCreepingMass(anchorX, anchorY) {
+    const def = ENEMY_DEFS.creeping_mass;
+    const segCount = this.rng.nextInt(def.segmentMin, def.segmentMax);
+    const segments = this._buildMassSegments(anchorX, anchorY, segCount);
+    const mass = new CreepingMass(segments);
+
+    // Create a sprite for every segment
+    for (const seg of mass.segments) {
+      const sprite = this.add.sprite(
+        seg.x * TILE_SIZE + TILE_SIZE / 2,
+        seg.y * TILE_SIZE + TILE_SIZE / 2,
+        mass.textureKey,
+      ).setDepth(8).setVisible(false);
+      seg.sprite = sprite;
+    }
+    // Head sprite reference used by single-sprite systems (flash, bump direction)
+    mass.sprite = mass.segments[0].sprite;
+
+    this.enemies.push(mass);
+    for (const seg of mass.segments) {
+      this.dungeonMap.setEntity(seg.x, seg.y, mass);
+    }
+  }
+
+  /**
+   * Grows a connected list of segment positions starting at (anchorX, anchorY)
+   * by repeatedly expanding to free adjacent walkable tiles.
+   *
+   * @param {number} anchorX
+   * @param {number} anchorY
+   * @param {number} count - Target number of segments.
+   * @returns {Array<{x:number,y:number}>}
+   */
+  _buildMassSegments(anchorX, anchorY, count) {
+    const dirs = [{ dx: 0, dy: -1 }, { dx: 1, dy: 0 }, { dx: 0, dy: 1 }, { dx: -1, dy: 0 }];
+    const placed = [{ x: anchorX, y: anchorY }];
+
+    for (let i = 1; i < count; i++) {
+      const parent = this.rng.pick(placed);
+      let expanded = false;
+      for (const { dx, dy } of dirs) {
+        const nx = parent.x + dx;
+        const ny = parent.y + dy;
+        if (
+          this.dungeonMap.isWalkable(nx, ny) &&
+          !this._getEntityAt(nx, ny) &&
+          !placed.some(s => s.x === nx && s.y === ny)
+        ) {
+          placed.push({ x: nx, y: ny });
+          expanded = true;
+          break;
+        }
+      }
+      if (!expanded) break; // No room to expand; spawn with fewer segments
+    }
+
+    return placed;
   }
 
   _spawnItems(rooms) {
@@ -438,8 +517,16 @@ export class GameScene extends Phaser.Scene {
 
     // Update entity visibility
     for (const enemy of this.enemies) {
-      const visible = map.getFovState(enemy.x, enemy.y) === FOV_STATE.VISIBLE;
-      if (enemy.sprite) enemy.sprite.setVisible(visible);
+      if (enemy.segments) {
+        // Multi-segment enemy: each segment has its own sprite and visibility
+        for (const seg of enemy.segments) {
+          const segVisible = map.getFovState(seg.x, seg.y) === FOV_STATE.VISIBLE;
+          if (seg.sprite) seg.sprite.setVisible(segVisible);
+        }
+      } else {
+        const visible = map.getFovState(enemy.x, enemy.y) === FOV_STATE.VISIBLE;
+        if (enemy.sprite) enemy.sprite.setVisible(visible);
+      }
     }
     for (const item of this.items) {
       const visible = map.getFovState(item.x, item.y) === FOV_STATE.VISIBLE;
@@ -709,7 +796,16 @@ export class GameScene extends Phaser.Scene {
           { defenderIsInvincible: devOptions.enemiesInvincible },
         );
         messages.forEach(msg => EventBus.emit(GameEvents.MESSAGE, msg));
-        this._flashSprite(target.sprite, 0xff4444);
+
+        // Flash all sprites for multi-segment enemies, otherwise the single sprite
+        if (target.segments) {
+          for (const seg of target.segments) this._flashSprite(seg.sprite, 0xff4444);
+        } else {
+          this._flashSprite(target.sprite, 0xff4444);
+        }
+
+        // Handle segments removed by damage (proportional HP loss for Creeping Mass)
+        this._applyPendingRemovedSegments(target);
 
         if (killed) {
           // Notify achievement system via event so it can update kill-based progress.
@@ -724,22 +820,71 @@ export class GameScene extends Phaser.Scene {
             // Offer skill selection if there are choices available.
             this._tryLaunchSkillLevelUp();
           }
-          this.dungeonMap.setEntity(target.x, target.y, null);
-          this.enemies = this.enemies.filter(e => e !== target);
-          if (target.sprite) {
-            this.tweens.add({
-              targets: target.sprite,
-              alpha: 0,
-              duration: 200,
-              onComplete: () => target.sprite?.destroy(),
-            });
-          }
+          this._destroyEnemy(target);
         }
 
         this._syncRegistry();
         this._startEnemyTurns();
       },
     });
+  }
+
+  /**
+   * Cleans up any segments removed from a multi-tile enemy during damage
+   * resolution (e.g. Creeping Mass losing segments proportional to HP loss).
+   * Clears the entity map tiles and fades out the segment sprites.
+   *
+   * @param {object} enemy
+   */
+  _applyPendingRemovedSegments(enemy) {
+    if (!enemy.pendingRemovedSegments?.length) return;
+    for (const seg of enemy.pendingRemovedSegments) {
+      this.dungeonMap.setEntity(seg.x, seg.y, null);
+      if (seg.sprite) {
+        this.tweens.add({
+          targets: seg.sprite,
+          alpha: 0,
+          duration: 200,
+          onComplete: () => seg.sprite?.destroy(),
+        });
+      }
+    }
+    enemy.pendingRemovedSegments = [];
+  }
+
+  /**
+   * Removes an enemy from the scene, clearing all of its dungeon-map tiles and
+   * destroying all associated sprites.  Handles both single-tile and multi-segment
+   * enemies (e.g. Creeping Mass).
+   *
+   * @param {object} target - The enemy entity to remove.
+   */
+  _destroyEnemy(target) {
+    this.enemies = this.enemies.filter(e => e !== target);
+    if (target.segments) {
+      // Multi-segment: clear every tile and destroy every sprite
+      for (const seg of target.segments) {
+        this.dungeonMap.setEntity(seg.x, seg.y, null);
+        if (seg.sprite) {
+          this.tweens.add({
+            targets: seg.sprite,
+            alpha: 0,
+            duration: 200,
+            onComplete: () => seg.sprite?.destroy(),
+          });
+        }
+      }
+    } else {
+      this.dungeonMap.setEntity(target.x, target.y, null);
+      if (target.sprite) {
+        this.tweens.add({
+          targets: target.sprite,
+          alpha: 0,
+          duration: 200,
+          onComplete: () => target.sprite?.destroy(),
+        });
+      }
+    }
   }
 
   _flashSprite(sprite, color) {
@@ -1175,6 +1320,28 @@ export class GameScene extends Phaser.Scene {
             enemy.y * TILE_SIZE + TILE_SIZE / 2
           );
         }
+      } else if (result.action === 'creeping_move') {
+        // Creeping Mass movement: one tail segment removed, one new segment added
+        const { removeSegment, addSegment } = result;
+        const seg = enemy.segments.find(s => s.x === removeSegment.x && s.y === removeSegment.y);
+        if (seg) {
+          this.dungeonMap.setEntity(seg.x, seg.y, null);
+          seg.x = addSegment.x;
+          seg.y = addSegment.y;
+          this.dungeonMap.setEntity(seg.x, seg.y, enemy);
+          if (seg.sprite) {
+            seg.sprite.setPosition(
+              seg.x * TILE_SIZE + TILE_SIZE / 2,
+              seg.y * TILE_SIZE + TILE_SIZE / 2,
+            );
+          }
+        }
+        // Keep head x, y in sync with the first remaining segment
+        if (enemy.segments.length > 0) {
+          enemy.x = enemy.segments[0].x;
+          enemy.y = enemy.segments[0].y;
+          enemy.sprite = enemy.segments[0].sprite;
+        }
       }
     }
 
@@ -1217,9 +1384,12 @@ export class GameScene extends Phaser.Scene {
 
   _getEntityAt(x, y) {
     if (this.player && this.player.x === x && this.player.y === y) return this.player;
-    return this.enemies.find(e => e.x === x && e.y === y)
-      || this.npcs.find(n => n.x === x && n.y === y)
-      || null;
+    // Support multi-segment enemies (e.g. Creeping Mass) by also checking their
+    // segments array, so all occupied tiles resolve to the same entity object.
+    return this.enemies.find(
+      e => (e.x === x && e.y === y) ||
+           (e.segments && e.segments.some(s => s.x === x && s.y === y)),
+    ) || this.npcs.find(n => n.x === x && n.y === y) || null;
   }
 
   // ─── Game Over ────────────────────────────────────────────────────────────

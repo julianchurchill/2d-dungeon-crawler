@@ -360,6 +360,23 @@ export class BootScene extends Phaser.Scene {
       g.fillRect(10, 0, 2, 3);
     });
 
+    // Creeping Mass — an amorphous blob of dark green ooze
+    this._genTexture('entity_creeping_mass', T, T, (g) => {
+      // Outer blob body
+      g.fillStyle(0x1a3a1a);
+      g.fillRect(2, 2, 12, 12);
+      // Lighter inner mass
+      g.fillStyle(0x2a5a2a);
+      g.fillRect(4, 4, 8, 8);
+      // Pulsing core
+      g.fillStyle(0x44aa44);
+      g.fillRect(6, 6, 4, 4);
+      // Dark spots suggesting eyes or nuclei
+      g.fillStyle(0x0a1a0a);
+      g.fillRect(5, 5, 2, 2);
+      g.fillRect(9, 9, 2, 2);
+    });
+
     // Elder — white-robed sage with a brown staff
     this._genTexture('entity_npc_elder', T, T, (g) => {
       // Robe — wide white/grey base
