@@ -86,8 +86,8 @@ export const ACHIEVEMENTS = [
   {
     id: 'mass_slayer',
     name: 'Mass Slayer',
-    description: 'Kill 5 Creeping Masses',
-    condition: { type: 'kill_type', enemyType: 'creeping_mass', target: 5 },
+    description: 'Kill 10 Creeping Masses',
+    condition: { type: 'kill_type', enemyType: 'creeping_mass', target: 10 },
     progressUnit: 'killed',
     unlocks: 'Creeping Mass Hunting skill',
   },
