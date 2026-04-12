@@ -360,28 +360,28 @@ export class BootScene extends Phaser.Scene {
       g.fillRect(10, 0, 2, 3);
     });
 
-    // Skeleton — pale bone-white warrior with hollow eyes
+    // Skeleton — reanimated bone minion; deliberately thin and grey-white
+    // to distinguish it clearly from the ivory Old Bones boss.
     this._genTexture('entity_skeleton', T, T, (g) => {
-      // Ribcage / torso
-      g.fillStyle(0xddddcc);
-      g.fillRect(4, 6, 8, 7);
-      // Ribs
-      g.fillStyle(0xbbbbaa);
-      g.fillRect(5, 7, 2, 1);
-      g.fillRect(9, 7, 2, 1);
-      g.fillRect(5, 9, 2, 1);
-      g.fillRect(9, 9, 2, 1);
-      // Head
-      g.fillStyle(0xeeeecc);
+      // Narrow torso — grey-white, clearly thinner than Old Bones
+      g.fillStyle(0xbbbbbb);
+      g.fillRect(6, 6, 4, 7);
+      // Exposed rib lines — dark to create contrast
+      g.fillStyle(0x555555);
+      g.fillRect(6, 7, 4, 1);
+      g.fillRect(6, 9, 4, 1);
+      g.fillRect(6, 11, 4, 1);
+      // Small skull head
+      g.fillStyle(0xcccccc);
       g.fillRect(5, 1, 6, 5);
-      // Hollow eye sockets
-      g.fillStyle(0x111111);
-      g.fillRect(6, 2, 2, 2);
-      g.fillRect(9, 2, 2, 2);
-      // Legs
-      g.fillStyle(0xddddcc);
-      g.fillRect(5, 13, 2, 3);
-      g.fillRect(9, 13, 2, 3);
+      // Empty eye sockets — bright red to distinguish from Old Bones' amber
+      g.fillStyle(0xdd2222);
+      g.fillRect(6, 2, 1, 2);
+      g.fillRect(9, 2, 1, 2);
+      // Thin stick legs
+      g.fillStyle(0xaaaaaa);
+      g.fillRect(6, 13, 2, 3);
+      g.fillRect(10, 13, 2, 3);
     });
 
     // Old Bones — imposing ivory skeleton boss with glowing eyes
