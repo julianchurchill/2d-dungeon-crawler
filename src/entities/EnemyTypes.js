@@ -82,6 +82,7 @@ export const ENEMY_DEFS = {
     aggroRange: 10,
     color: 0xeeeecc,
     solitary: true,   // at most one per room (enforced by EnemySpawner)
+    isBoss: true,     // excluded from spawn table; handled by boss-spawn logic
   },
   /**
    * Creeping Mass — multi-tile amorphous enemy.

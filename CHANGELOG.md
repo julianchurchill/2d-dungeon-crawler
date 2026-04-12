@@ -9,6 +9,7 @@ Entries are listed newest-first within each section.
 
 ### Added
 
+- 2026-04-12 — Dev options: new **BOSSES** section with per-boss total-quantity controls (separate from the spawn-table weights). Setting a boss count to N places exactly N of that boss on the level, bypassing normal floor-range and achievement gates. Boss types are also now excluded from the SPAWN TABLE section.
 - 2026-04-12 — Boss: **Old Bones** — a unique undead boss appearing randomly on floors 10–15 (once per game). On first hit it summons 0–2 skeleton minions. Defeating it grants 25 gold, drops either the **Bone Blade** (+7 Attack) or the **Skeleton Shield** (+5 Defense), and unlocks the **Bone Breaker** achievement.
 - 2026-04-12 — New enemy: **Skeleton** — frail undead minion summoned by Old Bones; does not appear in the regular spawn table.
 - 2026-04-12 — Unique items: **Bone Blade** (weapon, +7 Attack) and **Skeleton Shield** (armor, +5 Defense) — exclusive drops from the Old Bones boss.

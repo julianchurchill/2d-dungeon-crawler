@@ -1,7 +1,7 @@
 import { Given, When, Then, defineStep } from '@cucumber/cucumber';
 import assert from 'node:assert/strict';
 import { devOptions, isSpawnConfigValid } from '../../src/systems/DevOptions.js';
-import { buildSpawnTableFromWeights } from '../../src/entities/EnemyTypes.js';
+import { buildSpawnTableFromWeights, ENEMY_DEFS } from '../../src/entities/EnemyTypes.js';
 
 // ─── Setting spawn overrides ──────────────────────────────────────────────
 
@@ -53,6 +53,24 @@ Then('the spawn table config should be valid', function () {
 
 Then('the spawn table config should be invalid', function () {
   assert.ok(!isSpawnConfigValid(devOptions), 'Expected spawn config to be invalid');
+});
+
+// ─── Boss quantities ──────────────────────────────────────────────────────
+
+defineStep('the dev boss quantities are set to old_bones {int}', function (count) {
+  devOptions.bossQuantities = { old_bones: count };
+});
+
+Then('the dev boss quantities should be null', function () {
+  assert.equal(devOptions.bossQuantities, null);
+});
+
+Then('the dev boss quantities should be old_bones {int}', function (count) {
+  assert.deepEqual(devOptions.bossQuantities, { old_bones: count });
+});
+
+Then('the {string} enemy type should be flagged as a boss in ENEMY_DEFS', function (type) {
+  assert.ok(ENEMY_DEFS[type]?.isBoss === true, `Expected ENEMY_DEFS["${type}"].isBoss to be true`);
 });
 
 // ─── buildSpawnTableFromWeights ───────────────────────────────────────────

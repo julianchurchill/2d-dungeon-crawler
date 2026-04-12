@@ -46,6 +46,25 @@ Feature: Developer spawn options
     When the dev spawn weights are set to goblin 0 orc 0 troll 0
     Then the spawn table config should be invalid
 
+  Scenario: Default boss quantities are null (use normal boss spawn logic)
+    Then the dev boss quantities should be null
+
+  Scenario: Boss quantities can be set
+    When the dev boss quantities are set to old_bones 1
+    Then the dev boss quantities should be old_bones 1
+
+  Scenario: Boss quantity of 2 means exactly 2 of that boss per level
+    When the dev boss quantities are set to old_bones 2
+    Then the dev boss quantities should be old_bones 2
+
+  Scenario: Reset clears boss quantities back to null
+    Given the dev boss quantities are set to old_bones 1
+    When developer options are reset
+    Then the dev boss quantities should be null
+
+  Scenario: old_bones is identified as a boss type in ENEMY_DEFS
+    Then the "old_bones" enemy type should be flagged as a boss in ENEMY_DEFS
+
   Scenario: buildSpawnTableFromWeights converts weights to weighted array
     When a spawn table is built from goblin 2 orc 1 troll 0
     Then the spawn table should contain 2 goblins

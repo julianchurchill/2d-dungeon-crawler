@@ -35,6 +35,9 @@ const DEV_START_ITEMS = ['HEALTH_POTION', 'HEALTH_POTION', 'MEGA_POTION', 'SWORD
  *                                             to use the floor-scaled default.
  * @property {boolean} enemiesInvincible      - When true, all enemies take zero damage.
  * @property {boolean} playerInvincible       - When true, the player takes zero damage.
+ * @property {Object.<string,number>|null} bossQuantities - Map of boss type → exact total
+ *                                             count to place on the level, or null to use
+ *                                             the normal boss-spawn logic.
  */
 export const devOptions = {
   startFloor: 0,
@@ -45,6 +48,7 @@ export const devOptions = {
   maxEnemiesPerRoom: null,
   enemiesInvincible: false,
   playerInvincible: false,
+  bossQuantities: null,
 };
 
 /**
@@ -59,6 +63,7 @@ export function resetDevOptions() {
   devOptions.maxEnemiesPerRoom = null;
   devOptions.enemiesInvincible = false;
   devOptions.playerInvincible = false;
+  devOptions.bossQuantities = null;
 }
 
 /**
