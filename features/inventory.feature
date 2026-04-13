@@ -34,6 +34,18 @@ Feature: Inventory Management
     Then the player defense power should be 4
     And the leather armor should be the equipped armor
 
+  Scenario: Equipping a weapon emits PLAYER_STATS_CHANGED with effective attack bonus
+    Given a player with base attack 5
+    And a short sword in the player inventory
+    When the player equips the short sword
+    Then the PLAYER_STATS_CHANGED event should carry attack 8
+
+  Scenario: Equipping armor emits PLAYER_STATS_CHANGED with effective defense bonus
+    Given a player with base defense 2
+    And leather armor in the player inventory
+    When the player equips the leather armor
+    Then the PLAYER_STATS_CHANGED event should carry defense 4
+
   Scenario: Player cannot pick up items when inventory is full
     Given a player with a full inventory of 20 items
     And a health potion on the ground
