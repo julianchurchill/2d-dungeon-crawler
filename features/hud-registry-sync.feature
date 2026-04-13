@@ -25,3 +25,10 @@ Feature: HUD initialised from registry on scene start
     Given an empty registry
     When syncHudFromRegistry is called
     Then the HUD floor update should not have been called
+
+  Scenario: Detaching registry listeners stops HUD updates after UIScene shutdown
+    Given a registry with event emitter
+    And a mock HUD is attached to registry listeners
+    When the registry listeners are detached
+    And playerHP changes in the registry to 10 out of 30
+    Then the HUD HP update should not have been called
