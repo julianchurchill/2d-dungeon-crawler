@@ -7,6 +7,11 @@ Entries are listed newest-first within each section.
 
 ## [Unreleased]
 
+### Fixed
+
+- 2026-04-13 — Equipping a weapon or armor now correctly updates the ATK/DEF values shown in the HUD; previously the display always showed base stats, ignoring equipment bonuses.
+- 2026-04-11 — NPC roaming crash: `this.rng` is an object, not a function — fixed to call `this.rng.next()` instead of `this.rng()`
+
 ### Added
 
 - 2026-04-12 — Dev options: new **BOSSES** section with per-boss total-quantity controls (separate from the spawn-table weights). Setting a boss count to N places exactly N of that boss on the level, bypassing normal floor-range and achievement gates. Boss types are also now excluded from the SPAWN TABLE section.
@@ -19,10 +24,6 @@ Entries are listed newest-first within each section.
 - 2026-04-12 — New enemy: **Creeping Mass** — a multi-tile amorphous creature appearing from floor 10. It has 3–5 connected segments (each occupying one tile) and moves by removing a tail segment and re-placing it adjacent to the body. HP is proportional to segment count; segments are lost as the mass takes damage, keeping the body connected at all times.
 - 2026-04-11 — Floor 1 now contains up-stairs (pale blue `<`) leading back to the town; using them returns the player to the dungeon staircase in the town square
 - 2026-04-11 — NPC dialogue is now partially contextual: with a 40% chance per interaction the NPC picks a line that reacts to the player's current state (equipped weapon/armour, level, gold, inventory); falls back to the normal cycling lines otherwise
-
-### Fixed
-
-- 2026-04-11 — NPC roaming crash: `this.rng` is an object, not a function — fixed to call `this.rng.next()` instead of `this.rng()`
 
 - 2026-04-10 — Town NPCs roam slowly around town: each NPC takes a random step every 3 player turns, staying clear of walls and other entities; each NPC (Elder, Guard, Merchant) has a distinctive procedurally-generated sprite
 - 2026-04-10 — Town NPCs: three characters (Elder, Guard, Merchant) stand in the town square; bumping into one opens a dialogue panel showing their name and a cycling line of conversation; dismissed with ENTER, ESC, or the ✕ button

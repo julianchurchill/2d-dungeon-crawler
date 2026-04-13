@@ -1565,7 +1565,8 @@ export class GameScene extends Phaser.Scene {
     const s = this.player.stats;
     this.registry.set('playerHP', s.hp);
     this.registry.set('playerMaxHp', s.maxHp);
-    this.registry.set('playerStats', { ...s });
+    // Include equipment bonuses so the HUD shows effective ATK/DEF, not base values.
+    this.registry.set('playerStats', { ...s, attack: this.player.attackPower, defense: this.player.defensePower });
     this.registry.set('floor', this.floorManager.currentFloor);
     this.registry.set('inventory', [...this.player.inventory]);
     this.registry.set('playerGold', this.player.gold);

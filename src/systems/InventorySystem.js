@@ -39,7 +39,13 @@ export class InventorySystem {
     }
 
     EventBus.emit(GameEvents.INVENTORY_CHANGED, player.inventory);
-    EventBus.emit(GameEvents.PLAYER_STATS_CHANGED, player.stats);
+    // Emit effective stats (including equipment bonuses) so listeners display
+    // the correct ATK/DEF values rather than bare base stats.
+    EventBus.emit(GameEvents.PLAYER_STATS_CHANGED, {
+      ...player.stats,
+      attack: player.attackPower,
+      defense: player.defensePower,
+    });
     return msg;
   }
 

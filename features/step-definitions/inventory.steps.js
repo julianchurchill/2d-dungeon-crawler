@@ -4,6 +4,8 @@ import { Player } from '../../src/entities/Player.js';
 import { Item } from '../../src/items/Item.js';
 import { ITEM_TYPES } from '../../src/items/ItemTypes.js';
 import { InventorySystem } from '../../src/systems/InventorySystem.js';
+import { EventBus } from '../../src/utils/EventBus.js';
+import { GameEvents } from '../../src/events/GameEvents.js';
 
 // --- Given ---
 
@@ -76,10 +78,14 @@ When('the player uses the health potion', function () {
 });
 
 When('the player equips the short sword', function () {
+  this.emittedStats = null;
+  EventBus.once(GameEvents.PLAYER_STATS_CHANGED, (stats) => { this.emittedStats = stats; });
   this.result = InventorySystem.useItem(this.player, 0);
 });
 
 When('the player equips the leather armor', function () {
+  this.emittedStats = null;
+  EventBus.once(GameEvents.PLAYER_STATS_CHANGED, (stats) => { this.emittedStats = stats; });
   this.result = InventorySystem.useItem(this.player, 0);
 });
 
@@ -161,4 +167,14 @@ Then('the item shortName should be shorter than the full name', function () {
 Then('the item shortName should not be defined', function () {
   assert.strictEqual(this.itemType.shortName, undefined,
     `Expected shortName to be undefined on ${this.itemType.name}`);
+});
+
+Then('the PLAYER_STATS_CHANGED event should carry attack {int}', function (expected) {
+  assert.ok(this.emittedStats, 'Expected PLAYER_STATS_CHANGED to have been emitted');
+  assert.equal(this.emittedStats.attack, expected);
+});
+
+Then('the PLAYER_STATS_CHANGED event should carry defense {int}', function (expected) {
+  assert.ok(this.emittedStats, 'Expected PLAYER_STATS_CHANGED to have been emitted');
+  assert.equal(this.emittedStats.defense, expected);
 });
