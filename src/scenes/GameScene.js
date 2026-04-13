@@ -18,6 +18,7 @@ import { TILE, FOV_STATE } from '../utils/TileTypes.js';
 import { createRNG } from '../utils/RNG.js';
 import { HeldMovementTracker } from '../systems/HeldMovementTracker.js';
 import { HoldRepeatScheduler } from '../systems/HoldRepeatScheduler.js';
+import { tilesetManager } from '../systems/TilesetManager.js';
 import { RunMovementController } from '../systems/RunMovementController.js';
 import { applyToGame, devOptions } from '../systems/DevOptions.js';
 import { EnemySpawner } from '../systems/EnemySpawner.js';
@@ -246,27 +247,31 @@ export class GameScene extends Phaser.Scene {
     // Use a RenderTexture for the entire map (draw once)
     this.mapRT = this.add.renderTexture(0, 0, mapW, mapH).setDepth(0).setOrigin(0);
 
+    // Resolve tile texture keys through the tileset manager so the active
+    // tileset prefix ('classic_' or 'modern_') is applied automatically.
+    const tk = (base) => tilesetManager.getTileKey(base);
+
     const tileKeys = isTown ? {
-      [TILE.FLOOR]:       'tile_town_floor',
-      [TILE.WALL]:        'tile_town_wall',
-      [TILE.DOOR]:        'tile_door',
-      [TILE.STAIRS_DOWN]: 'tile_town_stairs',
-      [TILE.TOWN_ACCENT]: 'tile_town_accent',
-      [TILE.SHOP_ROOF]:   'tile_shop_roof',
-      [TILE.HOME_DOOR]:   'tile_home_door',
+      [TILE.FLOOR]:       tk('tile_town_floor'),
+      [TILE.WALL]:        tk('tile_town_wall'),
+      [TILE.DOOR]:        tk('tile_door'),
+      [TILE.STAIRS_DOWN]: tk('tile_town_stairs'),
+      [TILE.TOWN_ACCENT]: tk('tile_town_accent'),
+      [TILE.SHOP_ROOF]:   tk('tile_shop_roof'),
+      [TILE.HOME_DOOR]:   tk('tile_home_door'),
     } : {
-      [TILE.FLOOR]:       'tile_floor',
-      [TILE.WALL]:        'tile_wall',
-      [TILE.DOOR]:        'tile_door',
-      [TILE.STAIRS_DOWN]: 'tile_stairs',
-      [TILE.STAIRS_UP]:   'tile_stairs_up',
+      [TILE.FLOOR]:       tk('tile_floor'),
+      [TILE.WALL]:        tk('tile_wall'),
+      [TILE.DOOR]:        tk('tile_door'),
+      [TILE.STAIRS_DOWN]: tk('tile_stairs'),
+      [TILE.STAIRS_UP]:   tk('tile_stairs_up'),
     };
 
     // Build position → texture-key overrides for typed shop doors (town only)
     const doorTextureAt = {};
     if (isTown) {
       for (const shop of shops) {
-        doorTextureAt[`${shop.doorX},${shop.doorY}`] = `tile_door_${shop.type}`;
+        doorTextureAt[`${shop.doorX},${shop.doorY}`] = tk(`tile_door_${shop.type}`);
       }
     }
 

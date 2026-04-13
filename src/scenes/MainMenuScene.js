@@ -136,10 +136,41 @@ export class MainMenuScene extends Phaser.Scene {
       onSelect: goAchievements,
     });
 
+    // OPTIONS button
+    const optBtnY = achBtnY + 44;
+    const optBg = this.add.rectangle(width / 2, optBtnY, 200, 34, 0x1a2a3a)
+      .setStrokeStyle(1, 0x336677)
+      .setInteractive({ useHandCursor: true });
+
+    const optTxt = this.add.text(width / 2, optBtnY, '⚙  OPTIONS', {
+      fontSize: '12px', fontFamily: FONT_FAMILY, color: '#6699aa', resolution: 2,
+    }).setOrigin(0.5);
+
+    const goOptions = () => {
+      this.cameras.main.fadeOut(200, 0, 0, 0);
+      this.time.delayedCall(200, () => this.scene.start('OptionsScene'));
+    };
+    optBg.on('pointerover', () => {
+      optBg.setFillStyle(0x223344);
+      optTxt.setColor('#88ccff');
+    });
+    optBg.on('pointerout', () => {
+      optBg.setFillStyle(0x1a2a3a);
+      const isFocused = this._nav && this._nav.focusedIndex === this._navItems.length;
+      optTxt.setColor(isFocused ? COLOR_FOCUSED : '#6699aa');
+    });
+    optBg.on('pointerdown', goOptions);
+
+    this._navItems.push({
+      onFocus:  () => { optBg.setFillStyle(0x223344); optTxt.setColor(COLOR_FOCUSED); },
+      onBlur:   () => { optBg.setFillStyle(0x1a2a3a); optTxt.setColor('#6699aa'); },
+      onSelect: goOptions,
+    });
+
     // DEV OPTIONS button — only shown in development builds
-    let lastBtnY = achBtnY;
+    let lastBtnY = optBtnY;
     if (isDevEnvironment()) {
-      const devBtnY = achBtnY + 44;
+      const devBtnY = optBtnY + 44;
       lastBtnY = devBtnY;
       const devBg = this.add.rectangle(width / 2, devBtnY, 200, 34, 0x1a2a3a)
         .setStrokeStyle(1, 0x336677)
