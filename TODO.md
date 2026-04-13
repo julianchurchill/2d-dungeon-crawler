@@ -34,6 +34,7 @@
 - [ ] show details of inventory item when highlighted
 - [ ] drop items with 'd' when in inventory. Provide a button for mobile interface.
 - [ ] destroy items to get collectable materials that could be used later to create new items or enhance existing ones. Use 'D' when in inventory and provide a button for mobile interface. Protect unique items by asking the player to confirm the action.
+- [x] unique items cannot be sold. Instead they can be stored in a **display case** inside the player's **home** — a unique location in the Town. The player can move unique items from their inventory into the display case, and retrieve them again later.
 - [x] arrow keys to move around inventory (no mouse)
 
 ## UI

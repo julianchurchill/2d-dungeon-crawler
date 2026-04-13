@@ -9,6 +9,7 @@ import { EventBus } from '../utils/EventBus.js';
 import { GameEvents } from '../events/GameEvents.js';
 import { isTouchDevice } from '../utils/TouchDeviceDetector.js';
 import { syncHudFromRegistry, attachHudRegistryListeners, detachHudRegistryListeners } from '../ui/HudRegistrySync.js';
+import { DisplayCasePanel } from '../ui/DisplayCasePanel.js';
 import { ShopPanel } from '../ui/ShopPanel.js';
 import { DialoguePanel } from '../ui/DialoguePanel.js';
 
@@ -28,6 +29,7 @@ export class UIScene extends Phaser.Scene {
     this.skillsPanel = new SkillsPanel(this);
     this.shopPanel = new ShopPanel(this);
     this.dialoguePanel = new DialoguePanel(this);
+    this.displayCasePanel = new DisplayCasePanel(this);
     this.dpad = new DPad(this);
     // Show touch controls only on devices that support touch input
     this.dpad.setVisible(isTouchDevice());
@@ -80,6 +82,21 @@ export class UIScene extends Phaser.Scene {
       this.dialoguePanel?.hide();
     }, this);
 
+    // Open the display case panel when the player enters their home
+    EventBus.on(GameEvents.OPEN_DISPLAY_CASE, ({ displayCase, inventory, player }) => {
+      this.displayCasePanel.show(displayCase, inventory, player);
+    }, this);
+
+    // Close the display case panel
+    EventBus.on(GameEvents.CLOSE_DISPLAY_CASE, () => {
+      this.displayCasePanel?.hide();
+    }, this);
+
+    // Refresh the display case panel when items are stored or retrieved
+    EventBus.on(GameEvents.DISPLAY_CASE_CHANGED, ({ displayCase, inventory }) => {
+      this.displayCasePanel?.refresh(displayCase, inventory);
+    }, this);
+
     // Registry → HUD (listeners are detached on shutdown to prevent stale
     // callbacks firing against destroyed game objects after a restart).
     this._hudListenerHandle = attachHudRegistryListeners(this.registry.events, this.registry, this.hud);
@@ -128,18 +145,22 @@ export class UIScene extends Phaser.Scene {
 
     kb.on('keydown-UP', () => {
       if (this.shopPanel.visible) this.shopPanel.navigate(-1);
+      else if (this.displayCasePanel.visible) this.displayCasePanel.navigate(-1);
     });
 
     kb.on('keydown-DOWN', () => {
       if (this.shopPanel.visible) this.shopPanel.navigate(1);
+      else if (this.displayCasePanel.visible) this.displayCasePanel.navigate(1);
     });
 
     kb.on('keydown-W', () => {
       if (this.shopPanel.visible) this.shopPanel.navigate(-1);
+      else if (this.displayCasePanel.visible) this.displayCasePanel.navigate(-1);
     });
 
     kb.on('keydown-S', () => {
       if (this.shopPanel.visible) this.shopPanel.navigate(1);
+      else if (this.displayCasePanel.visible) this.displayCasePanel.navigate(1);
     });
 
     kb.on('keydown-ENTER', () => {
@@ -147,6 +168,8 @@ export class UIScene extends Phaser.Scene {
         EventBus.emit(GameEvents.CLOSE_DIALOGUE);
       } else if (this.shopPanel.visible) {
         this.shopPanel.select();
+      } else if (this.displayCasePanel.visible) {
+        this.displayCasePanel.select();
       }
     });
   }
@@ -235,6 +258,7 @@ export class UIScene extends Phaser.Scene {
     this.inventoryPanel?.resize(width, height);
     this.shopPanel?.resize(width, height);
     this.dialoguePanel?.resize(width, height);
+    this.displayCasePanel?.resize(width, height);
     this.dpad?.resize(width, height);
     // Re-evaluate touch support on resize — handles DevTools device toolbar
     // toggling and detachable touchscreen laptops changing touch capability.

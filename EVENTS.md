@@ -106,3 +106,10 @@ DialoguePanel (show/hide)──► DIALOGUE_TOGGLED     ──► GameScene (gat
 | `OPEN_DIALOGUE` | `'open-dialogue'` | `{ npcName: string, line: string }` | GameScene (NPC bump) | UIScene → DialoguePanel.show() |
 | `CLOSE_DIALOGUE` | `'close-dialogue'` | *(none)* | GameScene (ESC/ENTER), DialoguePanel (✕) | UIScene → DialoguePanel.hide() |
 | `DIALOGUE_TOGGLED` | `'dialogue-toggled'` | `boolean` (open) | DialoguePanel (show/hide) | GameScene (ESC gate) |
+
+| `OPEN_DISPLAY_CASE` | `'open-display-case'` | `{ displayCase, inventory, player }` | GameScene (home door bump) | UIScene → DisplayCasePanel.show() |
+| `CLOSE_DISPLAY_CASE` | `'close-display-case'` | *(none)* | GameScene (ESC key), DisplayCasePanel (✕ button) | UIScene → DisplayCasePanel.hide() |
+| `DISPLAY_CASE_TOGGLED` | `'display-case-toggled'` | `boolean` (open) | DisplayCasePanel (show/hide) | GameScene (ESC gate, state restore) |
+| `STORE_ITEM` | `'store-item'` | `{ index: number }` | DisplayCasePanel (inventory row) | GameScene._handleStoreItem |
+| `RETRIEVE_ITEM` | `'retrieve-item'` | `{ index: number }` | DisplayCasePanel (case row) | GameScene._handleRetrieveItem |
+| `DISPLAY_CASE_CHANGED` | `'display-case-changed'` | `{ displayCase, inventory }` | GameScene (after store/retrieve) | UIScene → DisplayCasePanel.refresh() |

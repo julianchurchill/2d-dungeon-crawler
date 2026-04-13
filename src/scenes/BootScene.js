@@ -260,6 +260,29 @@ export class BootScene extends Phaser.Scene {
       g.fillRect(T / 2 - 2, 6, 4, 2);
     });
 
+    // Home door tile — warm golden door, distinct from shop doors
+    this._genTexture('tile_home_door', T, T, (g) => {
+      // Frame — deep warm brown
+      g.fillStyle(0x4a2e10);
+      g.fillRect(0, 0, T, T);
+      // Door face — lighter warm wood
+      g.fillStyle(0x8b5e2a);
+      g.fillRect(2, 1, T - 4, T - 2);
+      // Panel lines
+      g.fillStyle(0x6a4218, 0.8);
+      g.fillRect(3, 5, T - 6, 1);
+      g.fillRect(3, T - 6, T - 6, 1);
+      // Golden house icon (simplified gable + walls)
+      g.fillStyle(0xffcc44);
+      // Roof peak
+      g.fillTriangle(T / 2, 3, T / 2 - 4, 7, T / 2 + 4, 7);
+      // Walls (rectangle below roof)
+      g.fillRect(T / 2 - 3, 7, 6, 5);
+      // Door handle
+      g.fillStyle(0xffeebb);
+      g.fillRect(T - 4, T / 2 + 1, 2, 2);
+    });
+
     // Shadow/fog tile — pure black for overlay
     this._genTexture('tile_shadow', T, T, (g) => {
       g.fillStyle(0x000000);

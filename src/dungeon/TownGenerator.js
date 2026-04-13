@@ -22,6 +22,8 @@ const TOWN_HEIGHT = 20;
 const START_POS = { x: 5, y: 10 };
 /** Stairs-down position — centre of the town square. */
 const STAIRS_POS = { x: 10, y: 10 };
+/** Home door position — south-east corner of the town, away from shops and stairs. */
+const HOME_DOOR_POS = { x: 17, y: 14 };
 
 /**
  * Fixed shop definitions. Each shop occupies a 5-tile-wide alcove against
@@ -68,6 +70,9 @@ export class TownGenerator {
     this._carveStairsAccent(map);
     map.setTile(STAIRS_POS.x, STAIRS_POS.y, TILE.STAIRS_DOWN);
 
+    // Place the home door in the south-east area of the town
+    map.setTile(HOME_DOOR_POS.x, HOME_DOOR_POS.y, TILE.HOME_DOOR);
+
     // Surround empty tiles with walls (builds the outer border)
     map.buildWalls();
 
@@ -78,6 +83,7 @@ export class TownGenerator {
       stairsPos: { ...STAIRS_POS },
       shops: SHOPS.map(s => ({ type: s.type, doorX: s.doorX, doorY: s.doorY })),
       npcs: TOWN_NPCS.map(n => ({ name: n.name, x: n.x, y: n.y, spriteKey: n.spriteKey, lines: n.lines, contextualLines: n.contextualLines })),
+      homeDoorPos: { x: HOME_DOOR_POS.x, y: HOME_DOOR_POS.y },
     };
   }
 

@@ -10,6 +10,8 @@ export const TILE = Object.freeze({
   SHOP_ROOF: 6,
   /** Stairs leading up — present on floor 1 only, returns the player to the town. */
   STAIRS_UP: 7,
+  /** The door to the player's home in the town. Triggers the display case panel. */
+  HOME_DOOR: 8,
 });
 
 export const FOV_STATE = Object.freeze({

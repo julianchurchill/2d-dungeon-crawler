@@ -27,6 +27,8 @@ export class ShopSystem {
    * @returns {boolean}
    */
   accepts(item) {
+    // Unique items can never be sold — they belong in the player's display case.
+    if (item.unique) return false;
     return this.acceptedItemTypes.includes(item.itemType);
   }
 
