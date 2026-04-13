@@ -18,6 +18,7 @@ import { TILE, FOV_STATE } from '../utils/TileTypes.js';
 import { createRNG } from '../utils/RNG.js';
 import { HeldMovementTracker } from '../systems/HeldMovementTracker.js';
 import { HoldRepeatScheduler } from '../systems/HoldRepeatScheduler.js';
+import { tilesetManager } from '../systems/TilesetManager.js';
 import { RunMovementController } from '../systems/RunMovementController.js';
 import { applyToGame, devOptions } from '../systems/DevOptions.js';
 import { EnemySpawner } from '../systems/EnemySpawner.js';
@@ -150,7 +151,7 @@ export class GameScene extends Phaser.Scene {
       this.playerSprite = this.add.sprite(
         startPos.x * TILE_SIZE + TILE_SIZE / 2,
         startPos.y * TILE_SIZE + TILE_SIZE / 2,
-        'entity_player'
+        tilesetManager.getTileKey('entity_player')
       ).setDepth(10);
       this.player.sprite = this.playerSprite;
     } else {
@@ -246,27 +247,31 @@ export class GameScene extends Phaser.Scene {
     // Use a RenderTexture for the entire map (draw once)
     this.mapRT = this.add.renderTexture(0, 0, mapW, mapH).setDepth(0).setOrigin(0);
 
+    // Resolve tile texture keys through the tileset manager so the active
+    // tileset prefix ('classic_' or 'modern_') is applied automatically.
+    const tk = (base) => tilesetManager.getTileKey(base);
+
     const tileKeys = isTown ? {
-      [TILE.FLOOR]:       'tile_town_floor',
-      [TILE.WALL]:        'tile_town_wall',
-      [TILE.DOOR]:        'tile_door',
-      [TILE.STAIRS_DOWN]: 'tile_town_stairs',
-      [TILE.TOWN_ACCENT]: 'tile_town_accent',
-      [TILE.SHOP_ROOF]:   'tile_shop_roof',
-      [TILE.HOME_DOOR]:   'tile_home_door',
+      [TILE.FLOOR]:       tk('tile_town_floor'),
+      [TILE.WALL]:        tk('tile_town_wall'),
+      [TILE.DOOR]:        tk('tile_door'),
+      [TILE.STAIRS_DOWN]: tk('tile_town_stairs'),
+      [TILE.TOWN_ACCENT]: tk('tile_town_accent'),
+      [TILE.SHOP_ROOF]:   tk('tile_shop_roof'),
+      [TILE.HOME_DOOR]:   tk('tile_home_door'),
     } : {
-      [TILE.FLOOR]:       'tile_floor',
-      [TILE.WALL]:        'tile_wall',
-      [TILE.DOOR]:        'tile_door',
-      [TILE.STAIRS_DOWN]: 'tile_stairs',
-      [TILE.STAIRS_UP]:   'tile_stairs_up',
+      [TILE.FLOOR]:       tk('tile_floor'),
+      [TILE.WALL]:        tk('tile_wall'),
+      [TILE.DOOR]:        tk('tile_door'),
+      [TILE.STAIRS_DOWN]: tk('tile_stairs'),
+      [TILE.STAIRS_UP]:   tk('tile_stairs_up'),
     };
 
     // Build position → texture-key overrides for typed shop doors (town only)
     const doorTextureAt = {};
     if (isTown) {
       for (const shop of shops) {
-        doorTextureAt[`${shop.doorX},${shop.doorY}`] = `tile_door_${shop.type}`;
+        doorTextureAt[`${shop.doorX},${shop.doorY}`] = tk(`tile_door_${shop.type}`);
       }
     }
 
@@ -390,7 +395,7 @@ export class GameScene extends Phaser.Scene {
     const sprite = this.add.sprite(
       x * TILE_SIZE + TILE_SIZE / 2,
       y * TILE_SIZE + TILE_SIZE / 2,
-      enemy.textureKey
+      tilesetManager.getTileKey(enemy.textureKey)
     ).setDepth(8).setVisible(false);
     enemy.sprite = sprite;
     this.enemies.push(enemy);
@@ -424,7 +429,7 @@ export class GameScene extends Phaser.Scene {
       const sprite = this.add.sprite(
         seg.x * TILE_SIZE + TILE_SIZE / 2,
         seg.y * TILE_SIZE + TILE_SIZE / 2,
-        mass.textureKey,
+        tilesetManager.getTileKey(mass.textureKey),
       ).setDepth(8).setVisible(false);
       seg.sprite = sprite;
     }
@@ -497,7 +502,7 @@ export class GameScene extends Phaser.Scene {
     const sprite = this.add.sprite(
       x * TILE_SIZE + TILE_SIZE / 2,
       y * TILE_SIZE + TILE_SIZE / 2,
-      item.textureKey
+      tilesetManager.getTileKey(item.textureKey)
     ).setDepth(6).setVisible(false);
     item.sprite = sprite;
     this.items.push(item);
@@ -514,7 +519,8 @@ export class GameScene extends Phaser.Scene {
     for (const def of npcDefs) {
       const npc = new Npc(def.x, def.y, def);
       // Fall back to the player sprite if the NPC texture is not loaded.
-      const textureKey = this.textures.exists(def.spriteKey) ? def.spriteKey : 'entity_player';
+      const resolvedKey = tilesetManager.getTileKey(def.spriteKey);
+      const textureKey = this.textures.exists(resolvedKey) ? resolvedKey : tilesetManager.getTileKey('entity_player');
       const sprite = this.add.sprite(
         def.x * TILE_SIZE + TILE_SIZE / 2,
         def.y * TILE_SIZE + TILE_SIZE / 2,

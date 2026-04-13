@@ -7,6 +7,7 @@ import { InGameMenuScene } from './scenes/InGameMenuScene.js';
 import { HelpScene } from './scenes/HelpScene.js';
 import { DevMenuScene } from './scenes/DevMenuScene.js';
 import { SkillLevelUpScene } from './scenes/SkillLevelUpScene.js';
+import { OptionsScene } from './scenes/OptionsScene.js';
 import { GameScene } from './scenes/GameScene.js';
 import { UIScene } from './scenes/UIScene.js';
 
@@ -22,7 +23,7 @@ const config = {
     width: window.innerWidth,
     height: window.innerHeight,
   },
-  scene: [BootScene, MainMenuScene, DevOptionsScene, AchievementsScene, InGameMenuScene, HelpScene, DevMenuScene, SkillLevelUpScene, GameScene, UIScene],
+  scene: [BootScene, MainMenuScene, OptionsScene, DevOptionsScene, AchievementsScene, InGameMenuScene, HelpScene, DevMenuScene, SkillLevelUpScene, GameScene, UIScene],
 };
 
 /**

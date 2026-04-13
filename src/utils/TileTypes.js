@@ -20,9 +20,3 @@ export const FOV_STATE = Object.freeze({
   VISIBLE: 2,
 });
 
-export const TILE_KEYS = {
-  [TILE.FLOOR]: 'tile_floor',
-  [TILE.WALL]: 'tile_wall',
-  [TILE.DOOR]: 'tile_door',
-  [TILE.STAIRS_DOWN]: 'tile_stairs',
-};

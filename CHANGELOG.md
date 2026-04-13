@@ -15,6 +15,7 @@ Entries are listed newest-first within each section.
 
 ### Added
 
+- 2026-04-13 — **Options menu & tilesets**: a new Options screen is accessible from the main menu. Players can switch between the **Classic** tileset (dark minimal palette, original look) and the **Modern** tileset (high-contrast slate-brick dungeon with vivid step colours and defined cobblestone town tiles). The choice persists across sessions via localStorage.
 - 2026-04-13 — **Player's Home & Display Case**: the Town now contains a home (golden door tile, south-east area). Unique items (Bone Blade, Skeleton Shield) cannot be sold at shops; instead they can be stored in the display case inside the home and retrieved later. Keyboard (UP/DOWN/ENTER) and mouse/touch navigation supported.
 - 2026-04-12 — Dev options: new **BOSSES** section with per-boss total-quantity controls (separate from the spawn-table weights). Setting a boss count to N places exactly N of that boss on the level, bypassing normal floor-range and achievement gates. Boss types are also now excluded from the SPAWN TABLE section.
 - 2026-04-12 — Boss: **Old Bones** — a unique undead boss appearing randomly on floors 10–15 (once per game). On first hit it summons 0–2 skeleton minions. Defeating it grants 25 gold, drops either the **Bone Blade** (+7 Attack) or the **Skeleton Shield** (+5 Defense), and unlocks the **Bone Breaker** achievement.
