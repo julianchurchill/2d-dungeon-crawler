@@ -8,7 +8,7 @@ import { MessageLog } from '../ui/MessageLog.js';
 import { EventBus } from '../utils/EventBus.js';
 import { GameEvents } from '../events/GameEvents.js';
 import { isTouchDevice } from '../utils/TouchDeviceDetector.js';
-import { syncHudFromRegistry } from '../ui/HudRegistrySync.js';
+import { syncHudFromRegistry, attachHudRegistryListeners, detachHudRegistryListeners } from '../ui/HudRegistrySync.js';
 import { ShopPanel } from '../ui/ShopPanel.js';
 import { DialoguePanel } from '../ui/DialoguePanel.js';
 
@@ -80,23 +80,9 @@ export class UIScene extends Phaser.Scene {
       this.dialoguePanel?.hide();
     }, this);
 
-    // Registry → HUD
-    this.registry.events.on('changedata-playerHP', (parent, value) => {
-      const maxHp = this.registry.get('playerMaxHp') || 30;
-      this.hud.updateHP(value, maxHp);
-    });
-
-    this.registry.events.on('changedata-playerStats', (parent, stats) => {
-      if (stats) this.hud.updateStats(stats);
-    });
-
-    this.registry.events.on('changedata-floor', (parent, floor) => {
-      this.hud.updateFloor(floor);
-    });
-
-    this.registry.events.on('changedata-playerGold', (parent, gold) => {
-      this.hud.updateGold(gold);
-    });
+    // Registry → HUD (listeners are detached on shutdown to prevent stale
+    // callbacks firing against destroyed game objects after a restart).
+    this._hudListenerHandle = attachHudRegistryListeners(this.registry.events, this.registry, this.hud);
 
     // GameScene.create() runs before UIScene.create(), so the initial
     // registry.set() calls happen before the changedata-* listeners above are
@@ -117,9 +103,12 @@ export class UIScene extends Phaser.Scene {
 
     this.scale.on('resize', this._onResize, this);
 
-    // Clean up DOM listener when the scene shuts down (e.g. game over).
+    // Clean up listeners when the scene shuts down (e.g. game over / restart).
+    // Removing registry listeners prevents stale callbacks from firing against
+    // destroyed HUD game objects on the next game restart.
     this.events.once('shutdown', () => {
       window.removeEventListener('wheel', this._onWheel);
+      detachHudRegistryListeners(this._hudListenerHandle);
     });
   }
 

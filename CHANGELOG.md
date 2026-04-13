@@ -9,6 +9,7 @@ Entries are listed newest-first within each section.
 
 ### Fixed
 
+- 2026-04-13 — Restarting after death no longer crashes with `Cannot read properties of null (reading 'setSize')`: UIScene now removes its registry `changedata-*` listeners on shutdown, preventing stale callbacks from firing against destroyed HUD game objects on the next run.
 - 2026-04-13 — Equipping a weapon or armor now correctly updates the ATK/DEF values shown in the HUD; previously the display always showed base stats, ignoring equipment bonuses.
 - 2026-04-11 — NPC roaming crash: `this.rng` is an object, not a function — fixed to call `this.rng.next()` instead of `this.rng()`
 
