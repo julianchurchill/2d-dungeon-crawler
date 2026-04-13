@@ -283,4 +283,51 @@ export const GameEvents = {
    * @type {boolean}
    */
   DIALOGUE_TOGGLED: 'dialogue-toggled',
+
+  /**
+   * Open the display case panel in the player's home.
+   * Emitted by: GameScene (when player bumps the home door)
+   * Subscribed by: UIScene → DisplayCasePanel.show()
+   * @type {{ displayCase: DisplayCase, inventory: Item[], player: Player }}
+   */
+  OPEN_DISPLAY_CASE: 'open-display-case',
+
+  /**
+   * Close the display case panel.
+   * Emitted by: GameScene (ESC key while display case open), DisplayCasePanel (✕ button)
+   * Subscribed by: UIScene → DisplayCasePanel.hide()
+   */
+  CLOSE_DISPLAY_CASE: 'close-display-case',
+
+  /**
+   * The display case panel has been opened or closed.
+   * Emitted by: DisplayCasePanel (show → true, hide → false)
+   * Subscribed by: GameScene (to gate ESC handler)
+   * @type {boolean}
+   */
+  DISPLAY_CASE_TOGGLED: 'display-case-toggled',
+
+  /**
+   * Store the inventory item at the given index in the display case.
+   * Emitted by: DisplayCasePanel (on ENTER / tap in inventory section)
+   * Subscribed by: GameScene → _handleStoreItem
+   * @type {{ index: number }}
+   */
+  STORE_ITEM: 'store-item',
+
+  /**
+   * Retrieve the display case item at the given index into the player's inventory.
+   * Emitted by: DisplayCasePanel (on ENTER / tap in display case section)
+   * Subscribed by: GameScene → _handleRetrieveItem
+   * @type {{ index: number }}
+   */
+  RETRIEVE_ITEM: 'retrieve-item',
+
+  /**
+   * The display case or inventory contents changed (item stored or retrieved).
+   * Emitted by: GameScene (after store/retrieve)
+   * Subscribed by: UIScene → DisplayCasePanel.refresh()
+   * @type {{ displayCase: DisplayCase, inventory: Item[] }}
+   */
+  DISPLAY_CASE_CHANGED: 'display-case-changed',
 };

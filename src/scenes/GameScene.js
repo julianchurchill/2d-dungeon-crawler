@@ -86,6 +86,11 @@ export class GameScene extends Phaser.Scene {
       if (!open) this.turnManager.setState(TURN_STATE.PLAYER_INPUT);
     }, this);
 
+    // Restore player input when the display case panel closes.
+    EventBus.on(GameEvents.DISPLAY_CASE_TOGGLED, (open) => {
+      if (!open) this.turnManager.setState(TURN_STATE.PLAYER_INPUT);
+    }, this);
+
     // Entities lists
     this.enemies = [];
     this.npcs = [];
@@ -248,6 +253,7 @@ export class GameScene extends Phaser.Scene {
       [TILE.STAIRS_DOWN]: 'tile_town_stairs',
       [TILE.TOWN_ACCENT]: 'tile_town_accent',
       [TILE.SHOP_ROOF]:   'tile_shop_roof',
+      [TILE.HOME_DOOR]:   'tile_home_door',
     } : {
       [TILE.FLOOR]:       'tile_floor',
       [TILE.WALL]:        'tile_wall',
@@ -633,6 +639,8 @@ export class GameScene extends Phaser.Scene {
         EventBus.emit(GameEvents.CLOSE_MESSAGE_LOG);
       } else if (this.turnManager.state === TURN_STATE.DIALOGUE) {
         EventBus.emit(GameEvents.CLOSE_DIALOGUE);
+      } else if (this.turnManager.state === TURN_STATE.DISPLAY_CASE) {
+        EventBus.emit(GameEvents.CLOSE_DISPLAY_CASE);
       } else if (this.turnManager.state === TURN_STATE.SHOP) {
         // Close both shop panels together — UIScene handles the cascade
         EventBus.emit(GameEvents.CLOSE_SELL_PANEL);
@@ -689,6 +697,8 @@ export class GameScene extends Phaser.Scene {
     EventBus.on(GameEvents.INVENTORY_USE, (index) => this._useInventoryItem(index), this);
     EventBus.on(GameEvents.SELL_ITEM, ({ shopType, item }) => this._handleSellItem(shopType, item), this);
     EventBus.on(GameEvents.BUY_ITEM, ({ shopType, shopItem }) => this._handleBuyItem(shopType, shopItem), this);
+    EventBus.on(GameEvents.STORE_ITEM, ({ index }) => this._handleStoreItem(index), this);
+    EventBus.on(GameEvents.RETRIEVE_ITEM, ({ index }) => this._handleRetrieveItem(index), this);
     EventBus.on(GameEvents.FLOOR_CHANGED, (floor) => {
       this.registry.set('floor', floor);
     }, this);
@@ -794,6 +804,18 @@ export class GameScene extends Phaser.Scene {
       this.turnManager.setState(TURN_STATE.DIALOGUE);
       const line = result.npc.talk(this.player, () => this.rng.next());
       EventBus.emit(GameEvents.OPEN_DIALOGUE, { npcName: result.npc.name, line });
+      return;
+    }
+
+    if (result.action === 'home') {
+      // Cancel any active run; no turn spent on home interactions
+      this._runController.cancel();
+      this.turnManager.setState(TURN_STATE.DISPLAY_CASE);
+      EventBus.emit(GameEvents.OPEN_DISPLAY_CASE, {
+        displayCase: this.player.displayCase,
+        inventory: this.player.inventory,
+        player: this.player,
+      });
       return;
     }
 
@@ -1414,6 +1436,53 @@ export class GameScene extends Phaser.Scene {
     EventBus.emit(GameEvents.PLAYER_GOLD_CHANGED, this.player.gold);
     EventBus.emit(GameEvents.INVENTORY_CHANGED, [...this.player.inventory]);
     this._syncRegistry();
+  }
+
+  // ─── Display Case ────────────────────────────────────────────────────────
+
+  /**
+   * Moves the inventory item at `index` into the player's display case.
+   * Only unique items can be stored; non-unique items are silently ignored.
+   *
+   * @param {number} index - Zero-based index into the player's inventory.
+   */
+  _handleStoreItem(index) {
+    const item = this.player.inventory[index];
+    if (!item) return;
+    const stored = this.player.displayCase.store(item);
+    if (!stored) {
+      EventBus.emit(GameEvents.MESSAGE, `${item.name} cannot be stored in the display case.`);
+      return;
+    }
+    this.player.removeItem(index);
+    EventBus.emit(GameEvents.MESSAGE, `You place the ${item.name} in the display case.`);
+    EventBus.emit(GameEvents.DISPLAY_CASE_CHANGED, {
+      displayCase: this.player.displayCase,
+      inventory: this.player.inventory,
+    });
+    EventBus.emit(GameEvents.INVENTORY_CHANGED, [...this.player.inventory]);
+  }
+
+  /**
+   * Retrieves the display case item at `index` into the player's inventory.
+   * Fails gracefully if the inventory is full.
+   *
+   * @param {number} index - Zero-based index into the display case items.
+   */
+  _handleRetrieveItem(index) {
+    if (!this.player.canPickUp()) {
+      EventBus.emit(GameEvents.MESSAGE, 'Your pack is full!');
+      return;
+    }
+    const item = this.player.displayCase.retrieve(index);
+    if (!item) return;
+    this.player.addItem(item);
+    EventBus.emit(GameEvents.MESSAGE, `You take the ${item.name} from the display case.`);
+    EventBus.emit(GameEvents.DISPLAY_CASE_CHANGED, {
+      displayCase: this.player.displayCase,
+      inventory: this.player.inventory,
+    });
+    EventBus.emit(GameEvents.INVENTORY_CHANGED, [...this.player.inventory]);
   }
 
   // ─── Enemy Turns ──────────────────────────────────────────────────────────

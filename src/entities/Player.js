@@ -1,4 +1,5 @@
 import { TILE } from '../utils/TileTypes.js';
+import { DisplayCase } from '../systems/DisplayCase.js';
 
 export class Player {
   /**
@@ -26,6 +27,8 @@ export class Player {
     this.maxInventory = 20;
     this.equippedWeapon = null;
     this.equippedArmor = null;
+    /** @type {DisplayCase} Persistent display case for unique items — survives floor transitions. */
+    this.displayCase = new DisplayCase();
     this.sprite = null;
   }
 
@@ -48,6 +51,9 @@ export class Player {
 
     // Walking into a door opens the adjacent shop without moving the player
     if (map.getTile(nx, ny) === TILE.DOOR) return { action: 'shop', doorX: nx, doorY: ny };
+
+    // Walking into the home door opens the display case panel
+    if (map.getTile(nx, ny) === TILE.HOME_DOOR) return { action: 'home' };
 
     if (!map.isWalkable(nx, ny)) return { action: 'blocked' };
 
