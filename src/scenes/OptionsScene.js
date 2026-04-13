@@ -137,23 +137,33 @@ export class OptionsScene extends Phaser.Scene {
       .setStrokeStyle(isActive ? 2 : 1, isActive ? activeStroke : normalStroke)
       .setInteractive({ useHandCursor: true });
 
-    // Tile preview strip — sample floor, wall, door tiles side by side
-    const tileSize  = 16;
-    const previewTiles = [
+    // Preview strips — two rows: tiles on top, entities + items below
+    const tileSize = 16;
+    const tilePreviews = [
       `${tileset}_tile_floor`,
       `${tileset}_tile_wall`,
       `${tileset}_tile_door`,
       `${tileset}_tile_stairs`,
     ];
-    const totalW    = previewTiles.length * tileSize;
-    const startX    = cx - totalW / 2;
-    const previewY  = cy - h / 2 + tileSize / 2 + 8;
+    const entityPreviews = [
+      `${tileset}_entity_player`,
+      `${tileset}_entity_goblin`,
+      `${tileset}_entity_orc`,
+      `${tileset}_item_weapon`,
+    ];
 
-    for (let i = 0; i < previewTiles.length; i++) {
-      const key = previewTiles[i];
-      if (this.textures.exists(key)) {
-        this.add.image(startX + i * tileSize + tileSize / 2, previewY, key)
-          .setDisplaySize(tileSize, tileSize);
+    const rowY1 = cy - h / 2 + tileSize / 2 + 8;
+    const rowY2 = rowY1 + tileSize + 2;
+
+    for (const [row, keys] of [[rowY1, tilePreviews], [rowY2, entityPreviews]]) {
+      const totalW = keys.length * tileSize;
+      const startX = cx - totalW / 2;
+      for (let i = 0; i < keys.length; i++) {
+        const key = keys[i];
+        if (this.textures.exists(key)) {
+          this.add.image(startX + i * tileSize + tileSize / 2, row, key)
+            .setDisplaySize(tileSize, tileSize);
+        }
       }
     }
 

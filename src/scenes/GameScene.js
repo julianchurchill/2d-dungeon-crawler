@@ -151,7 +151,7 @@ export class GameScene extends Phaser.Scene {
       this.playerSprite = this.add.sprite(
         startPos.x * TILE_SIZE + TILE_SIZE / 2,
         startPos.y * TILE_SIZE + TILE_SIZE / 2,
-        'entity_player'
+        tilesetManager.getTileKey('entity_player')
       ).setDepth(10);
       this.player.sprite = this.playerSprite;
     } else {
@@ -395,7 +395,7 @@ export class GameScene extends Phaser.Scene {
     const sprite = this.add.sprite(
       x * TILE_SIZE + TILE_SIZE / 2,
       y * TILE_SIZE + TILE_SIZE / 2,
-      enemy.textureKey
+      tilesetManager.getTileKey(enemy.textureKey)
     ).setDepth(8).setVisible(false);
     enemy.sprite = sprite;
     this.enemies.push(enemy);
@@ -429,7 +429,7 @@ export class GameScene extends Phaser.Scene {
       const sprite = this.add.sprite(
         seg.x * TILE_SIZE + TILE_SIZE / 2,
         seg.y * TILE_SIZE + TILE_SIZE / 2,
-        mass.textureKey,
+        tilesetManager.getTileKey(mass.textureKey),
       ).setDepth(8).setVisible(false);
       seg.sprite = sprite;
     }
@@ -502,7 +502,7 @@ export class GameScene extends Phaser.Scene {
     const sprite = this.add.sprite(
       x * TILE_SIZE + TILE_SIZE / 2,
       y * TILE_SIZE + TILE_SIZE / 2,
-      item.textureKey
+      tilesetManager.getTileKey(item.textureKey)
     ).setDepth(6).setVisible(false);
     item.sprite = sprite;
     this.items.push(item);
@@ -519,7 +519,8 @@ export class GameScene extends Phaser.Scene {
     for (const def of npcDefs) {
       const npc = new Npc(def.x, def.y, def);
       // Fall back to the player sprite if the NPC texture is not loaded.
-      const textureKey = this.textures.exists(def.spriteKey) ? def.spriteKey : 'entity_player';
+      const resolvedKey = tilesetManager.getTileKey(def.spriteKey);
+      const textureKey = this.textures.exists(resolvedKey) ? resolvedKey : tilesetManager.getTileKey('entity_player');
       const sprite = this.add.sprite(
         def.x * TILE_SIZE + TILE_SIZE / 2,
         def.y * TILE_SIZE + TILE_SIZE / 2,
