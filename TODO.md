@@ -2,6 +2,9 @@
 
 ## Bugs
 
+- [ ] options menu has "choose the visual style for dungeons tiles" overlaps the tileset buttons and 'active' text overlaps icons on buttons. Fix the text overlap and remove the 'active' text entirely as it is not needed.
+- [ ] UI menu help tidy up - 'help' screen is missing 'k' for skills. Move 'Controls' information from main menu into a 'help' menu accessible from the main menu - the same 'help' menu as available in-game.
+- [ ] dev options screen 'Bosses' section 'total per level (overrides normal boss logic)' text overlaps the buttons below it
 - [x] mobile inventory panel has no way to close it — no close button on touch devices
 - [x] mobile double-tap run does not stop when another button is pressed — any d-pad button press should cancel an active run, mirroring keyboard behaviour
 - [x] mobile controls overlap the message log and lack an Achievements/ESC button: move D-pad up to clear the message log, move INV to the centre position, add a menu button that opens Achievements (or closes the message log if it is open)
@@ -11,8 +14,8 @@
 
 ## General
 
+- [ ] every dungeon floor should have an up staircase next to the initial spawn point of the player so they can go back up one floor
 - [ ] music
-- [ ] bosses - unique (once per run) and repeatable (champions?)
 - [ ] stats - deepest level reached, monster types kill count, unique bosses kill count
 - [x] in-game help screen — pressing ESC or the mobile ≡ menu button shows an in-game menu with Achievements and Help options; Help shows controls relevant to the current device (keyboard or mobile)
 - [x] display and maintain an application version number following semantic versioning and include the git commit hash for the built application
@@ -34,8 +37,13 @@
 - [ ] show details of inventory item when highlighted
 - [ ] drop items with 'd' when in inventory. Provide a button for mobile interface.
 - [ ] destroy items to get collectable materials that could be used later to create new items or enhance existing ones. Use 'D' when in inventory and provide a button for mobile interface. Protect unique items by asking the player to confirm the action.
+- [ ] stackable items - some items can stack, such as potions and scrolls, so they only take up one slot in the inventory. The number of items in that slot should be visible in the inventory panel slot. Using a stacked item only uses 1 item at a time. Selling a stacked item only sells 1 item at a time.
 - [x] unique items cannot be sold. Instead they can be stored in a **display case** inside the player's **home** — a unique location in the Town. The player can move unique items from their inventory into the display case, and retrieve them again later.
 - [x] arrow keys to move around inventory (no mouse)
+
+## Items
+
+- [ ] home seeking scroll - item appears from floor 10 onwards, fairly rare. Rarely appears in the magic (was potions) shop. When used takes you out of the current floor and to the Town level outside your home. Once used the item is destroyed. A portal remains next to your home until used that can be used to return to the floor you left. The floor should be preserved in the state you left it, including enemies and items.
 
 ## UI
 
@@ -47,9 +55,10 @@
 ## Enemies
 
 - [ ] enemy health - perhaps a health bar
-- [ ] enemy types
+- [ ] new enemy - 'burrower', solitary, appears from floor 15, mole like, when next to a wall has a chance of removing the wall and leaving a 'tunnel' which can be trodden on. Once a tunnel is started the 'burrower' will slowly continue to extend the 'tunnel' where possible going deeper into the wall or space that is not already navigable.
+- [ ] ranged attack enemy types
 - [ ] associate enemies with a chance of appearing based on the dungeon level. Record that against their enemy stats as their level. This can then be used for Hall of Legends information when players die for the highest level enemy they have defeated.
-- [ ] have an optional max dungeon level below which enemies will appear
+- [ ] champions - some normal enemy types occasionally spawn as a 'champion' with enhanced stats and a bigger, bolder texture than the normal enemy giving more xp on defeating and can drop normal weapons, armour or items that might otherwise spawn on that level or up to 5 levels below
 - [x] boss spawn developer options - add to developer options to spawn unique bosses, alongside enemy spawning controls.
 - [x] Boss - Old Bones, the first boss the player can encounter. Will randomly appear between level 10 and 15 until the player defeats it. As it is a unique boss it can only appear once in a level. Gives player an achievement on defeating. Drops 1 unique weapon or piece of armour with a bone/skeleton theme. Drops some gold. Is quite aggressive. May spawn up to 2 skeleton minions nearby once combat starts.
 - [x] new enemy - Creeping Mass, appears from level 10, is solitary. It has 3-5 segments which each cover 1 tile. The segments are always connected by at least one other segment. The whole enemy moves one tile at a time by removing one outer segment and placing it on a free adjacent tile to any other segment. A Creeping Mass has hp relative to the number of segments it has. As it gets damaged it loses segments in proportion to it's remaining hp.
@@ -61,6 +70,7 @@
 - [ ] show a character sheet by pressing 'c' which shows all the players stats currently. Provide a button for the mobile interface.
 - [ ] look - the player can click or touch a cell in the map to see more information about what is in that cell, e.g. for an enemy see the name and hp "Goblin 8hp", for items show the name and description "Short Sword +3 Attack", for other things at least show the name "Stone floor" or "Stone wall". The information should pop up perhaps in the bottom right or top right of the screen. Position appropriately for mobile devices. Using look does not advance the game turn. Look can only be used on cells that is in the character's line of sight.
 - [ ] look cursor - a cursor can be activated on non-touch devices with 'l' and deactivated with ESC. When activated the player can move the cursor around the map with the direction keys to highlight the thing that is being looked at. The cursor starts on the player.
+- [ ] ranged attacks
 - [x] hold keys for continued movement
 - [x] run movement - SHIFT+direction keeps going until an obstacle or visible enemy/item stops them
 
@@ -73,6 +83,7 @@
 
 ## Town
 
+- [ ] rename the 'Potion shop' to be the 'Magic shop' for future expansion with new magical items besides potions
 - [x] the town contains shops that can be entered where the player can buy items with currency. The items will have randomly generated stats and may include occasional rare items that are powerful for the players level. They will not include unique items that can only be found by exploring the dungeon.
 - [x] the town contains shops that can be entered where items from the players inventory can be sold for currency
 - [x] the town is a special level, always appears at level 0 and is the starting place for a new game. It has a non-random layout and combat is disabled there.
