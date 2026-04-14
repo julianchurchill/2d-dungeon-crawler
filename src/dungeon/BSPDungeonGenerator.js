@@ -113,8 +113,10 @@ class BSPNode {
 export class BSPDungeonGenerator {
   /**
    * @param {object} rng   - Seeded RNG instance from createRNG()
-   * @param {number} [floor=2] - Dungeon floor number; floor 1 receives up-stairs in the start room.
-   * @returns {{ map: DungeonMap, rooms: Array, startPos: {x,y}, stairsPos: {x,y}, stairsUpPos?: {x,y} }}
+   * @param {number} [floor=2] - Dungeon floor number. Every floor receives up-stairs in the
+   *   start room (offset one tile from the player spawn) so the player can ascend back to the
+   *   previous floor (or to town from floor 1).
+   * @returns {{ map: DungeonMap, rooms: Array, startPos: {x,y}, stairsPos: {x,y}, stairsUpPos: {x,y} }}
    */
   generate(rng, floor = 2) {
     const map = new DungeonMap(MAP_WIDTH, MAP_HEIGHT);
@@ -145,13 +147,11 @@ export class BSPDungeonGenerator {
     }
     map.setTile(farthestRoom.cx, farthestRoom.cy, TILE.STAIRS_DOWN);
 
-    // Floor 1 connects back to the town — place up-stairs in the start room,
-    // offset one tile from centre so it doesn't overlap the player spawn point.
-    let stairsUpPos;
-    if (floor === 1) {
-      stairsUpPos = { x: startRoom.cx + 1, y: startRoom.cy };
-      map.setTile(stairsUpPos.x, stairsUpPos.y, TILE.STAIRS_UP);
-    }
+    // Every dungeon floor has up-stairs in the start room, offset one tile from
+    // centre so they don't overlap the player spawn point.  On floor 1 they lead
+    // back to town; on floors 2+ they lead back to the previous floor.
+    const stairsUpPos = { x: startRoom.cx + 1, y: startRoom.cy };
+    map.setTile(stairsUpPos.x, stairsUpPos.y, TILE.STAIRS_UP);
 
     return {
       map,
