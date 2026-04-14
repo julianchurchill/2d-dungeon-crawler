@@ -42,7 +42,11 @@ import { generateShopItems } from '../items/ShopInventory.js';
 import { isTouchDevice } from '../utils/TouchDeviceDetector.js';
 import { NpcRoamController } from '../systems/NpcRoamController.js';
 
-const TILE_SIZE = 16;
+// TILE_SIZE is initialised from TilesetManager in GameScene.create() so it
+// reflects the active tileset (16 for Classic/Modern, 32 for HD) each time
+// the scene starts.  Declared as let so the module-level references below
+// stay simple while still being writable at create-time.
+let TILE_SIZE = 16;
 const FOV_RADIUS = 8;
 const MOVE_DURATION = 80;
 // Additional delay after the move animation before auto-repeat fires.
@@ -56,6 +60,12 @@ export class GameScene extends Phaser.Scene {
 
   create() {
     this.cameras.main.fadeIn(400, 0, 0, 0);
+
+    // Resolve tile size and camera zoom from the active tileset.
+    // TILE_SIZE is a module-level let so all methods in this file pick it up
+    // without needing it passed as a parameter.
+    TILE_SIZE = tilesetManager.getTileSize();
+    this.cameras.main.setZoom(tilesetManager.getCameraZoom());
 
     // Systems
     this.floorManager = new FloorManager();
@@ -161,10 +171,9 @@ export class GameScene extends Phaser.Scene {
       );
     }
 
-    // Camera
+    // Camera — zoom is already set in create() from TilesetManager
     const mapW = map.width * TILE_SIZE;
     const mapH = map.height * TILE_SIZE;
-    this.cameras.main.setZoom(2);
     if (this.floorManager.isTown() && !isTouchDevice()) {
       // Desktop town: show the whole map centred; no player-follow
       this.cameras.main.stopFollow();

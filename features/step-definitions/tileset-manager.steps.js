@@ -33,3 +33,11 @@ Then('the active tileset should be {string}', function (expected) {
 Then('the tile key for {string} should be {string}', function (base, expected) {
   assert.strictEqual(this.tilesetManager.getTileKey(base), expected);
 });
+
+Then('the tile size should be {int}', function (expected) {
+  assert.strictEqual(this.tilesetManager.getTileSize(), expected);
+});
+
+Then('the camera zoom should be {int}', function (expected) {
+  assert.strictEqual(this.tilesetManager.getCameraZoom(), expected);
+});
