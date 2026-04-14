@@ -20,8 +20,7 @@ export class MainMenuScene extends Phaser.Scene {
 
     this._buildBackground();
     this._buildTitle(width, height);
-    const menuBottomY = this._buildMenu(width, height);
-    this._buildControls(width, menuBottomY + 24);
+    this._buildMenu(width, height);
     this._buildVersion(width, height);
     this._setupKeyboardNav();
 
@@ -167,11 +166,41 @@ export class MainMenuScene extends Phaser.Scene {
       onSelect: goOptions,
     });
 
+    // HELP button
+    const helpBtnY = optBtnY + 44;
+    const helpBg = this.add.rectangle(width / 2, helpBtnY, 200, 34, 0x1a2a3a)
+      .setStrokeStyle(1, 0x336677)
+      .setInteractive({ useHandCursor: true });
+
+    const helpTxt = this.add.text(width / 2, helpBtnY, '?  HELP', {
+      fontSize: '12px', fontFamily: FONT_FAMILY, color: '#6699aa', resolution: 2,
+    }).setOrigin(0.5);
+
+    const goHelp = () => {
+      this.cameras.main.fadeOut(200, 0, 0, 0);
+      this.time.delayedCall(200, () =>
+        this.scene.start('HelpScene', { fromScene: 'MainMenuScene' }));
+    };
+    helpBg.on('pointerover', () => {
+      helpBg.setFillStyle(0x223344);
+      helpTxt.setColor('#aaddff');
+    });
+    helpBg.on('pointerout', () => {
+      helpBg.setFillStyle(0x1a2a3a);
+      const isFocused = this._nav && this._nav.focusedIndex === this._navItems.length;
+      helpTxt.setColor(isFocused ? COLOR_FOCUSED : '#6699aa');
+    });
+    helpBg.on('pointerdown', goHelp);
+
+    this._navItems.push({
+      onFocus:  () => { helpBg.setFillStyle(0x223344); helpTxt.setColor(COLOR_FOCUSED); },
+      onBlur:   () => { helpBg.setFillStyle(0x1a2a3a); helpTxt.setColor('#6699aa'); },
+      onSelect: goHelp,
+    });
+
     // DEV OPTIONS button — only shown in development builds
-    let lastBtnY = optBtnY;
     if (isDevEnvironment()) {
-      const devBtnY = optBtnY + 44;
-      lastBtnY = devBtnY;
+      const devBtnY = helpBtnY + 44;
       const devBg = this.add.rectangle(width / 2, devBtnY, 200, 34, 0x1a2a3a)
         .setStrokeStyle(1, 0x336677)
         .setInteractive({ useHandCursor: true });
@@ -202,9 +231,6 @@ export class MainMenuScene extends Phaser.Scene {
       });
     }
 
-    // Return the bottom edge of the last button so the caller can position
-    // content below it without overlapping.
-    return lastBtnY + 17;
   }
 
   /**
@@ -244,37 +270,6 @@ export class MainMenuScene extends Phaser.Scene {
     this.time.delayedCall(300, () => {
       this.scene.start('GameScene');
       this.scene.launch('UIScene');
-    });
-  }
-
-  /**
-   * Renders the controls reference below the menu buttons.
-   *
-   * @param {number} width  - Canvas width.
-   * @param {number} startY - Y pixel to place the first line at.
-   */
-  _buildControls(width, startY) {
-    const lines = [
-      'CONTROLS',
-      '──────────────────',
-      'WASD / Arrow Keys — Move',
-      'SHIFT + Direction — Run',
-      'Bump into enemies — Attack',
-      'Walk over items — Pick Up',
-      'I — Open Inventory',
-      'Click message log — History',
-      '> on stairs — Descend',
-      '',
-      'Mobile: Use the D-Pad on screen',
-    ];
-
-    lines.forEach((line, i) => {
-      this.add.text(width / 2, startY + i * 16, line, {
-        fontSize: i === 0 ? '13px' : '11px',
-        fontFamily: FONT_FAMILY,
-        color: i === 0 ? '#ffdd88' : '#888888',
-        resolution: 2,
-      }).setOrigin(0.5);
     });
   }
 

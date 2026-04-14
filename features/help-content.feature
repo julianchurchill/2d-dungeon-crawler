@@ -18,3 +18,13 @@ Feature: In-game help content adapts to device type
     When the help content is retrieved
     Then the help content should mention "SHIFT"
     And the help content should not mention "double-tap"
+
+  Scenario: Keyboard help content includes skills key binding
+    Given the device is not a touch device
+    When the help content is retrieved
+    Then the help content should mention "open skills"
+
+  Scenario: Touch help content includes skills button
+    Given the device is a touch device
+    When the help content is retrieved
+    Then the help content should mention "SKILLS"

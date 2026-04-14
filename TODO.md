@@ -2,7 +2,7 @@
 
 ## Bugs
 
-- [ ] UI menu help tidy up - 'help' screen is missing 'k' for skills. Move 'Controls' information from main menu into a 'help' menu accessible from the main menu - the same 'help' menu as available in-game.
+- [x] UI menu help tidy up - 'help' screen is missing 'k' for skills. Move 'Controls' information from main menu into a 'help' menu accessible from the main menu - the same 'help' menu as available in-game.
 - [x] dev options screen 'Bosses' section 'total per level (overrides normal boss logic)' text overlaps the buttons below it
 - [x] options menu has "choose the visual style for dungeons tiles" overlaps the tileset buttons and 'active' text overlaps icons on buttons. Fix the text overlap and remove the 'active' text entirely as it is not needed.
 

@@ -7,7 +7,7 @@ import { FONT_FAMILY } from '../utils/FontConfig.js';
  *  - Touch devices see tap / double-tap / hold button controls.
  *  - Non-touch devices see keyboard bindings.
  *
- * Launched by InGameMenuScene with `{ fromScene: 'GameScene' }`.
+ * Launched by InGameMenuScene or MainMenuScene; `fromScene` data controls where Back returns to.
  * The Back button (or ESC) wakes GameScene + UIScene and stops this scene.
  */
 
