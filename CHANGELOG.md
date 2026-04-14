@@ -7,6 +7,10 @@ Entries are listed newest-first within each section.
 
 ## [Unreleased]
 
+---
+
+## [0.39.0] - 2026-04-14
+
 ### Changed
 
 - 2026-04-14 — The player's home in the town is now a multi-tile structure: a 5-tile-wide alcove against the south border wall with a roof interior and walls on three sides, matching the shop alcove aesthetic. The home door is centred on the north face at (16, 16), placing the Guard NPC naturally in front of the entrance.
