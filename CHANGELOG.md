@@ -7,13 +7,9 @@ Entries are listed newest-first within each section.
 
 ## [Unreleased]
 
-### Changed
-
-- 2026-04-14 — Item icons in the inventory, shop, and display case panels now use tileset-prefixed sprite textures instead of fixed emoji characters. Classic, Modern, and HD tilesets each show their own distinct icon art for potions, weapons, and armour.
-- 2026-04-09 — Combined BuyPanel and SellPanel into a single ShopPanel: player-owned sellable items appear at the top, shop stock for purchase below, and the player's gold balance is always visible in the panel header; UP/DOWN navigate all rows, ENTER buys or sells depending on which section is highlighted
-
 ### Fixed
 
+- 2026-04-14 — Display case panel now opens centred on screen (both horizontally and vertically) matching the shop panel behaviour; previously it was pinned to y=40 near the top.
 - 2026-04-14 — Help screen now lists `k` (keyboard) and SKILLS button (touch) for opening the skills panel; previously the skills control was missing from both device variants.
 - 2026-04-14 — Main menu Controls section removed; a HELP button now opens the same Help screen available in-game, keeping controls documented in one place.
 - 2026-04-14 — Dev options Bosses section: "Total per level" subtitle no longer overlaps the boss quantity buttons; spacing increased and word-wrap added so long text stays within the panel.
