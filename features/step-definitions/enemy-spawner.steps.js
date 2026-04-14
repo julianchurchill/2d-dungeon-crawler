@@ -6,6 +6,13 @@ import { EnemySpawner } from '../../src/systems/EnemySpawner.js';
 // ─── Shared helpers ───────────────────────────────────────────────────────
 
 /**
+ * A neutral difficulty manager stub that applies no scaling (all multipliers 1).
+ * Injected into EnemySpawner test instances so spawner count/position tests are
+ * isolated from the difficulty system.
+ */
+const neutralDiffMgr = { getConfig: () => ({ enemyCount: 1, enemyHp: 1, enemyAtk: 1 }) };
+
+/**
  * Builds a set of rooms at non-overlapping x offsets so positions never
  * conflict (avoiding false negatives when getEntityAt is checked).
  *
@@ -74,7 +81,7 @@ Given('an EnemySpawner with max enemies per room {int}', function (max) {
     spawnWeights: null,
     minEnemiesPerRoom: null,
     maxEnemiesPerRoom: max,
-  });
+  }, neutralDiffMgr);
 });
 
 Given('an EnemySpawner with null max enemies per room and a maximum RNG', function () {
@@ -83,7 +90,7 @@ Given('an EnemySpawner with null max enemies per room and a maximum RNG', functi
     spawnWeights: null,
     minEnemiesPerRoom: null,
     maxEnemiesPerRoom: null,
-  });
+  }, neutralDiffMgr);
 });
 
 Given('an EnemySpawner with min {int} max {int} and a minimum RNG', function (min, max) {
@@ -92,7 +99,7 @@ Given('an EnemySpawner with min {int} max {int} and a minimum RNG', function (mi
     spawnWeights: null,
     minEnemiesPerRoom: min,
     maxEnemiesPerRoom: max,
-  });
+  }, neutralDiffMgr);
 });
 
 Given('an EnemySpawner with min {int} max {int} a minimum RNG and troll-only weights', function (min, max) {
@@ -101,7 +108,7 @@ Given('an EnemySpawner with min {int} max {int} a minimum RNG and troll-only wei
     spawnWeights: { cockroach: 0, sprite: 0, goblin: 0, orc: 0, troll: 1 },
     minEnemiesPerRoom: min,
     maxEnemiesPerRoom: max,
-  });
+  }, neutralDiffMgr);
 });
 
 Given('an EnemySpawner that only spawns cockroaches with max enemies per room {int} and a maximum RNG',
@@ -111,7 +118,7 @@ Given('an EnemySpawner that only spawns cockroaches with max enemies per room {i
       spawnWeights: { cockroach: 1, sprite: 0, goblin: 0, orc: 0, troll: 0 },
       minEnemiesPerRoom: null,
       maxEnemiesPerRoom: max,
-    });
+    }, neutralDiffMgr);
   }
 );
 
@@ -121,7 +128,7 @@ Given('an EnemySpawner with max enemies per room {int} and a maximum RNG', funct
     spawnWeights: null,
     minEnemiesPerRoom: null,
     maxEnemiesPerRoom: max,
-  });
+  }, neutralDiffMgr);
 });
 
 When('spawning cockroaches for {int} rooms on floor {int} with entity-aware tracking',
@@ -201,7 +208,7 @@ Given('an EnemySpawner that only spawns creeping_mass with min {int} max {int} a
       spawnWeights: { creeping_mass: 1 },
       minEnemiesPerRoom: min,
       maxEnemiesPerRoom: max,
-    });
+    }, neutralDiffMgr);
   },
 );
 

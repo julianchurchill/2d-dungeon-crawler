@@ -32,11 +32,6 @@ Then('the enemy count multiplier should be less than 1', function () {
   assert.ok(m < 1, `Expected enemy count multiplier < 1 but got ${m}`);
 });
 
-Then('the enemy count multiplier should equal 1', function () {
-  const m = this.difficultyManager.getConfig().enemyCount;
-  assert.equal(m, 1);
-});
-
 Then('the enemy count multiplier should be greater than 1', function () {
   const m = this.difficultyManager.getConfig().enemyCount;
   assert.ok(m > 1, `Expected enemy count multiplier > 1 but got ${m}`);

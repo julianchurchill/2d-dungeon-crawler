@@ -22,9 +22,9 @@ export const DIFFICULTIES = Object.freeze({
  * @type {Record<string, {enemyCount: number, enemyHp: number, enemyAtk: number}>}
  */
 const DIFFICULTY_CONFIG = {
-  [DIFFICULTIES.EASY]:   { enemyCount: 0.67, enemyHp: 0.75, enemyAtk: 0.75 },
-  [DIFFICULTIES.NORMAL]: { enemyCount: 1.0,  enemyHp: 1.0,  enemyAtk: 1.0  },
-  [DIFFICULTIES.HARD]:   { enemyCount: 1.5,  enemyHp: 1.5,  enemyAtk: 1.5  },
+  [DIFFICULTIES.EASY]:   { enemyCount: 0.75, enemyHp: 0.85, enemyAtk: 0.85 },
+  [DIFFICULTIES.NORMAL]: { enemyCount: 1.25, enemyHp: 1.25, enemyAtk: 1.25 },
+  [DIFFICULTIES.HARD]:   { enemyCount: 2.0,  enemyHp: 1.75, enemyAtk: 1.75 },
 };
 
 export class DifficultyManager {

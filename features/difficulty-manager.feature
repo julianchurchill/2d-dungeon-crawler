@@ -22,9 +22,9 @@ Feature: Difficulty Manager
     When the difficulty is set to "easy"
     Then the enemy count multiplier should be less than 1
 
-  Scenario: Normal difficulty has no enemy count change
+  Scenario: Normal difficulty increases enemy count
     Given a new DifficultyManager with no stored preference
-    Then the enemy count multiplier should equal 1
+    Then the enemy count multiplier should be greater than 1
 
   Scenario: Hard difficulty increases enemy count
     Given a new DifficultyManager with no stored preference
