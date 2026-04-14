@@ -28,6 +28,7 @@ import { handleMobileMenuPress } from '../systems/MobileMenuHandler.js';
 import { wrapWithRunCancel } from '../utils/ActionWrapper.js';
 import { applyInventoryToggle } from '../systems/InventoryToggle.js';
 import { applySkillsToggle } from '../systems/SkillsToggle.js';
+import { difficultyManager } from '../systems/DifficultyManager.js';
 import { applyEscPanelClose } from '../systems/EscPanelClose.js';
 import { SkillSystem } from '../systems/SkillSystem.js';
 import { LuckyStrikeSkill } from '../skills/LuckyStrikeSkill.js';
@@ -401,6 +402,15 @@ export class GameScene extends Phaser.Scene {
     // Old Bones must be constructed as OldBones (not plain Enemy) so that boss
     // properties — isBoss, minionsSpawned, dropGold, dropItem — are present.
     const enemy = type === 'old_bones' ? new OldBones(x, y, this.rng) : new Enemy(x, y, type);
+
+    // Scale HP and ATK by the active difficulty (bosses are exempt).
+    if (!enemy.isBoss) {
+      const { enemyHp, enemyAtk } = difficultyManager.getConfig();
+      enemy.stats.hp    = Math.max(1, Math.round(enemy.stats.hp    * enemyHp));
+      enemy.stats.maxHp = Math.max(1, Math.round(enemy.stats.maxHp * enemyHp));
+      enemy.stats.attack = Math.max(1, Math.round(enemy.stats.attack * enemyAtk));
+    }
+
     const sprite = this.add.sprite(
       x * TILE_SIZE + TILE_SIZE / 2,
       y * TILE_SIZE + TILE_SIZE / 2,

@@ -13,15 +13,18 @@
 
 import { getSpawnTable, getEnemiesPerRoom, ENEMY_DEFS } from '../entities/EnemyTypes.js';
 import { devOptions } from '../systems/DevOptions.js';
+import { difficultyManager as defaultDifficultyManager } from '../systems/DifficultyManager.js';
 
 export class EnemySpawner {
   /**
-   * @param {import('../utils/RNG.js').RNG}  rng  - Seeded RNG for positions and type picks.
-   * @param {typeof devOptions}              opts - Dev-option overrides (defaults to singleton).
+   * @param {import('../utils/RNG.js').RNG}      rng               - Seeded RNG for positions and type picks.
+   * @param {typeof devOptions}                  opts              - Dev-option overrides (defaults to singleton).
+   * @param {import('./DifficultyManager.js').DifficultyManager} [diffMgr] - Difficulty manager (injectable for tests).
    */
-  constructor(rng, opts = devOptions) {
-    this.rng  = rng;
-    this.opts = opts;
+  constructor(rng, opts = devOptions, diffMgr = defaultDifficultyManager) {
+    this.rng     = rng;
+    this.opts    = opts;
+    this._diffMgr = diffMgr;
   }
 
   /**
@@ -33,9 +36,14 @@ export class EnemySpawner {
    * @param {Function} spawnEnemy  - `(x, y, type) => void` — creates one enemy on the map.
    */
   spawnForRooms(rooms, floor, getEntityAt, spawnEnemy) {
-    const spawnTable  = getSpawnTable(floor, this.opts.spawnWeights);
-    const minPerRoom  = this.opts.minEnemiesPerRoom ?? 0;
-    const maxPerRoom  = this.opts.maxEnemiesPerRoom ?? getEnemiesPerRoom(floor);
+    const spawnTable       = getSpawnTable(floor, this.opts.spawnWeights);
+    const countMultiplier  = this._diffMgr.getConfig().enemyCount;
+    const minPerRoom = Math.max(0, Math.round(
+      (this.opts.minEnemiesPerRoom ?? 0) * countMultiplier,
+    ));
+    const maxPerRoom = Math.max(minPerRoom, Math.round(
+      (this.opts.maxEnemiesPerRoom ?? getEnemiesPerRoom(floor)) * countMultiplier,
+    ));
 
     // Room 0 is always the player's start room — skip it.
     for (let i = 1; i < rooms.length; i++) {
