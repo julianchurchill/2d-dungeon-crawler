@@ -29,3 +29,9 @@ Feature: Display Case Panel interactions
     And a new display case
     When the player stores inventory item at index 0 in the display case
     Then the DISPLAY_CASE_CHANGED event should have been emitted
+
+  Scenario: Display case panel is centred on screen when opened
+    Given a player with a Bone Blade in their inventory
+    And a new display case
+    When the display case panel is shown on an 800x600 screen
+    Then the display case panel should be vertically centred on that screen

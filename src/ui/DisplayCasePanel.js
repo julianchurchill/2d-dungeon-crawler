@@ -137,7 +137,11 @@ export class DisplayCasePanel {
    */
   resize(width, height) {
     if (!this._container) return;
-    this._container.setPosition(Math.round(width / 2 - PANEL_W / 2), 40);
+    const panelH = this._bg.height;
+    this._container.setPosition(
+      Math.floor((width - PANEL_W) / 2),
+      Math.floor((height - panelH) / 2),
+    );
   }
 
   // ─── Private ─────────────────────────────────────────────────────────────
@@ -154,11 +158,14 @@ export class DisplayCasePanel {
    */
   _build() {
     const s = this.scene;
-    const { width } = s.scale;
-    const x = Math.round(width / 2 - PANEL_W / 2);
+    const { width, height } = s.scale;
 
-    // Placeholder height — will be resized in _refresh() once row counts are known
-    this._container = s.add.container(x, 40).setDepth(300).setVisible(false);
+    // Position is finalised in _refresh() once the panel height is known;
+    // use a temporary placeholder so the container exists before rows are built.
+    this._container = s.add.container(
+      Math.floor((width - PANEL_W) / 2),
+      Math.floor(height / 2),
+    ).setDepth(300).setVisible(false);
 
     // Background (sized in _refresh)
     this._bg = s.add.rectangle(0, 0, PANEL_W, 200, 0x1a1a2e, 0.97)
@@ -289,8 +296,13 @@ export class DisplayCasePanel {
     this._footerText.setText(selectedItem ? selectedItem.description || '' : '');
     y += FOOTER_H;
 
-    // Resize background to fit
+    // Resize background to fit and centre panel on screen
     this._bg.setSize(PANEL_W, y);
+    const { width, height } = this.scene.scale;
+    this._container.setPosition(
+      Math.floor((width - PANEL_W) / 2),
+      Math.floor((height - y) / 2),
+    );
   }
 
   /**

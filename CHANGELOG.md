@@ -15,6 +15,7 @@ Entries are listed newest-first within each section.
 
 ### Fixed
 
+- 2026-04-14 — Display case panel now opens centred on screen (both horizontally and vertically) matching the shop panel behaviour; previously it was pinned to y=40 near the top.
 - 2026-04-14 — Help screen now lists `k` (keyboard) and SKILLS button (touch) for opening the skills panel; previously the skills control was missing from both device variants.
 - 2026-04-14 — Main menu Controls section removed; a HELP button now opens the same Help screen available in-game, keeping controls documented in one place.
 - 2026-04-14 — Dev options Bosses section: "Total per level" subtitle no longer overlaps the boss quantity buttons; spacing increased and word-wrap added so long text stays within the panel.
