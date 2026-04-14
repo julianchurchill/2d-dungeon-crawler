@@ -22,10 +22,13 @@ export class BootScene extends Phaser.Scene {
   create() {
     this._createClassicTileTextures();
     this._createModernTileTextures();
+    this._createHdTileTextures();
     this._createClassicEntityTextures();
     this._createModernEntityTextures();
+    this._createHdEntityTextures();
     this._createClassicItemTextures();
     this._createModernItemTextures();
+    this._createHdItemTextures();
     this._createUITextures();
     this.scene.start('MainMenuScene');
   }
@@ -1368,6 +1371,1310 @@ export class BootScene extends Phaser.Scene {
       g.fillRect(0, 3, 10, 3);
       g.fillRect(2, 6, 6, 2);
       g.fillRect(4, 8, 2, 1);
+    });
+  }
+
+  // ---------------------------------------------------------------------------
+  // HD tile textures  (prefix: 'hd_', size: 32×32)
+  //
+  // 32×32 pixel tiles rendered at camera zoom=1 → 32 screen pixels per tile
+  // (same screen size as 16×16 tiles at zoom=2, but with 4× the pixel detail).
+  // Palette: rich warm dungeon stone + vibrant town cobblestone.
+  // ---------------------------------------------------------------------------
+
+  /** Generates all hd_ prefixed 32×32 tile textures. */
+  _createHdTileTextures() {
+    const S = 32; // HD tile size
+
+    // Dungeon floor — large stone slabs with mortar grid and surface detail
+    this._genTexture('hd_tile_floor', S, S, (g) => {
+      // Mortar background
+      g.fillStyle(0x0e1018);
+      g.fillRect(0, 0, S, S);
+      // Four stone slabs in a 2×2 grid (each 14×14 with 2px mortar)
+      const slabColor  = 0x22283a;
+      const slabHilight = 0x2e3650;
+      const slabShadow  = 0x181d28;
+      const slabs = [[1,1],[17,1],[1,17],[17,17]];
+      for (const [sx, sy] of slabs) {
+        g.fillStyle(slabColor);
+        g.fillRect(sx, sy, 14, 14);
+        // Top-edge highlight
+        g.fillStyle(slabHilight);
+        g.fillRect(sx, sy, 14, 1);
+        g.fillRect(sx, sy, 1, 14);
+        // Bottom-right shadow
+        g.fillStyle(slabShadow);
+        g.fillRect(sx, sy + 13, 14, 1);
+        g.fillRect(sx + 13, sy, 1, 14);
+      }
+      // Surface noise — scattered pits in stone
+      const pits = [[4,4],[10,7],[20,3],[27,8],[6,20],[14,25],[23,18],[28,26],[9,12],[19,22]];
+      for (const [px, py] of pits) {
+        g.fillStyle(0x131820, 0.8);
+        g.fillRect(px, py, 2, 1);
+      }
+    });
+
+    // Dungeon wall — rich layered stone brick with clear courses and bevel
+    this._genTexture('hd_tile_wall', S, S, (g) => {
+      // Stone base
+      g.fillStyle(0x2e3a4e);
+      g.fillRect(0, 0, S, S);
+      // Brick courses: 3 rows of bricks with alternating offsets
+      // Row 0 (y 1–9): bricks at x=1, x=12, x=22
+      const brickH   = 9;
+      const brickRows = [
+        { y: 1,  offsets: [1, 12, 23] },
+        { y: 12, offsets: [6, 17] },
+        { y: 23, offsets: [1, 12, 23] },
+      ];
+      for (const row of brickRows) {
+        for (const bx of row.offsets) {
+          const bw = (bx === row.offsets[row.offsets.length - 1]) ? S - bx - 1 : 9;
+          // Brick face
+          g.fillStyle(0x3e4e66);
+          g.fillRect(bx, row.y, bw, brickH);
+          // Top highlight
+          g.fillStyle(0x5a7098);
+          g.fillRect(bx, row.y, bw, 1);
+          g.fillRect(bx, row.y, 1, brickH);
+          // Bottom/right shadow
+          g.fillStyle(0x1e2a38);
+          g.fillRect(bx, row.y + brickH - 1, bw, 1);
+          g.fillRect(bx + bw - 1, row.y, 1, brickH);
+          // Surface scuff mark
+          g.fillStyle(0x344258, 0.6);
+          g.fillRect(bx + 3, row.y + 3, 3, 1);
+        }
+      }
+      // Outer top + left bright edge catch
+      g.fillStyle(0x6888b0);
+      g.fillRect(0, 0, S, 1);
+      g.fillRect(0, 0, 1, S);
+      // Outer bottom + right deep shadow
+      g.fillStyle(0x0a1018);
+      g.fillRect(0, S - 1, S, 1);
+      g.fillRect(S - 1, 0, 1, S);
+    });
+
+    // Dungeon door — dark mahogany with ornate mouldings and gold hardware
+    this._genTexture('hd_tile_door', S, S, (g) => {
+      // Stone door-frame
+      g.fillStyle(0x1e1408);
+      g.fillRect(0, 0, S, S);
+      // Door face — rich mahogany
+      g.fillStyle(0x7a3e18);
+      g.fillRect(3, 1, S - 6, S - 2);
+      // Upper raised panel
+      g.fillStyle(0x5a2e10);
+      g.fillRect(5, 3, S - 10, 10);
+      g.fillStyle(0x9a5028, 0.5);
+      g.fillRect(5, 3, S - 10, 1);
+      g.fillRect(5, 3, 1, 10);
+      // Middle panel
+      g.fillStyle(0x5a2e10);
+      g.fillRect(5, 15, S - 10, 8);
+      g.fillStyle(0x9a5028, 0.5);
+      g.fillRect(5, 15, S - 10, 1);
+      g.fillRect(5, 15, 1, 8);
+      // Lower raised panel
+      g.fillStyle(0x5a2e10);
+      g.fillRect(5, 25, S - 10, S - 27);
+      g.fillStyle(0x9a5028, 0.5);
+      g.fillRect(5, 25, S - 10, 1);
+      g.fillRect(5, 25, 1, S - 27);
+      // Gold handle plate
+      g.fillStyle(0x443300);
+      g.fillRect(S - 8, 14, 5, 8);
+      g.fillStyle(0xffcc00);
+      g.fillRect(S - 7, 15, 4, 6);
+      // Handle knob
+      g.fillStyle(0xffe880);
+      g.fillRect(S - 7, 17, 3, 2);
+      // Hinge marks (left side)
+      g.fillStyle(0xaa8800);
+      g.fillRect(4, 5, 2, 4);
+      g.fillRect(4, 23, 2, 4);
+    });
+
+    // Dungeon stairs down — deep stone with wide steps and golden tread nosings
+    this._genTexture('hd_tile_stairs', S, S, (g) => {
+      // Background stone
+      g.fillStyle(0x0e1018);
+      g.fillRect(0, 0, S, S);
+      // Five descending steps — tread + riser for each
+      const steps = [
+        { y: 2,  w: 28, x: 2 },
+        { y: 8,  w: 22, x: 5 },
+        { y: 14, w: 16, x: 8 },
+        { y: 20, w: 10, x: 11 },
+        { y: 26, w: 4,  x: 14 },
+      ];
+      for (const { x, y, w } of steps) {
+        // Riser (dark)
+        g.fillStyle(0x1a2030);
+        g.fillRect(x, y, w, 5);
+        // Tread top highlight (gold nosing)
+        g.fillStyle(0xddaa44);
+        g.fillRect(x, y, w, 2);
+        // Tread body
+        g.fillStyle(0x2a3448);
+        g.fillRect(x, y + 2, w, 3);
+        // Left wall shadow
+        g.fillStyle(0x0a0e18);
+        g.fillRect(x, y, 1, 5);
+        // Right wall shadow
+        g.fillRect(x + w - 1, y, 1, 5);
+      }
+      // Down indicator arrow
+      g.fillStyle(0xffcc44);
+      g.fillTriangle(S/2 - 3, 30, S/2 + 3, 30, S/2, S - 1);
+    });
+
+    // Dungeon stairs up — blue-tinted ascending steps
+    this._genTexture('hd_tile_stairs_up', S, S, (g) => {
+      g.fillStyle(0x0e1018);
+      g.fillRect(0, 0, S, S);
+      const steps = [
+        { y: 2,  w: 28, x: 2 },
+        { y: 8,  w: 22, x: 5 },
+        { y: 14, w: 16, x: 8 },
+        { y: 20, w: 10, x: 11 },
+        { y: 26, w: 4,  x: 14 },
+      ];
+      // Draw in reverse (bottom step first, visually ascending)
+      const reversed = [...steps].reverse();
+      for (let i = 0; i < reversed.length; i++) {
+        const { x, y, w } = reversed[i];
+        const stepY = 2 + i * 6;
+        g.fillStyle(0x1a2030);
+        g.fillRect(x, stepY, w, 5);
+        g.fillStyle(0x4488cc);
+        g.fillRect(x, stepY, w, 2);
+        g.fillStyle(0x223450);
+        g.fillRect(x, stepY + 2, w, 3);
+        g.fillStyle(0x0a0e18);
+        g.fillRect(x, stepY, 1, 5);
+        g.fillRect(x + w - 1, stepY, 1, 5);
+      }
+      // Up indicator arrow
+      g.fillStyle(0x88ccff);
+      g.fillTriangle(S/2 - 3, 2, S/2 + 3, 2, S/2, 0);
+    });
+
+    // Town floor — warm sandstone with large well-defined cobblestones
+    this._genTexture('hd_tile_town_floor', S, S, (g) => {
+      // Mortar
+      g.fillStyle(0x4a3820);
+      g.fillRect(0, 0, S, S);
+      // Six cobblestones in two rows (3 top, 3 bottom offset)
+      const stones = [
+        // Top row
+        { x: 1, y: 1, w: 8, h: 13 },
+        { x: 11, y: 1, w: 10, h: 13 },
+        { x: 23, y: 1, w: 8, h: 13 },
+        // Bottom row (offset)
+        { x: 1, y: 16, w: 13, h: 14 },
+        { x: 16, y: 16, w: 8, h: 14 },
+        { x: 26, y: 16, w: 5, h: 14 },
+      ];
+      for (const { x, y, w, h } of stones) {
+        g.fillStyle(0xa08060);
+        g.fillRect(x, y, w, h);
+        // Top-left highlight
+        g.fillStyle(0xc0a07a);
+        g.fillRect(x, y, w, 1);
+        g.fillRect(x, y, 1, h);
+        // Bottom-right shadow
+        g.fillStyle(0x786040);
+        g.fillRect(x, y + h - 1, w, 1);
+        g.fillRect(x + w - 1, y, 1, h);
+        // Surface texture (small pit)
+        g.fillStyle(0x887050, 0.6);
+        g.fillRect(x + 2, y + 3, 2, 1);
+      }
+    });
+
+    // Town wall — cream limestone blocks with defined mortar and shadow
+    this._genTexture('hd_tile_town_wall', S, S, (g) => {
+      // Mortar
+      g.fillStyle(0x6a5a40);
+      g.fillRect(0, 0, S, S);
+      // Three rows of limestone blocks
+      const rows = [
+        { y: 1, blocks: [{x:1,w:14},{x:17,w:14}] },
+        { y: 12, blocks: [{x:1,w:8},{x:11,w:11},{x:24,w:7}] },
+        { y: 23, blocks: [{x:1,w:14},{x:17,w:14}] },
+      ];
+      for (const row of rows) {
+        for (const { x, w } of row.blocks) {
+          g.fillStyle(0xd0c0a0);
+          g.fillRect(x, row.y, w, 9);
+          // Top-edge light (limestone catches warm light)
+          g.fillStyle(0xe8d8b8);
+          g.fillRect(x, row.y, w, 1);
+          g.fillRect(x, row.y, 1, 9);
+          // Bottom-edge shadow
+          g.fillStyle(0xa89878);
+          g.fillRect(x, row.y + 8, w, 1);
+          g.fillRect(x + w - 1, row.y, 1, 9);
+          // Mid-block surface variation
+          g.fillStyle(0xc8b898, 0.5);
+          g.fillRect(x + 3, row.y + 4, 4, 1);
+        }
+      }
+      // Top bright edge
+      g.fillStyle(0xf0e0c8);
+      g.fillRect(0, 0, S, 1);
+    });
+
+    // Town stairs — warm sandstone steps, descending
+    this._genTexture('hd_tile_town_stairs', S, S, (g) => {
+      g.fillStyle(0x6a5040);
+      g.fillRect(0, 0, S, S);
+      const steps = [
+        { x: 2,  y: 2,  w: 28 },
+        { x: 5,  y: 8,  w: 22 },
+        { x: 8,  y: 14, w: 16 },
+        { x: 11, y: 20, w: 10 },
+        { x: 14, y: 26, w: 4  },
+      ];
+      for (const { x, y, w } of steps) {
+        g.fillStyle(0x8a6a50);
+        g.fillRect(x, y, w, 5);
+        g.fillStyle(0xe8c890);
+        g.fillRect(x, y, w, 2);
+        g.fillStyle(0xaa8868);
+        g.fillRect(x, y + 2, w, 3);
+        g.fillStyle(0x4a3020);
+        g.fillRect(x, y, 1, 5);
+        g.fillRect(x + w - 1, y, 1, 5);
+      }
+      g.fillStyle(0xffdd99);
+      g.fillTriangle(S/2 - 3, 30, S/2 + 3, 30, S/2, S - 1);
+    });
+
+    // Shop roof — dark mahogany planks with knots and grain
+    this._genTexture('hd_tile_shop_roof', S, S, (g) => {
+      g.fillStyle(0x180c04);
+      g.fillRect(0, 0, S, S);
+      // Five planks across the tile
+      const planks = [0, 7, 14, 21, 28];
+      for (const py of planks) {
+        g.fillStyle(0x3a1e08);
+        g.fillRect(0, py, S, 5);
+        // Grain highlight line
+        g.fillStyle(0x5a3010, 0.8);
+        g.fillRect(0, py + 1, S, 1);
+        g.fillRect(0, py + 3, S, 1);
+        // Dark knot
+        g.fillStyle(0x220c02, 0.9);
+        const kx = (py * 7 + 4) % (S - 4);
+        g.fillEllipse(kx + 4, py + 2, 5, 3);
+      }
+      // Plank gaps
+      g.fillStyle(0x0a0602);
+      for (const py of planks) {
+        g.fillRect(0, py + 5, S, 2);
+      }
+    });
+
+    // Town accent floor — polished light limestone with subtle veining
+    this._genTexture('hd_tile_town_accent', S, S, (g) => {
+      g.fillStyle(0x8a7858);
+      g.fillRect(0, 0, S, S);
+      const stones = [
+        { x: 1, y: 1, w: 8,  h: 13 },
+        { x: 11, y: 1, w: 10, h: 13 },
+        { x: 23, y: 1, w: 8,  h: 13 },
+        { x: 1,  y: 16, w: 13, h: 14 },
+        { x: 16, y: 16, w: 8,  h: 14 },
+        { x: 26, y: 16, w: 5,  h: 14 },
+      ];
+      for (const { x, y, w, h } of stones) {
+        // Polished stone — lighter and more uniform
+        g.fillStyle(0xd8c8a8);
+        g.fillRect(x, y, w, h);
+        // Strong specular at top-left (polished surface)
+        g.fillStyle(0xf0e0c8);
+        g.fillRect(x, y, w, 1);
+        g.fillRect(x, y, 1, h);
+        // Subtle vein
+        g.fillStyle(0xc0b090, 0.5);
+        g.fillRect(x + 1, y + h / 2 | 0, 3, 1);
+        // Bottom shadow (lighter than town floor)
+        g.fillStyle(0xb8a888);
+        g.fillRect(x, y + h - 1, w, 1);
+        g.fillRect(x + w - 1, y, 1, h);
+      }
+    });
+
+    // Potion shop door — HD mahogany with flask icon
+    this._genTexture('hd_tile_door_potion', S, S, (g) => {
+      this._drawHdDoorBase(g, S);
+      // Flask body — vivid ruby
+      g.fillStyle(0x440011);
+      g.fillEllipse(S/2, S * 0.58, 12, 14);
+      g.fillStyle(0xee1144);
+      g.fillEllipse(S/2, S * 0.58, 10, 12);
+      // Neck
+      g.fillStyle(0xbb0033);
+      g.fillRect(S/2 - 2, S * 0.28, 5, 8);
+      // Cork
+      g.fillStyle(0xeecc88);
+      g.fillRect(S/2 - 2, S * 0.20, 5, 5);
+      // Shine
+      g.fillStyle(0xff88aa, 0.8);
+      g.fillRect(S/2 - 4, S * 0.52, 3, 5);
+      g.fillStyle(0xffffff, 0.5);
+      g.fillRect(S/2 - 3, S * 0.53, 1, 3);
+    });
+
+    // Weapon shop door — HD mahogany with sword icon
+    this._genTexture('hd_tile_door_weapon', S, S, (g) => {
+      this._drawHdDoorBase(g, S);
+      // Blade
+      g.fillStyle(0x555555);
+      g.fillRect(S/2 - 2, 4, 5, 18);
+      g.fillStyle(0xeeeeff);
+      g.fillRect(S/2 - 1, 4, 4, 17);
+      g.fillStyle(0xffffff, 0.6);
+      g.fillRect(S/2, 5, 2, 15);
+      // Cross-guard — vivid gold
+      g.fillStyle(0x332200);
+      g.fillRect(S/2 - 6, 20, 13, 5);
+      g.fillStyle(0xffcc00);
+      g.fillRect(S/2 - 5, 21, 11, 4);
+      // Pommel
+      g.fillStyle(0xddaa22);
+      g.fillRect(S/2 - 2, 25, 5, 4);
+    });
+
+    // Armour shop door — HD mahogany with shield icon
+    this._genTexture('hd_tile_door_armour', S, S, (g) => {
+      this._drawHdDoorBase(g, S);
+      // Shield body — blue steel
+      g.fillStyle(0x112233);
+      g.fillRect(S/2 - 7, 5, 15, 13);
+      g.fillTriangle(S/2 - 7, 18, S/2 + 8, 18, S/2, 26);
+      g.fillStyle(0x4477aa);
+      g.fillRect(S/2 - 6, 6, 13, 11);
+      g.fillTriangle(S/2 - 6, 17, S/2 + 7, 17, S/2, 25);
+      g.fillStyle(0x6699cc, 0.5);
+      g.fillRect(S/2 - 5, 6, 5, 5);
+      // Gold cross emblem
+      g.fillStyle(0xffcc00);
+      g.fillRect(S/2 - 1, 7, 3, 10);
+      g.fillRect(S/2 - 5, 11, 11, 3);
+      // Gem
+      g.fillStyle(0xff2244);
+      g.fillRect(S/2, 12, 2, 2);
+    });
+
+    // Home door — rich oak with ornate house icon and gold trim
+    this._genTexture('hd_tile_home_door', S, S, (g) => {
+      this._drawHdDoorBase(g, S);
+      // House icon — vivid gold
+      // Roof
+      g.fillStyle(0x443300);
+      g.fillTriangle(S/2, 4, S/2 - 8, 13, S/2 + 8, 13);
+      g.fillStyle(0xffdd44);
+      g.fillTriangle(S/2, 5, S/2 - 7, 13, S/2 + 7, 13);
+      // Chimney
+      g.fillStyle(0xddbb33);
+      g.fillRect(S/2 + 2, 3, 3, 5);
+      // Walls
+      g.fillStyle(0x443300);
+      g.fillRect(S/2 - 6, 13, 13, 11);
+      g.fillStyle(0xeecc55);
+      g.fillRect(S/2 - 5, 14, 11, 10);
+      // Door
+      g.fillStyle(0x6a3a18);
+      g.fillRect(S/2 - 2, 18, 5, 6);
+      // Window
+      g.fillStyle(0x88ccff, 0.8);
+      g.fillRect(S/2 + 2, 15, 3, 3);
+      g.fillStyle(0x4488aa);
+      g.fillRect(S/2 + 3, 15, 1, 3);
+      g.fillRect(S/2 + 2, 16, 3, 1);
+    });
+  }
+
+  /**
+   * Draws the HD door base (frame + mahogany face + raised panels) reused by
+   * all shop and home door variants.
+   * @param {Phaser.GameObjects.Graphics} g
+   * @param {number} S - Tile size (32)
+   */
+  _drawHdDoorBase(g, S) {
+    // Stone frame
+    g.fillStyle(0x140a04);
+    g.fillRect(0, 0, S, S);
+    // Mahogany face
+    g.fillStyle(0x7a3e18);
+    g.fillRect(3, 1, S - 6, S - 2);
+    // Upper panel
+    g.fillStyle(0x5a2e10);
+    g.fillRect(5, 3, S - 10, 10);
+    g.fillStyle(0x9a5028, 0.5);
+    g.fillRect(5, 3, S - 10, 1);
+    g.fillRect(5, 3, 1, 10);
+    // Middle panel
+    g.fillStyle(0x5a2e10);
+    g.fillRect(5, 15, S - 10, 8);
+    g.fillStyle(0x9a5028, 0.5);
+    g.fillRect(5, 15, S - 10, 1);
+    g.fillRect(5, 15, 1, 8);
+  }
+
+  // ---------------------------------------------------------------------------
+  // HD entity textures  (prefix: 'hd_', size: 32×32)
+  // ---------------------------------------------------------------------------
+
+  /** Generates hd_ prefixed 32×32 entity sprite textures. */
+  _createHdEntityTextures() {
+    const S = 32;
+
+    // Player — diamond with faceted shading and bright pupil
+    this._genTexture('hd_entity_player', S, S, (g) => {
+      // Dark outline
+      g.fillStyle(0x001144);
+      g.fillTriangle(S/2, 0, S, S/2, S/2, S);
+      g.fillTriangle(S/2, 0, 0, S/2, S/2, S);
+      // Main body — vivid royal blue
+      g.fillStyle(0x2266ee);
+      g.fillTriangle(S/2, 2, S - 2, S/2, S/2, S - 2);
+      g.fillTriangle(S/2, 2, 2, S/2, S/2, S - 2);
+      // Left-top facet — lighter
+      g.fillStyle(0x55aaff, 0.8);
+      g.fillTriangle(S/2, 2, 2, S/2, S/2, S/2);
+      // Right-bottom facet — darker
+      g.fillStyle(0x1144aa, 0.6);
+      g.fillTriangle(S/2, S/2, S - 2, S/2, S/2, S - 2);
+      // Eye
+      g.fillStyle(0xffffff);
+      g.fillRect(S/2 - 2, S/2 - 4, 4, 4);
+      g.fillStyle(0x0033cc);
+      g.fillRect(S/2 - 1, S/2 - 3, 2, 2);
+      g.fillStyle(0xffffff);
+      g.fillRect(S/2, S/2 - 3, 1, 1);
+    });
+
+    // Cockroach — segmented body, six legs, antennae
+    this._genTexture('hd_entity_cockroach', S, S, (g) => {
+      // Body shadow
+      g.fillStyle(0x110400);
+      g.fillEllipse(S/2, S/2 + 2, 18, 26);
+      // Abdomen segments (3 ovals stacked)
+      g.fillStyle(0x5a2a0a);
+      g.fillEllipse(S/2, S/2 + 5, 14, 10);
+      g.fillStyle(0x6a3a14);
+      g.fillEllipse(S/2, S/2 - 1, 14, 8);
+      // Head + thorax
+      g.fillStyle(0x7a4a1e);
+      g.fillEllipse(S/2, S/2 - 7, 12, 8);
+      // Shell sheen
+      g.fillStyle(0xaa7040, 0.6);
+      g.fillEllipse(S/2 - 2, S/2 - 3, 6, 10);
+      // Eyes
+      g.fillStyle(0xff4400);
+      g.fillRect(S/2 - 4, S/2 - 10, 3, 3);
+      g.fillRect(S/2 + 1, S/2 - 10, 3, 3);
+      g.fillStyle(0xff9966, 0.8);
+      g.fillRect(S/2 - 3, S/2 - 10, 1, 1);
+      // Antennae
+      g.fillStyle(0x3a1804);
+      g.fillRect(S/2 - 3, S/2 - 14, 1, 5);
+      g.fillRect(S/2 - 5, S/2 - 16, 3, 1);
+      g.fillRect(S/2 + 2, S/2 - 14, 1, 5);
+      g.fillRect(S/2 + 2, S/2 - 16, 3, 1);
+      // Legs — 3 per side
+      g.fillStyle(0x2a1008);
+      for (let i = 0; i < 3; i++) {
+        const ly = S/2 - 5 + i * 5;
+        g.fillRect(S/2 - 12, ly, 5, 1);
+        g.fillRect(S/2 - 14, ly - 1, 3, 1);
+        g.fillRect(S/2 + 7, ly, 5, 1);
+        g.fillRect(S/2 + 11, ly - 1, 3, 1);
+      }
+    });
+
+    // Sprite — radiant fairy with wings and glow
+    this._genTexture('hd_entity_sprite', S, S, (g) => {
+      // Wing glow aura
+      g.fillStyle(0xaaddff, 0.2);
+      g.fillEllipse(S/2, S/2, 28, 24);
+      // Wings
+      g.fillStyle(0x99ccff, 0.5);
+      g.fillEllipse(S/2 - 9, S/2, 12, 20);
+      g.fillEllipse(S/2 + 9, S/2, 12, 20);
+      g.fillStyle(0xbbddff, 0.8);
+      g.fillEllipse(S/2 - 8, S/2 - 2, 8, 14);
+      g.fillEllipse(S/2 + 8, S/2 - 2, 8, 14);
+      // Body
+      g.fillStyle(0x5577bb);
+      g.fillEllipse(S/2, S/2 + 2, 10, 14);
+      // Head
+      g.fillStyle(0x88aaee);
+      g.fillEllipse(S/2, S/2 - 6, 10, 10);
+      // Halo
+      g.fillStyle(0xffffff, 0.9);
+      g.fillEllipse(S/2, S/2 - 11, 10, 3);
+      g.fillStyle(0xffffcc);
+      g.fillRect(S/2 - 1, S/2 - 12, 3, 2);
+      // Eyes
+      g.fillStyle(0x220044);
+      g.fillRect(S/2 - 3, S/2 - 7, 2, 2);
+      g.fillRect(S/2 + 1, S/2 - 7, 2, 2);
+      g.fillStyle(0xeeddff, 0.8);
+      g.fillRect(S/2 - 2, S/2 - 7, 1, 1);
+      // Dress detail
+      g.fillStyle(0x7799cc, 0.6);
+      g.fillRect(S/2 - 3, S/2 + 2, 7, 3);
+    });
+
+    // Goblin — hunched green creature with big ears and yellow eyes
+    this._genTexture('hd_entity_goblin', S, S, (g) => {
+      // Body shadow
+      g.fillStyle(0x112211);
+      g.fillRect(7, 8, 18, 22);
+      // Legs
+      g.fillStyle(0x338833);
+      g.fillRect(8, 24, 6, 6);
+      g.fillRect(18, 24, 6, 6);
+      // Body
+      g.fillStyle(0x44bb44);
+      g.fillRect(8, 12, 16, 14);
+      // Belly shading
+      g.fillStyle(0x55cc55, 0.5);
+      g.fillRect(11, 14, 10, 8);
+      // Head
+      g.fillStyle(0x55cc55);
+      g.fillRect(7, 4, 18, 12);
+      // Ears
+      g.fillStyle(0x338833);
+      g.fillRect(4, 6, 4, 6);
+      g.fillRect(24, 6, 4, 6);
+      g.fillStyle(0xcc4444, 0.6);
+      g.fillRect(5, 7, 2, 3);
+      g.fillRect(25, 7, 2, 3);
+      // Eyes — large yellow with black slit
+      g.fillStyle(0xffee00);
+      g.fillRect(9, 6, 5, 5);
+      g.fillRect(18, 6, 5, 5);
+      g.fillStyle(0x221100);
+      g.fillRect(11, 6, 2, 5);
+      g.fillRect(20, 6, 2, 5);
+      // Nose
+      g.fillStyle(0x33aa33);
+      g.fillRect(14, 11, 4, 2);
+      // Mouth / teeth
+      g.fillStyle(0x221100);
+      g.fillRect(9, 14, 14, 2);
+      g.fillStyle(0xeeeedd);
+      g.fillRect(10, 14, 2, 3);
+      g.fillRect(14, 14, 2, 3);
+      g.fillRect(20, 14, 2, 3);
+      // Clawed hands
+      g.fillStyle(0x44bb44);
+      g.fillRect(6, 16, 3, 6);
+      g.fillRect(23, 16, 3, 6);
+      g.fillStyle(0x222200);
+      g.fillRect(6, 22, 1, 2);
+      g.fillRect(8, 22, 1, 2);
+      g.fillRect(23, 22, 1, 2);
+      g.fillRect(25, 22, 1, 2);
+    });
+
+    // Orc — muscular warrior with armour scraps and prominent tusks
+    this._genTexture('hd_entity_orc', S, S, (g) => {
+      // Shadow
+      g.fillStyle(0x330000);
+      g.fillRect(5, 2, 22, 28);
+      // Legs
+      g.fillStyle(0xaa2222);
+      g.fillRect(7, 22, 7, 8);
+      g.fillRect(18, 22, 7, 8);
+      // Body
+      g.fillStyle(0xcc2222);
+      g.fillRect(6, 11, 20, 13);
+      // Chest armour — dark leather scraps
+      g.fillStyle(0x442211);
+      g.fillRect(8, 12, 7, 8);
+      g.fillRect(17, 12, 7, 8);
+      g.fillStyle(0x664422, 0.6);
+      g.fillRect(9, 13, 5, 5);
+      g.fillRect(18, 13, 5, 5);
+      // Shoulder guards
+      g.fillStyle(0x553311);
+      g.fillRect(5, 11, 5, 5);
+      g.fillRect(22, 11, 5, 5);
+      // Head
+      g.fillStyle(0xdd3333);
+      g.fillRect(7, 2, 18, 12);
+      // Brow ridge
+      g.fillStyle(0x991111);
+      g.fillRect(7, 2, 18, 3);
+      // Eyes — fierce orange-yellow
+      g.fillStyle(0xff9900);
+      g.fillRect(9, 4, 5, 4);
+      g.fillRect(18, 4, 5, 4);
+      g.fillStyle(0xffdd00, 0.8);
+      g.fillRect(11, 5, 2, 2);
+      g.fillRect(20, 5, 2, 2);
+      g.fillStyle(0x110000);
+      g.fillRect(10, 4, 2, 4);
+      g.fillRect(19, 4, 2, 4);
+      // Nostrils
+      g.fillStyle(0x881111);
+      g.fillRect(13, 9, 2, 2);
+      g.fillRect(17, 9, 2, 2);
+      // Jaw / mouth
+      g.fillStyle(0x661111);
+      g.fillRect(9, 11, 14, 2);
+      // Tusks — large and prominent
+      g.fillStyle(0xeeeedd);
+      g.fillRect(9, 12, 4, 7);
+      g.fillRect(19, 12, 4, 7);
+      g.fillStyle(0xccccbb);
+      g.fillRect(10, 17, 2, 2);
+      g.fillRect(20, 17, 2, 2);
+      // Arms / hands
+      g.fillStyle(0xcc2222);
+      g.fillRect(4, 14, 4, 8);
+      g.fillRect(24, 14, 4, 8);
+      g.fillStyle(0xaa1111);
+      g.fillRect(4, 20, 4, 4);
+      g.fillRect(24, 20, 4, 4);
+    });
+
+    // Troll — hulking stone-grey mass
+    this._genTexture('hd_entity_troll', S, S, (g) => {
+      // Shadow
+      g.fillStyle(0x080808);
+      g.fillRect(2, 0, 28, 32);
+      // Legs — thick stumps
+      g.fillStyle(0x1e1818);
+      g.fillRect(4, 22, 9, 10);
+      g.fillRect(19, 22, 9, 10);
+      // Body — massive
+      g.fillStyle(0x2e2424);
+      g.fillRect(3, 8, 26, 16);
+      // Rocky texture on body
+      g.fillStyle(0x383030, 0.6);
+      g.fillRect(5, 10, 8, 6);
+      g.fillRect(19, 12, 7, 5);
+      g.fillRect(12, 17, 6, 4);
+      // Head — wide and flat
+      g.fillStyle(0x383030);
+      g.fillRect(3, 0, 26, 10);
+      // Horns
+      g.fillStyle(0x4a3838);
+      g.fillRect(4, 0, 5, 8);
+      g.fillRect(23, 0, 5, 8);
+      g.fillStyle(0x6a5050);
+      g.fillRect(5, 0, 2, 5);
+      g.fillRect(24, 0, 2, 5);
+      // Blazing eyes — large and terrifying
+      g.fillStyle(0xff5500);
+      g.fillRect(7, 2, 7, 5);
+      g.fillRect(18, 2, 7, 5);
+      g.fillStyle(0xff9900, 0.8);
+      g.fillRect(9, 3, 3, 3);
+      g.fillRect(20, 3, 3, 3);
+      g.fillStyle(0xffcc44, 0.6);
+      g.fillRect(10, 4, 1, 1);
+      g.fillRect(21, 4, 1, 1);
+      // Arms
+      g.fillStyle(0x282020);
+      g.fillRect(0, 10, 5, 10);
+      g.fillRect(27, 10, 5, 10);
+      // Knuckles
+      g.fillStyle(0x3a2c2c);
+      g.fillRect(0, 18, 5, 4);
+      g.fillRect(27, 18, 5, 4);
+    });
+
+    // Skeleton — crisp anatomical skeleton
+    this._genTexture('hd_entity_skeleton', S, S, (g) => {
+      // Dark background
+      g.fillStyle(0x0a0a0a);
+      g.fillRect(10, 0, 12, 32);
+      g.fillRect(8, 12, 16, 14);
+      // Skull
+      g.fillStyle(0xdddddd);
+      g.fillRect(9, 1, 14, 10);
+      // Jaw
+      g.fillStyle(0xcccccc);
+      g.fillRect(10, 9, 12, 4);
+      // Jaw gap
+      g.fillStyle(0x0a0a0a);
+      g.fillRect(13, 10, 3, 2);
+      g.fillRect(17, 10, 3, 2);
+      // Eye sockets — vivid red
+      g.fillStyle(0xff1111);
+      g.fillRect(11, 3, 4, 4);
+      g.fillRect(17, 3, 4, 4);
+      g.fillStyle(0xff6666, 0.6);
+      g.fillRect(12, 4, 2, 2);
+      g.fillRect(18, 4, 2, 2);
+      // Ribcage
+      g.fillStyle(0xbbbbbb);
+      g.fillRect(12, 13, 8, 1);
+      g.fillRect(11, 16, 10, 1);
+      g.fillRect(12, 19, 8, 1);
+      g.fillRect(13, 22, 6, 1);
+      // Spine
+      g.fillStyle(0x999999);
+      g.fillRect(15, 13, 2, 12);
+      // Pelvis
+      g.fillStyle(0xbbbbbb);
+      g.fillRect(11, 24, 10, 3);
+      // Leg bones
+      g.fillStyle(0xaaaaaa);
+      g.fillRect(11, 27, 4, 5);
+      g.fillRect(17, 27, 4, 5);
+      // Arm bones
+      g.fillStyle(0xaaaaaa);
+      g.fillRect(7, 13, 4, 8);
+      g.fillRect(21, 13, 4, 8);
+      // Elbow joints
+      g.fillStyle(0xbbbbbb);
+      g.fillRect(7, 20, 4, 2);
+      g.fillRect(21, 20, 4, 2);
+    });
+
+    // Old Bones — imposing ivory skeleton boss
+    this._genTexture('hd_entity_old_bones', S, S, (g) => {
+      // Large shadow
+      g.fillStyle(0x111100);
+      g.fillRect(4, 0, 24, 32);
+      // Leg bones — thicker than regular skeleton
+      g.fillStyle(0xe8e6d8);
+      g.fillRect(6, 24, 7, 8);
+      g.fillRect(19, 24, 7, 8);
+      // Boot/foot
+      g.fillStyle(0xd0cec0);
+      g.fillRect(5, 29, 9, 3);
+      g.fillRect(18, 29, 9, 3);
+      // Ribcage torso
+      g.fillStyle(0xf0eedd);
+      g.fillRect(5, 12, 22, 14);
+      // Rib detail — thick slabs
+      g.fillStyle(0xd8d6c8);
+      g.fillRect(6, 13, 5, 3);
+      g.fillRect(6, 17, 5, 3);
+      g.fillRect(6, 21, 5, 3);
+      g.fillRect(21, 13, 5, 3);
+      g.fillRect(21, 17, 5, 3);
+      g.fillRect(21, 21, 5, 3);
+      // Spine
+      g.fillStyle(0xc8c6b8);
+      g.fillRect(14, 12, 4, 14);
+      // Pelvis
+      g.fillStyle(0xe8e6d8);
+      g.fillRect(7, 24, 18, 4);
+      // Skull
+      g.fillStyle(0xf8f6e8);
+      g.fillRect(7, 0, 18, 13);
+      // Crown of bone spikes
+      g.fillStyle(0xe8e0cc);
+      g.fillRect(7, 0, 3, 5);
+      g.fillRect(13, 0, 4, 4);
+      g.fillRect(22, 0, 3, 5);
+      // Eye sockets — large, burning amber
+      g.fillStyle(0xff9900);
+      g.fillRect(8, 3, 6, 5);
+      g.fillRect(18, 3, 6, 5);
+      g.fillStyle(0xffcc44, 0.9);
+      g.fillRect(10, 4, 3, 3);
+      g.fillRect(20, 4, 3, 3);
+      g.fillStyle(0xffee88, 0.7);
+      g.fillRect(11, 5, 1, 1);
+      g.fillRect(21, 5, 1, 1);
+      // Jaw
+      g.fillStyle(0xe8e0d0);
+      g.fillRect(9, 10, 14, 4);
+      // Teeth
+      g.fillStyle(0xf8f8f0);
+      g.fillRect(10, 12, 2, 3);
+      g.fillRect(13, 12, 2, 3);
+      g.fillRect(17, 12, 2, 3);
+      g.fillRect(20, 12, 2, 3);
+      // Arm bones
+      g.fillStyle(0xe8e6d8);
+      g.fillRect(2, 12, 5, 10);
+      g.fillRect(25, 12, 5, 10);
+      // Shoulder joints
+      g.fillStyle(0xd0cebc);
+      g.fillEllipse(5, 12, 7, 7);
+      g.fillEllipse(27, 12, 7, 7);
+    });
+
+    // Creeping Mass — toxic electric-green multisegment blob
+    this._genTexture('hd_entity_creeping_mass', S, S, (g) => {
+      // Outer dark shell
+      g.fillStyle(0x041404);
+      g.fillRect(1, 1, 30, 30);
+      // Outer ooze
+      g.fillStyle(0x124412);
+      g.fillRect(2, 2, 28, 28);
+      // Mid layer
+      g.fillStyle(0x228822);
+      g.fillRect(5, 5, 22, 22);
+      // Inner toxic core — vivid electric green
+      g.fillStyle(0x33cc33);
+      g.fillRect(9, 9, 14, 14);
+      g.fillStyle(0x66ff66, 0.8);
+      g.fillRect(12, 12, 8, 8);
+      g.fillStyle(0x99ff99, 0.6);
+      g.fillRect(14, 14, 4, 4);
+      // Dark nucleus / organelles
+      g.fillStyle(0x041404);
+      g.fillRect(10, 10, 4, 4);
+      g.fillRect(18, 18, 4, 4);
+      g.fillRect(10, 18, 3, 3);
+      g.fillRect(19, 10, 3, 3);
+      // Pseudo-pods / drip tendrils
+      g.fillStyle(0x124412);
+      g.fillRect(5, 0, 4, 3);
+      g.fillRect(23, 0, 4, 3);
+      g.fillRect(0, 8, 2, 5);
+      g.fillRect(30, 8, 2, 5);
+      g.fillRect(6, 29, 3, 3);
+      g.fillRect(23, 29, 3, 3);
+      // Toxic drip highlights
+      g.fillStyle(0x44ff44, 0.5);
+      g.fillRect(5, 1, 2, 2);
+      g.fillRect(25, 1, 2, 2);
+    });
+
+    // Elder — robed sage with detailed staff and beard
+    this._genTexture('hd_entity_npc_elder', S, S, (g) => {
+      // Robe — wide ivory white
+      g.fillStyle(0x888877);
+      g.fillRect(4, 16, 20, 16);
+      g.fillStyle(0xf0f0e8);
+      g.fillRect(5, 17, 18, 15);
+      g.fillTriangle(5, 32, 23, 32, 14, 17);
+      // Gold trim on robe hem
+      g.fillStyle(0xddbb44);
+      g.fillRect(5, 17, 18, 1);
+      g.fillRect(5, 29, 18, 1);
+      // Body
+      g.fillStyle(0xe8e8e0);
+      g.fillRect(10, 12, 12, 8);
+      // Arms in sleeves
+      g.fillStyle(0xd8d8d0);
+      g.fillRect(6, 14, 5, 10);
+      g.fillRect(21, 14, 5, 10);
+      // Head
+      g.fillStyle(0xffddbf);
+      g.fillEllipse(S/2, 9, 14, 14);
+      // White hair / wisps
+      g.fillStyle(0xeeeeee);
+      g.fillRect(5, 5, 4, 5);
+      g.fillRect(23, 5, 4, 5);
+      g.fillRect(9, 3, 14, 3);
+      // White beard — flowing downward
+      g.fillStyle(0xffffff);
+      g.fillTriangle(8, 14, 22, 14, 15, 22);
+      g.fillStyle(0xdddddd, 0.7);
+      g.fillRect(10, 16, 10, 3);
+      // Eyes
+      g.fillStyle(0x334466);
+      g.fillRect(11, 8, 3, 3);
+      g.fillRect(18, 8, 3, 3);
+      g.fillStyle(0x88aabb, 0.8);
+      g.fillRect(12, 8, 1, 1);
+      g.fillRect(19, 8, 1, 1);
+      // Eyebrows — white bushy
+      g.fillStyle(0xffffff);
+      g.fillRect(10, 6, 5, 2);
+      g.fillRect(17, 6, 5, 2);
+      // Staff — ornate gold with glowing orb
+      g.fillStyle(0xaa8822);
+      g.fillRect(25, 0, 3, 32);
+      // Staff orb
+      g.fillStyle(0x113355);
+      g.fillEllipse(26, 4, 8, 8);
+      g.fillStyle(0x88ccff);
+      g.fillEllipse(26, 4, 6, 6);
+      g.fillStyle(0xcceeff, 0.8);
+      g.fillRect(25, 2, 3, 3);
+    });
+
+    // Guard — full polished plate armour with red-crested helmet
+    this._genTexture('hd_entity_npc_guard', S, S, (g) => {
+      // Shadow
+      g.fillStyle(0x111822);
+      g.fillRect(5, 0, 22, 32);
+      // Sabatons (armoured boots)
+      g.fillStyle(0x6688aa);
+      g.fillRect(6, 26, 8, 6);
+      g.fillRect(18, 26, 8, 6);
+      // Greaves
+      g.fillStyle(0x7898bb);
+      g.fillRect(7, 20, 7, 8);
+      g.fillRect(18, 20, 7, 8);
+      // Tassets (hip plates)
+      g.fillStyle(0x6888aa);
+      g.fillRect(7, 18, 7, 4);
+      g.fillRect(18, 18, 7, 4);
+      // Breastplate — main torso
+      g.fillStyle(0x7898bb);
+      g.fillRect(7, 10, 18, 10);
+      // Chest highlight
+      g.fillStyle(0x99bbdd, 0.7);
+      g.fillRect(9, 11, 6, 5);
+      // Pauldrons (shoulder armour)
+      g.fillStyle(0x5878a0);
+      g.fillRect(5, 10, 4, 6);
+      g.fillRect(23, 10, 4, 6);
+      g.fillStyle(0x7898bb, 0.7);
+      g.fillRect(5, 10, 4, 2);
+      // Gorget + neck
+      g.fillStyle(0x6888aa);
+      g.fillRect(12, 8, 8, 4);
+      // Helmet — full visored
+      g.fillStyle(0x5878a0);
+      g.fillRect(7, 0, 18, 10);
+      // Helmet crest — vivid red
+      g.fillStyle(0xcc2200);
+      g.fillRect(13, 0, 6, 4);
+      g.fillStyle(0xff3300);
+      g.fillRect(14, 0, 4, 3);
+      // Visor slit — bright cyan
+      g.fillStyle(0x00ddff);
+      g.fillRect(8, 5, 16, 3);
+      g.fillStyle(0x88eeff, 0.7);
+      g.fillRect(9, 5, 14, 1);
+      // Spear handle — steel
+      g.fillStyle(0x99aacc);
+      g.fillRect(29, 0, 3, 32);
+      // Spear tip
+      g.fillStyle(0xddeeff);
+      g.fillTriangle(29, 0, 32, 0, 30, 6);
+      // Gauntlets
+      g.fillStyle(0x6888aa);
+      g.fillRect(5, 14, 3, 6);
+      g.fillRect(24, 14, 3, 6);
+    });
+
+    // Merchant — rich emerald cloak with coin-stuffed pack
+    this._genTexture('hd_entity_npc_merchant', S, S, (g) => {
+      // Shadow
+      g.fillStyle(0x0a1a0a);
+      g.fillRect(5, 0, 22, 32);
+      // Feet / shoes — brown leather
+      g.fillStyle(0x6a3a18);
+      g.fillRect(8, 28, 6, 4);
+      g.fillRect(18, 28, 6, 4);
+      // Deep emerald cloak body
+      g.fillStyle(0x115522);
+      g.fillRect(5, 14, 22, 18);
+      g.fillStyle(0x22aa44);
+      g.fillRect(6, 15, 20, 17);
+      // Cloak fold highlights
+      g.fillStyle(0x33cc55, 0.5);
+      g.fillRect(7, 16, 4, 12);
+      g.fillRect(18, 18, 4, 10);
+      // Cloak hem embroidery
+      g.fillStyle(0xddaa22);
+      g.fillRect(6, 30, 20, 1);
+      g.fillRect(6, 15, 20, 1);
+      // Body under cloak
+      g.fillStyle(0x224422);
+      g.fillRect(10, 10, 12, 8);
+      // Hood
+      g.fillStyle(0x117733);
+      g.fillRect(8, 4, 16, 12);
+      g.fillStyle(0x0a5522);
+      g.fillRect(8, 4, 16, 2);
+      // Face
+      g.fillStyle(0xffddbb);
+      g.fillEllipse(S/2, 10, 12, 12);
+      // Eyes — friendly crinkled
+      g.fillStyle(0x664422);
+      g.fillRect(11, 8, 3, 2);
+      g.fillRect(18, 8, 3, 2);
+      // Smile wrinkles
+      g.fillStyle(0xddaa99);
+      g.fillRect(11, 12, 3, 1);
+      g.fillRect(18, 12, 3, 1);
+      // Smile
+      g.fillStyle(0x884422);
+      g.fillRect(13, 13, 6, 1);
+      // Coin purse — fat and golden
+      g.fillStyle(0x220d00);
+      g.fillEllipse(S/2 + 7, S - 4, 14, 14);
+      g.fillStyle(0xffbb00);
+      g.fillEllipse(S/2 + 7, S - 5, 12, 12);
+      g.fillStyle(0xffdd66);
+      g.fillEllipse(S/2 + 6, S - 7, 8, 8);
+      // Bag tie
+      g.fillStyle(0xcc8800);
+      g.fillRect(S/2 + 5, S - 12, 4, 2);
+    });
+  }
+
+  // ---------------------------------------------------------------------------
+  // HD item textures  (prefix: 'hd_', size: 32×32)
+  // ---------------------------------------------------------------------------
+
+  /** Generates hd_ prefixed 32×32 item sprite textures. */
+  _createHdItemTextures() {
+    const S = 32;
+
+    // Health potion — ruby vial with glass caustic and bubbles
+    this._genTexture('hd_item_potion_health', S, S, (g) => {
+      // Outline shadow
+      g.fillStyle(0x330011);
+      g.fillEllipse(S/2, S * 0.6, 18, 20);
+      g.fillRect(S/2 - 4, S * 0.22, 9, 14);
+      // Vial body — deep red fill
+      g.fillStyle(0xcc0033);
+      g.fillEllipse(S/2, S * 0.6, 16, 18);
+      // Liquid highlight — lighter at top (light refraction)
+      g.fillStyle(0xee2255);
+      g.fillEllipse(S/2, S * 0.53, 12, 10);
+      // Neck — narrow glass
+      g.fillStyle(0x990022);
+      g.fillRect(S/2 - 3, S * 0.24, 7, 12);
+      g.fillStyle(0xcc1144, 0.5);
+      g.fillRect(S/2, S * 0.25, 2, 10);
+      // Cork — warm amber
+      g.fillStyle(0x885500);
+      g.fillRect(S/2 - 3, S * 0.14, 7, 7);
+      g.fillStyle(0xddaa55);
+      g.fillRect(S/2 - 2, S * 0.15, 5, 5);
+      // Glass shine — left-side specular
+      g.fillStyle(0xff88aa, 0.8);
+      g.fillRect(S/2 - 6, S * 0.52, 4, 8);
+      g.fillStyle(0xffffff, 0.6);
+      g.fillRect(S/2 - 5, S * 0.54, 2, 5);
+      // Bubble detail inside liquid
+      g.fillStyle(0xff6688, 0.5);
+      g.fillRect(S/2 + 2, S * 0.6, 3, 3);
+      g.fillRect(S/2 - 1, S * 0.68, 2, 2);
+    });
+
+    // Weapon — longsword with detailed blade, guard, and wrapped grip
+    this._genTexture('hd_item_weapon', S, S, (g) => {
+      // Blade shadow
+      g.fillStyle(0x222233);
+      g.fillRect(S/2 - 3, 1, 7, 22);
+      // Blade — mirror-polished steel
+      g.fillStyle(0xccccdd);
+      g.fillRect(S/2 - 2, 1, 5, 21);
+      // Blade edge — bright
+      g.fillStyle(0xeeeeff);
+      g.fillRect(S/2 - 1, 2, 3, 19);
+      // Central fuller (groove down the centre)
+      g.fillStyle(0x8888aa, 0.6);
+      g.fillRect(S/2, 3, 1, 17);
+      // Blade shine highlight
+      g.fillStyle(0xffffff, 0.7);
+      g.fillRect(S/2 - 1, 2, 2, 6);
+      // Cross-guard — gold with shadow
+      g.fillStyle(0x221100);
+      g.fillRect(S/2 - 8, 20, 17, 5);
+      g.fillStyle(0xffcc00);
+      g.fillRect(S/2 - 7, 21, 15, 4);
+      g.fillStyle(0xffee88, 0.6);
+      g.fillRect(S/2 - 6, 21, 13, 1);
+      // Guard end caps (round)
+      g.fillStyle(0xddaa00);
+      g.fillRect(S/2 - 8, 22, 2, 2);
+      g.fillRect(S/2 + 6, 22, 2, 2);
+      // Grip — leather wrap
+      g.fillStyle(0x7a3a18);
+      g.fillRect(S/2 - 1, 25, 3, 5);
+      g.fillStyle(0x5a2a10);
+      g.fillRect(S/2 - 1, 26, 3, 1);
+      g.fillRect(S/2 - 1, 28, 3, 1);
+      // Pommel — faceted gold sphere
+      g.fillStyle(0x443300);
+      g.fillRect(S/2 - 3, 29, 7, 3);
+      g.fillStyle(0xffcc00);
+      g.fillRect(S/2 - 2, 30, 5, 2);
+      g.fillStyle(0xffee88, 0.7);
+      g.fillRect(S/2 - 1, 30, 3, 1);
+    });
+
+    // Armor — heater shield with metallic face, rivets, and gem boss
+    this._genTexture('hd_item_armor', S, S, (g) => {
+      // Outline
+      g.fillStyle(0x0a1620);
+      g.fillRect(3, 1, 26, 20);
+      g.fillTriangle(3, 21, 29, 21, S/2, 31);
+      // Shield face — layered blue steel
+      g.fillStyle(0x3366aa);
+      g.fillRect(4, 2, 24, 18);
+      g.fillTriangle(4, 20, 28, 20, S/2, 30);
+      // Upper highlight — lighter quadrant (light catch)
+      g.fillStyle(0x5588cc, 0.7);
+      g.fillRect(4, 2, 12, 9);
+      // Steel rivets at corners
+      g.fillStyle(0xaabbcc);
+      g.fillRect(5, 3, 2, 2);
+      g.fillRect(25, 3, 2, 2);
+      g.fillRect(5, 17, 2, 2);
+      g.fillRect(25, 17, 2, 2);
+      // Gold cross boss
+      g.fillStyle(0x221100);
+      g.fillRect(S/2 - 3, 4, 7, 18);
+      g.fillRect(5, 11, 22, 7);
+      g.fillStyle(0xffcc00);
+      g.fillRect(S/2 - 2, 5, 5, 16);
+      g.fillRect(6, 12, 20, 5);
+      // Central gem — large ruby
+      g.fillStyle(0x550011);
+      g.fillRect(S/2 - 2, 12, 5, 5);
+      g.fillStyle(0xff1133);
+      g.fillRect(S/2 - 1, 13, 3, 3);
+      g.fillStyle(0xff7799, 0.8);
+      g.fillRect(S/2 - 1, 13, 2, 1);
+      // Raised edge trim
+      g.fillStyle(0x7799bb);
+      g.fillRect(4, 2, 24, 1);
+      g.fillRect(4, 2, 1, 18);
+    });
+
+    // Bone Blade — pale ivory weapon with detailed serrations and amber pommel
+    this._genTexture('hd_item_bone_blade', S, S, (g) => {
+      // Blade shadow
+      g.fillStyle(0x333322);
+      g.fillRect(S/2 - 3, 0, 7, 22);
+      // Blade — bright ivory
+      g.fillStyle(0xf0eedd);
+      g.fillRect(S/2 - 2, 1, 5, 20);
+      // Serrated left edge — five prominent notches
+      g.fillStyle(0xccccaa);
+      for (let i = 0; i < 5; i++) {
+        g.fillRect(S/2 - 3, 2 + i * 4, 2, 2);
+      }
+      // Blade tip
+      g.fillStyle(0xf8f6e0);
+      g.fillTriangle(S/2 - 2, 1, S/2 + 3, 1, S/2, 0);
+      // Blade shine
+      g.fillStyle(0xffffff, 0.7);
+      g.fillRect(S/2, 2, 2, 16);
+      // Bone grain texture
+      g.fillStyle(0xe0dec8, 0.5);
+      g.fillRect(S/2 - 1, 5, 3, 1);
+      g.fillRect(S/2 - 1, 10, 3, 1);
+      g.fillRect(S/2 - 1, 15, 3, 1);
+      // Guard — amber gold
+      g.fillStyle(0x331100);
+      g.fillRect(S/2 - 8, 20, 17, 5);
+      g.fillStyle(0xff9900);
+      g.fillRect(S/2 - 7, 21, 15, 4);
+      g.fillStyle(0xffcc44, 0.7);
+      g.fillRect(S/2 - 6, 21, 13, 1);
+      // Bone handle
+      g.fillStyle(0xe8e0cc);
+      g.fillRect(S/2 - 2, 25, 5, 6);
+      g.fillStyle(0xd0c8b0);
+      g.fillRect(S/2 - 2, 26, 5, 1);
+      g.fillRect(S/2 - 2, 28, 5, 1);
+      // Pommel — ivory sphere
+      g.fillStyle(0xf0e8d8);
+      g.fillRect(S/2 - 3, 30, 7, 2);
+    });
+
+    // Skeleton Shield — bone-white with skull motif and purple soul gem
+    this._genTexture('hd_item_skeleton_shield', S, S, (g) => {
+      // Outline
+      g.fillStyle(0x222211);
+      g.fillRect(3, 1, 26, 20);
+      g.fillTriangle(3, 21, 29, 21, S/2, 31);
+      // Bone face — rich ivory
+      g.fillStyle(0xeeeedd);
+      g.fillRect(4, 2, 24, 18);
+      g.fillTriangle(4, 20, 28, 20, S/2, 30);
+      // Bone texture bands (horizontal grain)
+      g.fillStyle(0xe0dec8, 0.4);
+      g.fillRect(5, 5, 22, 1);
+      g.fillRect(5, 10, 22, 1);
+      g.fillRect(5, 15, 22, 1);
+      // Skull face in the upper half
+      g.fillStyle(0xd8d8cc);
+      g.fillRect(10, 3, 12, 8);
+      // Skull eye sockets
+      g.fillStyle(0x0a0a0a);
+      g.fillRect(11, 5, 3, 3);
+      g.fillRect(18, 5, 3, 3);
+      // Skull teeth
+      g.fillRect(12, 10, 2, 2);
+      g.fillRect(15, 10, 2, 2);
+      g.fillRect(18, 10, 2, 2);
+      // Crossed bones lower half
+      g.fillStyle(0xe8e8d8);
+      // Bone 1 (top-left to bottom-right)
+      g.fillRect(6, 14, 4, 4);
+      g.fillRect(9, 17, 14, 4);
+      g.fillRect(22, 14, 4, 4);
+      // Cross-arms on bones
+      g.fillStyle(0xddddcc);
+      g.fillRect(6, 14, 4, 1);
+      g.fillRect(22, 14, 4, 1);
+      // Soul gem — large deep purple
+      g.fillStyle(0x220033);
+      g.fillRect(S/2 - 3, 12, 7, 7);
+      g.fillStyle(0x8822cc);
+      g.fillRect(S/2 - 2, 13, 5, 5);
+      g.fillStyle(0xbb55ff, 0.8);
+      g.fillRect(S/2 - 1, 14, 3, 3);
+      g.fillStyle(0xddaaff, 0.6);
+      g.fillRect(S/2 - 1, 14, 2, 1);
+      // Raised bone border
+      g.fillStyle(0xf8f8ee);
+      g.fillRect(4, 2, 24, 1);
+      g.fillRect(4, 2, 1, 18);
+    });
+
+    // Teleport potion — deep violet vial with swirling cosmic effect
+    this._genTexture('hd_item_potion_teleport', S, S, (g) => {
+      // Outline
+      g.fillStyle(0x110022);
+      g.fillEllipse(S/2, S * 0.6, 18, 20);
+      g.fillRect(S/2 - 4, S * 0.22, 9, 14);
+      // Vial body — deep violet
+      g.fillStyle(0x6611aa);
+      g.fillEllipse(S/2, S * 0.6, 16, 18);
+      // Swirling inner liquid — lighter bands
+      g.fillStyle(0x8833cc);
+      g.fillEllipse(S/2, S * 0.54, 12, 10);
+      g.fillStyle(0xaa55dd, 0.6);
+      g.fillEllipse(S/2 - 1, S * 0.58, 7, 7);
+      // Neck
+      g.fillStyle(0x440088);
+      g.fillRect(S/2 - 3, S * 0.24, 7, 12);
+      g.fillStyle(0x8822bb, 0.5);
+      g.fillRect(S/2, S * 0.25, 2, 10);
+      // Cork
+      g.fillStyle(0x885500);
+      g.fillRect(S/2 - 3, S * 0.14, 7, 7);
+      g.fillStyle(0xddaa55);
+      g.fillRect(S/2 - 2, S * 0.15, 5, 5);
+      // Glass shine
+      g.fillStyle(0xbb88ff, 0.7);
+      g.fillRect(S/2 - 6, S * 0.52, 4, 8);
+      g.fillStyle(0xffffff, 0.5);
+      g.fillRect(S/2 - 5, S * 0.54, 2, 5);
+      // Cosmic sparkles around vial
+      g.fillStyle(0xeeddff, 0.9);
+      g.fillRect(S/2 + 4, S * 0.38, 2, 2);
+      g.fillRect(S/2 + 6, S * 0.52, 2, 2);
+      g.fillRect(S/2 + 3, S * 0.65, 2, 2);
+      g.fillRect(S/2 - 8, S * 0.48, 2, 2);
+      g.fillRect(S/2 - 6, S * 0.62, 2, 2);
+      // Star centres
+      g.fillStyle(0xffffff, 0.8);
+      g.fillRect(S/2 + 5, S * 0.39, 1, 1);
+      g.fillRect(S/2 + 4, S * 0.66, 1, 1);
     });
   }
 }

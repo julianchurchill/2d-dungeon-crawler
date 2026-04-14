@@ -80,12 +80,14 @@ export class OptionsScene extends Phaser.Scene {
     }).setOrigin(0.5);
 
     // --- Tileset option cards ---
-    const cardW = 170;
+    const cardW = 160;
     const cardH = 130;
-    const gap   = 24;
+    const gap   = 16;
     const cardY = sectionY + 88;
-    const leftX  = width / 2 - cardW / 2 - gap / 2;
-    const rightX = width / 2 + cardW / 2 + gap / 2;
+    const spacing = cardW + gap;
+    const leftX   = width / 2 - spacing;
+    const centreX = width / 2;
+    const rightX  = width / 2 + spacing;
 
     const active = tilesetManager.getTileset();
 
@@ -100,16 +102,26 @@ export class OptionsScene extends Phaser.Scene {
 
     // Modern card
     this._modernCard = this._buildTilesetCard(
-      rightX, cardY, cardW, cardH,
+      centreX, cardY, cardW, cardH,
       TILESETS.MODERN,
       'MODERN',
       'High-contrast slate brick\nwith vivid step colours',
       active === TILESETS.MODERN,
     );
 
-    // Wire keyboard nav items for the two cards
+    // HD card
+    this._hdCard = this._buildTilesetCard(
+      rightX, cardY, cardW, cardH,
+      TILESETS.HD,
+      'HD',
+      '32×32 pixel art with rich\ntexture and fine detail',
+      active === TILESETS.HD,
+    );
+
+    // Wire keyboard nav items for all three cards
     this._navItems.push(this._classicCard.navItem);
     this._navItems.push(this._modernCard.navItem);
+    this._navItems.push(this._hdCard.navItem);
   }
 
   /**
