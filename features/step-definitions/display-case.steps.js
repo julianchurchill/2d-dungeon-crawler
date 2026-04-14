@@ -82,3 +82,25 @@ Then('the town result should include a home door position', function () {
     `Expected townResult.homeDoorPos to be {x, y}, got ${JSON.stringify(this.townResult.homeDoorPos)}`,
   );
 });
+
+Then('the town home interior should contain shop roof tiles', function () {
+  const map = this.townResult.map;
+  const { x: doorX, y: doorY } = this.townResult.homeDoorPos;
+  // The home interior is the row(s) south of the door wall (doorY+1 onward)
+  // and between the side walls. Check at least one tile directly inside.
+  const interiorTile = map.getTile(doorX, doorY + 1);
+  assert.equal(
+    interiorTile, TILE.SHOP_ROOF,
+    `Expected tile at (${doorX}, ${doorY + 1}) to be SHOP_ROOF but got ${interiorTile}`,
+  );
+});
+
+Then('the town home sides and back should be walled', function () {
+  const map = this.townResult.map;
+  const { x: doorX, y: doorY } = this.townResult.homeDoorPos;
+  // The tiles immediately left and right of the door on the same row are walls
+  const leftOfDoor  = map.getTile(doorX - 1, doorY);
+  const rightOfDoor = map.getTile(doorX + 1, doorY);
+  assert.equal(leftOfDoor,  TILE.WALL, `Expected tile left of door (${doorX - 1}, ${doorY}) to be WALL`);
+  assert.equal(rightOfDoor, TILE.WALL, `Expected tile right of door (${doorX + 1}, ${doorY}) to be WALL`);
+});

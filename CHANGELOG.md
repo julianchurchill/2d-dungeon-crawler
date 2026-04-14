@@ -9,6 +9,7 @@ Entries are listed newest-first within each section.
 
 ### Changed
 
+- 2026-04-14 — The player's home in the town is now a multi-tile structure: a 5-tile-wide alcove against the south border wall with a roof interior and walls on three sides, matching the shop alcove aesthetic. The home door is centred on the north face at (16, 16), placing the Guard NPC naturally in front of the entrance.
 - 2026-04-14 — Item icons in the inventory, shop, and display case panels now use tileset-prefixed sprite textures instead of fixed emoji characters. Classic, Modern, and HD tilesets each show their own distinct icon art for potions, weapons, and armour.
 - 2026-04-09 — Combined BuyPanel and SellPanel into a single ShopPanel: player-owned sellable items appear at the top, shop stock for purchase below, and the player's gold balance is always visible in the panel header; UP/DOWN navigate all rows, ENTER buys or sells depending on which section is highlighted
 
