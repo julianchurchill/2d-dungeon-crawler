@@ -74,6 +74,7 @@ function createMockScene() {
       rectangle: () => makeFluent(),
       text: (_x, _y, text) => makeFluent(text),
       graphics: () => makeGraphics(),
+      image: (_x, _y, key) => { const img = makeFluent(key); img.setDisplaySize = () => img; img.setOrigin = () => img; return img; },
     },
   };
 }
