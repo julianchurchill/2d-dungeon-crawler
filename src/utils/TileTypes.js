@@ -8,7 +8,7 @@ export const TILE = Object.freeze({
   TOWN_ACCENT: 5,
   /** Shop roof tile — fills the interior of town shop alcoves. Non-walkable. */
   SHOP_ROOF: 6,
-  /** Stairs leading up — present on floor 1 only, returns the player to the town. */
+  /** Stairs leading up — present on every dungeon floor; leads to town from floor 1, or to the previous floor otherwise. */
   STAIRS_UP: 7,
   /** The door to the player's home in the town. Triggers the display case panel. */
   HOME_DOOR: 8,

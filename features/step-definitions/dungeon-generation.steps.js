@@ -110,10 +110,10 @@ Then('the stairs should be reachable from the start position', function () {
   );
 });
 
-When('a floor 1 dungeon is generated with seed {int}', function (seed) {
+When('a floor {int} dungeon is generated with seed {int}', function (floor, seed) {
   const rng = createRNG(seed);
   const generator = new BSPDungeonGenerator();
-  this.dungeonResult = generator.generate(rng, 1);
+  this.dungeonResult = generator.generate(rng, floor);
 });
 
 Then('the map should contain stairs leading up', function () {
@@ -126,18 +126,6 @@ Then('the map should contain stairs leading up', function () {
     if (found) break;
   }
   assert.ok(found, 'Expected map to contain stairs leading up');
-});
-
-Then('the map should not contain stairs leading up', function () {
-  const { map } = this.dungeonResult;
-  let found = false;
-  for (let y = 0; y < map.height; y++) {
-    for (let x = 0; x < map.width; x++) {
-      if (map.getTile(x, y) === TILE.STAIRS_UP) { found = true; break; }
-    }
-    if (found) break;
-  }
-  assert.ok(!found, 'Expected map to NOT contain stairs leading up');
 });
 
 Then('the up-stairs should be reachable from the start position', function () {

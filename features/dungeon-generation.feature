@@ -34,6 +34,14 @@ Feature: Dungeon Generation
     When a floor 1 dungeon is generated with seed 12345
     Then the up-stairs should be reachable from the start position
 
-  Scenario: Floor 2 dungeon does not contain up-stairs
-    When a dungeon is generated with seed 12345
-    Then the map should not contain stairs leading up
+  Scenario: Floor 2 dungeon contains up-stairs back to floor 1
+    When a floor 2 dungeon is generated with seed 12345
+    Then the map should contain stairs leading up
+
+  Scenario: Floor 2 up-stairs are reachable from the start position
+    When a floor 2 dungeon is generated with seed 12345
+    Then the up-stairs should be reachable from the start position
+
+  Scenario: Floor 5 dungeon contains up-stairs
+    When a floor 5 dungeon is generated with seed 12345
+    Then the map should contain stairs leading up

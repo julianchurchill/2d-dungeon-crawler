@@ -1163,6 +1163,10 @@ export class GameScene extends Phaser.Scene {
         dungeonData.stairsPos.x * TILE_SIZE + TILE_SIZE / 2,
         dungeonData.stairsPos.y * TILE_SIZE + TILE_SIZE / 2,
       );
+      // Recompute FOV from the actual landing position (stairsPos), not the
+      // startPos that _buildFloor() used — without this the revealed area would
+      // be centred on the wrong tile.
+      this._updateFOV();
       this._syncRegistry();
       if (this.floorManager.isTown()) {
         EventBus.emit(GameEvents.MESSAGE, 'You ascend back to town.');

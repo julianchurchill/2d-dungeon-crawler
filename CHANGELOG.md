@@ -23,6 +23,7 @@ Entries are listed newest-first within each section.
 
 ### Added
 
+- 2026-04-14 — Every dungeon floor now has up-stairs placed in the start room (one tile offset from the player spawn). Floors 2+ lead back to the previous floor; floor 1 continues to lead back to town.
 - 2026-04-14 — **HD tileset (32×32)**: a new HD option in the Options screen renders all dungeon tiles, entity sprites, and item icons at 32×32 pixels with rich pixel-art detail (stone slab floors, bevelled brick walls, panelled doors, multi-step staircases, fully-detailed character and creature sprites, illustrated item icons). Camera zoom is automatically set to 1× so HD tiles fill the same screen space as 16×16 tiles at 2×. The choice persists across sessions.
 - 2026-04-13 — **Options menu & tilesets**: a new Options screen is accessible from the main menu. Players can switch between the **Classic** tileset (dark minimal palette, original look) and the **Modern** tileset (high-contrast slate-brick dungeon with vivid step colours and defined cobblestone town tiles). The choice persists across sessions via localStorage.
 - 2026-04-13 — **Player's Home & Display Case**: the Town now contains a home (golden door tile, south-east area). Unique items (Bone Blade, Skeleton Shield) cannot be sold at shops; instead they can be stored in the display case inside the home and retrieved later. Keyboard (UP/DOWN/ENTER) and mouse/touch navigation supported.
