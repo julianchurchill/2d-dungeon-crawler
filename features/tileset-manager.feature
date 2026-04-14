@@ -3,9 +3,9 @@ Feature: Tileset Manager
   The tileset manager tracks which visual tileset is active and persists
   the choice across sessions using storage.
 
-  Scenario: Default tileset is classic
+  Scenario: Default tileset is hd
     Given a fresh tileset manager
-    Then the active tileset should be 'classic'
+    Then the active tileset should be 'hd'
 
   Scenario: Tileset can be changed to modern
     Given a fresh tileset manager
@@ -27,6 +27,7 @@ Feature: Tileset Manager
 
   Scenario: Tile key is prefixed with the classic tileset
     Given a fresh tileset manager
+    When the tileset is changed to 'classic'
     Then the tile key for 'tile_floor' should be 'classic_tile_floor'
 
   Scenario: Tile key prefix changes when tileset is switched to modern
@@ -36,6 +37,7 @@ Feature: Tileset Manager
 
   Scenario: Classic tileset has tile size 16
     Given a fresh tileset manager
+    When the tileset is changed to 'classic'
     Then the tile size should be 16
 
   Scenario: Modern tileset has tile size 16
@@ -50,6 +52,7 @@ Feature: Tileset Manager
 
   Scenario: Classic tileset has camera zoom 2
     Given a fresh tileset manager
+    When the tileset is changed to 'classic'
     Then the camera zoom should be 2
 
   Scenario: Modern tileset has camera zoom 2

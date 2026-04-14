@@ -48,7 +48,7 @@ export class TilesetManager {
    * @returns {'classic'|'modern'|'hd'}
    */
   getTileset() {
-    return this._storage?.getItem(STORAGE_KEY) ?? TILESETS.CLASSIC;
+    return this._storage?.getItem(STORAGE_KEY) ?? TILESETS.HD;
   }
 
   /**
