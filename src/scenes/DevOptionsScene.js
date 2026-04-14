@@ -175,12 +175,12 @@ export class DevOptionsScene extends Phaser.Scene {
     this.add.text(cx, y, 'BOSSES', {
       fontSize: '13px', fontFamily: FONT_FAMILY, color: '#ffdd88', resolution: 2,
     }).setOrigin(0.5);
-    y += 8;
+    y += 20;
 
-    this.add.text(cx, y + 10, 'Total per level (overrides normal boss logic)', {
+    this.add.text(cx, y, 'Total per level (overrides normal boss logic)', {
       fontSize: '10px', fontFamily: FONT_FAMILY, color: '#668899', resolution: 2,
     }).setOrigin(0.5);
-    y += 28;
+    y += 22;
 
     for (const key of BOSS_KEYS) {
       this._makeBossQuantityRow(ENEMY_DEFS[key].name, key, cx, y);
