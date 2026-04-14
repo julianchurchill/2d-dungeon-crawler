@@ -72,18 +72,11 @@ export class OptionsScene extends Phaser.Scene {
       resolution: 2,
     }).setOrigin(0.5);
 
-    this.add.text(width / 2, sectionY + 20, 'Choose the visual style for dungeon tiles', {
-      fontSize: '11px',
-      fontFamily: FONT_FAMILY,
-      color: '#556677',
-      resolution: 2,
-    }).setOrigin(0.5);
-
     // --- Tileset option cards ---
     const cardW = 160;
     const cardH = 130;
     const gap   = 16;
-    const cardY = sectionY + 88;
+    const cardY = sectionY + 76;
     const spacing = cardW + gap;
     const leftX   = width / 2 - spacing;
     const centreX = width / 2;
@@ -149,7 +142,8 @@ export class OptionsScene extends Phaser.Scene {
       .setStrokeStyle(isActive ? 2 : 1, isActive ? activeStroke : normalStroke)
       .setInteractive({ useHandCursor: true });
 
-    // Preview strips — two rows: tiles on top, entities + items below
+    // Preview strips — two rows: tiles on top, entities + items below.
+    // Each preview image is displayed at 16×16 regardless of source tileset size.
     const tileSize = 16;
     const tilePreviews = [
       `${tileset}_tile_floor`,
@@ -164,8 +158,9 @@ export class OptionsScene extends Phaser.Scene {
       `${tileset}_item_weapon`,
     ];
 
-    const rowY1 = cy - h / 2 + tileSize / 2 + 8;
-    const rowY2 = rowY1 + tileSize + 2;
+    // Start the first row 12px below the top edge of the card.
+    const rowY1 = cy - h / 2 + tileSize / 2 + 12;
+    const rowY2 = rowY1 + tileSize + 6;
 
     for (const [row, keys] of [[rowY1, tilePreviews], [rowY2, entityPreviews]]) {
       const totalW = keys.length * tileSize;
@@ -179,17 +174,9 @@ export class OptionsScene extends Phaser.Scene {
       }
     }
 
-    // Active badge
-    const badgeY = cy - h / 2 + tileSize + 20;
-    const badgeTxt = this.add.text(cx, badgeY, isActive ? '✓ ACTIVE' : '', {
-      fontSize: '10px',
-      fontFamily: FONT_FAMILY,
-      color: '#88ccff',
-      resolution: 2,
-    }).setOrigin(0.5);
-
-    // Label
-    this.add.text(cx, badgeY + 18, label, {
+    // Label — positioned below the second preview row with comfortable spacing.
+    const labelY = rowY2 + tileSize / 2 + 16;
+    this.add.text(cx, labelY, label, {
       fontSize: '16px',
       fontFamily: FONT_FAMILY,
       color: isActive ? '#ffdd88' : '#aabbcc',
@@ -197,7 +184,7 @@ export class OptionsScene extends Phaser.Scene {
     }).setOrigin(0.5);
 
     // Description
-    this.add.text(cx, badgeY + 40, desc, {
+    this.add.text(cx, labelY + 22, desc, {
       fontSize: '10px',
       fontFamily: FONT_FAMILY,
       color: '#667788',
