@@ -31,9 +31,10 @@ export function getHelpContent(isTouchDev) {
       {
         heading: 'ACTIONS',
         lines: [
-          'INV \u2014 open / close inventory',
-          '\u25bc\u25bc  \u2014 use stairs',
-          '\u2261   \u2014 open this menu',
+          'INV    \u2014 open / close inventory',
+          'SKILLS \u2014 open skills',
+          '\u25bc\u25bc     \u2014 use stairs',
+          '\u2261      \u2014 open this menu',
         ],
       },
     ];
@@ -51,6 +52,7 @@ export function getHelpContent(isTouchDev) {
       heading: 'ACTIONS',
       lines: [
         'I       \u2014 open / close inventory',
+        'k       \u2014 open skills',
         '. or >  \u2014 use stairs',
         'ESC     \u2014 open this menu',
       ],
