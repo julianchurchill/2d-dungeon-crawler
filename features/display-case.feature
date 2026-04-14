@@ -42,3 +42,11 @@ Feature: Display Case
   Scenario: The town generation result includes the home door position
     Given the town is generated
     Then the town result should include a home door position
+
+  Scenario: The town home is a multi-tile structure with roof tiles
+    Given the town is generated
+    Then the town home interior should contain shop roof tiles
+
+  Scenario: The town home is enclosed by walls on its sides
+    Given the town is generated
+    Then the town home sides and back should be walled
