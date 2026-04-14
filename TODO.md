@@ -2,9 +2,9 @@
 
 ## Bugs
 
-- [ ] options menu has "choose the visual style for dungeons tiles" overlaps the tileset buttons and 'active' text overlaps icons on buttons. Fix the text overlap and remove the 'active' text entirely as it is not needed.
 - [ ] UI menu help tidy up - 'help' screen is missing 'k' for skills. Move 'Controls' information from main menu into a 'help' menu accessible from the main menu - the same 'help' menu as available in-game.
 - [ ] dev options screen 'Bosses' section 'total per level (overrides normal boss logic)' text overlaps the buttons below it
+- [x] options menu has "choose the visual style for dungeons tiles" overlaps the tileset buttons and 'active' text overlaps icons on buttons. Fix the text overlap and remove the 'active' text entirely as it is not needed.
 - [x] mobile inventory panel has no way to close it — no close button on touch devices
 - [x] mobile double-tap run does not stop when another button is pressed — any d-pad button press should cancel an active run, mirroring keyboard behaviour
 - [x] mobile controls overlap the message log and lack an Achievements/ESC button: move D-pad up to clear the message log, move INV to the centre position, add a menu button that opens Achievements (or closes the message log if it is open)
