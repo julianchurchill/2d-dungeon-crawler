@@ -17,6 +17,7 @@
 
 - [ ] music
 - [ ] stats - deepest level reached, monster types kill count, unique bosses kill count
+- [x] variable difficulty setting in options — Easy / Normal / Hard affects enemy count per room and enemy HP/ATK multipliers; persisted across sessions
 - [x] every dungeon floor should have an up staircase next to the initial spawn point of the player so they can go back up one floor
 - [x] in-game help screen — pressing ESC or the mobile ≡ menu button shows an in-game menu with Achievements and Help options; Help shows controls relevant to the current device (keyboard or mobile)
 - [x] display and maintain an application version number following semantic versioning and include the git commit hash for the built application
