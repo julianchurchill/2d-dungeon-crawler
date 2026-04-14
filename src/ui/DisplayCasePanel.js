@@ -16,6 +16,7 @@
 import { FONT_FAMILY } from '../utils/FontConfig.js';
 import { EventBus } from '../utils/EventBus.js';
 import { GameEvents } from '../events/GameEvents.js';
+import { tilesetManager as defaultTilesetManager } from '../systems/TilesetManager.js';
 
 const PANEL_W = 260;
 const PANEL_PAD = 14;
@@ -24,15 +25,19 @@ const TITLE_H = 50;
 const SECTION_HEADER_H = 22;
 const FOOTER_H = 44;
 
-/** Icon per item type. */
-const ICON_MAP = { weapon: '⚔️', armor: '🛡️' };
+/** X offset for item name text, leaving room for the 16×16 icon + padding. */
+const ICON_COL_W = 24;
 
 export class DisplayCasePanel {
   /**
    * @param {Phaser.Scene} scene - UIScene instance.
+   * @param {import('../systems/TilesetManager.js').TilesetManager} [tilesetManager]
+   *   Injected tileset manager; defaults to the singleton. Pass a custom instance
+   *   in tests to control the active tileset without touching localStorage.
    */
-  constructor(scene) {
+  constructor(scene, tilesetManager = defaultTilesetManager) {
     this.scene = scene;
+    this._tilesetManager = tilesetManager;
     /** @type {boolean} Whether the panel is currently visible. */
     this.visible = false;
     this._player = null;
@@ -307,8 +312,13 @@ export class DisplayCasePanel {
       objs.push(highlight);
     }
 
-    const icon = ICON_MAP[item.itemType] || '✦';
-    const nameText = s.add.text(PANEL_PAD, y + 8, `${icon} ${item.name}`, {
+    const iconKey = this._tilesetManager.getTileKey(item.textureKey);
+    const iconImg = s.add.image(PANEL_PAD + 8, y + ROW_H / 2, iconKey)
+      .setDisplaySize(16, 16).setOrigin(0.5, 0.5);
+    this._container.add(iconImg);
+    objs.push(iconImg);
+
+    const nameText = s.add.text(PANEL_PAD + ICON_COL_W, y + 8, item.name, {
       fontSize: '12px', fontFamily: FONT_FAMILY,
       color: isSelected ? '#ffffff' : '#dddddd',
       stroke: '#000000', strokeThickness: 2, resolution: 2,

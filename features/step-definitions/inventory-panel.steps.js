@@ -57,6 +57,7 @@ function createMockScene() {
       container: () => makeFluent(),
       rectangle: () => makeFluent(),
       text: (_x, _y, text) => makeFluent(text),
+      image: (_x, _y, key) => { const img = makeFluent(key); img.setDisplaySize = () => img; img.setTexture = (k) => { img._textureKey = k; return img; }; return img; },
     },
     input: { keyboard },
   };

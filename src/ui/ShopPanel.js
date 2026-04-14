@@ -16,6 +16,7 @@ import { FONT_FAMILY } from '../utils/FontConfig.js';
 import { EventBus } from '../utils/EventBus.js';
 import { GameEvents } from '../events/GameEvents.js';
 import { ShopSystem } from '../systems/ShopSystem.js';
+import { tilesetManager as defaultTilesetManager } from '../systems/TilesetManager.js';
 
 const PANEL_W = 240;
 const PANEL_PAD = 14;
@@ -24,8 +25,6 @@ const TITLE_H = 50;
 const SECTION_HEADER_H = 22;
 const FOOTER_H = 36;
 
-/** Maps itemType to emoji icon. */
-const ICON_MAP = { consumable: '🧪', weapon: '⚔️', armor: '🛡️' };
 /** Maps shopType to display name. */
 const SHOP_NAMES = { potion: 'Potion Shop', weapon: 'Weapon Shop', armour: 'Armour Shop' };
 
@@ -38,9 +37,13 @@ const SHOP_NAMES = { potion: 'Potion Shop', weapon: 'Weapon Shop', armour: 'Armo
 export class ShopPanel {
   /**
    * @param {Phaser.Scene} scene - UIScene instance.
+   * @param {import('../systems/TilesetManager.js').TilesetManager} [tilesetManager]
+   *   Injected tileset manager; defaults to the singleton. Pass a custom instance
+   *   in tests to control the active tileset without touching localStorage.
    */
-  constructor(scene) {
+  constructor(scene, tilesetManager = defaultTilesetManager) {
     this.scene = scene;
+    this._tilesetManager = tilesetManager;
     /** @type {boolean} Whether the panel is currently visible. */
     this.visible = false;
     this._shopType = null;
@@ -416,9 +419,8 @@ export class ShopPanel {
     sep.lineTo(PANEL_W - PANEL_PAD, y);
     sep.strokePath();
 
-    const icon = s.add.text(PANEL_PAD, y + ROW_H / 2, ICON_MAP[item.itemType] ?? '?', {
-      fontSize: '16px', resolution: 2,
-    }).setOrigin(0, 0.5);
+    const icon = s.add.image(PANEL_PAD + 8, y + ROW_H / 2, this._tilesetManager.getTileKey(item.textureKey))
+      .setDisplaySize(16, 16).setOrigin(0.5, 0.5);
 
     const nameText = s.add.text(PANEL_PAD + 22, y + ROW_H / 2, item.name, {
       fontSize: '10px', fontFamily: FONT_FAMILY, color: '#dddddd',

@@ -4,6 +4,7 @@ import { GameEvents } from '../events/GameEvents.js';
 import { InventoryCursor } from '../systems/InventoryCursor.js';
 import { applySlotPointerDown } from '../systems/InventorySlotPointer.js';
 import { isTouchDevice } from '../utils/TouchDeviceDetector.js';
+import { tilesetManager as defaultTilesetManager } from '../systems/TilesetManager.js';
 
 /**
  * Returns the title text for the inventory panel header.
@@ -23,8 +24,15 @@ const SLOT_PAD = 4;
 const PANEL_PAD = 16;
 
 export class InventoryPanel {
-  constructor(scene) {
+  /**
+   * @param {Phaser.Scene} scene - The UIScene instance.
+   * @param {import('../systems/TilesetManager.js').TilesetManager} [tilesetManager]
+   *   Injected tileset manager; defaults to the singleton. Pass a custom instance
+   *   in tests to control the active tileset without touching localStorage.
+   */
+  constructor(scene, tilesetManager = defaultTilesetManager) {
     this.scene = scene;
+    this._tilesetManager = tilesetManager;
     this.visible = false;
     this.inventory = [];
     this._cursor = new InventoryCursor(COLS, ROWS);
@@ -85,9 +93,9 @@ export class InventoryPanel {
           .setStrokeStyle(1, 0x445566)
           .setInteractive({ useHandCursor: false });
 
-        const icon = s.add.text(sx, sy - 7, '', {
-          fontSize: '18px', resolution: 2,
-        }).setOrigin(0.5);
+        // Placeholder texture key — updated with the tileset-prefixed key in _refresh().
+        const icon = s.add.image(sx, sy - 7, '__DEFAULT')
+          .setDisplaySize(16, 16).setVisible(false);
 
         // Label sits below the icon; word wrap keeps names inside the wider slot.
         const label = s.add.text(sx, sy + 7, '', {
@@ -275,19 +283,15 @@ export class InventoryPanel {
   // ─── Content refresh ─────────────────────────────────────────────────────
 
   _refresh(player) {
-    const ICONS = {
-      consumable: '🧪',
-      weapon: '⚔️',
-      armor: '🛡️',
-    };
     for (let i = 0; i < this._slots.length; i++) {
       const { icon, label } = this._slots[i];
       if (i < this.inventory.length) {
         const item = this.inventory[i];
-        icon.setText(ICONS[item.itemType] || '?');
+        icon.setTexture(this._tilesetManager.getTileKey(item.textureKey))
+          .setDisplaySize(16, 16).setVisible(true);
         label.setText(item.shortName ?? item.name);
       } else {
-        icon.setText('');
+        icon.setVisible(false);
         label.setText('');
       }
     }
