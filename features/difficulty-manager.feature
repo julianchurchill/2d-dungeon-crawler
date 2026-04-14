@@ -17,10 +17,15 @@ Feature: Difficulty Manager
     When the difficulty is set to "hard"
     Then the difficulty should be "hard"
 
-  Scenario: Easy difficulty reduces enemy count
+  Scenario: Difficulty can be changed to brutal
+    Given a new DifficultyManager with no stored preference
+    When the difficulty is set to "brutal"
+    Then the difficulty should be "brutal"
+
+  Scenario: Easy difficulty has no enemy count scaling
     Given a new DifficultyManager with no stored preference
     When the difficulty is set to "easy"
-    Then the enemy count multiplier should be less than 1
+    Then the enemy count multiplier should equal 1
 
   Scenario: Normal difficulty increases enemy count
     Given a new DifficultyManager with no stored preference
@@ -31,22 +36,37 @@ Feature: Difficulty Manager
     When the difficulty is set to "hard"
     Then the enemy count multiplier should be greater than 1
 
-  Scenario: Easy difficulty reduces enemy HP
+  Scenario: Brutal difficulty increases enemy count more than hard
+    Given a new DifficultyManager with no stored preference
+    When the difficulty is set to "brutal"
+    Then the enemy count multiplier should be greater than 1
+
+  Scenario: Easy difficulty has no enemy HP scaling
     Given a new DifficultyManager with no stored preference
     When the difficulty is set to "easy"
-    Then the enemy HP multiplier should be less than 1
+    Then the enemy HP multiplier should equal 1
 
   Scenario: Hard difficulty increases enemy HP
     Given a new DifficultyManager with no stored preference
     When the difficulty is set to "hard"
     Then the enemy HP multiplier should be greater than 1
 
-  Scenario: Easy difficulty reduces enemy ATK
+  Scenario: Brutal difficulty increases enemy HP
+    Given a new DifficultyManager with no stored preference
+    When the difficulty is set to "brutal"
+    Then the enemy HP multiplier should be greater than 1
+
+  Scenario: Easy difficulty has no enemy ATK scaling
     Given a new DifficultyManager with no stored preference
     When the difficulty is set to "easy"
-    Then the enemy ATK multiplier should be less than 1
+    Then the enemy ATK multiplier should equal 1
 
   Scenario: Hard difficulty increases enemy ATK
     Given a new DifficultyManager with no stored preference
     When the difficulty is set to "hard"
+    Then the enemy ATK multiplier should be greater than 1
+
+  Scenario: Brutal difficulty increases enemy ATK
+    Given a new DifficultyManager with no stored preference
+    When the difficulty is set to "brutal"
     Then the enemy ATK multiplier should be greater than 1

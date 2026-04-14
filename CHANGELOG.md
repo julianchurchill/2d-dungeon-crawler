@@ -28,8 +28,8 @@ Entries are listed newest-first within each section.
 
 ### Added
 
-- 2026-04-14 — **Difficulty tuning**: all three difficulty levels increased. Easy: count ×0.75, HP/ATK ×0.85. Normal: count ×1.25, HP/ATK ×1.25. Hard: count ×2.0, HP/ATK ×1.75. Bosses remain unaffected.
-- 2026-04-14 — **Difficulty setting**: a new DIFFICULTY section in the Options screen lets players choose Easy, Normal, or Hard before starting a game. The choice persists across sessions via localStorage. Bosses are unaffected by difficulty scaling.
+- 2026-04-14 — **Difficulty tuning + Brutal tier**: Easy is now baseline (count ×1.0, HP/ATK ×1.0). Normal: count ×2.0, HP/ATK ×1.75. Hard: count ×2.5, HP/ATK ×2.0. New **Brutal** tier: count ×3.0, HP/ATK ×3.0. Bosses remain unaffected by all difficulty scaling.
+- 2026-04-14 — **Difficulty setting**: a new DIFFICULTY section in the Options screen lets players choose Easy, Normal, Hard, or Brutal before starting a game. The choice persists across sessions via localStorage. Bosses are unaffected by difficulty scaling.
 - 2026-04-14 — Every dungeon floor now has up-stairs placed in the start room (one tile offset from the player spawn). Floors 2+ lead back to the previous floor; floor 1 continues to lead back to town.
 - 2026-04-14 — **HD tileset (32×32)**: a new HD option in the Options screen renders all dungeon tiles, entity sprites, and item icons at 32×32 pixels with rich pixel-art detail (stone slab floors, bevelled brick walls, panelled doors, multi-step staircases, fully-detailed character and creature sprites, illustrated item icons). Camera zoom is automatically set to 1× so HD tiles fill the same screen space as 16×16 tiles at 2×. The choice persists across sessions.
 - 2026-04-13 — **Options menu & tilesets**: a new Options screen is accessible from the main menu. Players can switch between the **Classic** tileset (dark minimal palette, original look) and the **Modern** tileset (high-contrast slate-brick dungeon with vivid step colours and defined cobblestone town tiles). The choice persists across sessions via localStorage.

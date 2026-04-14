@@ -70,20 +70,26 @@ export class OptionsScene extends Phaser.Scene {
       fontSize: '15px', fontFamily: FONT_FAMILY, color: '#aabbcc', resolution: 2,
     }).setOrigin(0.5);
 
-    const cardW = 140;
-    const cardH = 80;
-    const gap   = 16;
-    const cardY = sectionY + 58;
+    // Four cards side by side — narrower width and tighter gap to fit the screen.
+    const cardW   = 110;
+    const cardH   = 80;
+    const gap     = 10;
+    const cardY   = sectionY + 58;
     const spacing = cardW + gap;
-    const active = difficultyManager.getDifficulty();
+    // Centre the group of 4 cards: total width = 4*cardW + 3*gap
+    const groupW  = 4 * cardW + 3 * gap;
+    const startX  = width / 2 - groupW / 2 + cardW / 2;
+    const active  = difficultyManager.getDifficulty();
 
-    this._diffEasyCard   = this._buildDifficultyCard(width / 2 - spacing, cardY, cardW, cardH, DIFFICULTIES.EASY,   'EASY',   'Fewer enemies\nreduced HP & ATK', active === DIFFICULTIES.EASY);
-    this._diffNormalCard = this._buildDifficultyCard(width / 2,           cardY, cardW, cardH, DIFFICULTIES.NORMAL, 'NORMAL', 'Standard challenge\ndefault balance',  active === DIFFICULTIES.NORMAL);
-    this._diffHardCard   = this._buildDifficultyCard(width / 2 + spacing, cardY, cardW, cardH, DIFFICULTIES.HARD,   'HARD',   'More enemies\nincreased HP & ATK',  active === DIFFICULTIES.HARD);
+    this._diffEasyCard   = this._buildDifficultyCard(startX,               cardY, cardW, cardH, DIFFICULTIES.EASY,   'EASY',   'Standard enemies\nno scaling',      active === DIFFICULTIES.EASY);
+    this._diffNormalCard = this._buildDifficultyCard(startX + spacing,     cardY, cardW, cardH, DIFFICULTIES.NORMAL, 'NORMAL', 'More enemies\nhigher HP & ATK',     active === DIFFICULTIES.NORMAL);
+    this._diffHardCard   = this._buildDifficultyCard(startX + spacing * 2, cardY, cardW, cardH, DIFFICULTIES.HARD,   'HARD',   'Many enemies\nmuch higher stats',    active === DIFFICULTIES.HARD);
+    this._diffBrutalCard = this._buildDifficultyCard(startX + spacing * 3, cardY, cardW, cardH, DIFFICULTIES.BRUTAL, 'BRUTAL', 'Extreme enemies\ntriple HP & ATK',   active === DIFFICULTIES.BRUTAL);
 
     this._navItems.push(this._diffEasyCard.navItem);
     this._navItems.push(this._diffNormalCard.navItem);
     this._navItems.push(this._diffHardCard.navItem);
+    this._navItems.push(this._diffBrutalCard.navItem);
   }
 
   /**
@@ -93,7 +99,7 @@ export class OptionsScene extends Phaser.Scene {
    * @param {number}  cy       - Card centre Y.
    * @param {number}  w        - Card width.
    * @param {number}  h        - Card height.
-   * @param {string}  level    - Difficulty key ('easy'|'normal'|'hard').
+   * @param {string}  level    - Difficulty key ('easy'|'normal'|'hard'|'brutal').
    * @param {string}  label    - Display label.
    * @param {string}  desc     - Two-line description.
    * @param {boolean} isActive - Whether this level is currently selected.
@@ -104,6 +110,7 @@ export class OptionsScene extends Phaser.Scene {
       [DIFFICULTIES.EASY]:   '#88ff88',
       [DIFFICULTIES.NORMAL]: '#ffdd88',
       [DIFFICULTIES.HARD]:   '#ff8888',
+      [DIFFICULTIES.BRUTAL]: '#ff44ff',
     };
     const normalStroke  = 0x336677;
     const normalFill    = 0x1a2a3a;
@@ -114,11 +121,13 @@ export class OptionsScene extends Phaser.Scene {
       [DIFFICULTIES.EASY]:   0x447744,
       [DIFFICULTIES.NORMAL]: 0x664400,
       [DIFFICULTIES.HARD]:   0x882222,
+      [DIFFICULTIES.BRUTAL]: 0x662266,
     }[level] ?? 0x446644;
     const fillColour = {
       [DIFFICULTIES.EASY]:   0x1a3a1a,
       [DIFFICULTIES.NORMAL]: 0x3a2a0a,
       [DIFFICULTIES.HARD]:   0x3a0a0a,
+      [DIFFICULTIES.BRUTAL]: 0x2a0a2a,
     }[level] ?? 0x1a2a3a;
 
     const bg = this.add.rectangle(cx, cy, w, h,

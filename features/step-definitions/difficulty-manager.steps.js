@@ -32,14 +32,19 @@ Then('the enemy count multiplier should be less than 1', function () {
   assert.ok(m < 1, `Expected enemy count multiplier < 1 but got ${m}`);
 });
 
+Then('the enemy count multiplier should equal 1', function () {
+  const m = this.difficultyManager.getConfig().enemyCount;
+  assert.equal(m, 1);
+});
+
 Then('the enemy count multiplier should be greater than 1', function () {
   const m = this.difficultyManager.getConfig().enemyCount;
   assert.ok(m > 1, `Expected enemy count multiplier > 1 but got ${m}`);
 });
 
-Then('the enemy HP multiplier should be less than 1', function () {
+Then('the enemy HP multiplier should equal 1', function () {
   const m = this.difficultyManager.getConfig().enemyHp;
-  assert.ok(m < 1, `Expected enemy HP multiplier < 1 but got ${m}`);
+  assert.equal(m, 1);
 });
 
 Then('the enemy HP multiplier should be greater than 1', function () {
@@ -47,9 +52,9 @@ Then('the enemy HP multiplier should be greater than 1', function () {
   assert.ok(m > 1, `Expected enemy HP multiplier > 1 but got ${m}`);
 });
 
-Then('the enemy ATK multiplier should be less than 1', function () {
+Then('the enemy ATK multiplier should equal 1', function () {
   const m = this.difficultyManager.getConfig().enemyAtk;
-  assert.ok(m < 1, `Expected enemy ATK multiplier < 1 but got ${m}`);
+  assert.equal(m, 1);
 });
 
 Then('the enemy ATK multiplier should be greater than 1', function () {
