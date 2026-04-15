@@ -70,6 +70,27 @@ export const SKILLS = Object.freeze({
     targetType: 'creeping_mass',
     bonusMultiplier: 0.10,
   },
+  SKELETON_HUNTING: {
+    id: 'skeleton_hunting',
+    name: 'Skeleton Hunting',
+    description: '+10% damage against skeletons.',
+    targetType: 'skeleton',
+    bonusMultiplier: 0.10,
+  },
+  SKELETON_WARRIOR_HUNTING: {
+    id: 'skeleton_warrior_hunting',
+    name: 'Skeleton Warrior Hunting',
+    description: '+10% damage against skeleton warriors.',
+    targetType: 'skeleton_warrior',
+    bonusMultiplier: 0.10,
+  },
+  SKELETON_MAGE_HUNTING: {
+    id: 'skeleton_mage_hunting',
+    name: 'Skeleton Mage Hunting',
+    description: '+10% damage against skeleton mages.',
+    targetType: 'skeleton_mage',
+    bonusMultiplier: 0.10,
+  },
   NIGHT_VISION: {
     id: 'night_vision',
     name: 'Night Vision',
