@@ -43,6 +43,7 @@ import { generateShopItems } from '../items/ShopInventory.js';
 import { isTouchDevice } from '../utils/TouchDeviceDetector.js';
 import { NpcRoamController } from '../systems/NpcRoamController.js';
 import { LookPanel } from '../ui/LookPanel.js';
+import { LookCursor } from '../ui/LookCursor.js';
 
 // TILE_SIZE is initialised from TilesetManager in GameScene.create() so it
 // reflects the active tileset (16 for Classic/Modern, 32 for HD) each time
@@ -134,6 +135,9 @@ export class GameScene extends Phaser.Scene {
     this._onLookResize = ({ width, height }) => this._lookPanel.resize(width, height);
     this.scale.on('resize', this._onLookResize);
     this.events.once('shutdown', () => this.scale.off('resize', this._onLookResize));
+
+    // Look cursor — keyboard-driven cell inspector for non-touch devices.
+    this._lookCursor = new LookCursor(this, this.dungeonMap, TILE_SIZE);
 
     // Cross-scene events
     this._setupEvents();
@@ -664,9 +668,28 @@ export class GameScene extends Phaser.Scene {
     this.input.keyboard.on('keydown-K',           wrapWithRunCancel(this._runController, () => this._toggleSkills()));
     this.input.keyboard.on('keydown-PERIOD',       wrapWithRunCancel(this._runController, () => this._tryUseStairs()));
     this.input.keyboard.on('keydown-GREATER_THAN', wrapWithRunCancel(this._runController, () => this._tryUseStairs()));
+    // 'l' — toggle look cursor (non-touch devices only).
+    if (!isTouchDevice()) {
+      this.input.keyboard.on('keydown-L', wrapWithRunCancel(this._runController, () => {
+        if (this._lookCursor?.active) {
+          this._lookCursor.deactivate();
+          this._lookPanel.hide();
+        } else {
+          this._lookCursor?.activate(this.player.x, this.player.y);
+          this._showLookInfoAt(this.player.x, this.player.y);
+        }
+      }));
+    }
+
     // ESC closes whichever panel is open (message log, sell, inventory, skills)
     // before falling through to the in-game menu — evaluated in priority order.
     this.input.keyboard.on('keydown-ESC', wrapWithRunCancel(this._runController, () => {
+      // Look cursor takes highest priority — ESC deactivates it first.
+      if (this._lookCursor?.active) {
+        this._lookCursor.deactivate();
+        this._lookPanel.hide();
+        return;
+      }
       if (this._messageLogOpen) {
         EventBus.emit(GameEvents.CLOSE_MESSAGE_LOG);
       } else if (this.turnManager.state === TURN_STATE.DIALOGUE) {
@@ -751,6 +774,15 @@ export class GameScene extends Phaser.Scene {
   }
 
   _handleDir(dir) {
+    // When the look cursor is active, direction keys move the cursor instead
+    // of the player — the game turn is not advanced.
+    if (this._lookCursor?.active) {
+      if (this.turnManager.state !== TURN_STATE.PLAYER_INPUT) return;
+      const { dx, dy } = DIR_DELTA[dir];
+      this._lookCursor.move(dx, dy);
+      this._showLookInfoAt(this._lookCursor.x, this._lookCursor.y);
+      return;
+    }
     if (!this.turnManager.isAcceptingInput()) return;
     const { dx, dy } = DIR_DELTA[dir];
     this._doPlayerMove(dx, dy);
@@ -1158,10 +1190,12 @@ export class GameScene extends Phaser.Scene {
 
   _descend() {
     this._lookPanel?.hide();
+    this._lookCursor?.deactivate();
     this.cameras.main.fadeOut(300, 0, 0, 0);
     this.time.delayedCall(300, () => {
       const dungeonData = this.floorManager.descend();
       this._buildFloor(dungeonData);
+      this._lookCursor?.updateMap(this.dungeonMap, TILE_SIZE);
       this._syncRegistry();
       EventBus.emit(GameEvents.MESSAGE, `You descend to floor ${this.floorManager.currentFloor}.`);
       this.cameras.main.fadeIn(300, 0, 0, 0);
@@ -1175,10 +1209,12 @@ export class GameScene extends Phaser.Scene {
    */
   _ascend() {
     this._lookPanel?.hide();
+    this._lookCursor?.deactivate();
     this.cameras.main.fadeOut(300, 0, 0, 0);
     this.time.delayedCall(300, () => {
       const dungeonData = this.floorManager.ascend();
       this._buildFloor(dungeonData);
+      this._lookCursor?.updateMap(this.dungeonMap, TILE_SIZE);
       // Place the player at the stairs position of the destination floor,
       // and sync the sprite so the camera centres on the correct tile.
       this.player.x = dungeonData.stairsPos.x;
@@ -1645,9 +1681,8 @@ export class GameScene extends Phaser.Scene {
 
   /**
    * Handles a pointer click or touch on the game canvas.
-   * Converts screen coordinates to tile coordinates, checks line of sight via
-   * the FOV state, then shows the LookPanel with appropriate info.
-   * Never advances the game turn.
+   * Deactivates the look cursor if active, then shows the LookPanel for the
+   * clicked tile (if it is in the player's FOV).  Never advances the turn.
    *
    * @param {Phaser.Input.Pointer} pointer
    */
@@ -1655,6 +1690,11 @@ export class GameScene extends Phaser.Scene {
     // Only act when the player can take input (blocks DPad side-effects, enemy
     // turn animations, and clicks through open UI panels in UIScene).
     if (this.turnManager.state !== TURN_STATE.PLAYER_INPUT) return;
+
+    // A click while the cursor is active deactivates it.
+    if (this._lookCursor?.active) {
+      this._lookCursor.deactivate();
+    }
 
     // Convert screen-space pointer position to world-space tile coordinates.
     const world = this.cameras.main.getWorldPoint(pointer.x, pointer.y);
@@ -1665,7 +1705,17 @@ export class GameScene extends Phaser.Scene {
     if (!this.dungeonMap.inBounds(tx, ty)) return;
     if (this.dungeonMap.getFovState(tx, ty) !== FOV_STATE.VISIBLE) return;
 
-    // Priority: enemy > NPC > floor item > tile
+    this._showLookInfoAt(tx, ty);
+  }
+
+  /**
+   * Shows the LookPanel for the given tile coordinates.
+   * Priority: enemy > NPC > floor item > tile label.
+   *
+   * @param {number} tx - Tile x.
+   * @param {number} ty - Tile y.
+   */
+  _showLookInfoAt(tx, ty) {
     const entity = this._getEntityAt(tx, ty);
     if (entity && entity !== this.player) {
       if (entity.stats) {
@@ -1691,6 +1741,7 @@ export class GameScene extends Phaser.Scene {
 
   _gameOver() {
     this._lookPanel?.hide();
+    this._lookCursor?.deactivate();
     EventBus.emit(GameEvents.GAME_OVER);
     this.turnManager.setState(TURN_STATE.GAME_OVER);
     EventBus.emit(GameEvents.MESSAGE, 'You died! Press R to restart.');
@@ -1700,6 +1751,7 @@ export class GameScene extends Phaser.Scene {
 
   _restart() {
     this._lookPanel?.hide();
+    this._lookCursor?.deactivate();
     // Clean up event listeners
     EventBus.removeAllListeners();
 
