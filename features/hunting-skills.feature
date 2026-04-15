@@ -11,12 +11,15 @@ Feature: Hunting Skills
 
     Examples:
       | skillKey                  | damage | target        | expected |
-      | GOBLIN_HUNTING            | 10     | goblin        | 11       |
-      | ORC_HUNTING               | 10     | orc           | 11       |
-      | TROLL_HUNTING             | 10     | troll         | 11       |
-      | COCKROACH_HUNTING         | 10     | cockroach     | 11       |
-      | SPRITE_HUNTING            | 10     | sprite        | 11       |
-      | CREEPING_MASS_HUNTING     | 10     | creeping_mass | 11       |
+      | GOBLIN_HUNTING              | 10     | goblin           | 11       |
+      | ORC_HUNTING                 | 10     | orc              | 11       |
+      | TROLL_HUNTING               | 10     | troll            | 11       |
+      | COCKROACH_HUNTING           | 10     | cockroach        | 11       |
+      | SPRITE_HUNTING              | 10     | sprite           | 11       |
+      | CREEPING_MASS_HUNTING       | 10     | creeping_mass    | 11       |
+      | SKELETON_HUNTING            | 10     | skeleton         | 11       |
+      | SKELETON_WARRIOR_HUNTING    | 10     | skeleton_warrior | 11       |
+      | SKELETON_MAGE_HUNTING       | 10     | skeleton_mage    | 11       |
 
   Scenario Outline: Hunting skill deals no bonus damage against a different enemy type
     Given a HuntingSkill for "<skillKey>"
@@ -24,12 +27,15 @@ Feature: Hunting Skills
     Then the hunting skill damage result is 10
 
     Examples:
-      | skillKey              |
-      | ORC_HUNTING           |
-      | TROLL_HUNTING         |
-      | COCKROACH_HUNTING     |
-      | SPRITE_HUNTING        |
-      | CREEPING_MASS_HUNTING |
+      | skillKey                  |
+      | ORC_HUNTING               |
+      | TROLL_HUNTING             |
+      | COCKROACH_HUNTING         |
+      | SPRITE_HUNTING            |
+      | CREEPING_MASS_HUNTING     |
+      | SKELETON_HUNTING          |
+      | SKELETON_WARRIOR_HUNTING  |
+      | SKELETON_MAGE_HUNTING     |
 
   Scenario Outline: Hunting skill deals no bonus damage when defender type is unknown
     Given a HuntingSkill for "<skillKey>"
@@ -37,13 +43,16 @@ Feature: Hunting Skills
     Then the hunting skill damage result is 10
 
     Examples:
-      | skillKey              |
-      | GOBLIN_HUNTING        |
-      | ORC_HUNTING           |
-      | TROLL_HUNTING         |
-      | COCKROACH_HUNTING     |
-      | SPRITE_HUNTING        |
-      | CREEPING_MASS_HUNTING |
+      | skillKey                  |
+      | GOBLIN_HUNTING            |
+      | ORC_HUNTING               |
+      | TROLL_HUNTING             |
+      | COCKROACH_HUNTING         |
+      | SPRITE_HUNTING            |
+      | CREEPING_MASS_HUNTING     |
+      | SKELETON_HUNTING          |
+      | SKELETON_WARRIOR_HUNTING  |
+      | SKELETON_MAGE_HUNTING     |
 
   Scenario Outline: Hunting skill cannot be upgraded or downgraded
     Given a HuntingSkill for "<skillKey>"
@@ -51,13 +60,16 @@ Feature: Hunting Skills
     And the hunting skill cannot be downgraded
 
     Examples:
-      | skillKey              |
-      | GOBLIN_HUNTING        |
-      | ORC_HUNTING           |
-      | TROLL_HUNTING         |
-      | COCKROACH_HUNTING     |
-      | SPRITE_HUNTING        |
-      | CREEPING_MASS_HUNTING |
+      | skillKey                  |
+      | GOBLIN_HUNTING            |
+      | ORC_HUNTING               |
+      | TROLL_HUNTING             |
+      | COCKROACH_HUNTING         |
+      | SPRITE_HUNTING            |
+      | CREEPING_MASS_HUNTING     |
+      | SKELETON_HUNTING          |
+      | SKELETON_WARRIOR_HUNTING  |
+      | SKELETON_MAGE_HUNTING     |
 
   Scenario Outline: Hunting skill description mentions its target type and bonus
     Given a HuntingSkill for "<skillKey>"
@@ -65,13 +77,16 @@ Feature: Hunting Skills
     And the hunting skill description mentions "10%"
 
     Examples:
-      | skillKey              | target        |
-      | GOBLIN_HUNTING        | goblin        |
-      | ORC_HUNTING           | orc           |
-      | TROLL_HUNTING         | troll         |
-      | COCKROACH_HUNTING     | cockroach     |
-      | SPRITE_HUNTING        | sprite        |
-      | CREEPING_MASS_HUNTING | creeping_mass |
+      | skillKey                  | target           |
+      | GOBLIN_HUNTING            | goblin           |
+      | ORC_HUNTING               | orc              |
+      | TROLL_HUNTING             | troll            |
+      | COCKROACH_HUNTING         | cockroach        |
+      | SPRITE_HUNTING            | sprite           |
+      | CREEPING_MASS_HUNTING     | creeping_mass    |
+      | SKELETON_HUNTING          | skeleton         |
+      | SKELETON_WARRIOR_HUNTING  | skeleton_warrior |
+      | SKELETON_MAGE_HUNTING     | skeleton_mage    |
 
   # ── SkillSystem integration ───────────────────────────────────────────────
 

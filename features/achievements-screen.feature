@@ -5,7 +5,7 @@ Feature: Achievements screen display list
   Scenario: Display list contains an entry for every achievement
     Given the achievement system is initialised
     When the achievements display list is retrieved
-    Then the display list should contain 28 entries
+    Then the display list should contain 31 entries
 
   Scenario: An incomplete achievement entry shows progress text
     Given the achievement system is initialised

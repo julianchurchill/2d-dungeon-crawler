@@ -52,6 +52,21 @@ Feature: Achievement system
     When the player kills 10 trolls
     Then the "Troll Killer" achievement should be completed
 
+  Scenario: Skeleton Killer is unlocked when 10 skeletons are killed
+    Given the achievement system is initialised
+    When the player kills 10 skeletons
+    Then the "Skeleton Killer" achievement should be completed
+
+  Scenario: Skeleton Warrior Killer is unlocked when 10 skeleton warriors are killed
+    Given the achievement system is initialised
+    When the player kills 10 skeleton_warriors
+    Then the "Skeleton Warrior Killer" achievement should be completed
+
+  Scenario: Skeleton Mage Killer is unlocked when 10 skeleton mages are killed
+    Given the achievement system is initialised
+    When the player kills 10 skeleton_mages
+    Then the "Skeleton Mage Killer" achievement should be completed
+
   Scenario: A floor milestone achievement is unlocked when the target floor is reached
     Given the achievement system is initialised
     When the player reaches dungeon floor 50

@@ -146,6 +146,24 @@ When('the player kills {int} creeping_masses', function (count) {
   }
 });
 
+When('the player kills {int} skeletons', function (count) {
+  for (let i = 0; i < count; i++) {
+    this.eventBus.emit(GameEvents.ENEMY_KILLED, 'skeleton');
+  }
+});
+
+When('the player kills {int} skeleton_warriors', function (count) {
+  for (let i = 0; i < count; i++) {
+    this.eventBus.emit(GameEvents.ENEMY_KILLED, 'skeleton_warrior');
+  }
+});
+
+When('the player kills {int} skeleton_mages', function (count) {
+  for (let i = 0; i < count; i++) {
+    this.eventBus.emit(GameEvents.ENEMY_KILLED, 'skeleton_mage');
+  }
+});
+
 When('the player reaches level {int}', function (level) {
   this.eventBus.emit(GameEvents.PLAYER_LEVEL_UP, level);
 });

@@ -1273,12 +1273,15 @@ export class GameScene extends Phaser.Scene {
     // Permanent skills are applied immediately and are never shown in the
     // level-up pool — the player cannot activate or upgrade them.
     const PERMANENT_SKILLS = {
-      goblin_killer:    () => new HuntingSkill('GOBLIN_HUNTING'),
-      orc_killer:       () => new HuntingSkill('ORC_HUNTING'),
-      troll_killer:     () => new HuntingSkill('TROLL_HUNTING'),
-      cockroach_killer: () => new HuntingSkill('COCKROACH_HUNTING'),
-      sprite_killer:    () => new HuntingSkill('SPRITE_HUNTING'),
-      mass_slayer:      () => new HuntingSkill('CREEPING_MASS_HUNTING'),
+      goblin_killer:            () => new HuntingSkill('GOBLIN_HUNTING'),
+      orc_killer:               () => new HuntingSkill('ORC_HUNTING'),
+      troll_killer:             () => new HuntingSkill('TROLL_HUNTING'),
+      cockroach_killer:         () => new HuntingSkill('COCKROACH_HUNTING'),
+      sprite_killer:            () => new HuntingSkill('SPRITE_HUNTING'),
+      mass_slayer:              () => new HuntingSkill('CREEPING_MASS_HUNTING'),
+      skeleton_killer:          () => new HuntingSkill('SKELETON_HUNTING'),
+      skeleton_warrior_killer:  () => new HuntingSkill('SKELETON_WARRIOR_HUNTING'),
+      skeleton_mage_killer:     () => new HuntingSkill('SKELETON_MAGE_HUNTING'),
     };
 
     // Pool skills are added to the inactive skill list so the player can
@@ -1316,13 +1319,16 @@ export class GameScene extends Phaser.Scene {
     if (!skillSystem) return;
 
     const SKILL_IDS = {
-      goblin_killer:    'goblin_hunting',
-      orc_killer:       'orc_hunting',
-      troll_killer:     'troll_hunting',
-      cockroach_killer: 'cockroach_hunting',
-      sprite_killer:    'sprite_hunting',
-      mass_slayer:      'creeping_mass_hunting',
-      burrower:         'night_vision',
+      goblin_killer:            'goblin_hunting',
+      orc_killer:               'orc_hunting',
+      troll_killer:             'troll_hunting',
+      cockroach_killer:         'cockroach_hunting',
+      sprite_killer:            'sprite_hunting',
+      mass_slayer:              'creeping_mass_hunting',
+      skeleton_killer:          'skeleton_hunting',
+      skeleton_warrior_killer:  'skeleton_warrior_hunting',
+      skeleton_mage_killer:     'skeleton_mage_hunting',
+      burrower:                 'night_vision',
     };
 
     const skillId = SKILL_IDS[achievementId];
