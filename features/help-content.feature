@@ -24,6 +24,11 @@ Feature: In-game help content adapts to device type
     When the help content is retrieved
     Then the help content should mention "open skills"
 
+  Scenario: Keyboard help content includes look cursor key binding
+    Given the device is not a touch device
+    When the help content is retrieved
+    Then the help content should mention "look cursor"
+
   Scenario: Touch help content includes skills button
     Given the device is a touch device
     When the help content is retrieved
