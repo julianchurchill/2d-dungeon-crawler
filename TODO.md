@@ -70,8 +70,8 @@
 - [ ] increase defense when a character levels up
 - [ ] character graphic
 - [ ] show a character sheet by pressing 'c' which shows all the players stats currently. Provide a button for the mobile interface.
-- [ ] look cursor - a cursor can be activated on non-touch devices with 'l' and deactivated with ESC. When activated the player can move the cursor around the map with the direction keys to highlight the thing that is being looked at. The cursor starts on the player.
 - [ ] ranged attacks
+- [x] look cursor - a cursor can be activated on non-touch devices with 'l' and deactivated with ESC. When activated the player can move the cursor around the map with the direction keys to highlight the thing that is being looked at. The cursor starts on the player.
 - [x] look - the player can click or touch a cell in the map to see more information about what is in that cell, e.g. for an enemy see the name and hp "Goblin 8hp", for items show the name and description "Short Sword +3 Attack", for other things at least show the name "Stone floor" or "Stone wall". The information should pop up perhaps in the bottom right or top right of the screen. Position appropriately for mobile devices. Using look does not advance the game turn. Look can only be used on cells that is in the character's line of sight.
 - [x] hold keys for continued movement
 - [x] run movement - SHIFT+direction keeps going until an obstacle or visible enemy/item stops them

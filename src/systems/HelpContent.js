@@ -53,6 +53,7 @@ export function getHelpContent(isTouchDev) {
       lines: [
         'I       \u2014 open / close inventory',
         'k       \u2014 open skills',
+        'l       \u2014 look cursor',
         '. or >  \u2014 use stairs',
         'ESC     \u2014 open this menu',
       ],

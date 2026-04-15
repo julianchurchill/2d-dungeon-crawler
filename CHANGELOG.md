@@ -9,6 +9,7 @@ Entries are listed newest-first within each section.
 
 ### Added
 
+- 2026-04-15 — **Look cursor**: on non-touch devices press `l` to activate a cursor that starts on the player's tile. Direction keys move it around the visible map; the LookPanel updates with info about each tile under the cursor. Press `l` again or ESC to deactivate. Does not advance the game turn.
 - 2026-04-15 — **Look**: clicking or touching any visible map cell shows a popup in the bottom-right corner describing what is there — enemy name and current/max HP, item name and description, or the tile name (Stone Floor, Stone Wall, Door, etc.). Only cells within the player's line of sight can be inspected. Looking does not advance the game turn.
 
 ---
