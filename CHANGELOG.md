@@ -7,6 +7,10 @@ Entries are listed newest-first within each section.
 
 ## [Unreleased]
 
+### Added
+
+- 2026-04-15 — **Look**: clicking or touching any visible map cell shows a popup in the bottom-right corner describing what is there — enemy name and current/max HP, item name and description, or the tile name (Stone Floor, Stone Wall, Door, etc.). Only cells within the player's line of sight can be inspected. Looking does not advance the game turn.
+
 ---
 
 ## [0.39.0] - 2026-04-14
