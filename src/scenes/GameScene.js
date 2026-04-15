@@ -42,6 +42,7 @@ import { ShopSystem } from '../systems/ShopSystem.js';
 import { generateShopItems } from '../items/ShopInventory.js';
 import { isTouchDevice } from '../utils/TouchDeviceDetector.js';
 import { NpcRoamController } from '../systems/NpcRoamController.js';
+import { LookPanel } from '../ui/LookPanel.js';
 
 // TILE_SIZE is initialised from TilesetManager in GameScene.create() so it
 // reflects the active tileset (16 for Classic/Modern, 32 for HD) each time
@@ -127,6 +128,12 @@ export class GameScene extends Phaser.Scene {
     this._runController  = new RunMovementController();
     this._runStartItems  = new Set();
     this._setupInput();
+
+    // Look panel — shows cell info on click/touch; does not advance the turn.
+    this._lookPanel = new LookPanel(this);
+    this._onLookResize = ({ width, height }) => this._lookPanel.resize(width, height);
+    this.scale.on('resize', this._onLookResize);
+    this.events.once('shutdown', () => this.scale.off('resize', this._onLookResize));
 
     // Cross-scene events
     this._setupEvents();
@@ -697,6 +704,9 @@ export class GameScene extends Phaser.Scene {
     this.input.keyboard.on('keydown-S',     (e) => { if (e.shiftKey) { this._startRun(DIR.DOWN);  } else { wDown();  } });
     this.input.keyboard.on('keydown-A',     (e) => { if (e.shiftKey) { this._startRun(DIR.LEFT);  } else { wLeft();  } });
     this.input.keyboard.on('keydown-D',     (e) => { if (e.shiftKey) { this._startRun(DIR.RIGHT); } else { wRight(); } });
+
+    // Pointer click/touch — look at the tapped cell without advancing the turn.
+    this.input.on('pointerdown', (pointer) => this._handleLookClick(pointer));
   }
 
   _setupEvents() {
@@ -817,6 +827,8 @@ export class GameScene extends Phaser.Scene {
   // ─── Player Actions ───────────────────────────────────────────────────────
 
   _doPlayerMove(dx, dy) {
+    this._lookPanel?.hide();
+
     const result = this.player.move(dx, dy, this.dungeonMap, (x, y) => this._getEntityAt(x, y));
 
     if (result.action === 'blocked') {
@@ -1145,6 +1157,7 @@ export class GameScene extends Phaser.Scene {
   }
 
   _descend() {
+    this._lookPanel?.hide();
     this.cameras.main.fadeOut(300, 0, 0, 0);
     this.time.delayedCall(300, () => {
       const dungeonData = this.floorManager.descend();
@@ -1161,6 +1174,7 @@ export class GameScene extends Phaser.Scene {
    * land near the stairs they arrived from.
    */
   _ascend() {
+    this._lookPanel?.hide();
     this.cameras.main.fadeOut(300, 0, 0, 0);
     this.time.delayedCall(300, () => {
       const dungeonData = this.floorManager.ascend();
@@ -1629,9 +1643,54 @@ export class GameScene extends Phaser.Scene {
     ) || this.npcs.find(n => n.x === x && n.y === y) || null;
   }
 
+  /**
+   * Handles a pointer click or touch on the game canvas.
+   * Converts screen coordinates to tile coordinates, checks line of sight via
+   * the FOV state, then shows the LookPanel with appropriate info.
+   * Never advances the game turn.
+   *
+   * @param {Phaser.Input.Pointer} pointer
+   */
+  _handleLookClick(pointer) {
+    // Only act when the player can take input (blocks DPad side-effects, enemy
+    // turn animations, and clicks through open UI panels in UIScene).
+    if (this.turnManager.state !== TURN_STATE.PLAYER_INPUT) return;
+
+    // Convert screen-space pointer position to world-space tile coordinates.
+    const world = this.cameras.main.getWorldPoint(pointer.x, pointer.y);
+    const tx = Math.floor(world.x / TILE_SIZE);
+    const ty = Math.floor(world.y / TILE_SIZE);
+
+    // Only reveal info for tiles currently in the player's line of sight.
+    if (!this.dungeonMap.inBounds(tx, ty)) return;
+    if (this.dungeonMap.getFovState(tx, ty) !== FOV_STATE.VISIBLE) return;
+
+    // Priority: enemy > NPC > floor item > tile
+    const entity = this._getEntityAt(tx, ty);
+    if (entity && entity !== this.player) {
+      if (entity.stats) {
+        // Enemies have a stats object.
+        this._lookPanel.showEnemy(entity);
+      } else {
+        // NPCs have a name but no stats; show their name as the tile label.
+        this._lookPanel.showTile(entity.name);
+      }
+      return;
+    }
+
+    const item = this.items.find(i => i.x === tx && i.y === ty);
+    if (item) {
+      this._lookPanel.showItem(item);
+      return;
+    }
+
+    this._lookPanel.showTile(this.dungeonMap.getTile(tx, ty));
+  }
+
   // ─── Game Over ────────────────────────────────────────────────────────────
 
   _gameOver() {
+    this._lookPanel?.hide();
     EventBus.emit(GameEvents.GAME_OVER);
     this.turnManager.setState(TURN_STATE.GAME_OVER);
     EventBus.emit(GameEvents.MESSAGE, 'You died! Press R to restart.');
@@ -1640,6 +1699,7 @@ export class GameScene extends Phaser.Scene {
   }
 
   _restart() {
+    this._lookPanel?.hide();
     // Clean up event listeners
     EventBus.removeAllListeners();
 
