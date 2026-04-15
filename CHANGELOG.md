@@ -9,6 +9,7 @@ Entries are listed newest-first within each section.
 
 ### Added
 
+- 2026-04-15 — **Equipment panel**: opening the inventory now also shows an equipment panel to its right with a Weapon slot and a Shield slot. Each slot displays the equipped item's name or "Empty" when nothing is equipped, and updates live as items are equipped.
 - 2026-04-15 — **Skeleton kill achievements and hunting skills**: killing 10 skeletons, 10 Skeleton Warriors, or 10 Skeleton Mages now unlocks the corresponding **Skeleton Hunting**, **Skeleton Warrior Hunting**, or **Skeleton Mage Hunting** permanent skill (+10% damage against that type).
 - 2026-04-15 — **Skeleton enemies (floors 10–15)**: three skeleton-themed enemy types now populate floors 10–15. Basic **Skeleton** (hp 12, atk 4) joins the roster from floor 10; **Skeleton Warrior** (hp 18, atk 6, def 3) appears as a heavily armoured variant from floor 10; **Skeleton Mage** (hp 10, atk 5, teleports) dominates floors 13–15. Floor 16+ returns to a troll/Creeping Mass heavy roster. All three enemy types have unique classic and modern pixel-art sprites.
 - 2026-04-15 — **Look cursor**: on non-touch devices press `l` to activate a cursor that starts on the player's tile. Direction keys move it around the visible map; the LookPanel updates with info about each tile under the cursor. Press `l` again or ESC to deactivate. Does not advance the game turn.
