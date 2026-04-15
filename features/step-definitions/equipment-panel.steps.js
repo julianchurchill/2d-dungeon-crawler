@@ -62,6 +62,16 @@ function createMockScene() {
   };
 }
 
+/**
+ * Minimal TilesetManager stub — prefixes the key with 'classic_' to simulate
+ * the real singleton behaviour without touching localStorage or Phaser textures.
+ *
+ * @returns {{ getTileKey: (key: string) => string }}
+ */
+function createMockTilesetManager() {
+  return { getTileKey: (key) => `classic_${key}` };
+}
+
 // ── Hooks ────────────────────────────────────────────────────────────────────
 
 /** Clean up INVENTORY_CHANGED listeners after each scenario. */
@@ -73,19 +83,19 @@ After(function () {
 
 Given('an equipment panel with an unequipped player', function () {
   this.player = new Player(0, 0);
-  this.equipmentPanel = new EquipmentPanel(createMockScene());
+  this.equipmentPanel = new EquipmentPanel(createMockScene(), createMockTilesetManager());
 });
 
 Given('an equipment panel with a player who has a short sword equipped', function () {
   this.player = new Player(0, 0);
   this.player.equippedWeapon = new Item(0, 0, ITEM_TYPES.SWORD);
-  this.equipmentPanel = new EquipmentPanel(createMockScene());
+  this.equipmentPanel = new EquipmentPanel(createMockScene(), createMockTilesetManager());
 });
 
 Given('an equipment panel with a player who has leather armor equipped', function () {
   this.player = new Player(0, 0);
   this.player.equippedArmor = new Item(0, 0, ITEM_TYPES.LEATHER_ARMOR);
-  this.equipmentPanel = new EquipmentPanel(createMockScene());
+  this.equipmentPanel = new EquipmentPanel(createMockScene(), createMockTilesetManager());
 });
 
 // ── When ─────────────────────────────────────────────────────────────────────
@@ -126,4 +136,30 @@ Then('the weapon slot label is {string}', function (expected) {
 Then('the shield slot label is {string}', function (expected) {
   const text = this.equipmentPanel._shieldLabel._text;
   assert.equal(text, expected, `Expected shield label "${expected}" but got "${text}"`);
+});
+
+Then('the weapon slot icon is not visible', function () {
+  assert.equal(this.equipmentPanel._weaponIcon._visible, false, 'Expected weapon icon to be hidden');
+});
+
+Then('the shield slot icon is not visible', function () {
+  assert.equal(this.equipmentPanel._shieldIcon._visible, false, 'Expected shield icon to be hidden');
+});
+
+Then('the weapon slot icon is visible', function () {
+  assert.equal(this.equipmentPanel._weaponIcon._visible, true, 'Expected weapon icon to be visible');
+});
+
+Then('the shield slot icon is visible', function () {
+  assert.equal(this.equipmentPanel._shieldIcon._visible, true, 'Expected shield icon to be visible');
+});
+
+Then('the weapon slot icon texture contains {string}', function (expected) {
+  const key = this.equipmentPanel._weaponIcon._textureKey ?? '';
+  assert.ok(key.includes(expected), `Expected weapon icon texture to contain "${expected}" but got "${key}"`);
+});
+
+Then('the shield slot icon texture contains {string}', function (expected) {
+  const key = this.equipmentPanel._shieldIcon._textureKey ?? '';
+  assert.ok(key.includes(expected), `Expected shield icon texture to contain "${expected}" but got "${key}"`);
 });
