@@ -9,8 +9,13 @@ Entries are listed newest-first within each section.
 
 ### Added
 
+- 2026-04-15 — **Skeleton enemies (floors 10–15)**: three skeleton-themed enemy types now populate floors 10–15. Basic **Skeleton** (hp 12, atk 4) joins the roster from floor 10; **Skeleton Warrior** (hp 18, atk 6, def 3) appears as a heavily armoured variant from floor 10; **Skeleton Mage** (hp 10, atk 5, teleports) dominates floors 13–15. Floor 16+ returns to a troll/Creeping Mass heavy roster. All three enemy types have unique classic and modern pixel-art sprites.
 - 2026-04-15 — **Look cursor**: on non-touch devices press `l` to activate a cursor that starts on the player's tile. Direction keys move it around the visible map; the LookPanel updates with info about each tile under the cursor. Press `l` again or ESC to deactivate. Does not advance the game turn.
 - 2026-04-15 — **Look**: clicking or touching any visible map cell shows a popup in the bottom-right corner describing what is there — enemy name and current/max HP, item name and description, or the tile name (Stone Floor, Stone Wall, Door, etc.). Only cells within the player's line of sight can be inspected. Looking does not advance the game turn.
+
+### Changed
+
+- 2026-04-15 — **Dev options — Start Floor / Start Level now unlimited**: removed the upper cap of 10 on Start Floor and 20 on Start Level; both can now be incremented without limit.
 
 ---
 

@@ -696,6 +696,52 @@ export class BootScene extends Phaser.Scene {
       g.fillRect(10, 13, 2, 3);
     });
 
+    // Skeleton Warrior — armoured skeleton with a visible chest-plate and shield arm
+    this._genTexture('classic_entity_skeleton_warrior', T, T, (g) => {
+      // Torso / armour plate
+      g.fillStyle(0xaaaaaa);
+      g.fillRect(5, 6, 6, 7);
+      // Armour highlight
+      g.fillStyle(0xcccccc);
+      g.fillRect(6, 7, 4, 2);
+      // Skull
+      g.fillStyle(0xcccccc);
+      g.fillRect(5, 1, 6, 5);
+      // Helmet top
+      g.fillStyle(0x888888);
+      g.fillRect(4, 1, 8, 2);
+      // Eyes — red
+      g.fillStyle(0xdd2222);
+      g.fillRect(6, 2, 1, 2);
+      g.fillRect(9, 2, 1, 2);
+      // Legs
+      g.fillStyle(0x999999);
+      g.fillRect(5, 13, 2, 3);
+      g.fillRect(9, 13, 2, 3);
+    });
+
+    // Skeleton Mage — robed skeleton with a glowing purple aura
+    this._genTexture('classic_entity_skeleton_mage', T, T, (g) => {
+      // Robe body
+      g.fillStyle(0x7755aa);
+      g.fillRect(4, 6, 8, 8);
+      // Robe shadow
+      g.fillStyle(0x553388);
+      g.fillRect(5, 10, 6, 4);
+      // Skull
+      g.fillStyle(0xcccccc);
+      g.fillRect(5, 1, 6, 5);
+      // Eyes — pale purple glow
+      g.fillStyle(0xcc88ff);
+      g.fillRect(6, 2, 1, 2);
+      g.fillRect(9, 2, 1, 2);
+      // Staff
+      g.fillStyle(0x885533);
+      g.fillRect(13, 2, 1, 10);
+      g.fillStyle(0xcc88ff);
+      g.fillRect(12, 1, 3, 2);
+    });
+
     // Old Bones — imposing ivory skeleton boss
     this._genTexture('classic_entity_old_bones', T, T, (g) => {
       g.fillStyle(0xeeeecc);
@@ -968,6 +1014,69 @@ export class BootScene extends Phaser.Scene {
       g.fillStyle(0xbbbbbb);
       g.fillRect(5, 13, 2, 3);
       g.fillRect(9, 13, 2, 3);
+    });
+
+    // Skeleton Warrior — armoured skeleton with bold metal highlights
+    this._genTexture('modern_entity_skeleton_warrior', T, T, (g) => {
+      // Dark silhouette
+      g.fillStyle(0x111111);
+      g.fillRect(4, 0, 8, 16);
+      g.fillRect(3, 6, 10, 8);
+      // Armour plate — cool grey steel
+      g.fillStyle(0xaaaaaa);
+      g.fillRect(4, 6, 8, 7);
+      // Armour highlight band
+      g.fillStyle(0xdddddd);
+      g.fillRect(5, 7, 6, 2);
+      // Helmet
+      g.fillStyle(0x888888);
+      g.fillRect(4, 0, 8, 3);
+      // Skull face
+      g.fillStyle(0xeeeeee);
+      g.fillRect(5, 2, 6, 4);
+      // Jaw
+      g.fillStyle(0xaaaaaa);
+      g.fillRect(5, 5, 6, 1);
+      // Eyes — vivid red
+      g.fillStyle(0xff2222);
+      g.fillRect(6, 3, 2, 2);
+      g.fillRect(9, 3, 2, 2);
+      // Leg bones
+      g.fillStyle(0xbbbbbb);
+      g.fillRect(4, 13, 3, 3);
+      g.fillRect(9, 13, 3, 3);
+    });
+
+    // Skeleton Mage — robed skeleton with vivid arcane glow
+    this._genTexture('modern_entity_skeleton_mage', T, T, (g) => {
+      // Dark silhouette
+      g.fillStyle(0x110022);
+      g.fillRect(4, 0, 8, 16);
+      g.fillRect(3, 6, 10, 10);
+      // Robe — rich purple
+      g.fillStyle(0x8833cc);
+      g.fillRect(4, 6, 8, 10);
+      // Robe shading
+      g.fillStyle(0x551199);
+      g.fillRect(5, 11, 6, 5);
+      // Skull
+      g.fillStyle(0xeeeeee);
+      g.fillRect(5, 1, 6, 5);
+      // Jaw
+      g.fillStyle(0xaaaaaa);
+      g.fillRect(5, 5, 6, 1);
+      // Eyes — vivid arcane purple
+      g.fillStyle(0xdd44ff);
+      g.fillRect(6, 2, 2, 2);
+      g.fillRect(9, 2, 2, 2);
+      // Staff
+      g.fillStyle(0x664400);
+      g.fillRect(13, 2, 2, 11);
+      // Orb
+      g.fillStyle(0xdd44ff);
+      g.fillRect(12, 0, 4, 4);
+      g.fillStyle(0xffffff);
+      g.fillRect(13, 1, 2, 2);
     });
 
     // Old Bones — imposing ivory boss with strong silhouette and crown
@@ -2143,6 +2252,107 @@ export class BootScene extends Phaser.Scene {
       g.fillStyle(0xbbbbbb);
       g.fillRect(7, 20, 4, 2);
       g.fillRect(21, 20, 4, 2);
+    });
+
+    // Skeleton Warrior — heavily armoured skeleton soldier
+    this._genTexture('hd_entity_skeleton_warrior', S, S, (g) => {
+      // Dark silhouette
+      g.fillStyle(0x0a0a0a);
+      g.fillRect(8, 0, 16, 32);
+      g.fillRect(6, 12, 20, 16);
+      // Armour plate — cool steel
+      g.fillStyle(0x888888);
+      g.fillRect(9, 12, 14, 14);
+      // Armour highlight band
+      g.fillStyle(0xcccccc);
+      g.fillRect(10, 14, 12, 3);
+      // Armour mid shade
+      g.fillStyle(0xaaaaaa);
+      g.fillRect(10, 17, 12, 9);
+      // Helmet
+      g.fillStyle(0x777777);
+      g.fillRect(8, 0, 16, 5);
+      g.fillStyle(0x999999);
+      g.fillRect(9, 1, 14, 3);
+      // Skull face beneath visor
+      g.fillStyle(0xdddddd);
+      g.fillRect(10, 4, 12, 8);
+      // Jaw
+      g.fillStyle(0xbbbbbb);
+      g.fillRect(11, 10, 10, 3);
+      // Jaw gap
+      g.fillStyle(0x0a0a0a);
+      g.fillRect(13, 11, 3, 2);
+      g.fillRect(17, 11, 3, 2);
+      // Eye sockets — red
+      g.fillStyle(0xff2222);
+      g.fillRect(11, 5, 4, 4);
+      g.fillRect(17, 5, 4, 4);
+      g.fillStyle(0xff6666, 0.5);
+      g.fillRect(12, 6, 2, 2);
+      g.fillRect(18, 6, 2, 2);
+      // Shoulder pauldrons
+      g.fillStyle(0x777777);
+      g.fillRect(5, 12, 5, 6);
+      g.fillRect(22, 12, 5, 6);
+      g.fillStyle(0xaaaaaa);
+      g.fillRect(6, 13, 3, 4);
+      g.fillRect(23, 13, 3, 4);
+      // Leg armour
+      g.fillStyle(0x888888);
+      g.fillRect(10, 26, 5, 6);
+      g.fillRect(17, 26, 5, 6);
+      // Leg highlight
+      g.fillStyle(0xaaaaaa);
+      g.fillRect(11, 27, 3, 4);
+      g.fillRect(18, 27, 3, 4);
+    });
+
+    // Skeleton Mage — robed skeleton with arcane staff and vivid purple aura
+    this._genTexture('hd_entity_skeleton_mage', S, S, (g) => {
+      // Dark silhouette
+      g.fillStyle(0x0a0010);
+      g.fillRect(8, 0, 16, 32);
+      g.fillRect(5, 12, 22, 20);
+      // Robe — rich purple
+      g.fillStyle(0x7722bb);
+      g.fillRect(6, 12, 20, 20);
+      // Robe shading — lower third
+      g.fillStyle(0x551199);
+      g.fillRect(7, 22, 18, 10);
+      // Robe hem detail
+      g.fillStyle(0x9944dd);
+      g.fillRect(6, 12, 20, 2);
+      // Skull
+      g.fillStyle(0xdddddd);
+      g.fillRect(10, 1, 12, 10);
+      // Jaw
+      g.fillStyle(0xbbbbbb);
+      g.fillRect(11, 9, 10, 3);
+      // Jaw gap
+      g.fillStyle(0x0a0010);
+      g.fillRect(13, 10, 3, 2);
+      g.fillRect(17, 10, 3, 2);
+      // Eye sockets — vivid arcane purple
+      g.fillStyle(0xcc33ff);
+      g.fillRect(11, 3, 4, 4);
+      g.fillRect(17, 3, 4, 4);
+      g.fillStyle(0xee99ff, 0.7);
+      g.fillRect(12, 4, 2, 2);
+      g.fillRect(18, 4, 2, 2);
+      // Staff
+      g.fillStyle(0x553300);
+      g.fillRect(26, 4, 3, 26);
+      // Orb housing
+      g.fillStyle(0x331144);
+      g.fillRect(23, 0, 9, 9);
+      // Orb glow
+      g.fillStyle(0xcc33ff);
+      g.fillRect(24, 1, 7, 7);
+      g.fillStyle(0xee99ff, 0.8);
+      g.fillRect(25, 2, 5, 5);
+      g.fillStyle(0xffffff, 0.9);
+      g.fillRect(26, 3, 3, 3);
     });
 
     // Old Bones — imposing ivory skeleton boss
