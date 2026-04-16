@@ -33,3 +33,13 @@ Feature: In-game help content adapts to device type
     Given the device is a touch device
     When the help content is retrieved
     Then the help content should mention "SKILLS"
+
+  Scenario: Keyboard help includes ranged attack binding
+    Given the device is not a touch device
+    When the help content is retrieved
+    Then the help content should mention "fire ranged weapon"
+
+  Scenario: Touch help includes BOW button
+    Given the device is a touch device
+    When the help content is retrieved
+    Then the help content should mention "BOW"

@@ -44,6 +44,8 @@ DPad (INV button)        ──► TOGGLE_INVENTORY     ──► GameScene._tog
 DPad (K button)          ──► TOGGLE_SKILLS        ──► GameScene._toggleSkills
 DPad (▼▼ button)         ──► USE_STAIRS           ──► GameScene._tryUseStairs
 DPad (≡ menu button)     ──► OPEN_IN_GAME_MENU   ──► GameScene (close log or open in-game menu)
+DPad (BOW button), R key ──► TOGGLE_RANGED_AIM   ──► GameScene._handleToggleRangedAim
+GameScene                ──► RANGED_AIM_MODE_CHANGED ──► DPad (BOW button highlight)
 
 AchievementSystem        ──► ACHIEVEMENT_UNLOCKED ──► GameScene → MESSAGE log
 AchievementSystem        ──► ACHIEVEMENT_UNLOCKED ──► UIScene → _showAchievementBanner
@@ -113,3 +115,5 @@ DialoguePanel (show/hide)──► DIALOGUE_TOGGLED     ──► GameScene (gat
 | `STORE_ITEM` | `'store-item'` | `{ index: number }` | DisplayCasePanel (inventory row) | GameScene._handleStoreItem |
 | `RETRIEVE_ITEM` | `'retrieve-item'` | `{ index: number }` | DisplayCasePanel (case row) | GameScene._handleRetrieveItem |
 | `DISPLAY_CASE_CHANGED` | `'display-case-changed'` | `{ displayCase, inventory }` | GameScene (after store/retrieve) | UIScene → DisplayCasePanel.refresh() |
+| `TOGGLE_RANGED_AIM` | `'toggle-ranged-aim'` | *(none)* | GameScene (R key), DPad (BOW button) | GameScene._handleToggleRangedAim |
+| `RANGED_AIM_MODE_CHANGED` | `'ranged-aim-mode-changed'` | `boolean` (active) | GameScene (aim mode toggle/cancel) | DPad (BOW button highlight) |

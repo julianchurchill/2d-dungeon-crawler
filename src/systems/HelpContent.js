@@ -33,6 +33,7 @@ export function getHelpContent(isTouchDev) {
         lines: [
           'INV    \u2014 open / close inventory',
           'SKILLS \u2014 open skills',
+          'BOW    \u2014 fire ranged weapon (aim mode)',
           '\u25bc\u25bc     \u2014 use stairs',
           '\u2261      \u2014 open this menu',
         ],
@@ -54,6 +55,7 @@ export function getHelpContent(isTouchDev) {
         'I       \u2014 open / close inventory',
         'k       \u2014 open skills',
         'l       \u2014 look cursor',
+        'r       \u2014 fire ranged weapon (aim mode)',
         '. or >  \u2014 use stairs',
         'ESC     \u2014 open this menu',
       ],

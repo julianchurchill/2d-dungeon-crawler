@@ -98,6 +98,12 @@ Given('an equipment panel with a player who has leather armor equipped', functio
   this.equipmentPanel = new EquipmentPanel(createMockScene(), createMockTilesetManager());
 });
 
+Given('an equipment panel with a player who has a short bow equipped', function () {
+  this.player = new Player(0, 0);
+  this.player.equippedRangedWeapon = new Item(0, 0, ITEM_TYPES.SHORT_BOW);
+  this.equipmentPanel = new EquipmentPanel(createMockScene(), createMockTilesetManager());
+});
+
 // ── When ─────────────────────────────────────────────────────────────────────
 
 When('the equipment panel is shown', function () {
@@ -115,6 +121,11 @@ When('a short sword is equipped via the inventory changed event', function () {
 
 When('leather armor is equipped via the inventory changed event', function () {
   this.player.equippedArmor = new Item(0, 0, ITEM_TYPES.LEATHER_ARMOR);
+  EventBus.emit(GameEvents.INVENTORY_CHANGED, this.player.inventory);
+});
+
+When('a short bow is equipped via the inventory changed event', function () {
+  this.player.equippedRangedWeapon = new Item(0, 0, ITEM_TYPES.SHORT_BOW);
   EventBus.emit(GameEvents.INVENTORY_CHANGED, this.player.inventory);
 });
 
@@ -162,4 +173,22 @@ Then('the weapon slot icon texture contains {string}', function (expected) {
 Then('the shield slot icon texture contains {string}', function (expected) {
   const key = this.equipmentPanel._shieldIcon._textureKey ?? '';
   assert.ok(key.includes(expected), `Expected shield icon texture to contain "${expected}" but got "${key}"`);
+});
+
+Then('the ranged slot label is {string}', function (expected) {
+  const text = this.equipmentPanel._rangedLabel._text;
+  assert.equal(text, expected, `Expected ranged label "${expected}" but got "${text}"`);
+});
+
+Then('the ranged slot icon is not visible', function () {
+  assert.equal(this.equipmentPanel._rangedIcon._visible, false, 'Expected ranged icon to be hidden');
+});
+
+Then('the ranged slot icon is visible', function () {
+  assert.equal(this.equipmentPanel._rangedIcon._visible, true, 'Expected ranged icon to be visible');
+});
+
+Then('the ranged slot icon texture contains {string}', function (expected) {
+  const key = this.equipmentPanel._rangedIcon._textureKey ?? '';
+  assert.ok(key.includes(expected), `Expected ranged icon texture to contain "${expected}" but got "${key}"`);
 });

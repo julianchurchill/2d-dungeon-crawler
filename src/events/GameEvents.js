@@ -330,4 +330,19 @@ export const GameEvents = {
    * @type {{ displayCase: DisplayCase, inventory: Item[] }}
    */
   DISPLAY_CASE_CHANGED: 'display-case-changed',
+
+  /**
+   * Request to toggle ranged-aim mode on or off.
+   * Emitted by: GameScene (R key), DPad (BOW button)
+   * Subscribed by: GameScene (_handleToggleRangedAim)
+   */
+  TOGGLE_RANGED_AIM: 'toggle-ranged-aim',
+
+  /**
+   * Ranged-aim mode has changed state.
+   * Emitted by: GameScene (when _aimingRanged flips)
+   * Subscribed by: DPad (highlights / dims the BOW button)
+   * @type {boolean} true = aim mode active, false = aim mode cancelled.
+   */
+  RANGED_AIM_MODE_CHANGED: 'ranged-aim-mode-changed',
 };

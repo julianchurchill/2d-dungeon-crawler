@@ -15,9 +15,10 @@ import { isDevEnvironment } from '../utils/Environment.js';
 
 /**
  * Default starting inventory used in development mode.
- * Gives the developer a representative set of items to test with immediately.
+ * Gives the developer a representative set of items to test with immediately,
+ * including one of each equipment type so all slots can be tested.
  */
-const DEV_START_ITEMS = ['HEALTH_POTION', 'HEALTH_POTION', 'MEGA_POTION', 'SWORD', 'LEATHER_ARMOR'];
+export const DEV_START_ITEMS = ['HEALTH_POTION', 'HEALTH_POTION', 'MEGA_POTION', 'SWORD', 'LEATHER_ARMOR', 'SHORT_BOW'];
 
 /**
  * Mutable singleton that holds the current developer option values.

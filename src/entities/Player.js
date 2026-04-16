@@ -26,6 +26,7 @@ export class Player {
     this.inventory = [];
     this.maxInventory = 20;
     this.equippedWeapon = null;
+    this.equippedRangedWeapon = null;
     this.equippedArmor = null;
     /** @type {DisplayCase} Persistent display case for unique items — survives floor transitions. */
     this.displayCase = new DisplayCase();
@@ -33,7 +34,20 @@ export class Player {
   }
 
   get attackPower() {
-    return this.stats.attack + (this.equippedWeapon?.attackBonus || 0);
+    return this.stats.attack
+      + (this.equippedWeapon?.attackBonus || 0)
+      + (this.equippedRangedWeapon?.attackBonus || 0);
+  }
+
+  /**
+   * The effective ranged attack power: base stat plus ranged-weapon bonus only.
+   * Melee weapon bonuses are intentionally excluded so that equipping a sword
+   * does not boost bow damage.
+   *
+   * @returns {number}
+   */
+  get rangedAttackPower() {
+    return this.stats.attack + (this.equippedRangedWeapon?.attackBonus || 0);
   }
 
   get defensePower() {

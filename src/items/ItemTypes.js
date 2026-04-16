@@ -73,6 +73,24 @@ export const ITEM_TYPES = {
     sellPrice: 35,
     unique: true,
   },
+  SHORT_BOW: {
+    id: 'short_bow',
+    name: 'Short Bow',
+    description: '+2 Attack',
+    textureKey: 'item_ranged_weapon',
+    type: 'ranged_weapon',
+    attackBonus: 2,
+    sellPrice: 12,
+  },
+  HAND_CROSSBOW: {
+    id: 'hand_crossbow',
+    name: 'Hand Crossbow',
+    description: '+4 Attack',
+    textureKey: 'item_ranged_weapon',
+    type: 'ranged_weapon',
+    attackBonus: 4,
+    sellPrice: 22,
+  },
   POTION_OF_MINOR_TELEPORTATION: {
     id: 'potion_of_minor_teleportation',
     name: 'Potion of Minor Teleportation',
@@ -100,7 +118,7 @@ export function getFloorLoot(floor, rng, unlockedItems = new Set()) {
   const pool = [
     ITEM_TYPES.HEALTH_POTION, ITEM_TYPES.HEALTH_POTION, ITEM_TYPES.HEALTH_POTION,
   ];
-  if (floor >= 1) pool.push(ITEM_TYPES.SWORD, ITEM_TYPES.LEATHER_ARMOR);
+  if (floor >= 1) pool.push(ITEM_TYPES.SWORD, ITEM_TYPES.LEATHER_ARMOR, ITEM_TYPES.SHORT_BOW);
   if (floor >= 2) {
     pool.push(
       ITEM_TYPES.MEGA_POTION, ITEM_TYPES.MEGA_POTION, ITEM_TYPES.MEGA_POTION,
@@ -108,6 +126,7 @@ export function getFloorLoot(floor, rng, unlockedItems = new Set()) {
     );
   }
   if (floor >= 3) pool.push(ITEM_TYPES.CHAIN_MAIL);
+  if (floor >= 4) pool.push(ITEM_TYPES.HAND_CROSSBOW);
   if (unlockedItems.has(ITEM_TYPES.POTION_OF_MINOR_TELEPORTATION.id)) {
     pool.push(ITEM_TYPES.POTION_OF_MINOR_TELEPORTATION);
   }

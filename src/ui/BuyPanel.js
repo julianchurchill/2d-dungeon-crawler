@@ -22,7 +22,7 @@ const TITLE_H = 46;
 const FOOTER_H = 32;
 
 /** Maps itemType to emoji icon. */
-const ICON_MAP = { consumable: '🧪', weapon: '⚔️', armor: '🛡️' };
+const ICON_MAP = { consumable: '🧪', weapon: '⚔️', ranged_weapon: '🏹', armor: '🛡️' };
 /** Maps shopType to display name. */
 const SHOP_NAMES = { potion: 'Potion Shop', weapon: 'Weapon Shop', armour: 'Armour Shop' };
 

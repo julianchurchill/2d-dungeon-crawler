@@ -85,3 +85,36 @@ Feature: Equipment Panel
     Given an equipment panel with a player who has leather armor equipped
     When the equipment panel is shown
     Then the shield slot icon texture contains "item_armor"
+
+  # ── Ranged slot ───────────────────────────────────────────────────────────────
+
+  Scenario: Ranged slot shows "Empty" when no ranged weapon is equipped
+    Given an equipment panel with an unequipped player
+    When the equipment panel is shown
+    Then the ranged slot label is "Empty"
+
+  Scenario: Ranged slot shows equipped ranged weapon name
+    Given an equipment panel with a player who has a short bow equipped
+    When the equipment panel is shown
+    Then the ranged slot label is "Short Bow"
+
+  Scenario: Ranged slot icon is hidden when no ranged weapon is equipped
+    Given an equipment panel with an unequipped player
+    When the equipment panel is shown
+    Then the ranged slot icon is not visible
+
+  Scenario: Ranged slot icon is visible when a ranged weapon is equipped
+    Given an equipment panel with a player who has a short bow equipped
+    When the equipment panel is shown
+    Then the ranged slot icon is visible
+
+  Scenario: Ranged slot icon uses the ranged weapon's texture key
+    Given an equipment panel with a player who has a short bow equipped
+    When the equipment panel is shown
+    Then the ranged slot icon texture contains "item_ranged_weapon"
+
+  Scenario: Equipment panel updates when ranged weapon is equipped while open
+    Given an equipment panel with an unequipped player
+    And the equipment panel is shown
+    When a short bow is equipped via the inventory changed event
+    Then the ranged slot label is "Short Bow"
