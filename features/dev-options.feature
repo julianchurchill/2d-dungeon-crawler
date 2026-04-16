@@ -11,6 +11,9 @@ Feature: Developer options
     And the start level should be 1
     And the start items should be empty
 
+  Scenario: Dev start items include a short bow
+    Then the dev start items should include "SHORT_BOW"
+
   Scenario: Start floor can be set
     When the start floor is set to 3
     Then the start floor should be 3

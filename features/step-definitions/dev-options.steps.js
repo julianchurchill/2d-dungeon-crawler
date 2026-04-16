@@ -1,6 +1,6 @@
 import { Given, When, Then, defineStep } from '@cucumber/cucumber';
 import assert from 'node:assert/strict';
-import { devOptions, resetDevOptions, applyToGame } from '../../src/systems/DevOptions.js';
+import { devOptions, resetDevOptions, applyToGame, DEV_START_ITEMS } from '../../src/systems/DevOptions.js';
 import { Player } from '../../src/entities/Player.js';
 import { FloorManager } from '../../src/systems/FloorManager.js';
 
@@ -46,6 +46,10 @@ Then('the start items should be empty', function () {
 
 Then('the starting items should contain {string}', function (key) {
   assert.ok(devOptions.startItems.includes(key), `Expected startItems to contain "${key}"`);
+});
+
+Then('the dev start items should include {string}', function (key) {
+  assert.ok(DEV_START_ITEMS.includes(key), `Expected DEV_START_ITEMS to include "${key}"`);
 });
 
 // ─── applyToGame helpers ───────────────────────────────────────────────────
