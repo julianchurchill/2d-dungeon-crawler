@@ -9,6 +9,7 @@ Entries are listed newest-first within each section.
 
 ### Added
 
+- 2026-04-16 — **Ranged weapon slot + Short Bow & Hand Crossbow**: the equipment panel now has a third **Ranged** slot. Two basic ranged weapons can be found as dungeon floor loot — **Short Bow** (+2 ATK, from floor 1) and **Hand Crossbow** (+4 ATK, from floor 4). Both contribute their attack bonus to the player's total attack power. All three tileset variants (classic, modern, HD) include a bow/arrow sprite for the new item.
 - 2026-04-15 — **Equipment panel item icons**: the Weapon and Shield slots in the equipment panel now display the equipped item's sprite icon, scaled to fill the slot. The icon is hidden when the slot is empty and updates live when items are equipped. The redundant "WPN / ARM" text bar at the bottom of the inventory panel has been removed.
 - 2026-04-15 — **Equipment panel**: opening the inventory now also shows an equipment panel to its right with a Weapon slot and a Shield slot. Each slot displays the equipped item's name or "Empty" when nothing is equipped, and updates live as items are equipped.
 - 2026-04-15 — **Skeleton kill achievements and hunting skills**: killing 10 skeletons, 10 Skeleton Warriors, or 10 Skeleton Mages now unlocks the corresponding **Skeleton Hunting**, **Skeleton Warrior Hunting**, or **Skeleton Mage Hunting** permanent skill (+10% damage against that type).

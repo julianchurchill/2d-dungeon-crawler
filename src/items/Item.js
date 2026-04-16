@@ -9,7 +9,7 @@ export class Item {
     this.shortName = typeDef.shortName;
     this.description = typeDef.description;
     this.textureKey = typeDef.textureKey;
-    this.itemType = typeDef.type; // 'consumable' | 'weapon' | 'armor'
+    this.itemType = typeDef.type; // 'consumable' | 'weapon' | 'ranged_weapon' | 'armor'
     this.sellPrice = typeDef.sellPrice ?? 0;
     this.unique = typeDef.unique ?? false;
     this.effect = typeDef.effect || null;
@@ -48,6 +48,9 @@ export class Item {
     } else if (this.itemType === 'weapon') {
       player.equippedWeapon = this;
       return `You equip the ${this.name}. (+${this.attackBonus} ATK)`;
+    } else if (this.itemType === 'ranged_weapon') {
+      player.equippedRangedWeapon = this;
+      return `You equip the ${this.name}. (+${this.attackBonus} ATK)`;
     } else if (this.itemType === 'armor') {
       player.equippedArmor = this;
       return `You equip the ${this.name}. (+${this.defenseBonus} DEF)`;
@@ -60,6 +63,6 @@ export class Item {
   }
 
   isEquipment() {
-    return this.itemType === 'weapon' || this.itemType === 'armor';
+    return this.itemType === 'weapon' || this.itemType === 'ranged_weapon' || this.itemType === 'armor';
   }
 }

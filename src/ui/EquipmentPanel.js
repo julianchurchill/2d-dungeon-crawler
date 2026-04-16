@@ -1,13 +1,14 @@
 /**
  * @module EquipmentPanel
- * @description Displays the player's equipped melee weapon and shield (armour)
- * as two labelled visual slots. The panel is shown and hidden alongside the
- * inventory panel and is positioned immediately to its right.
+ * @description Displays the player's equipped melee weapon, shield (armour),
+ * and ranged weapon as three labelled visual slots with item icons.  The panel
+ * is shown and hidden alongside the inventory panel and is positioned
+ * immediately to its right.
  *
  * Layout (all measurements in pixels):
- *   - Two large slots stacked vertically, each 72 × 72 px
- *   - Slot group = slot label (above) + slot box + item-name label (below)
- *   - The two groups are centred within the panel height
+ *   - Three slots stacked vertically, each 72 × 72 px
+ *   - Slot group = slot label (above) + slot box + icon + item-name label (below)
+ *   - All three groups are centred within the panel height (394 px)
  */
 
 import { FONT_FAMILY } from '../utils/FontConfig.js';
@@ -72,68 +73,67 @@ export class EquipmentPanel {
     }).setOrigin(0.5, 0);
     this._container.add(title);
 
-    // Vertical positions for the two slot groups
-    // Centre the two groups (each ~108 px tall) within the remaining height
-    const contentH  = 2 * (16 + SLOT_SIZE + 18) + 12; // 224 px
-    const startY    = Math.floor((PANEL_H - 30 - contentH) / 2) + 30;
+    // Vertical positions for the three slot groups.
+    // Each group: label (14px) + slot (SLOT_SIZE px) + name (14px) = 100px, plus 6px gap.
+    // 3 groups × 100px + 2 × 6px gaps = 312px content height.
+    const GROUP_STRIDE = 14 + SLOT_SIZE + 14 + 6; // 106 px per group
+    const contentH     = 3 * GROUP_STRIDE - 6;    // 312 px (no trailing gap)
+    const startY       = Math.floor((PANEL_H - 30 - contentH) / 2) + 30;
+
+    /**
+     * Creates one equipment slot group (title label + slot box + icon + name label)
+     * and adds all objects to the container.
+     *
+     * @param {number} groupY - Y position of the group's title label.
+     * @param {string} title  - Slot title displayed above the box.
+     * @returns {{ icon: object, label: object }}
+     */
+    const makeSlot = (groupY, title) => {
+      const labelY = groupY;
+      const slotY  = labelY + 14;
+      const nameY  = slotY + SLOT_SIZE + 2;
+
+      this._container.add(
+        s.add.text(PANEL_W / 2, labelY, title, {
+          fontSize: '11px', fontFamily: FONT_FAMILY, color: '#99bbdd',
+          stroke: '#000000', strokeThickness: 2, resolution: 2,
+        }).setOrigin(0.5, 0)
+      );
+
+      this._container.add(
+        s.add.rectangle(PANEL_W / 2, slotY + SLOT_SIZE / 2, SLOT_SIZE, SLOT_SIZE, 0x222233, 1)
+          .setStrokeStyle(1, 0x445566)
+      );
+
+      const icon = s.add.image(PANEL_W / 2, slotY + SLOT_SIZE / 2, '__DEFAULT')
+        .setDisplaySize(SLOT_SIZE - 8, SLOT_SIZE - 8)
+        .setVisible(false);
+      this._container.add(icon);
+
+      const label = s.add.text(PANEL_W / 2, nameY, 'Empty', {
+        fontSize: '10px', fontFamily: FONT_FAMILY, color: '#cccccc',
+        stroke: '#000000', strokeThickness: 2, resolution: 2,
+        wordWrap: { width: SLOT_SIZE }, align: 'center',
+      }).setOrigin(0.5, 0);
+      this._container.add(label);
+
+      return { icon, label };
+    };
 
     // ── Weapon slot ──
-    const wLabelY  = startY;
-    const wSlotY   = wLabelY + 18;
-    const wNameY   = wSlotY + SLOT_SIZE / 2 + 8;
-
-    this._container.add(
-      s.add.text(PANEL_W / 2, wLabelY, 'Weapon', {
-        fontSize: '11px', fontFamily: FONT_FAMILY, color: '#99bbdd',
-        stroke: '#000000', strokeThickness: 2, resolution: 2,
-      }).setOrigin(0.5, 0)
-    );
-
-    this._weaponBg = s.add.rectangle(PANEL_W / 2, wSlotY + SLOT_SIZE / 2, SLOT_SIZE, SLOT_SIZE, 0x222233, 1)
-      .setStrokeStyle(1, 0x445566);
-    this._container.add(this._weaponBg);
-
-    // Icon centred within the weapon slot; hidden until an item is equipped.
-    this._weaponIcon = s.add.image(PANEL_W / 2, wSlotY + SLOT_SIZE / 2, '__DEFAULT')
-      .setDisplaySize(SLOT_SIZE - 8, SLOT_SIZE - 8)
-      .setVisible(false);
-    this._container.add(this._weaponIcon);
-
-    this._weaponLabel = s.add.text(PANEL_W / 2, wNameY, 'Empty', {
-      fontSize: '10px', fontFamily: FONT_FAMILY, color: '#cccccc',
-      stroke: '#000000', strokeThickness: 2, resolution: 2,
-      wordWrap: { width: SLOT_SIZE }, align: 'center',
-    }).setOrigin(0.5, 0);
-    this._container.add(this._weaponLabel);
+    const wpn = makeSlot(startY, 'Weapon');
+    this._weaponIcon  = wpn.icon;
+    this._weaponLabel = wpn.label;
 
     // ── Shield slot ──
-    const sLabelY  = startY + 16 + SLOT_SIZE + 20 + 12;
-    const sSlotY   = sLabelY + 18;
-    const sNameY   = sSlotY + SLOT_SIZE / 2 + 8;
+    const shd = makeSlot(startY + GROUP_STRIDE, 'Shield');
+    this._shieldIcon  = shd.icon;
+    this._shieldLabel = shd.label;
 
-    this._container.add(
-      s.add.text(PANEL_W / 2, sLabelY, 'Shield', {
-        fontSize: '11px', fontFamily: FONT_FAMILY, color: '#99bbdd',
-        stroke: '#000000', strokeThickness: 2, resolution: 2,
-      }).setOrigin(0.5, 0)
-    );
-
-    this._shieldBg = s.add.rectangle(PANEL_W / 2, sSlotY + SLOT_SIZE / 2, SLOT_SIZE, SLOT_SIZE, 0x222233, 1)
-      .setStrokeStyle(1, 0x445566);
-    this._container.add(this._shieldBg);
-
-    // Icon centred within the shield slot; hidden until an item is equipped.
-    this._shieldIcon = s.add.image(PANEL_W / 2, sSlotY + SLOT_SIZE / 2, '__DEFAULT')
-      .setDisplaySize(SLOT_SIZE - 8, SLOT_SIZE - 8)
-      .setVisible(false);
-    this._container.add(this._shieldIcon);
-
-    this._shieldLabel = s.add.text(PANEL_W / 2, sNameY, 'Empty', {
-      fontSize: '10px', fontFamily: FONT_FAMILY, color: '#cccccc',
-      stroke: '#000000', strokeThickness: 2, resolution: 2,
-      wordWrap: { width: SLOT_SIZE }, align: 'center',
-    }).setOrigin(0.5, 0);
-    this._container.add(this._shieldLabel);
+    // ── Ranged slot ──
+    const rng = makeSlot(startY + GROUP_STRIDE * 2, 'Ranged');
+    this._rangedIcon  = rng.icon;
+    this._rangedLabel = rng.label;
 
     // Refresh when inventory changes (e.g. player equips an item)
     EventBus.on(GameEvents.INVENTORY_CHANGED, () => {
@@ -192,30 +192,30 @@ export class EquipmentPanel {
   }
 
   /**
-   * Updates the weapon and shield slot labels and icons from the stored player
-   * reference.  Icons are shown with the item's tileset-prefixed texture when
-   * an item is equipped and hidden when the slot is empty.
+   * Updates all slot labels and icons from the stored player reference.
+   * Icons are shown with the item's tileset-prefixed texture when an item is
+   * equipped and hidden when the slot is empty.
    */
   _refresh() {
     if (!this._player) return;
+    this._refreshSlot(this._player.equippedWeapon,        this._weaponIcon, this._weaponLabel);
+    this._refreshSlot(this._player.equippedArmor,         this._shieldIcon, this._shieldLabel);
+    this._refreshSlot(this._player.equippedRangedWeapon,  this._rangedIcon, this._rangedLabel);
+  }
 
-    const weapon = this._player.equippedWeapon;
-    const armor  = this._player.equippedArmor;
-
-    this._weaponLabel.setText(weapon?.name ?? 'Empty');
-    if (weapon) {
-      this._weaponIcon.setTexture(this._tilesetManager.getTileKey(weapon.textureKey))
-        .setVisible(true);
+  /**
+   * Updates a single equipment slot's icon and name label.
+   *
+   * @param {import('../items/Item.js').Item|null} item   - Equipped item or null.
+   * @param {object} icon  - Phaser Image object for the slot icon.
+   * @param {object} label - Phaser Text object for the item name.
+   */
+  _refreshSlot(item, icon, label) {
+    label.setText(item?.name ?? 'Empty');
+    if (item) {
+      icon.setTexture(this._tilesetManager.getTileKey(item.textureKey)).setVisible(true);
     } else {
-      this._weaponIcon.setVisible(false);
-    }
-
-    this._shieldLabel.setText(armor?.name ?? 'Empty');
-    if (armor) {
-      this._shieldIcon.setTexture(this._tilesetManager.getTileKey(armor.textureKey))
-        .setVisible(true);
-    } else {
-      this._shieldIcon.setVisible(false);
+      icon.setVisible(false);
     }
   }
 }

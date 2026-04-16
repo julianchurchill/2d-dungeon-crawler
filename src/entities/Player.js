@@ -26,6 +26,7 @@ export class Player {
     this.inventory = [];
     this.maxInventory = 20;
     this.equippedWeapon = null;
+    this.equippedRangedWeapon = null;
     this.equippedArmor = null;
     /** @type {DisplayCase} Persistent display case for unique items — survives floor transitions. */
     this.displayCase = new DisplayCase();
@@ -33,7 +34,9 @@ export class Player {
   }
 
   get attackPower() {
-    return this.stats.attack + (this.equippedWeapon?.attackBonus || 0);
+    return this.stats.attack
+      + (this.equippedWeapon?.attackBonus || 0)
+      + (this.equippedRangedWeapon?.attackBonus || 0);
   }
 
   get defensePower() {

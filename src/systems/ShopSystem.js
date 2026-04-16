@@ -8,7 +8,7 @@
 /** Maps shop type → the item type categories it accepts. */
 export const SHOP_ACCEPTED_TYPES = {
   potion: ['consumable'],
-  weapon: ['weapon'],
+  weapon: ['weapon', 'ranged_weapon'],
   armour: ['armor'],
 };
 

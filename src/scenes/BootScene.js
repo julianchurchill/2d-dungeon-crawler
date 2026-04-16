@@ -1270,6 +1270,22 @@ export class BootScene extends Phaser.Scene {
       g.fillRect(T/2 - 3, 6, 6, 2);
     });
 
+    // Ranged weapon — bow shape (arc + arrow)
+    this._genTexture('classic_item_ranged_weapon', T, T, (g) => {
+      // Bow stave — curved brown arc drawn as a rotated rectangle
+      g.fillStyle(0x885533);
+      g.fillRect(T/2 - 1, 2, 2, 12);      // stave
+      g.fillStyle(0xaaaaaa);
+      g.fillRect(T/2 - 1, 7, 1, 1);       // string centre
+      g.fillRect(T/2 - 3, 3, 1, 1);       // top string
+      g.fillRect(T/2 - 3, 13, 1, 1);      // bottom string
+      // Arrow — thin horizontal line
+      g.fillStyle(0xcccccc);
+      g.fillRect(4, 7, 8, 1);             // arrow shaft
+      g.fillStyle(0xddaa44);
+      g.fillRect(3, 6, 2, 3);             // arrowhead
+    });
+
     // Bone Blade — serrated ivory weapon
     this._genTexture('classic_item_bone_blade', T, T, (g) => {
       g.fillStyle(0xeeeecc);
@@ -1385,6 +1401,33 @@ export class BootScene extends Phaser.Scene {
       // Gem at cross centre
       g.fillStyle(0xff3366);
       g.fillRect(T/2, 6, 2, 2);
+    });
+
+    // Ranged weapon — detailed bow with colour-shaded stave and taut string
+    this._genTexture('modern_item_ranged_weapon', T, T, (g) => {
+      // Bow stave shadow
+      g.fillStyle(0x442211);
+      g.fillRect(T/2 - 2, 1, 3, 14);
+      // Bow stave main
+      g.fillStyle(0xaa6633);
+      g.fillRect(T/2 - 1, 1, 2, 14);
+      // Bow stave highlight
+      g.fillStyle(0xddaa66, 0.7);
+      g.fillRect(T/2, 2, 1, 12);
+      // String
+      g.fillStyle(0xeeeecc);
+      g.fillRect(T/2 - 4, 2, 1, 1);
+      g.fillRect(T/2 - 4, 13, 1, 1);
+      g.fillRect(T/2 - 3, 6, 1, 1);
+      g.fillRect(T/2 - 3, 9, 1, 1);
+      // Arrow shaft
+      g.fillStyle(0xbbaa77);
+      g.fillRect(4, 7, 8, 1);
+      // Arrowhead
+      g.fillStyle(0xcccccc);
+      g.fillRect(3, 6, 2, 3);
+      g.fillStyle(0xaaaaaa);
+      g.fillRect(3, 7, 1, 1);
     });
 
     // Bone Blade — gleaming bone blade with vivid amber guard
@@ -2750,6 +2793,43 @@ export class BootScene extends Phaser.Scene {
       g.fillStyle(0x7799bb);
       g.fillRect(4, 2, 24, 1);
       g.fillRect(4, 2, 1, 18);
+    });
+
+    // Ranged weapon — detailed 32×32 bow with shaded stave and arrow
+    this._genTexture('hd_item_ranged_weapon', S, S, (g) => {
+      // Bow stave shadow
+      g.fillStyle(0x331100);
+      g.fillRect(S/2 - 3, 2, 5, 28);
+      // Stave body
+      g.fillStyle(0xaa6633);
+      g.fillRect(S/2 - 2, 2, 4, 28);
+      // Stave highlight
+      g.fillStyle(0xddaa66, 0.8);
+      g.fillRect(S/2 + 1, 3, 1, 26);
+      // Dark inner edge for depth
+      g.fillStyle(0x774422);
+      g.fillRect(S/2 - 2, 3, 1, 26);
+      // Bowstring
+      g.fillStyle(0xeeeedd);
+      g.fillRect(S/2 - 7, 3, 2, 1);    // top anchor
+      g.fillRect(S/2 - 7, 28, 2, 1);   // bottom anchor
+      g.fillRect(S/2 - 6, 4, 1, 5);    // top run
+      g.fillRect(S/2 - 6, 23, 1, 5);   // bottom run
+      g.fillRect(S/2 - 5, 9, 1, 3);    // mid-top
+      g.fillRect(S/2 - 5, 20, 1, 3);   // mid-bottom
+      g.fillRect(S/2 - 4, 12, 1, 8);   // centre run
+      // Arrow shaft
+      g.fillStyle(0xbbaa77);
+      g.fillRect(6, S/2 - 1, 18, 2);
+      // Arrowhead
+      g.fillStyle(0xcccccc);
+      g.fillRect(4, S/2 - 3, 4, 6);
+      g.fillStyle(0xaaaaaa);
+      g.fillRect(4, S/2 - 1, 2, 2);
+      // Fletching
+      g.fillStyle(0xcc4444);
+      g.fillRect(22, S/2 - 3, 2, 3);
+      g.fillRect(22, S/2, 2, 3);
     });
 
     // Bone Blade — pale ivory weapon with detailed serrations and amber pommel
