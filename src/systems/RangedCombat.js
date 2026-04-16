@@ -5,30 +5,50 @@
  */
 
 /**
+ * How many extra tiles beyond the weapon's range to scan when looking for
+ * an out-of-range enemy.  A value of 20 comfortably covers any practical
+ * dungeon width/height.
+ */
+const OUT_OF_RANGE_LOOKAHEAD = 20;
+
+/**
  * Find the first entity in a straight line from the shooter's position.
- * Scans tile-by-tile in the given direction until an opaque tile (wall) is
- * encountered, the range is exhausted, or an entity is found.
+ * Scans tile-by-tile in the given direction.
  *
- * @param {number}   px         - Shooter tile X.
- * @param {number}   py         - Shooter tile Y.
- * @param {number}   dx         - Direction X (-1, 0, or 1).
- * @param {number}   dy         - Direction Y (-1, 0, or 1).
- * @param {number}   range      - Maximum number of tiles to scan.
- * @param {function} isOpaque   - (x, y) => boolean — true when the tile blocks projectiles.
- * @param {function} getEntityAt - (x, y) => entity | null — returns the first entity at the tile.
- * @returns {object|null} The first entity found, or null if the path is clear / out of range.
+ * Within `range` tiles: returns the entity if found (wall stops the scan).
+ * Beyond `range` tiles: continues scanning up to OUT_OF_RANGE_LOOKAHEAD
+ * additional tiles so callers can tell the player their target is out of range
+ * rather than simply absent.
+ *
+ * @param {number}   px          - Shooter tile X.
+ * @param {number}   py          - Shooter tile Y.
+ * @param {number}   dx          - Direction X (-1, 0, or 1).
+ * @param {number}   dy          - Direction Y (-1, 0, or 1).
+ * @param {number}   range       - Maximum fire range in tiles.
+ * @param {function} isOpaque    - (x, y) => boolean — true when the tile blocks projectiles.
+ * @param {function} getEntityAt - (x, y) => entity | null — returns the entity at the tile.
+ * @returns {{ target: object|null, outOfRange: boolean }}
+ *   `target` is the entity within range (or null).
+ *   `outOfRange` is true when an entity was found beyond range (not blocked by a wall first).
  */
 export function findRangedTarget(px, py, dx, dy, range, isOpaque, getEntityAt) {
-  for (let step = 1; step <= range; step++) {
+  const totalScan = range + OUT_OF_RANGE_LOOKAHEAD;
+
+  for (let step = 1; step <= totalScan; step++) {
     const tx = px + dx * step;
     const ty = py + dy * step;
 
-    if (isOpaque(tx, ty)) return null;
+    if (isOpaque(tx, ty)) return { target: null, outOfRange: false };
 
     const entity = getEntityAt(tx, ty);
-    if (entity) return entity;
+    if (entity) {
+      // Entity found within fire range — targetable.
+      if (step <= range) return { target: entity, outOfRange: false };
+      // Entity found beyond fire range — not targetable but worth reporting.
+      return { target: null, outOfRange: true };
+    }
   }
-  return null;
+  return { target: null, outOfRange: false };
 }
 
 /**

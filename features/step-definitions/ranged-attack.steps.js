@@ -2,7 +2,7 @@
  * Step definitions for the ranged attack feature.
  *
  * Covers:
- *   - findRangedTarget: target-finding logic (walls, range, nearest-first)
+ *   - findRangedTarget: target-finding logic (walls, range, nearest-first, out-of-range)
  *   - resolveRangedAttack: damage, kill detection, and message content
  *   - Player.rangedAttackPower: only counts ranged-weapon bonus, not melee
  */
@@ -68,7 +68,8 @@ Given('a wall at tile {int}, {int}', function (x, y) {
 // ── When — target finding ─────────────────────────────────────────────────────
 
 When('finding a ranged target upward with range {int}', function (range) {
-  this.rangedTarget = findRangedTarget(
+  // findRangedTarget returns { target, outOfRange }
+  this.rangedFindResult = findRangedTarget(
     this.playerX, this.playerY,
     0, -1,           // dx=0, dy=-1 (up)
     range,
@@ -80,13 +81,31 @@ When('finding a ranged target upward with range {int}', function (range) {
 // ── Then — target finding ─────────────────────────────────────────────────────
 
 Then('the ranged target should be the enemy at {int}, {int}', function (x, y) {
-  assert.ok(this.rangedTarget !== null, 'Expected a ranged target but got null');
-  assert.equal(this.rangedTarget.x, x, `Expected target x=${x} but got ${this.rangedTarget.x}`);
-  assert.equal(this.rangedTarget.y, y, `Expected target y=${y} but got ${this.rangedTarget.y}`);
+  const target = this.rangedFindResult.target;
+  assert.ok(target !== null, 'Expected a ranged target but got null');
+  assert.equal(target.x, x, `Expected target x=${x} but got ${target.x}`);
+  assert.equal(target.y, y, `Expected target y=${y} but got ${target.y}`);
 });
 
 Then('no ranged target should be found', function () {
-  assert.equal(this.rangedTarget, null, 'Expected no ranged target but one was found');
+  assert.equal(
+    this.rangedFindResult.target, null,
+    'Expected no ranged target but one was found',
+  );
+});
+
+Then('the search result should indicate out of range', function () {
+  assert.ok(
+    this.rangedFindResult.outOfRange,
+    'Expected outOfRange to be true but it was false',
+  );
+});
+
+Then('the search result should not indicate out of range', function () {
+  assert.ok(
+    !this.rangedFindResult.outOfRange,
+    'Expected outOfRange to be false but it was true',
+  );
 });
 
 // ── Given — attack resolution ─────────────────────────────────────────────────

@@ -33,6 +33,15 @@ Feature: Ranged Attack
     And no walls block the path
     When finding a ranged target upward with range 6
     Then no ranged target should be found
+    And the search result should indicate out of range
+
+  Scenario: Wall-blocked shot is not flagged as out of range
+    Given the player is at tile 5, 5
+    And a wall at tile 5, 3
+    And an enemy is at tile 5, 2
+    When finding a ranged target upward with range 6
+    Then no ranged target should be found
+    And the search result should not indicate out of range
 
   Scenario: Nearest enemy in line is targeted first
     Given the player is at tile 5, 5

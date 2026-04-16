@@ -858,7 +858,7 @@ export class GameScene extends Phaser.Scene {
     this._setAimingRanged(false);
 
     const RANGED_RANGE = 6;
-    const target = findRangedTarget(
+    const { target, outOfRange } = findRangedTarget(
       this.player.x, this.player.y,
       dx, dy,
       RANGED_RANGE,
@@ -867,7 +867,8 @@ export class GameScene extends Phaser.Scene {
     );
 
     if (!target) {
-      EventBus.emit(GameEvents.MESSAGE, 'No target in that direction.');
+      const msg = outOfRange ? 'Target is out of range.' : 'No target in that direction.';
+      EventBus.emit(GameEvents.MESSAGE, msg);
       return;
     }
 
