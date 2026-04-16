@@ -125,21 +125,13 @@ export class InventoryPanel {
     }
 
     // Item description — updates when the cursor moves; empty when slot is empty.
-    // Positioned above the equipped bar; word wrap prevents overflow on longer descriptions.
-    this._descText = s.add.text(PANEL_PAD, panelH - PANEL_PAD - 16, '', {
+    // Anchored to the bottom of the panel with PANEL_PAD margin.
+    this._descText = s.add.text(PANEL_PAD, panelH - PANEL_PAD, '', {
       fontSize: '11px', fontFamily: FONT_FAMILY, color: '#ddddaa',
       stroke: '#000000', strokeThickness: 2, resolution: 2,
       wordWrap: { width: panelW - PANEL_PAD * 2 },
     }).setOrigin(0, 1);
     this._container.add(this._descText);
-
-    // Equipped display
-    // setOrigin(0, 1) anchors to bottom-left, giving PANEL_PAD margin from the panel edge.
-    this._equippedText = s.add.text(PANEL_PAD, panelH - PANEL_PAD, 'WPN: -   ARM: -', {
-      fontSize: '11px', fontFamily: FONT_FAMILY, color: '#88aacc',
-      stroke: '#000000', strokeThickness: 2, resolution: 2,
-    }).setOrigin(0, 1);
-    this._container.add(this._equippedText);
 
     // Refresh the equipped-name display whenever the inventory changes.
     // InventorySystem emits 'inventory-changed' after every interaction.
@@ -296,11 +288,6 @@ export class InventoryPanel {
       }
     }
 
-    if (player) {
-      const wpn = (player.equippedWeapon?.shortName ?? player.equippedWeapon?.name) || '-';
-      const arm = (player.equippedArmor?.shortName  ?? player.equippedArmor?.name)  || '-';
-      this._equippedText.setText(`WPN: ${wpn}   ARM: ${arm}`);
-    }
   }
 
   resize(width, height) {

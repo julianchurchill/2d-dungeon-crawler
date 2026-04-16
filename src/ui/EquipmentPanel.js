@@ -13,6 +13,7 @@
 import { FONT_FAMILY } from '../utils/FontConfig.js';
 import { EventBus } from '../utils/EventBus.js';
 import { GameEvents } from '../events/GameEvents.js';
+import { tilesetManager as defaultTilesetManager } from '../systems/TilesetManager.js';
 
 /** Width of each equipment slot in pixels. */
 const SLOT_SIZE  = 72;
@@ -30,11 +31,15 @@ const INV_PANEL_W = 4 * (54 + 4) + PANEL_PAD * 2;       // 264 px
 export class EquipmentPanel {
   /**
    * @param {Phaser.Scene} scene - The UIScene instance.
+   * @param {import('../systems/TilesetManager.js').TilesetManager} [tilesetManager]
+   *   Injected tileset manager; defaults to the singleton. Pass a custom instance
+   *   in tests to control the active tileset without touching localStorage.
    */
-  constructor(scene) {
-    this.scene   = scene;
-    this.visible = false;
-    this._player = null;
+  constructor(scene, tilesetManager = defaultTilesetManager) {
+    this.scene           = scene;
+    this._tilesetManager = tilesetManager;
+    this.visible         = false;
+    this._player         = null;
     this._build();
   }
 
@@ -88,6 +93,12 @@ export class EquipmentPanel {
       .setStrokeStyle(1, 0x445566);
     this._container.add(this._weaponBg);
 
+    // Icon centred within the weapon slot; hidden until an item is equipped.
+    this._weaponIcon = s.add.image(PANEL_W / 2, wSlotY + SLOT_SIZE / 2, '__DEFAULT')
+      .setDisplaySize(SLOT_SIZE - 8, SLOT_SIZE - 8)
+      .setVisible(false);
+    this._container.add(this._weaponIcon);
+
     this._weaponLabel = s.add.text(PANEL_W / 2, wNameY, 'Empty', {
       fontSize: '10px', fontFamily: FONT_FAMILY, color: '#cccccc',
       stroke: '#000000', strokeThickness: 2, resolution: 2,
@@ -110,6 +121,12 @@ export class EquipmentPanel {
     this._shieldBg = s.add.rectangle(PANEL_W / 2, sSlotY + SLOT_SIZE / 2, SLOT_SIZE, SLOT_SIZE, 0x222233, 1)
       .setStrokeStyle(1, 0x445566);
     this._container.add(this._shieldBg);
+
+    // Icon centred within the shield slot; hidden until an item is equipped.
+    this._shieldIcon = s.add.image(PANEL_W / 2, sSlotY + SLOT_SIZE / 2, '__DEFAULT')
+      .setDisplaySize(SLOT_SIZE - 8, SLOT_SIZE - 8)
+      .setVisible(false);
+    this._container.add(this._shieldIcon);
 
     this._shieldLabel = s.add.text(PANEL_W / 2, sNameY, 'Empty', {
       fontSize: '10px', fontFamily: FONT_FAMILY, color: '#cccccc',
@@ -175,13 +192,30 @@ export class EquipmentPanel {
   }
 
   /**
-   * Updates the weapon and shield slot labels from the stored player reference.
+   * Updates the weapon and shield slot labels and icons from the stored player
+   * reference.  Icons are shown with the item's tileset-prefixed texture when
+   * an item is equipped and hidden when the slot is empty.
    */
   _refresh() {
     if (!this._player) return;
-    const wpn = this._player.equippedWeapon?.name ?? 'Empty';
-    const arm = this._player.equippedArmor?.name  ?? 'Empty';
-    this._weaponLabel.setText(wpn);
-    this._shieldLabel.setText(arm);
+
+    const weapon = this._player.equippedWeapon;
+    const armor  = this._player.equippedArmor;
+
+    this._weaponLabel.setText(weapon?.name ?? 'Empty');
+    if (weapon) {
+      this._weaponIcon.setTexture(this._tilesetManager.getTileKey(weapon.textureKey))
+        .setVisible(true);
+    } else {
+      this._weaponIcon.setVisible(false);
+    }
+
+    this._shieldLabel.setText(armor?.name ?? 'Empty');
+    if (armor) {
+      this._shieldIcon.setTexture(this._tilesetManager.getTileKey(armor.textureKey))
+        .setVisible(true);
+    } else {
+      this._shieldIcon.setVisible(false);
+    }
   }
 }
