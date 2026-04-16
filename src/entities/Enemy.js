@@ -1,4 +1,5 @@
 import { ENEMY_DEFS } from './EnemyTypes.js';
+import { findRangedTarget } from '../systems/RangedCombat.js';
 
 export class Enemy {
   constructor(x, y, type) {
@@ -18,6 +19,10 @@ export class Enemy {
     this.textureKey = def.textureKey;
     this.teleportChance = def.teleportChance ?? 0;
     this.teleportRange = def.teleportRange ?? 0;
+    /** Ranged attack power (0 = no ranged attack). */
+    this.rangedAttackPower = def.rangedAttackPower ?? 0;
+    /** Maximum range in tiles for ranged attacks (0 = no ranged attack). */
+    this.rangedRange = def.rangedRange ?? 0;
     this.sprite = null; // set by GameScene
     this.id = `${type}_${x}_${y}_${Math.random().toString(36).slice(2, 7)}`;
   }
@@ -38,14 +43,20 @@ export class Enemy {
    * @param {DungeonMap} map
    * @param {function} getEntityAt - (x, y) => entity
    * @param {object} rng
-   * @returns {{ action: 'idle'|'move'|'attack'|'teleport', dx?: number, dy?: number, x?: number, y?: number, target?: entity }}
+   * @returns {{ action: 'idle'|'move'|'attack'|'ranged_attack'|'teleport', dx?: number, dy?: number, x?: number, y?: number, target?: entity }}
    */
   takeTurn(player, map, getEntityAt, rng) {
     const distToPlayer = Math.abs(this.x - player.x) + Math.abs(this.y - player.y);
 
-    // Check if adjacent to player
+    // Check if adjacent to player — always melee when touching
     if (distToPlayer === 1) {
       return { action: 'attack', target: player };
+    }
+
+    // Ranged attack: fire when the player is cardinally aligned and within range
+    if (this.rangedAttackPower > 0) {
+      const ranged = this._tryRangedAttack(player, map, getEntityAt);
+      if (ranged) return ranged;
     }
 
     // Teleport chance — substitutes for normal movement when it fires
@@ -101,6 +112,43 @@ export class Enemy {
         return { action: 'teleport', x, y };
       }
     }
+    return null;
+  }
+
+  /**
+   * Attempt a ranged attack on the player if they are cardinally aligned
+   * and within range with no opaque tile blocking the shot.
+   *
+   * @param {object}     player      - The player entity.
+   * @param {DungeonMap} map         - Map providing isOpaque().
+   * @param {function}   getEntityAt - (x, y) => entity | null
+   * @returns {{ action: 'ranged_attack', target: object }|null}
+   */
+  _tryRangedAttack(player, map, getEntityAt) {
+    const pdx = player.x - this.x;
+    const pdy = player.y - this.y;
+
+    // Only fire along a cardinal axis (not diagonally, not same tile)
+    if (pdx !== 0 && pdy !== 0) return null;
+    if (pdx === 0 && pdy === 0) return null;
+
+    const dx = pdx === 0 ? 0 : Math.sign(pdx);
+    const dy = pdy === 0 ? 0 : Math.sign(pdy);
+
+    // Include the player in entity lookups so the scan can find them even when
+    // they are not registered in the tile-entity map.
+    const getEntityOrPlayer = (x, y) => {
+      if (x === player.x && y === player.y) return player;
+      return getEntityAt(x, y);
+    };
+
+    const { target } = findRangedTarget(
+      this.x, this.y, dx, dy, this.rangedRange,
+      (x, y) => map.isOpaque(x, y),
+      getEntityOrPlayer,
+    );
+
+    if (target === player) return { action: 'ranged_attack', target: player };
     return null;
   }
 

@@ -1759,6 +1759,19 @@ export class GameScene extends Phaser.Scene {
           this._gameOver();
           return;
         }
+      } else if (result.action === 'ranged_attack') {
+        const { damage, killed, messages } = resolveRangedAttack(
+          enemy, this.player, this.rng,
+          { defenderIsInvincible: devOptions.playerInvincible },
+        );
+        messages.forEach(msg => EventBus.emit(GameEvents.MESSAGE, msg));
+        this._flashSprite(this.playerSprite, 0xff8800);
+        this._syncRegistry();
+
+        if (this.player.isDead()) {
+          this._gameOver();
+          return;
+        }
       } else if (result.action === 'move') {
         this.dungeonMap.setEntity(enemy.x, enemy.y, null);
         enemy.x += result.dx;

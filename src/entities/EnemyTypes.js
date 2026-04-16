@@ -83,7 +83,8 @@ export const ENEMY_DEFS = {
     color: 0xccccbb,
   },
   /**
-   * Skeleton Mage — a fragile but elusive skeletal caster that teleports.
+   * Skeleton Mage — a fragile but elusive skeletal caster that teleports and
+   * fires magical bolts at the player when cardinally aligned.
    * Appears in the regular spawn table from floor 13 onward.
    */
   skeleton_mage: {
@@ -97,6 +98,25 @@ export const ENEMY_DEFS = {
     color: 0xaaaacc,
     teleportChance: 0.3,
     teleportRange: 4,
+    rangedAttackPower: 6,
+    rangedRange: 4,
+  },
+  /**
+   * Spitter — a slimy creature that spits acid at the player from up to 3 tiles
+   * away.  Prefers to stay at range rather than close in.
+   * Appears in the regular spawn table from floor 10 onward.
+   */
+  spitter: {
+    name: 'Spitter',
+    hp: 12,
+    attack: 3,
+    defense: 0,
+    xp: 20,
+    textureKey: 'entity_spitter',
+    aggroRange: 6,
+    color: 0x88cc22,
+    rangedAttackPower: 5,
+    rangedRange: 3,
   },
   /**
    * Old Bones — unique boss; appears on floors 10–15 until defeated once.
@@ -156,18 +176,18 @@ export function getSpawnTable(floor, spawnWeights = null) {
   if (floor <= 5) return ['cockroach', 'cockroach', 'sprite', 'sprite', 'goblin', 'goblin', 'orc', 'troll'];
   // High floors (6–9): cockroaches rare, sprites gone, heavier enemies dominate.
   if (floor <= 9) return ['cockroach', 'goblin', 'goblin', 'orc', 'orc', 'troll'];
-  // Floors 10–12: skeletons enter alongside existing heavies; Creeping Mass lurks.
+  // Floors 10–12: skeletons and spitters enter alongside existing heavies.
   if (floor <= 12) return [
     'skeleton', 'skeleton', 'skeleton', 'skeleton_warrior',
-    'goblin', 'orc', 'troll', 'creeping_mass',
+    'goblin', 'orc', 'troll', 'creeping_mass', 'spitter',
   ];
-  // Floors 13–15: skeleton-dominant — warriors and mages take over.
+  // Floors 13–15: skeleton-dominant — warriors, mages, and spitters take over.
   if (floor <= 15) return [
     'skeleton', 'skeleton_warrior', 'skeleton_warrior',
-    'skeleton_mage', 'skeleton_mage', 'troll', 'creeping_mass',
+    'skeleton_mage', 'skeleton_mage', 'troll', 'creeping_mass', 'spitter',
   ];
-  // Floor 16+: heaviest tier — orcs, trolls, and Creeping Mass dominate.
-  return ['orc', 'troll', 'troll', 'creeping_mass', 'creeping_mass'];
+  // Floor 16+: heaviest tier — orcs, trolls, Creeping Mass, and spitters.
+  return ['orc', 'troll', 'troll', 'creeping_mass', 'creeping_mass', 'spitter'];
 }
 
 export function getEnemiesPerRoom(floor) {

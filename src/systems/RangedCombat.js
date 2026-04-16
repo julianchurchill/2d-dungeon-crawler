@@ -70,12 +70,18 @@ export function resolveRangedAttack(attacker, target, rng, { defenderIsInvincibl
   const actualDamage = defenderIsInvincible ? 0 : target.takeDamage(attackDamage);
   const killed = target.isDead();
 
-  const atkName = attacker.name || 'You';
-  const defName = target.name || 'it';
-  const verb = atkName === 'You' ? 'fire' : 'fires';
+  const playerIsAttacker = !attacker.name; // Player has no name property
+  const atkName = playerIsAttacker ? 'You' : attacker.name;
+  // When the target is the player (no name) use "you"; otherwise use the name.
+  const defName = target.name || 'you';
+  const article = target.name ? 'the ' : '';
+  const verb = playerIsAttacker ? 'fire' : 'fires';
+  const killVerb = playerIsAttacker ? 'kill' : 'kills';
+  // Kill pronoun: "kill it" when player kills enemy; "kills you" when enemy kills player.
+  const killPronoun = target.name ? 'it' : 'you';
   const msg = killed
-    ? `${atkName} ${verb} at the ${defName} and kill it!`
-    : `${atkName} ${verb} at the ${defName} for ${actualDamage} damage.`;
+    ? `${atkName} ${verb} at ${article}${defName} and ${killVerb} ${killPronoun}!`
+    : `${atkName} ${verb} at ${article}${defName} for ${actualDamage} damage.`;
 
   return { damage: actualDamage, killed, messages: [msg] };
 }

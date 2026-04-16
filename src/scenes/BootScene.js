@@ -777,6 +777,27 @@ export class BootScene extends Phaser.Scene {
       g.fillRect(9, 9, 2, 2);
     });
 
+    // Spitter — acid-green blob with a bulging spit gland
+    this._genTexture('classic_entity_spitter', T, T, (g) => {
+      // Body — dark olive base
+      g.fillStyle(0x2a5500);
+      g.fillRect(3, 4, 10, 9);
+      // Mid body — bright acid green
+      g.fillStyle(0x88cc22);
+      g.fillRect(4, 5, 8, 7);
+      // Spit gland — glowing yellow-green protrusion at front
+      g.fillStyle(0xccee00);
+      g.fillRect(10, 6, 3, 4);
+      // Eyes — dark with toxic glow
+      g.fillStyle(0x004400);
+      g.fillRect(5, 5, 2, 2);
+      g.fillRect(9, 5, 2, 2);
+      // Acid drip below
+      g.fillStyle(0x88cc22);
+      g.fillRect(5, 12, 2, 2);
+      g.fillRect(9, 12, 2, 2);
+    });
+
     // Elder — white-robed sage with brown staff
     this._genTexture('classic_entity_npc_elder', T, T, (g) => {
       g.fillStyle(0xddddcc);
@@ -1142,6 +1163,32 @@ export class BootScene extends Phaser.Scene {
       g.fillRect(10, 14, 2, 2);
       g.fillRect(1, 7, 1, 3);
       g.fillRect(14, 7, 1, 3);
+    });
+
+    // Spitter — acid-green blob with glowing toxic core and spit gland
+    this._genTexture('modern_entity_spitter', T, T, (g) => {
+      // Dark outer shell
+      g.fillStyle(0x1a3300);
+      g.fillRect(2, 3, 12, 10);
+      // Acid-green body
+      g.fillStyle(0x66aa11);
+      g.fillRect(3, 4, 10, 8);
+      // Toxic inner core
+      g.fillStyle(0xaadd22);
+      g.fillRect(4, 5, 6, 6);
+      // Spit gland — bright neon protrusion
+      g.fillStyle(0xddff00);
+      g.fillRect(11, 6, 3, 4);
+      g.fillStyle(0xeeff88, 0.8);
+      g.fillRect(12, 7, 2, 2);
+      // Eyes — toxic glow
+      g.fillStyle(0xffff00);
+      g.fillRect(4, 5, 2, 2);
+      g.fillRect(8, 5, 2, 2);
+      // Acid drips
+      g.fillStyle(0x66aa11);
+      g.fillRect(4, 12, 2, 2);
+      g.fillRect(10, 12, 2, 2);
     });
 
     // Elder — vivid white-gold robes with ornate staff
@@ -2501,6 +2548,45 @@ export class BootScene extends Phaser.Scene {
       g.fillStyle(0x44ff44, 0.5);
       g.fillRect(5, 1, 2, 2);
       g.fillRect(25, 1, 2, 2);
+    });
+
+    // Spitter — large acid-green blob with pulsing toxic core and spit gland
+    this._genTexture('hd_entity_spitter', S, S, (g) => {
+      // Dark outer shell
+      g.fillStyle(0x0f2200);
+      g.fillRect(3, 6, 22, 18);
+      // Acid-green body
+      g.fillStyle(0x558811);
+      g.fillRect(4, 7, 20, 16);
+      // Toxic inner core — bright
+      g.fillStyle(0x99cc22);
+      g.fillRect(6, 9, 14, 12);
+      // Core highlight
+      g.fillStyle(0xbbee44);
+      g.fillRect(8, 11, 8, 8);
+      // Spit gland — neon protrusion on right side
+      g.fillStyle(0xccff00);
+      g.fillRect(22, 10, 7, 8);
+      g.fillStyle(0xeeff66, 0.9);
+      g.fillRect(24, 12, 4, 4);
+      g.fillStyle(0xffffff, 0.6);
+      g.fillRect(25, 13, 2, 2);
+      // Eyes — large toxic yellow
+      g.fillStyle(0xffff00);
+      g.fillRect(7, 9, 4, 4);
+      g.fillRect(14, 9, 4, 4);
+      g.fillStyle(0x003300);
+      g.fillRect(8, 10, 2, 2);
+      g.fillRect(15, 10, 2, 2);
+      // Acid drips
+      g.fillStyle(0x558811);
+      g.fillRect(6, 23, 3, 4);
+      g.fillRect(13, 24, 3, 3);
+      g.fillRect(20, 23, 3, 4);
+      // Toxic drip highlights
+      g.fillStyle(0x99cc22, 0.7);
+      g.fillRect(7, 24, 1, 3);
+      g.fillRect(21, 24, 1, 3);
     });
 
     // Elder — robed sage with detailed staff and beard
