@@ -39,6 +39,17 @@ export class Player {
       + (this.equippedRangedWeapon?.attackBonus || 0);
   }
 
+  /**
+   * The effective ranged attack power: base stat plus ranged-weapon bonus only.
+   * Melee weapon bonuses are intentionally excluded so that equipping a sword
+   * does not boost bow damage.
+   *
+   * @returns {number}
+   */
+  get rangedAttackPower() {
+    return this.stats.attack + (this.equippedRangedWeapon?.attackBonus || 0);
+  }
+
   get defensePower() {
     return this.stats.defense + (this.equippedArmor?.defenseBonus || 0);
   }

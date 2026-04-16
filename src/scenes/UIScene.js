@@ -134,6 +134,7 @@ export class UIScene extends Phaser.Scene {
     this.events.once('shutdown', () => {
       window.removeEventListener('wheel', this._onWheel);
       detachHudRegistryListeners(this._hudListenerHandle);
+      this.dpad?.destroy();
     });
   }
 

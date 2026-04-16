@@ -38,6 +38,15 @@ const COLOR_STAIRS_STROKE = 0xccaa88;
 /** Stairs button label text colour — light amber. */
 const COLOR_STAIRS_LABEL  = '#ffcc88';
 
+/** BOW button fill colour (default / inactive) — dark olive. */
+const COLOR_BOW_FILL        = 0x443322;
+/** BOW button border colour — medium tan. */
+const COLOR_BOW_STROKE      = 0xaaaa44;
+/** BOW button fill colour when aim mode is active — bright amber. */
+const COLOR_BOW_FILL_ACTIVE = 0x886600;
+/** BOW button label text colour. */
+const COLOR_BOW_LABEL       = '#ffee88';
+
 /**
  * Pixels from the bottom of the screen to the D-pad anchor (centre of the
  * directional cross).  Must clear the compact message-log strip
@@ -177,9 +186,12 @@ export class DPad {
   }
 
   /**
-   * Creates the INV (top-right) and K (bottom-right) sub-menu buttons and
-   * registers them in _subMenuItems so they can be shown/hidden as a group.
-   * Both buttons are hidden by default.
+   * Creates the INV (top-right), SKILLS (bottom-right), and BOW (right of RIGHT
+   * button, centre-row) sub-menu buttons and registers them in _subMenuItems so
+   * they can be shown/hidden as a group.  All buttons are hidden by default.
+   *
+   * The BOW button also subscribes to RANGED_AIM_MODE_CHANGED to highlight
+   * itself when aim mode is active.
    */
   _buildSubMenuButtons() {
     const invItems = this._createSubBtn(PAD, -PAD, 'INV', () => {
@@ -192,7 +204,27 @@ export class DPad {
       EventBus.emit(GameEvents.TOGGLE_SKILLS);
     }, '10px');
 
-    this._subMenuItems = [...invItems, ...skillItems];
+    // BOW at (2*PAD, 0) — to the right of the RIGHT direction button.
+    const bowItems = this._createSubBtn(2 * PAD, 0, 'BOW', () => {
+      this._closeSubMenu();
+      EventBus.emit(GameEvents.TOGGLE_RANGED_AIM);
+    });
+    // Keep a reference to the background rect so it can be re-tinted when aim
+    // mode is active.
+    this._bowBg = bowItems[0];
+
+    // Highlight BOW button whenever aim mode is toggled.
+    // Store the handler so it can be removed in destroy().
+    this._onAimModeChanged = (active) => {
+      if (active) {
+        this._bowBg.setFillStyle(COLOR_BOW_FILL_ACTIVE, 0.9);
+      } else {
+        this._bowBg.setFillStyle(COLOR_BOW_FILL, 0.8);
+      }
+    };
+    EventBus.on(GameEvents.RANGED_AIM_MODE_CHANGED, this._onAimModeChanged);
+
+    this._subMenuItems = [...invItems, ...skillItems, ...bowItems];
     for (const obj of this._subMenuItems) obj.setVisible(false);
     this._container.add(this._subMenuItems);
   }
@@ -306,5 +338,17 @@ export class DPad {
    */
   setVisible(visible) {
     this._container.setVisible(visible);
+  }
+
+  /**
+   * Removes EventBus listeners registered by this DPad instance.
+   * Must be called when the owning scene shuts down to prevent stale handlers
+   * accumulating across game restarts.
+   */
+  destroy() {
+    if (this._onAimModeChanged) {
+      EventBus.off(GameEvents.RANGED_AIM_MODE_CHANGED, this._onAimModeChanged);
+      this._onAimModeChanged = null;
+    }
   }
 }
