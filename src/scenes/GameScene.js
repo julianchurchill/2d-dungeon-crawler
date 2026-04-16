@@ -874,38 +874,86 @@ export class GameScene extends Phaser.Scene {
 
     this.turnManager.setState(TURN_STATE.PLAYER_ACTING);
 
-    const { damage, killed, messages } = resolveRangedAttack(
-      this.player, target, this.rng,
-      { defenderIsInvincible: devOptions.enemiesInvincible },
-    );
-    messages.forEach(msg => EventBus.emit(GameEvents.MESSAGE, msg));
+    // Animate the projectile first; resolve damage in the onComplete callback so
+    // the hit visuals play after the projectile arrives.
+    this._animateProjectile(this.player.x, this.player.y, target.x, target.y, () => {
+      const { damage, killed, messages } = resolveRangedAttack(
+        this.player, target, this.rng,
+        { defenderIsInvincible: devOptions.enemiesInvincible },
+      );
+      messages.forEach(msg => EventBus.emit(GameEvents.MESSAGE, msg));
 
-    // Flash all sprites for multi-segment enemies (e.g. Creeping Mass), otherwise the single sprite.
-    if (target.segments) {
-      for (const seg of target.segments) this._flashSprite(seg.sprite, 0xff4444);
-    } else {
-      this._flashSprite(target.sprite, 0xff4444);
-    }
-
-    // Clean up any segments removed by proportional HP loss (Creeping Mass).
-    this._applyPendingRemovedSegments(target);
-
-    if (killed) {
-      EventBus.emit(GameEvents.ENEMY_KILLED, target.type);
-      if (target.isBoss) this._applyBossLoot(target);
-
-      const leveled = this.player.gainXP(target.xp);
-      if (leveled) {
-        EventBus.emit(GameEvents.MESSAGE, `Level up! You are now level ${this.player.stats.level}!`);
-        EventBus.emit(GameEvents.PLAYER_LEVEL_UP, this.player.stats.level);
-        this.cameras.main.flash(600, 255, 220, 100);
-        this._tryLaunchSkillLevelUp();
+      // Flash all sprites for multi-segment enemies (e.g. Creeping Mass), otherwise the single sprite.
+      if (target.segments) {
+        for (const seg of target.segments) this._flashSprite(seg.sprite, 0xff4444);
+      } else {
+        this._flashSprite(target.sprite, 0xff4444);
       }
-      this._destroyEnemy(target);
-    }
 
-    this._syncRegistry();
-    this._startEnemyTurns();
+      // Clean up any segments removed by proportional HP loss (Creeping Mass).
+      this._applyPendingRemovedSegments(target);
+
+      if (killed) {
+        EventBus.emit(GameEvents.ENEMY_KILLED, target.type);
+        if (target.isBoss) this._applyBossLoot(target);
+
+        const leveled = this.player.gainXP(target.xp);
+        if (leveled) {
+          EventBus.emit(GameEvents.MESSAGE, `Level up! You are now level ${this.player.stats.level}!`);
+          EventBus.emit(GameEvents.PLAYER_LEVEL_UP, this.player.stats.level);
+          this.cameras.main.flash(600, 255, 220, 100);
+          this._tryLaunchSkillLevelUp();
+        }
+        this._destroyEnemy(target);
+      }
+
+      this._syncRegistry();
+      this._startEnemyTurns();
+    });
+  }
+
+  /**
+   * Animates a small projectile dot from one tile centre to another, then
+   * calls `onComplete` after it arrives.  The travel time scales with pixel
+   * distance so every shot moves at the same apparent speed.
+   *
+   * @param {number}   fromTileX  - Source tile X.
+   * @param {number}   fromTileY  - Source tile Y.
+   * @param {number}   toTileX    - Destination tile X.
+   * @param {number}   toTileY    - Destination tile Y.
+   * @param {function} onComplete - Called once the projectile reaches its target.
+   */
+  _animateProjectile(fromTileX, fromTileY, toTileX, toTileY, onComplete) {
+    const half = TILE_SIZE / 2;
+    const sx = fromTileX * TILE_SIZE + half;
+    const sy = fromTileY * TILE_SIZE + half;
+    const tx = toTileX  * TILE_SIZE + half;
+    const ty = toTileY  * TILE_SIZE + half;
+
+    // Draw a small amber circle — size scales with tile size for all three tilesets.
+    const radius = Math.max(2, Math.round(TILE_SIZE * 0.15));
+    const projectile = this.add.graphics()
+      .fillStyle(0xffdd44, 1)
+      .fillCircle(0, 0, radius)
+      .setPosition(sx, sy)
+      .setDepth(12); // above map (0), shadows (5), entities (8), player (10)
+
+    // 500 px/s gives ~192 ms for max range (6 tiles) at 16 px/tile, fast but readable.
+    const PROJECTILE_PX_PER_MS = 0.5;
+    const dist = Math.hypot(tx - sx, ty - sy);
+    const duration = Math.max(60, dist / PROJECTILE_PX_PER_MS);
+
+    this.tweens.add({
+      targets: projectile,
+      x: tx,
+      y: ty,
+      duration,
+      ease: 'Linear',
+      onComplete: () => {
+        projectile.destroy();
+        onComplete();
+      },
+    });
   }
 
   /**
