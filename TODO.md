@@ -67,12 +67,12 @@
 
 ## Character
 
-- [ ] create an equipment area next to the inventory panel that shows equipment slots for melee weapon and shield
 - [ ] add a ranged weapon equipment slot to the player and add 2 basic ranged weapons that may be found in the dungeon
 - [ ] add equipment slots for helmet, rings, boots, legs, chest, arms, amulet and some basic items that can be found in the dungeon but only helmet and chest can only be found deeper than floor 10. Legs, chest and arms can only be found deeper than floor 20 and rings and amulets can only be found deeper than floor 30. Rings and amulets are rare.   These types of items only appear in the shops once the player has reached the corresponding minimum floor.
 - [ ] increase defense when a character levels up
 - [ ] character graphic
 - [ ] show a character sheet by pressing 'c' which shows all the players stats currently. Provide a button for the mobile interface.
+- [x] create an equipment area next to the inventory panel that shows equipment slots for melee weapon and shield
 - [x] look cursor - a cursor can be activated on non-touch devices with 'l' and deactivated with ESC. When activated the player can move the cursor around the map with the direction keys to highlight the thing that is being looked at. The cursor starts on the player.
 - [x] look - the player can click or touch a cell in the map to see more information about what is in that cell, e.g. for an enemy see the name and hp "Goblin 8hp", for items show the name and description "Short Sword +3 Attack", for other things at least show the name "Stone floor" or "Stone wall". The information should pop up perhaps in the bottom right or top right of the screen. Position appropriately for mobile devices. Using look does not advance the game turn. Look can only be used on cells that is in the character's line of sight.
 - [x] hold keys for continued movement

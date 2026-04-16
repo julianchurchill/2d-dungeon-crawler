@@ -12,6 +12,7 @@ import { syncHudFromRegistry, attachHudRegistryListeners, detachHudRegistryListe
 import { DisplayCasePanel } from '../ui/DisplayCasePanel.js';
 import { ShopPanel } from '../ui/ShopPanel.js';
 import { DialoguePanel } from '../ui/DialoguePanel.js';
+import { EquipmentPanel } from '../ui/EquipmentPanel.js';
 
 export class UIScene extends Phaser.Scene {
   constructor() {
@@ -26,6 +27,7 @@ export class UIScene extends Phaser.Scene {
     this.hud = new HUD(this);
     this.messageLog = new MessageLog(this);
     this.inventoryPanel = new InventoryPanel(this);
+    this.equipmentPanel = new EquipmentPanel(this);
     this.skillsPanel = new SkillsPanel(this);
     this.shopPanel = new ShopPanel(this);
     this.dialoguePanel = new DialoguePanel(this);
@@ -49,6 +51,12 @@ export class UIScene extends Phaser.Scene {
     EventBus.on(GameEvents.OPEN_INVENTORY, ({ inventory, player }) => {
       this._playerRef = player;
       this.inventoryPanel.toggle(inventory, player);
+      // Show or hide the equipment panel in sync with the inventory panel.
+      if (this.inventoryPanel.visible) {
+        this.equipmentPanel.show(player);
+      } else {
+        this.equipmentPanel.hide();
+      }
     }, this);
 
     // Gold changes — update HUD and the shop panel gold display
@@ -256,6 +264,7 @@ export class UIScene extends Phaser.Scene {
     this.hud?.resize(width, height);
     this.messageLog?.resize(width, height);
     this.inventoryPanel?.resize(width, height);
+    this.equipmentPanel?.resize(width, height);
     this.shopPanel?.resize(width, height);
     this.dialoguePanel?.resize(width, height);
     this.displayCasePanel?.resize(width, height);
