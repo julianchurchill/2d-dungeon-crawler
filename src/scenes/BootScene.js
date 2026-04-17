@@ -1372,6 +1372,69 @@ export class BootScene extends Phaser.Scene {
       g.fillRect(T/2 + 1, T/2 - 1, 1, 1);
       g.fillRect(T/2 - 3, T/2 + 3, 1, 1);
     });
+
+    // Helmet — rounded cap shape
+    this._genTexture('classic_item_helmet', T, T, (g) => {
+      g.fillStyle(0x8899aa);
+      g.fillRect(3, 5, 10, 7);
+      g.fillRect(4, 3, 8, 3);
+      g.fillRect(6, 2, 4, 2);
+      g.fillRect(2, 12, 12, 2);
+    });
+
+    // Chest — breastplate shape
+    this._genTexture('classic_item_chest', T, T, (g) => {
+      g.fillStyle(0x8899aa);
+      g.fillRect(3, 2, 10, 12);
+      g.fillStyle(0x667788);
+      g.fillRect(4, 4, 8, 2);
+      g.fillRect(4, 8, 8, 2);
+    });
+
+    // Legs — greaves shape
+    this._genTexture('classic_item_legs', T, T, (g) => {
+      g.fillStyle(0x8899aa);
+      g.fillRect(3, 1, 10, 6);
+      g.fillRect(3, 9, 4, 6);
+      g.fillRect(9, 9, 4, 6);
+    });
+
+    // Arms — gauntlet shape
+    this._genTexture('classic_item_arms', T, T, (g) => {
+      g.fillStyle(0x8899aa);
+      g.fillRect(4, 2, 8, 5);
+      g.fillRect(3, 7, 10, 7);
+      g.fillStyle(0x667788);
+      g.fillRect(4, 9, 8, 2);
+    });
+
+    // Boots — boot silhouette
+    this._genTexture('classic_item_boots', T, T, (g) => {
+      g.fillStyle(0x8899aa);
+      g.fillRect(4, 1, 6, 10);
+      g.fillRect(3, 11, 9, 4);
+      g.fillRect(3, 14, 11, 2);
+    });
+
+    // Ring — circle outline
+    this._genTexture('classic_item_ring', T, T, (g) => {
+      g.fillStyle(0xddaa44);
+      g.fillEllipse(T/2, T/2, 12, 12);
+      g.fillStyle(0x111122);
+      g.fillEllipse(T/2, T/2, 7, 7);
+      g.fillStyle(0xff4444);
+      g.fillEllipse(T/2, T/2 - 4, 4, 4);
+    });
+
+    // Amulet — teardrop with chain
+    this._genTexture('classic_item_amulet', T, T, (g) => {
+      g.fillStyle(0xddaa44);
+      g.fillRect(T/2 - 1, 1, 2, 6);
+      g.fillRect(T/2 - 4, 3, 8, 2);
+      g.fillEllipse(T/2, T/2 + 3, 9, 10);
+      g.fillStyle(0x44aadd);
+      g.fillEllipse(T/2, T/2 + 3, 5, 6);
+    });
   }
 
   // ---------------------------------------------------------------------------
@@ -1553,6 +1616,104 @@ export class BootScene extends Phaser.Scene {
       g.fillRect(T/2 + 2, T/2 - 1, 1, 1);
       g.fillRect(T/2 + 3, T/2 + 2, 1, 1);
       g.fillRect(T/2 - 4, T/2 + 4, 1, 1);
+    });
+
+    // Helmet — polished metal cap with cheekguard shadow
+    this._genTexture('modern_item_helmet', T, T, (g) => {
+      g.fillStyle(0x445566);
+      g.fillRect(3, 5, 10, 8);
+      g.fillRect(4, 3, 8, 3);
+      g.fillRect(6, 2, 4, 2);
+      g.fillRect(2, 12, 12, 2);
+      g.fillStyle(0x8899bb);
+      g.fillRect(5, 4, 6, 6);
+      g.fillStyle(0xbbccdd, 0.7);
+      g.fillRect(6, 5, 2, 4);
+    });
+
+    // Chest — layered breastplate with rivets
+    this._genTexture('modern_item_chest', T, T, (g) => {
+      g.fillStyle(0x445566);
+      g.fillRect(2, 1, 12, 14);
+      g.fillStyle(0x8899bb);
+      g.fillRect(3, 2, 10, 12);
+      g.fillStyle(0x667788);
+      g.fillRect(4, 5, 8, 1);
+      g.fillRect(4, 9, 8, 1);
+      g.fillStyle(0xbbccdd, 0.6);
+      g.fillRect(4, 3, 2, 8);
+    });
+
+    // Legs — greaves with knee guard
+    this._genTexture('modern_item_legs', T, T, (g) => {
+      g.fillStyle(0x445566);
+      g.fillRect(2, 1, 12, 7);
+      g.fillRect(2, 9, 5, 6);
+      g.fillRect(9, 9, 5, 6);
+      g.fillStyle(0x8899bb);
+      g.fillRect(3, 2, 10, 5);
+      g.fillRect(3, 10, 3, 4);
+      g.fillRect(10, 10, 3, 4);
+      g.fillStyle(0xaabbcc, 0.5);
+      g.fillRect(4, 3, 2, 3);
+    });
+
+    // Arms — armoured gauntlet with knuckle plates
+    this._genTexture('modern_item_arms', T, T, (g) => {
+      g.fillStyle(0x445566);
+      g.fillRect(3, 2, 10, 12);
+      g.fillStyle(0x8899bb);
+      g.fillRect(4, 3, 8, 10);
+      g.fillStyle(0x667788);
+      g.fillRect(4, 5, 8, 1);
+      g.fillRect(4, 9, 8, 1);
+      g.fillStyle(0xaabbcc, 0.5);
+      g.fillRect(5, 4, 2, 7);
+    });
+
+    // Boots — armoured sabatons
+    this._genTexture('modern_item_boots', T, T, (g) => {
+      g.fillStyle(0x445566);
+      g.fillRect(3, 1, 8, 11);
+      g.fillRect(2, 12, 10, 3);
+      g.fillRect(2, 14, 12, 2);
+      g.fillStyle(0x8899bb);
+      g.fillRect(4, 2, 6, 9);
+      g.fillRect(3, 13, 9, 2);
+      g.fillStyle(0xaabbcc, 0.5);
+      g.fillRect(5, 3, 2, 7);
+    });
+
+    // Ring — gold band with gemstone
+    this._genTexture('modern_item_ring', T, T, (g) => {
+      g.fillStyle(0x996600);
+      g.fillEllipse(T/2, T/2, 13, 13);
+      g.fillStyle(0x111122);
+      g.fillEllipse(T/2, T/2, 8, 8);
+      g.fillStyle(0xffcc44);
+      g.fillEllipse(T/2, T/2, 11, 11);
+      g.fillStyle(0x111122);
+      g.fillEllipse(T/2, T/2, 7, 7);
+      g.fillStyle(0xff3333);
+      g.fillEllipse(T/2, T/2 - 4, 4, 4);
+      g.fillStyle(0xff8888, 0.8);
+      g.fillRect(T/2 - 1, T/2 - 5, 1, 1);
+    });
+
+    // Amulet — golden teardrop pendant with cyan gem
+    this._genTexture('modern_item_amulet', T, T, (g) => {
+      g.fillStyle(0x996600);
+      g.fillRect(T/2 - 1, 1, 3, 6);
+      g.fillRect(T/2 - 5, 2, 10, 3);
+      g.fillEllipse(T/2, T/2 + 3, 11, 12);
+      g.fillStyle(0xffcc44);
+      g.fillRect(T/2 - 1, 2, 2, 5);
+      g.fillRect(T/2 - 4, 3, 8, 2);
+      g.fillEllipse(T/2, T/2 + 3, 9, 10);
+      g.fillStyle(0x33ccdd);
+      g.fillEllipse(T/2, T/2 + 3, 6, 7);
+      g.fillStyle(0xaaeeff, 0.8);
+      g.fillRect(T/2 - 2, T/2 + 1, 2, 3);
     });
   }
 
@@ -3051,6 +3212,113 @@ export class BootScene extends Phaser.Scene {
       g.fillStyle(0xffffff, 0.8);
       g.fillRect(S/2 + 5, S * 0.39, 1, 1);
       g.fillRect(S/2 + 4, S * 0.66, 1, 1);
+    });
+
+    // Helmet — polished metal helm with visor shadow
+    this._genTexture('hd_item_helmet', S, S, (g) => {
+      g.fillStyle(0x334455);
+      g.fillRect(6, 10, 20, 16);
+      g.fillRect(8, 6, 16, 5);
+      g.fillRect(12, 4, 8, 3);
+      g.fillRect(4, 24, 24, 4);
+      g.fillStyle(0x7799bb);
+      g.fillRect(7, 11, 18, 13);
+      g.fillRect(9, 7, 14, 5);
+      g.fillRect(13, 5, 6, 3);
+      g.fillStyle(0x99bbdd, 0.6);
+      g.fillRect(10, 12, 5, 10);
+    });
+
+    // Chest — detailed breastplate with pauldron hints
+    this._genTexture('hd_item_chest', S, S, (g) => {
+      g.fillStyle(0x334455);
+      g.fillRect(4, 2, 24, 28);
+      g.fillStyle(0x7799bb);
+      g.fillRect(5, 3, 22, 26);
+      g.fillStyle(0x556677);
+      g.fillRect(6, 8, 20, 2);
+      g.fillRect(6, 14, 20, 2);
+      g.fillRect(6, 20, 20, 2);
+      g.fillStyle(0xaabbcc, 0.5);
+      g.fillRect(7, 4, 4, 20);
+    });
+
+    // Legs — plate greaves with articulated knee
+    this._genTexture('hd_item_legs', S, S, (g) => {
+      g.fillStyle(0x334455);
+      g.fillRect(4, 1, 24, 14);
+      g.fillRect(4, 17, 10, 13);
+      g.fillRect(18, 17, 10, 13);
+      g.fillStyle(0x7799bb);
+      g.fillRect(5, 2, 22, 12);
+      g.fillRect(5, 18, 8, 11);
+      g.fillRect(19, 18, 8, 11);
+      g.fillStyle(0xaabbcc, 0.5);
+      g.fillRect(7, 3, 4, 9);
+    });
+
+    // Arms — full gauntlet with articulated fingers
+    this._genTexture('hd_item_arms', S, S, (g) => {
+      g.fillStyle(0x334455);
+      g.fillRect(6, 4, 20, 24);
+      g.fillStyle(0x7799bb);
+      g.fillRect(7, 5, 18, 22);
+      g.fillStyle(0x556677);
+      g.fillRect(8, 9, 16, 2);
+      g.fillRect(8, 15, 16, 2);
+      g.fillRect(8, 21, 16, 2);
+      g.fillStyle(0xaabbcc, 0.5);
+      g.fillRect(9, 6, 4, 18);
+    });
+
+    // Boots — plate sabatons with toe cap
+    this._genTexture('hd_item_boots', S, S, (g) => {
+      g.fillStyle(0x334455);
+      g.fillRect(7, 2, 14, 20);
+      g.fillRect(5, 22, 18, 6);
+      g.fillRect(4, 26, 24, 4);
+      g.fillStyle(0x7799bb);
+      g.fillRect(8, 3, 12, 18);
+      g.fillRect(6, 23, 16, 5);
+      g.fillRect(5, 27, 22, 3);
+      g.fillStyle(0xaabbcc, 0.5);
+      g.fillRect(10, 4, 4, 15);
+    });
+
+    // Ring — ornate gold band with faceted ruby
+    this._genTexture('hd_item_ring', S, S, (g) => {
+      g.fillStyle(0x775500);
+      g.fillEllipse(S/2, S/2, 26, 26);
+      g.fillStyle(0x111122);
+      g.fillEllipse(S/2, S/2, 16, 16);
+      g.fillStyle(0xffcc44);
+      g.fillEllipse(S/2, S/2, 23, 23);
+      g.fillStyle(0x111122);
+      g.fillEllipse(S/2, S/2, 14, 14);
+      g.fillStyle(0xee2222);
+      g.fillEllipse(S/2, S/2 - 8, 8, 8);
+      g.fillStyle(0xff8888, 0.8);
+      g.fillRect(S/2 - 2, S/2 - 10, 3, 3);
+      g.fillStyle(0xffaaaa, 0.5);
+      g.fillRect(S/2 - 1, S/2 - 9, 1, 1);
+    });
+
+    // Amulet — ornate golden teardrop with glowing cyan stone
+    this._genTexture('hd_item_amulet', S, S, (g) => {
+      g.fillStyle(0x775500);
+      g.fillRect(S/2 - 2, 2, 5, 12);
+      g.fillRect(S/2 - 10, 4, 20, 5);
+      g.fillEllipse(S/2, S/2 + 6, 22, 24);
+      g.fillStyle(0xffcc44);
+      g.fillRect(S/2 - 1, 3, 3, 10);
+      g.fillRect(S/2 - 8, 5, 16, 4);
+      g.fillEllipse(S/2, S/2 + 6, 19, 21);
+      g.fillStyle(0x22aacc);
+      g.fillEllipse(S/2, S/2 + 6, 13, 14);
+      g.fillStyle(0x55eeff, 0.7);
+      g.fillEllipse(S/2 - 2, S/2 + 3, 7, 8);
+      g.fillStyle(0xffffff, 0.6);
+      g.fillRect(S/2 - 4, S/2 + 2, 3, 4);
     });
   }
 }

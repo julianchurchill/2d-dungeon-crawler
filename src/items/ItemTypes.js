@@ -103,6 +103,70 @@ export const ITEM_TYPES = {
   },
 };
 
+// ── Additional equipment slot items ───────────────────────────────────────────
+
+ITEM_TYPES.LEATHER_CAP       = { id: 'leather_cap',       name: 'Leather Cap',        type: 'helmet',  defenseBonus: 1, sellPrice: 10, description: '+1 Defense', textureKey: 'item_helmet' };
+ITEM_TYPES.IRON_HELMET        = { id: 'iron_helmet',        name: 'Iron Helmet',         type: 'helmet',  defenseBonus: 3, sellPrice: 20, description: '+3 Defense', textureKey: 'item_helmet' };
+ITEM_TYPES.LEATHER_CHESTPIECE = { id: 'leather_chestpiece', name: 'Leather Chestpiece',  type: 'chest',   defenseBonus: 2, sellPrice: 12, description: '+2 Defense', textureKey: 'item_chest'  };
+ITEM_TYPES.CHAIN_HAUBERK      = { id: 'chain_hauberk',      name: 'Chain Hauberk',       type: 'chest',   defenseBonus: 4, sellPrice: 22, description: '+4 Defense', textureKey: 'item_chest'  };
+ITEM_TYPES.LEATHER_LEGGINGS   = { id: 'leather_leggings',   name: 'Leather Leggings',    type: 'legs',    defenseBonus: 1, sellPrice: 8,  description: '+1 Defense', textureKey: 'item_legs'   };
+ITEM_TYPES.CHAIN_LEGGINGS     = { id: 'chain_leggings',     name: 'Chain Leggings',      type: 'legs',    defenseBonus: 3, sellPrice: 18, description: '+3 Defense', textureKey: 'item_legs'   };
+ITEM_TYPES.LEATHER_GAUNTLETS  = { id: 'leather_gauntlets',  name: 'Leather Gauntlets',   type: 'arms',    defenseBonus: 1, sellPrice: 8,  description: '+1 Defense', textureKey: 'item_arms'   };
+ITEM_TYPES.IRON_GAUNTLETS     = { id: 'iron_gauntlets',     name: 'Iron Gauntlets',      type: 'arms',    defenseBonus: 3, sellPrice: 18, description: '+3 Defense', textureKey: 'item_arms'   };
+ITEM_TYPES.LEATHER_BOOTS      = { id: 'leather_boots',      name: 'Leather Boots',       type: 'boots',   defenseBonus: 1, sellPrice: 6,  description: '+1 Defense', textureKey: 'item_boots'  };
+ITEM_TYPES.IRON_BOOTS         = { id: 'iron_boots',         name: 'Iron Boots',          type: 'boots',   defenseBonus: 2, sellPrice: 14, description: '+2 Defense', textureKey: 'item_boots'  };
+ITEM_TYPES.IRON_RING          = { id: 'iron_ring',          name: 'Iron Ring',           type: 'ring',    attackBonus: 1,  defenseBonus: 0, sellPrice: 15, description: '+1 Attack', textureKey: 'item_ring'   };
+ITEM_TYPES.GOLD_RING          = { id: 'gold_ring',          name: 'Gold Ring',           type: 'ring',    attackBonus: 2,  defenseBonus: 0, sellPrice: 25, description: '+2 Attack', textureKey: 'item_ring'   };
+ITEM_TYPES.STONE_AMULET       = { id: 'stone_amulet',       name: 'Stone Amulet',        type: 'amulet',  defenseBonus: 2, sellPrice: 15, description: '+2 Defense', textureKey: 'item_amulet' };
+ITEM_TYPES.JADE_AMULET        = { id: 'jade_amulet',        name: 'Jade Amulet',         type: 'amulet',  attackBonus: 0,  defenseBonus: 3, sellPrice: 25, description: '+3 Defense', textureKey: 'item_amulet' };
+
+/**
+ * Returns the weighted item loot pool for the given floor.
+ * Extracted so tests can inspect pool contents without needing an RNG.
+ *
+ * @param {number} floor
+ * @param {Set<string>} [unlockedItems]
+ * @returns {object[]} Array of ITEM_TYPES entries (may contain duplicates for weighting).
+ */
+export function getFloorLootPool(floor, unlockedItems = new Set()) {
+  const pool = [
+    ITEM_TYPES.HEALTH_POTION, ITEM_TYPES.HEALTH_POTION, ITEM_TYPES.HEALTH_POTION,
+  ];
+  if (floor >= 1) {
+    pool.push(
+      ITEM_TYPES.SWORD, ITEM_TYPES.LEATHER_ARMOR, ITEM_TYPES.SHORT_BOW,
+      ITEM_TYPES.LEATHER_BOOTS, ITEM_TYPES.LEATHER_BOOTS,
+    );
+  }
+  if (floor >= 2) {
+    pool.push(
+      ITEM_TYPES.MEGA_POTION, ITEM_TYPES.MEGA_POTION, ITEM_TYPES.MEGA_POTION,
+      ITEM_TYPES.LONG_SWORD,
+    );
+  }
+  if (floor >= 3) pool.push(ITEM_TYPES.CHAIN_MAIL);
+  if (floor >= 4) pool.push(ITEM_TYPES.HAND_CROSSBOW);
+  if (floor >= 10) pool.push(ITEM_TYPES.LEATHER_CAP, ITEM_TYPES.IRON_HELMET);
+  if (floor >= 20) {
+    pool.push(
+      ITEM_TYPES.LEATHER_CHESTPIECE, ITEM_TYPES.CHAIN_HAUBERK,
+      ITEM_TYPES.LEATHER_LEGGINGS,   ITEM_TYPES.CHAIN_LEGGINGS,
+      ITEM_TYPES.LEATHER_GAUNTLETS,  ITEM_TYPES.IRON_GAUNTLETS,
+      ITEM_TYPES.IRON_BOOTS,
+    );
+  }
+  if (floor >= 30) {
+    pool.push(
+      ITEM_TYPES.IRON_RING,    ITEM_TYPES.GOLD_RING,
+      ITEM_TYPES.STONE_AMULET, ITEM_TYPES.JADE_AMULET,
+    );
+  }
+  if (unlockedItems.has(ITEM_TYPES.POTION_OF_MINOR_TELEPORTATION.id)) {
+    pool.push(ITEM_TYPES.POTION_OF_MINOR_TELEPORTATION);
+  }
+  return pool;
+}
+
 /**
  * Returns a random item type for the given floor, optionally including
  * achievement-unlocked items.
@@ -113,22 +177,6 @@ export const ITEM_TYPES = {
  * @returns {object} An ITEM_TYPES entry.
  */
 export function getFloorLoot(floor, rng, unlockedItems = new Set()) {
-  // Common items are added multiple times to increase their spawn weight.
-  // Rare/unlocked items are added once for a lower chance of appearing.
-  const pool = [
-    ITEM_TYPES.HEALTH_POTION, ITEM_TYPES.HEALTH_POTION, ITEM_TYPES.HEALTH_POTION,
-  ];
-  if (floor >= 1) pool.push(ITEM_TYPES.SWORD, ITEM_TYPES.LEATHER_ARMOR, ITEM_TYPES.SHORT_BOW);
-  if (floor >= 2) {
-    pool.push(
-      ITEM_TYPES.MEGA_POTION, ITEM_TYPES.MEGA_POTION, ITEM_TYPES.MEGA_POTION,
-      ITEM_TYPES.LONG_SWORD,
-    );
-  }
-  if (floor >= 3) pool.push(ITEM_TYPES.CHAIN_MAIL);
-  if (floor >= 4) pool.push(ITEM_TYPES.HAND_CROSSBOW);
-  if (unlockedItems.has(ITEM_TYPES.POTION_OF_MINOR_TELEPORTATION.id)) {
-    pool.push(ITEM_TYPES.POTION_OF_MINOR_TELEPORTATION);
-  }
+  const pool = getFloorLootPool(floor, unlockedItems);
   return rng.pick(pool);
 }
