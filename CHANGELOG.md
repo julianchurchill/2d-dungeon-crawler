@@ -7,6 +7,10 @@ Entries are listed newest-first within each section.
 
 ## [Unreleased]
 
+---
+
+## [0.51.0] - 2026-04-17
+
 ### Added
 
 - 2026-04-17 — **Additional equipment slots**: players can now equip items to **Helmet**, **Chest**, **Legs**, **Arms**, **Boots**, **Ring** (×2), and **Amulet** slots in addition to the existing Weapon, Shield, and Ranged slots. All equipped items contribute their defence and attack bonuses to the player's totals. Eleven new items span the new slots (Leather Cap, Iron Helmet, Leather Chestpiece, Chain Hauberk, Leather Leggings, Chain Leggings, Leather Gauntlets, Iron Gauntlets, Leather Boots, Iron Boots, Iron Ring, Gold Ring, Stone Amulet, Jade Amulet), gated behind appropriate floor thresholds (boots from floor 1, helmets from floor 10, chest/legs/arms from floor 20, rings/amulets from floor 30). The equipment panel has been redesigned into a two-column grid to fit all eleven slots. All three tileset variants include sprite icons for every new item type.
