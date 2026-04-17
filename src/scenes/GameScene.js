@@ -4,7 +4,7 @@ import { TurnManager, TURN_STATE } from '../systems/TurnManager.js';
 import { resolveMeleeAttack } from '../systems/CombatSystem.js';
 import { InventorySystem } from '../systems/InventorySystem.js';
 import { Player } from '../entities/Player.js';
-import { Enemy } from '../entities/Enemy.js';
+import { Enemy, getHealthBarColor } from '../entities/Enemy.js';
 import { CreepingMass } from '../entities/CreepingMass.js';
 import { OldBones } from '../entities/OldBones.js';
 import { Npc } from '../entities/Npc.js';
@@ -234,6 +234,7 @@ export class GameScene extends Phaser.Scene {
           if (seg.sprite) seg.sprite.destroy();
         }
       } else if (e.sprite) {
+        if (e.healthBar) { e.healthBar.destroy(); e.healthBar = null; }
         e.sprite.destroy();
       }
     }
@@ -435,6 +436,7 @@ export class GameScene extends Phaser.Scene {
       tilesetManager.getTileKey(enemy.textureKey)
     ).setDepth(8).setVisible(false);
     enemy.sprite = sprite;
+    this._createHealthBar(enemy);
     this.enemies.push(enemy);
     this.dungeonMap.setEntity(x, y, enemy);
 
@@ -647,6 +649,10 @@ export class GameScene extends Phaser.Scene {
       } else {
         const visible = map.getFovState(enemy.x, enemy.y) === FOV_STATE.VISIBLE;
         if (enemy.sprite) enemy.sprite.setVisible(visible);
+        // Health bar follows sprite visibility; also hide when at full health.
+        if (enemy.healthBar) {
+          enemy.healthBar.setVisible(visible && enemy.healthBarFraction < 1);
+        }
       }
     }
     for (const item of this.items) {
@@ -892,6 +898,9 @@ export class GameScene extends Phaser.Scene {
 
       // Clean up any segments removed by proportional HP loss (Creeping Mass).
       this._applyPendingRemovedSegments(target);
+
+      // Refresh the health bar to reflect the new HP.
+      this._updateHealthBar(target);
 
       if (killed) {
         EventBus.emit(GameEvents.ENEMY_KILLED, target.type);
@@ -1145,6 +1154,9 @@ export class GameScene extends Phaser.Scene {
         // Handle segments removed by damage (proportional HP loss for Creeping Mass)
         this._applyPendingRemovedSegments(target);
 
+        // Refresh the health bar to reflect the new HP.
+        this._updateHealthBar(target);
+
         // First-hit minion spawning for bosses that support it
         if (target.isBoss && target.shouldSpawnMinions && !target.minionsSpawned && damage > 0) {
           this._spawnBossMinions(target);
@@ -1227,6 +1239,8 @@ export class GameScene extends Phaser.Scene {
       }
     } else {
       this.dungeonMap.setEntity(target.x, target.y, null);
+      target.healthBar?.destroy();
+      target.healthBar = null;
       if (target.sprite) {
         this.tweens.add({
           targets: target.sprite,
@@ -1288,6 +1302,59 @@ export class GameScene extends Phaser.Scene {
     if (!sprite) return;
     sprite.setTint(color);
     this.time.delayedCall(150, () => sprite.clearTint());
+  }
+
+  /**
+   * Creates a thin health-bar Graphics object above the enemy's sprite and
+   * stores it as `enemy.healthBar`.  Initially drawn at full health.
+   * Should be called immediately after the enemy sprite is created.
+   *
+   * The bar is only shown when the enemy has taken damage (hp < maxHp)
+   * and is within the player's field of view.
+   *
+   * @param {Enemy} enemy
+   */
+  _createHealthBar(enemy) {
+    const barW = TILE_SIZE - 4;
+    const barH = Math.max(2, Math.round(TILE_SIZE * 0.1));
+    const bar = this.add.graphics()
+      .setDepth(9)       // just above entity sprites (depth 8)
+      .setScrollFactor(1)
+      .setVisible(false); // hidden until damaged
+    enemy.healthBar = bar;
+    // Draw the initial (full-health) state so dimensions are established.
+    this._updateHealthBar(enemy);
+  }
+
+  /**
+   * Redraws `enemy.healthBar` to reflect the enemy's current HP fraction.
+   * Shows the bar only when hp < maxHp and hides it at full health.
+   * Should be called after every attack that damages the enemy.
+   *
+   * @param {Enemy} enemy
+   */
+  _updateHealthBar(enemy) {
+    const bar = enemy.healthBar;
+    if (!bar) return;
+
+    const fraction = enemy.healthBarFraction;
+    const barW = TILE_SIZE - 4;
+    const barH = Math.max(2, Math.round(TILE_SIZE * 0.1));
+
+    // Position: centred horizontally above the sprite's top edge.
+    const cx = enemy.x * TILE_SIZE + TILE_SIZE / 2;
+    const cy = enemy.y * TILE_SIZE + 1; // 1 px below the top of the tile
+
+    bar.clear();
+    // Background track
+    bar.fillStyle(0x222222, 0.85);
+    bar.fillRect(cx - barW / 2, cy, barW, barH);
+    // Foreground fill
+    bar.fillStyle(getHealthBarColor(fraction), 1);
+    bar.fillRect(cx - barW / 2, cy, Math.round(barW * fraction), barH);
+
+    // Only show the bar when the enemy is damaged.
+    bar.setVisible(fraction < 1 && enemy.sprite?.visible === true);
   }
 
   _checkItemPickup() {
@@ -1800,6 +1867,8 @@ export class GameScene extends Phaser.Scene {
             enemy.y * TILE_SIZE + TILE_SIZE / 2
           );
         }
+        // Reposition health bar at new tile coordinates.
+        this._updateHealthBar(enemy);
       } else if (result.action === 'teleport') {
         this.dungeonMap.setEntity(enemy.x, enemy.y, null);
         enemy.x = result.x;
@@ -1811,6 +1880,8 @@ export class GameScene extends Phaser.Scene {
             enemy.y * TILE_SIZE + TILE_SIZE / 2
           );
         }
+        // Reposition health bar at new tile coordinates.
+        this._updateHealthBar(enemy);
       } else if (result.action === 'creeping_move') {
         // Creeping Mass movement: one tail segment removed, one new segment added
         const { removeSegment, addSegment } = result;
