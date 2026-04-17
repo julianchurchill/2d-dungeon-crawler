@@ -28,6 +28,14 @@ export class Player {
     this.equippedWeapon = null;
     this.equippedRangedWeapon = null;
     this.equippedArmor = null;
+    this.equippedHelmet = null;
+    this.equippedChest  = null;
+    this.equippedLegs   = null;
+    this.equippedArms   = null;
+    this.equippedBoots  = null;
+    this.equippedRing1  = null;
+    this.equippedRing2  = null;
+    this.equippedAmulet = null;
     /** @type {DisplayCase} Persistent display case for unique items — survives floor transitions. */
     this.displayCase = new DisplayCase();
     this.sprite = null;
@@ -36,7 +44,9 @@ export class Player {
   get attackPower() {
     return this.stats.attack
       + (this.equippedWeapon?.attackBonus || 0)
-      + (this.equippedRangedWeapon?.attackBonus || 0);
+      + (this.equippedRangedWeapon?.attackBonus || 0)
+      + (this.equippedRing1?.attackBonus || 0)
+      + (this.equippedRing2?.attackBonus || 0);
   }
 
   /**
@@ -51,7 +61,16 @@ export class Player {
   }
 
   get defensePower() {
-    return this.stats.defense + (this.equippedArmor?.defenseBonus || 0);
+    return this.stats.defense
+      + (this.equippedArmor?.defenseBonus    || 0)
+      + (this.equippedHelmet?.defenseBonus   || 0)
+      + (this.equippedChest?.defenseBonus    || 0)
+      + (this.equippedLegs?.defenseBonus     || 0)
+      + (this.equippedArms?.defenseBonus     || 0)
+      + (this.equippedBoots?.defenseBonus    || 0)
+      + (this.equippedRing1?.defenseBonus    || 0)
+      + (this.equippedRing2?.defenseBonus    || 0)
+      + (this.equippedAmulet?.defenseBonus   || 0);
   }
 
   move(dx, dy, map, getEntityAt) {

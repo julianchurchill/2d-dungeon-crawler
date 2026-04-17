@@ -9,7 +9,7 @@ export class Item {
     this.shortName = typeDef.shortName;
     this.description = typeDef.description;
     this.textureKey = typeDef.textureKey;
-    this.itemType = typeDef.type; // 'consumable' | 'weapon' | 'ranged_weapon' | 'armor'
+    this.itemType = typeDef.type; // 'consumable' | 'weapon' | 'ranged_weapon' | 'armor' | 'helmet' | 'chest' | 'legs' | 'arms' | 'boots' | 'ring' | 'amulet'
     this.sellPrice = typeDef.sellPrice ?? 0;
     this.unique = typeDef.unique ?? false;
     this.effect = typeDef.effect || null;
@@ -54,6 +54,32 @@ export class Item {
     } else if (this.itemType === 'armor') {
       player.equippedArmor = this;
       return `You equip the ${this.name}. (+${this.defenseBonus} DEF)`;
+    } else if (this.itemType === 'helmet') {
+      player.equippedHelmet = this;
+      return `You equip the ${this.name}. (+${this.defenseBonus} DEF)`;
+    } else if (this.itemType === 'chest') {
+      player.equippedChest = this;
+      return `You equip the ${this.name}. (+${this.defenseBonus} DEF)`;
+    } else if (this.itemType === 'legs') {
+      player.equippedLegs = this;
+      return `You equip the ${this.name}. (+${this.defenseBonus} DEF)`;
+    } else if (this.itemType === 'arms') {
+      player.equippedArms = this;
+      return `You equip the ${this.name}. (+${this.defenseBonus} DEF)`;
+    } else if (this.itemType === 'boots') {
+      player.equippedBoots = this;
+      return `You equip the ${this.name}. (+${this.defenseBonus} DEF)`;
+    } else if (this.itemType === 'ring') {
+      // Fill ring 1 first; overflow to ring 2
+      if (player.equippedRing1 === null) {
+        player.equippedRing1 = this;
+      } else {
+        player.equippedRing2 = this;
+      }
+      return `You equip the ${this.name}. (+${this.attackBonus} ATK)`;
+    } else if (this.itemType === 'amulet') {
+      player.equippedAmulet = this;
+      return `You equip the ${this.name}. (+${this.defenseBonus} DEF)`;
     }
     return `You use the ${this.name}.`;
   }
@@ -63,6 +89,7 @@ export class Item {
   }
 
   isEquipment() {
-    return this.itemType === 'weapon' || this.itemType === 'ranged_weapon' || this.itemType === 'armor';
+    return ['weapon', 'ranged_weapon', 'armor', 'helmet', 'chest', 'legs', 'arms', 'boots', 'ring', 'amulet']
+      .includes(this.itemType);
   }
 }
