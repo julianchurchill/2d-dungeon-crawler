@@ -179,4 +179,31 @@ export class Enemy {
     }
     return null;
   }
+
+  /**
+   * Current HP expressed as a fraction of max HP (0.0–1.0).
+   * Used by the health-bar renderer.
+   *
+   * @returns {number}
+   */
+  get healthBarFraction() {
+    if (this.stats.maxHp === 0) return 0;
+    return this.stats.hp / this.stats.maxHp;
+  }
+}
+
+/**
+ * Returns the Phaser hex colour for a health bar based on the HP fraction.
+ *
+ * - > 0.5 → green  (0x44aa44)
+ * - > 0.25 → yellow (0xaaaa44)
+ * - ≤ 0.25 → red   (0xaa4444)
+ *
+ * @param {number} fraction - HP fraction in range [0, 1].
+ * @returns {number} Phaser hex colour integer.
+ */
+export function getHealthBarColor(fraction) {
+  if (fraction > 0.5)  return 0x44aa44;
+  if (fraction > 0.25) return 0xaaaa44;
+  return 0xaa4444;
 }

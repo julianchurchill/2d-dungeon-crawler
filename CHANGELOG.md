@@ -9,6 +9,7 @@ Entries are listed newest-first within each section.
 
 ### Added
 
+- 2026-04-17 — **Enemy health bars**: a thin colour-coded bar appears above each enemy sprite when the enemy has taken damage. The bar is green above 50% HP, yellow between 25–50%, and red at 25% or below. It is hidden at full health and follows the enemy's FOV visibility.
 - 2026-04-17 — **Enemy ranged projectile animations**: when a Spitter or Skeleton Mage fires a ranged attack, a coloured projectile dot travels from the enemy to the player before damage is applied. All enemy projectiles for a turn fly simultaneously. Spitter fires acid-green; Skeleton Mage fires purple-violet.
 - 2026-04-16 — **Ranged enemies — Spitter and Skeleton Mage bolt**: the **Spitter** (hp 12, atk 3, def 0, xp 20) is a new enemy that spits acid up to 3 tiles along cardinal axes; it appears in the spawn table from floor 10. **Skeleton Mages** now also fire a magical bolt (power 6, range 4) when cardinally aligned with the player. Both enemy types fire before moving, check line-of-sight, and deal damage via `resolveRangedAttack`. The player sprite flashes orange on a hit from a ranged enemy attack.
 - 2026-04-16 — **Ranged attack mechanic**: press `R` (keyboard) or the **BOW** sub-menu button (mobile) to enter aim mode, then press a direction to fire the equipped ranged weapon up to 6 tiles. Walls block the shot; the nearest enemy in line is targeted. ESC or pressing `R` again cancels aim mode. The BOW button highlights while aiming. Help screen updated for both keyboard and mobile.
