@@ -100,6 +100,8 @@ export const ENEMY_DEFS = {
     teleportRange: 4,
     rangedAttackPower: 6,
     rangedRange: 4,
+    /** Purple-violet magic bolt colour. */
+    projectileColor: 0xcc44ff,
   },
   /**
    * Spitter — a slimy creature that spits acid at the player from up to 3 tiles
@@ -117,6 +119,8 @@ export const ENEMY_DEFS = {
     color: 0x88cc22,
     rangedAttackPower: 5,
     rangedRange: 3,
+    /** Acid-green projectile colour (matches the Spitter's body). */
+    projectileColor: 0x88cc22,
   },
   /**
    * Old Bones — unique boss; appears on floors 10–15 until defeated once.

@@ -23,6 +23,8 @@ export class Enemy {
     this.rangedAttackPower = def.rangedAttackPower ?? 0;
     /** Maximum range in tiles for ranged attacks (0 = no ranged attack). */
     this.rangedRange = def.rangedRange ?? 0;
+    /** Colour of the projectile sprite fired during a ranged attack (Phaser hex integer). */
+    this.projectileColor = def.projectileColor ?? 0xffdd44;
     this.sprite = null; // set by GameScene
     this.id = `${type}_${x}_${y}_${Math.random().toString(36).slice(2, 7)}`;
   }

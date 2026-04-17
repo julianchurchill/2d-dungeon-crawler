@@ -922,18 +922,19 @@ export class GameScene extends Phaser.Scene {
    * @param {number}   toTileX    - Destination tile X.
    * @param {number}   toTileY    - Destination tile Y.
    * @param {function} onComplete - Called once the projectile reaches its target.
+   * @param {number}   [color=0xffdd44] - Phaser hex colour for the projectile dot.
    */
-  _animateProjectile(fromTileX, fromTileY, toTileX, toTileY, onComplete) {
+  _animateProjectile(fromTileX, fromTileY, toTileX, toTileY, onComplete, color = 0xffdd44) {
     const half = TILE_SIZE / 2;
     const sx = fromTileX * TILE_SIZE + half;
     const sy = fromTileY * TILE_SIZE + half;
     const tx = toTileX  * TILE_SIZE + half;
     const ty = toTileY  * TILE_SIZE + half;
 
-    // Draw a small amber circle — size scales with tile size for all three tilesets.
+    // Draw a small coloured circle — size scales with tile size for all three tilesets.
     const radius = Math.max(2, Math.round(TILE_SIZE * 0.15));
     const projectile = this.add.graphics()
-      .fillStyle(0xffdd44, 1)
+      .fillStyle(color, 1)
       .fillCircle(0, 0, radius)
       .setPosition(sx, sy)
       .setDepth(12); // above map (0), shadows (5), entities (8), player (10)
@@ -1743,6 +1744,15 @@ export class GameScene extends Phaser.Scene {
   _startEnemyTurns() {
     this.turnManager.setState(TURN_STATE.ENEMY_ACTING);
 
+    /**
+     * Ranged attacks whose projectile animations are deferred until after the
+     * synchronous turn loop completes, so all projectiles can fly simultaneously.
+     * Damage is resolved immediately; only the visual is deferred.
+     *
+     * @type {Array<{fromX: number, fromY: number, toX: number, toY: number, color: number, killed: boolean}>}
+     */
+    const pendingProjectiles = [];
+
     for (const enemy of this.enemies) {
       const result = enemy.takeTurn(this.player, this.dungeonMap, (x, y) => this._getEntityAt(x, y), this.rng);
 
@@ -1765,13 +1775,20 @@ export class GameScene extends Phaser.Scene {
           { defenderIsInvincible: devOptions.playerInvincible },
         );
         messages.forEach(msg => EventBus.emit(GameEvents.MESSAGE, msg));
-        this._flashSprite(this.playerSprite, 0xff8800);
         this._syncRegistry();
 
-        if (this.player.isDead()) {
-          this._gameOver();
-          return;
-        }
+        // Queue a projectile animation — visual flies after all enemy actions resolve.
+        pendingProjectiles.push({
+          fromX: enemy.x,
+          fromY: enemy.y,
+          toX: this.player.x,
+          toY: this.player.y,
+          color: enemy.projectileColor,
+          killed,
+        });
+
+        // Player died — stop processing enemies; the deferred path handles game over.
+        if (killed) break;
       } else if (result.action === 'move') {
         this.dungeonMap.setEntity(enemy.x, enemy.y, null);
         enemy.x += result.dx;
@@ -1824,8 +1841,41 @@ export class GameScene extends Phaser.Scene {
       this._tickNpcRoam(roamer);
     }
 
+    // If any enemy fired a ranged attack, animate all projectiles simultaneously
+    // then flash the player and hand control back (or trigger game over).
+    if (pendingProjectiles.length > 0) {
+      const playerWasKilled = pendingProjectiles.some(p => p.killed);
+      this._launchEnemyProjectiles(pendingProjectiles, () => {
+        this._flashSprite(this.playerSprite, 0xff8800);
+        if (playerWasKilled) {
+          this._gameOver();
+        } else {
+          this.turnManager.setState(TURN_STATE.PLAYER_INPUT);
+          this._beginPlayerTurn();
+        }
+      });
+      return;
+    }
+
     this.turnManager.setState(TURN_STATE.PLAYER_INPUT);
     this._beginPlayerTurn();
+  }
+
+  /**
+   * Fires all pending enemy projectile animations simultaneously.
+   * `onComplete` is called once every projectile has reached its target.
+   *
+   * @param {Array<{fromX: number, fromY: number, toX: number, toY: number, color: number}>} projectiles
+   * @param {function} onComplete
+   */
+  _launchEnemyProjectiles(projectiles, onComplete) {
+    let remaining = projectiles.length;
+    for (const { fromX, fromY, toX, toY, color } of projectiles) {
+      this._animateProjectile(fromX, fromY, toX, toY, () => {
+        remaining -= 1;
+        if (remaining === 0) onComplete();
+      }, color);
+    }
   }
 
   /**

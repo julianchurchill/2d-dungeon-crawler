@@ -110,6 +110,13 @@ Then('the ranged action is not {string}', function (notExpected) {
   );
 });
 
+Then('the ranged enemy projectile colour is {int}', function (expected) {
+  assert.equal(
+    this.rangedEnemy.projectileColor, expected,
+    `Expected projectileColor ${expected}, got ${this.rangedEnemy.projectileColor}`,
+  );
+});
+
 Then('the ranged target is the player', function () {
   assert.strictEqual(
     this.rangedResult.target, this.playerTarget,

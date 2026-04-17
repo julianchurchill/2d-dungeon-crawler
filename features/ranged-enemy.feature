@@ -76,6 +76,16 @@ Feature: Ranged enemies
     Then the ranged action is "ranged_attack"
     And the ranged target is the player
 
+  # ── Projectile colours ────────────────────────────────────────────────────────
+
+  Scenario: Spitter has an acid-green projectile colour
+    Given a ranged enemy of type "spitter" at position 0, 0
+    Then the ranged enemy projectile colour is 8965154
+
+  Scenario: Skeleton Mage has a purple projectile colour
+    Given a ranged enemy of type "skeleton_mage" at position 0, 0
+    Then the ranged enemy projectile colour is 13387007
+
   # ── Spawn table ───────────────────────────────────────────────────────────────
 
   Scenario: Spitter is not in the spawn table before floor 10
