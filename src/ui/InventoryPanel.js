@@ -281,13 +281,14 @@ export class InventoryPanel {
         const item = this.inventory[i];
         icon.setTexture(this._tilesetManager.getTileKey(item.textureKey))
           .setDisplaySize(16, 16).setVisible(true);
-        label.setText(item.shortName ?? item.name);
+        const baseName = item.shortName ?? item.name;
+        const countSuffix = item.stackable && item.count > 1 ? ` x${item.count}` : '';
+        label.setText(baseName + countSuffix);
       } else {
         icon.setVisible(false);
         label.setText('');
       }
     }
-
   }
 
   resize(width, height) {

@@ -7,6 +7,7 @@ export const ITEM_TYPES = {
     type: 'consumable',
     effect: { heal: 15 },
     sellPrice: 5,
+    stackable: true,
   },
   MEGA_POTION: {
     id: 'mega_potion',
@@ -16,6 +17,7 @@ export const ITEM_TYPES = {
     type: 'consumable',
     effect: { heal: 30 },
     sellPrice: 10,
+    stackable: true,
   },
   SWORD: {
     id: 'sword',
@@ -100,6 +102,7 @@ export const ITEM_TYPES = {
     type: 'consumable',
     effect: { type: 'teleport_near', minDist: 3, maxDist: 8 },
     sellPrice: 8,
+    stackable: true,
   },
 };
 

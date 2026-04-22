@@ -53,3 +53,9 @@ Feature: Combined Shop Panel
     And a player with no matching inventory items and 50 gold
     When the shop panel is shown
     Then the panel should indicate there is nothing to buy
+
+  Scenario: Sell section shows stack count for stackable items
+    Given a potion shop with no stock
+    And a player with a health potion stack of 2 and 0 gold
+    When the potion shop panel is shown
+    Then the sell section bag count for "Health Potion" should be 2

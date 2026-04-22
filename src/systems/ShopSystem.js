@@ -44,7 +44,7 @@ export class ShopSystem {
    */
   buy(player, item, buyPrice) {
     if (player.gold < buyPrice) return false;
-    if (!player.canPickUp()) return false;
+    if (!player.canPickUp(item)) return false;
     player.gold -= buyPrice;
     player.addItem(item);
     return true;
@@ -87,7 +87,8 @@ export class ShopSystem {
     if (!this.accepts(item)) return 0;
     const idx = player.inventory.indexOf(item);
     if (idx === -1) return 0;
-    player.inventory.splice(idx, 1);
+    // removeItem handles stacks: decrements count for stacked items, splices otherwise.
+    player.removeItem(idx);
     player.gold += item.sellPrice;
     return item.sellPrice;
   }
