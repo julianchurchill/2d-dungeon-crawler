@@ -44,7 +44,7 @@ export class ShopSystem {
    */
   buy(player, item, buyPrice) {
     if (player.gold < buyPrice) return false;
-    if (!player.canPickUp()) return false;
+    if (!player.canPickUp(item)) return false;
     player.gold -= buyPrice;
     player.addItem(item);
     return true;

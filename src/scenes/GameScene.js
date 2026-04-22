@@ -1716,7 +1716,10 @@ export class GameScene extends Phaser.Scene {
     // Only push the buy-back entry when the sale actually succeeded (earned > 0)
     // to guard against mismatched shopType emits or other edge cases.
     if (earned > 0 && this._activeShop) {
-      this._activeShop.stock.push(system.createBuyBackEntry(item));
+      // For stackable items the stack object is still in inventory (count
+      // decremented), so we must clone it to avoid aliasing the live slot.
+      const buyBackItem = item.stackable ? item._cloneOne() : item;
+      this._activeShop.stock.push(system.createBuyBackEntry(buyBackItem));
     }
     EventBus.emit(GameEvents.MESSAGE, `Sold ${item.name} for ${earned} gold.`);
     EventBus.emit(GameEvents.PLAYER_GOLD_CHANGED, this.player.gold);
