@@ -1458,11 +1458,15 @@ export class GameScene extends Phaser.Scene {
     if (itemIndex === -1) return;
 
     const item = this.items[itemIndex];
+    // Determine success before calling pickUp so that stackable items that
+    // merge into an existing stack (and are therefore never pushed into the
+    // inventory array) are still removed from the floor.
+    const willPickUp = this.player.canPickUp(item);
     const msg = InventorySystem.pickUp(this.player, item);
     EventBus.emit(GameEvents.MESSAGE, msg);
 
-    if (this.player.inventory.includes(item)) {
-      // Successfully picked up
+    if (willPickUp) {
+      // Successfully picked up (either added to inventory or merged into a stack)
       this.items.splice(itemIndex, 1);
       if (item.sprite) item.sprite.destroy();
       this._syncRegistry();
