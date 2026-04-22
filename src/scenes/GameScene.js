@@ -475,8 +475,10 @@ export class GameScene extends Phaser.Scene {
       enemy = new Enemy(x, y, type);
     }
 
-    // Scale HP and ATK by the active difficulty (bosses and champions are exempt).
-    if (!enemy.isBoss && !enemy.isChampion) {
+    // Scale HP and ATK by the active difficulty (bosses are exempt; champions are
+    // not — difficulty scaling is applied on top of their champion stat boost so
+    // they remain proportionally tougher than normal enemies at every difficulty).
+    if (!enemy.isBoss) {
       const { enemyHp, enemyAtk } = difficultyManager.getConfig();
       enemy.stats.hp    = Math.max(1, Math.round(enemy.stats.hp    * enemyHp));
       enemy.stats.maxHp = Math.max(1, Math.round(enemy.stats.maxHp * enemyHp));
