@@ -9,6 +9,8 @@ Entries are listed newest-first within each section.
 
 ### Added
 
+- 2026-04-22 — **Dev option — spawn champions**: a new CHAMPIONS section in the Developer Options screen lets testers set exact per-level spawn counts for champion variants of any eligible enemy type. Counts are independent of the normal 10% champion-chance logic (both can apply simultaneously). Resetting returns to the default random-chance behaviour.
+- 2026-04-22 — **Champion enemies**: normal enemies now have a 10 % chance to spawn as a champion variant. Champions have 1.5× HP, 1.3× attack, and at least +1 defense compared to the base type, award twice the XP on defeat, are rendered with a gold tint and at 1.35× scale to distinguish them visually, and always drop a random item from the floor loot pool (drawn from the current floor up to 5 floors deeper) when killed. Solitary and boss enemy types (Creeping Mass, Old Bones) are exempt from the champion mechanic.
 - 2026-04-22 — **Stackable inventory items**: potions (Health Potion, Mega Potion, Potion of Minor Teleportation) now stack in a single inventory slot. The slot label shows the current count (e.g. `Health Potion x3`). Using a stacked consumable or selling one at a shop only affects one item at a time — the stack count decrements rather than the slot disappearing until the last item is consumed or sold. The inventory panel and sell panel both reflect stack counts accurately.
 
 ---

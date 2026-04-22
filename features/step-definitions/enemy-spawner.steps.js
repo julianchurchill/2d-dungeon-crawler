@@ -27,18 +27,21 @@ function makeRooms(count) {
 
 /** RNG whose nextInt always returns the maximum and pick always returns the last element. */
 const maxRNG = {
+  next: () => 1,        // 1 < any champion chance → no champions
   nextInt: (min, max) => max,
   pick: (arr) => arr[arr.length - 1],
 };
 
 /** RNG whose nextInt always returns 0 and pick always returns the first element. */
 const zeroRNG = {
+  next: () => 1,        // 1 < any champion chance → no champions
   nextInt: () => 0,
   pick: (arr) => arr[0],
 };
 
 /** RNG whose nextInt always returns its min argument and pick always returns the first element. */
 const minRNG = {
+  next: () => 1,        // 1 < any champion chance → no champions
   nextInt: (min) => min,
   pick: (arr) => arr[0],
 };

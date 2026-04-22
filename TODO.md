@@ -58,11 +58,11 @@
 
 - [ ] new enemy - 'burrower', solitary, appears from floor 15, mole like, when next to a wall has a chance of removing the wall and leaving a 'tunnel' which can be trodden on. Once a tunnel is started the 'burrower' will slowly continue to extend the 'tunnel' where possible going deeper into the wall or space that is not already navigable.
 - [ ] associate enemies with a chance of appearing based on the dungeon level. Record that against their enemy stats as their level. This can then be used for Hall of Legends information when players die for the highest level enemy they have defeated.
-- [ ] champions - some normal enemy types occasionally spawn as a 'champion' with enhanced stats and a bigger, bolder texture than the normal enemy giving more xp on defeating and can drop normal weapons, armour or items that might otherwise spawn on that level or up to 5 levels below
 - [x] enemy health - perhaps a health bar
 - [x] add a ranged enemy - spitter, shoots acid to attack but only from upto 3 tiles away, appears from floor 10. Give Skeleton Mages a ranged attack.
 - [x] boss spawn developer options - add to developer options to spawn unique bosses, alongside enemy spawning controls.
 - [x] Boss - Old Bones, the first boss the player can encounter. Will randomly appear between level 10 and 15 until the player defeats it. As it is a unique boss it can only appear once in a level. Gives player an achievement on defeating. Drops 1 unique weapon or piece of armour with a bone/skeleton theme. Drops some gold. Is quite aggressive. May spawn up to 2 skeleton minions nearby once combat starts.
+- [x] champions - some normal enemy types occasionally spawn as a 'champion' with enhanced stats and a bigger, bolder texture than the normal enemy giving more xp on defeating and can drop normal weapons, armour or items that might otherwise spawn on that level or up to 5 levels below
 - [x] new enemy - Creeping Mass, appears from level 10, is solitary. It has 3-5 segments which each cover 1 tile. The segments are always connected by at least one other segment. The whole enemy moves one tile at a time by removing one outer segment and placing it on a free adjacent tile to any other segment. A Creeping Mass has hp relative to the number of segments it has. As it gets damaged it loses segments in proportion to it's remaining hp.
 
 ## Character

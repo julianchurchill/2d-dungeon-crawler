@@ -5,6 +5,7 @@ import { resolveMeleeAttack } from '../systems/CombatSystem.js';
 import { InventorySystem } from '../systems/InventorySystem.js';
 import { Player } from '../entities/Player.js';
 import { Enemy, getHealthBarColor } from '../entities/Enemy.js';
+import { Champion } from '../entities/Champion.js';
 import { CreepingMass } from '../entities/CreepingMass.js';
 import { OldBones } from '../entities/OldBones.js';
 import { Npc } from '../entities/Npc.js';
@@ -52,6 +53,10 @@ import { findRangedTarget, resolveRangedAttack } from '../systems/RangedCombat.j
 // stay simple while still being writable at create-time.
 let TILE_SIZE = 16;
 const FOV_RADIUS = 8;
+/** Gold tint applied to champion sprites to distinguish them from normal enemies. */
+const CHAMPION_TINT  = 0xffaa00;
+/** Scale factor applied to champion sprites to make them visibly larger. */
+const CHAMPION_SCALE = 1.35;
 const MOVE_DURATION = 80;
 // Additional delay after the move animation before auto-repeat fires.
 // Total repeat interval ≈ MOVE_DURATION + MOVE_REPEAT_DELAY_MS (~150 ms).
@@ -216,6 +221,11 @@ export class GameScene extends Phaser.Scene {
       this._trySpawnOldBones(rooms);
     }
 
+    // Champion spawning: dev override places specific champion types at room centres
+    if (devOptions.championQuantities !== null) {
+      this._spawnDevChampions(rooms, devOptions.championQuantities);
+    }
+
     // Spawn items
     this._spawnItems(rooms);
 
@@ -356,7 +366,7 @@ export class GameScene extends Phaser.Scene {
       rooms,
       this.floorManager.currentFloor,
       (x, y)       => this._getEntityAt(x, y),
-      (x, y, type) => this._spawnEnemy(x, y, type),
+      (x, y, type, options) => this._spawnEnemy(x, y, type, options),
     );
   }
 
@@ -413,16 +423,61 @@ export class GameScene extends Phaser.Scene {
     }
   }
 
-  _spawnEnemy(x, y, type) {
+  /**
+   * Dev-only: spawns an exact number of champion variants of each enemy type
+   * specified in the `championQuantities` map.  Champions are placed at the
+   * centre of non-start rooms (first-fit order).  This runs in addition to the
+   * normal enemy spawner so that dev champions appear alongside regular enemies.
+   *
+   * @param {Array<{x:number,y:number,w:number,h:number}>} rooms
+   * @param {Object.<string,number>} quantities - Map of enemy type → total champion count.
+   */
+  _spawnDevChampions(rooms, quantities) {
+    const candidates = rooms.slice(1);
+    for (const [type, count] of Object.entries(quantities)) {
+      let spawned = 0;
+      for (const room of candidates) {
+        if (spawned >= count) break;
+        const cx = Math.floor(room.x + room.w / 2);
+        const cy = Math.floor(room.y + room.h / 2);
+        if (!this._getEntityAt(cx, cy)) {
+          this._spawnEnemy(cx, cy, type, { isChampion: true });
+          spawned++;
+        }
+      }
+    }
+  }
+
+  /**
+   * Spawns a single enemy entity at the given tile coordinates.
+   *
+   * @param {number} x
+   * @param {number} y
+   * @param {string} type    - Enemy type key from ENEMY_DEFS.
+   * @param {object} [options]
+   * @param {boolean} [options.isChampion=false] - When true, spawns a Champion variant.
+   */
+  _spawnEnemy(x, y, type, options = {}) {
     if (type === 'creeping_mass') {
       this._spawnCreepingMass(x, y);
       return;
     }
-    // Old Bones must be constructed as OldBones (not plain Enemy) so that boss
-    // properties — isBoss, minionsSpawned, dropGold, dropItem — are present.
-    const enemy = type === 'old_bones' ? new OldBones(x, y, this.rng) : new Enemy(x, y, type);
 
-    // Scale HP and ATK by the active difficulty (bosses are exempt).
+    let enemy;
+    if (type === 'old_bones') {
+      // Old Bones must be constructed as OldBones (not plain Enemy) so that boss
+      // properties — isBoss, minionsSpawned, dropGold, dropItem — are present.
+      enemy = new OldBones(x, y, this.rng);
+    } else if (options.isChampion) {
+      // Champion variant: enhanced stats, more XP, and an item drop.
+      enemy = new Champion(x, y, type, this.floorManager.currentFloor, this.rng);
+    } else {
+      enemy = new Enemy(x, y, type);
+    }
+
+    // Scale HP and ATK by the active difficulty (bosses are exempt; champions are
+    // not — difficulty scaling is applied on top of their champion stat boost so
+    // they remain proportionally tougher than normal enemies at every difficulty).
     if (!enemy.isBoss) {
       const { enemyHp, enemyAtk } = difficultyManager.getConfig();
       enemy.stats.hp    = Math.max(1, Math.round(enemy.stats.hp    * enemyHp));
@@ -435,6 +490,13 @@ export class GameScene extends Phaser.Scene {
       y * TILE_SIZE + TILE_SIZE / 2,
       tilesetManager.getTileKey(enemy.textureKey)
     ).setDepth(8).setVisible(false);
+
+    // Champions are rendered larger and with a gold tint to stand out.
+    if (enemy.isChampion) {
+      sprite.setScale(CHAMPION_SCALE);
+      sprite.setTint(CHAMPION_TINT);
+    }
+
     enemy.sprite = sprite;
     this._createHealthBar(enemy);
     this.enemies.push(enemy);
@@ -893,7 +955,7 @@ export class GameScene extends Phaser.Scene {
       if (target.segments) {
         for (const seg of target.segments) this._flashSprite(seg.sprite, 0xff4444);
       } else {
-        this._flashSprite(target.sprite, 0xff4444);
+        this._flashSprite(target.sprite, 0xff4444, target);
       }
 
       // Clean up any segments removed by proportional HP loss (Creeping Mass).
@@ -905,6 +967,7 @@ export class GameScene extends Phaser.Scene {
       if (killed) {
         EventBus.emit(GameEvents.ENEMY_KILLED, target.type);
         if (target.isBoss) this._applyBossLoot(target);
+        if (target.isChampion) this._applyChampionLoot(target);
 
         const leveled = this.player.gainXP(target.xp);
         if (leveled) {
@@ -1148,7 +1211,7 @@ export class GameScene extends Phaser.Scene {
         if (target.segments) {
           for (const seg of target.segments) this._flashSprite(seg.sprite, 0xff4444);
         } else {
-          this._flashSprite(target.sprite, 0xff4444);
+          this._flashSprite(target.sprite, 0xff4444, target);
         }
 
         // Handle segments removed by damage (proportional HP loss for Creeping Mass)
@@ -1172,6 +1235,10 @@ export class GameScene extends Phaser.Scene {
           // Boss-specific loot: gold and a unique item drop
           if (target.isBoss) {
             this._applyBossLoot(target);
+          }
+          // Champion-specific loot: item drop
+          if (target.isChampion) {
+            this._applyChampionLoot(target);
           }
 
           const leveled = this.player.gainXP(target.xp);
@@ -1298,10 +1365,37 @@ export class GameScene extends Phaser.Scene {
     }
   }
 
-  _flashSprite(sprite, color) {
+  /**
+   * Places the champion's drop item on the floor at the champion's position
+   * and notifies the player via the message log.
+   *
+   * @param {Champion} champion
+   */
+  _applyChampionLoot(champion) {
+    if (champion.dropItem) {
+      this._placeItem(champion.x, champion.y, champion.dropItem);
+      EventBus.emit(GameEvents.MESSAGE, `${champion.name} dropped: ${champion.dropItem.name}!`);
+    }
+  }
+
+  /**
+   * Flashes `sprite` with `color` for 150 ms, then restores the champion gold
+   * tint if the entity is a champion, or clears the tint entirely otherwise.
+   *
+   * @param {Phaser.GameObjects.Sprite} sprite
+   * @param {number} color       - Hex color integer for the flash.
+   * @param {object} [entity]    - The owning enemy entity; used to restore tint.
+   */
+  _flashSprite(sprite, color, entity = null) {
     if (!sprite) return;
     sprite.setTint(color);
-    this.time.delayedCall(150, () => sprite.clearTint());
+    this.time.delayedCall(150, () => {
+      if (entity?.isChampion) {
+        sprite.setTint(CHAMPION_TINT);
+      } else {
+        sprite.clearTint();
+      }
+    });
   }
 
   /**
@@ -1364,11 +1458,15 @@ export class GameScene extends Phaser.Scene {
     if (itemIndex === -1) return;
 
     const item = this.items[itemIndex];
+    // Determine success before calling pickUp so that stackable items that
+    // merge into an existing stack (and are therefore never pushed into the
+    // inventory array) are still removed from the floor.
+    const willPickUp = this.player.canPickUp(item);
     const msg = InventorySystem.pickUp(this.player, item);
     EventBus.emit(GameEvents.MESSAGE, msg);
 
-    if (this.player.inventory.includes(item)) {
-      // Successfully picked up
+    if (willPickUp) {
+      // Successfully picked up (either added to inventory or merged into a stack)
       this.items.splice(itemIndex, 1);
       if (item.sprite) item.sprite.destroy();
       this._syncRegistry();

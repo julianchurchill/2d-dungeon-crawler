@@ -15,6 +15,9 @@ import { getSpawnTable, getEnemiesPerRoom, ENEMY_DEFS } from '../entities/EnemyT
 import { devOptions } from '../systems/DevOptions.js';
 import { difficultyManager as defaultDifficultyManager } from '../systems/DifficultyManager.js';
 
+/** Base probability that any eligible enemy spawn becomes a champion (10%). */
+export const DEFAULT_CHAMPION_CHANCE = 0.1;
+
 export class EnemySpawner {
   /**
    * @param {import('../utils/RNG.js').RNG}      rng               - Seeded RNG for positions and type picks.
@@ -68,7 +71,10 @@ export class EnemySpawner {
           this._spawnCluster(type, ex, ey, size, room, getEntityAt, spawnEnemy);
         } else if (!getEntityAt(ex, ey)) {
           if (def.solitary) placedSolitaryTypes.add(type);
-          spawnEnemy(ex, ey, type);
+          // Champions may only arise from non-solitary, non-boss enemy types.
+          const championChance = this.opts.championChance ?? DEFAULT_CHAMPION_CHANCE;
+          const isChampion = !def.solitary && !def.isBoss && this.rng.next() < championChance;
+          spawnEnemy(ex, ey, type, { isChampion });
         }
       }
     }

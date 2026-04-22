@@ -39,6 +39,9 @@ export const DEV_START_ITEMS = ['HEALTH_POTION', 'HEALTH_POTION', 'MEGA_POTION',
  * @property {Object.<string,number>|null} bossQuantities - Map of boss type → exact total
  *                                             count to place on the level, or null to use
  *                                             the normal boss-spawn logic.
+ * @property {Object.<string,number>|null} championQuantities - Map of enemy type → exact total
+ *                                             count of champion variants to place on the level,
+ *                                             or null to use the normal 10% champion-chance logic.
  */
 export const devOptions = {
   startFloor: 0,
@@ -50,6 +53,7 @@ export const devOptions = {
   enemiesInvincible: false,
   playerInvincible: false,
   bossQuantities: null,
+  championQuantities: null,
 };
 
 /**
@@ -65,6 +69,7 @@ export function resetDevOptions() {
   devOptions.enemiesInvincible = false;
   devOptions.playerInvincible = false;
   devOptions.bossQuantities = null;
+  devOptions.championQuantities = null;
 }
 
 /**
