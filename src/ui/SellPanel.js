@@ -205,13 +205,16 @@ export class SellPanel {
 
     this._acceptableItems = inventory.filter(item => this._shop.accepts(item));
 
-    // Deduplicate by item name — one row per unique type, showing a count
+    // Deduplicate by item name — one row per unique type, showing a count.
+    // For stackable items use item.count; for non-stackable items each array
+    // entry counts as 1 (multiple unstacked copies sum their individual counts).
     const countByName = new Map();
     for (const item of this._acceptableItems) {
+      const qty = item.stackable ? item.count : 1;
       if (countByName.has(item.name)) {
-        countByName.get(item.name).count++;
+        countByName.get(item.name).count += qty;
       } else {
-        countByName.set(item.name, { item, count: 1 });
+        countByName.set(item.name, { item, count: qty });
       }
     }
     // Sort alphabetically so the list order is stable as items are sold

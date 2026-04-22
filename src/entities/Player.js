@@ -134,18 +134,55 @@ export class Player {
     return this.stats.hp <= 0;
   }
 
-  canPickUp() {
-    return this.inventory.length < this.maxInventory;
+  /**
+   * Returns true if the player can pick up the given item.
+   * Stackable items can always be picked up when a matching stack already exists
+   * in inventory, even when the inventory is otherwise full.
+   *
+   * @param {import('../items/Item.js').Item|null} [item] - Item to pick up.
+   * @returns {boolean}
+   */
+  canPickUp(item = null) {
+    if (this.inventory.length < this.maxInventory) return true;
+    if (item?.stackable) {
+      return this.inventory.some(i => i.id === item.id && i.stackable);
+    }
+    return false;
   }
 
+  /**
+   * Adds an item to the inventory, stacking it if a matching stackable slot exists.
+   * @param {import('../items/Item.js').Item} item
+   * @returns {boolean} True if the item was added.
+   */
   addItem(item) {
-    if (!this.canPickUp()) return false;
+    if (item.stackable) {
+      const existing = this.inventory.find(i => i.id === item.id && i.stackable);
+      if (existing) {
+        existing.count += item.count;
+        return true;
+      }
+    }
+    if (this.inventory.length >= this.maxInventory) return false;
     this.inventory.push(item);
     return true;
   }
 
+  /**
+   * Removes one item from the inventory slot at the given index.
+   * For stackable items with count > 1, decrements the count and returns a
+   * single-item clone rather than removing the slot entirely.
+   *
+   * @param {number} index
+   * @returns {import('../items/Item.js').Item|null} The removed (or cloned) item.
+   */
   removeItem(index) {
     if (index < 0 || index >= this.inventory.length) return null;
+    const item = this.inventory[index];
+    if (item.stackable && item.count > 1) {
+      item.count--;
+      return item._cloneOne();
+    }
     return this.inventory.splice(index, 1)[0];
   }
 }

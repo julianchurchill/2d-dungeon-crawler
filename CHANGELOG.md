@@ -7,6 +7,10 @@ Entries are listed newest-first within each section.
 
 ## [Unreleased]
 
+### Added
+
+- 2026-04-22 — **Stackable inventory items**: potions (Health Potion, Mega Potion, Potion of Minor Teleportation) now stack in a single inventory slot. The slot label shows the current count (e.g. `Health Potion x3`). Using a stacked consumable or selling one at a shop only affects one item at a time — the stack count decrements rather than the slot disappearing until the last item is consumed or sold. The inventory panel and sell panel both reflect stack counts accurately.
+
 ---
 
 ## [0.51.0] - 2026-04-17

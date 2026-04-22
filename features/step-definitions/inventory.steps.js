@@ -38,7 +38,8 @@ Given('a player at full health with {int} HP maximum', function (maxHp) {
 Given('a player with a full inventory of {int} items', function (count) {
   this.player = new Player(0, 0);
   for (let i = 0; i < count; i++) {
-    this.player.addItem(new Item(0, 0, ITEM_TYPES.HEALTH_POTION));
+    // Use a non-stackable item so each occupies a separate slot, filling the inventory.
+    this.player.addItem(new Item(0, 0, ITEM_TYPES.SWORD));
   }
 });
 

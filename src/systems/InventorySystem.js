@@ -11,7 +11,7 @@ export class InventorySystem {
    * @returns {string|null} message or null if failed
    */
   static pickUp(player, item) {
-    if (!player.canPickUp()) {
+    if (!player.canPickUp(item)) {
       return 'Your pack is full!';
     }
     player.addItem(item);
