@@ -287,10 +287,12 @@ export class ShopPanel {
     const acceptable = inventory.filter(item => shop.accepts(item));
     const countByName = new Map();
     for (const item of acceptable) {
+      // Use item.count for stackable items; each non-stackable entry counts as 1.
+      const qty = item.stackable ? item.count : 1;
       if (countByName.has(item.name)) {
-        countByName.get(item.name).count++;
+        countByName.get(item.name).count += qty;
       } else {
-        countByName.set(item.name, { item, count: 1 });
+        countByName.set(item.name, { item, count: qty });
       }
     }
     this._sellGroups = [...countByName.values()]

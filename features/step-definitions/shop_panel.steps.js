@@ -118,6 +118,19 @@ Given('a weapon shop with no stock', function () {
   shopStock = [];
 });
 
+Given('a potion shop with no stock', function () {
+  shopStock = [];
+});
+
+Given('a player with a health potion stack of {int} and {int} gold', function (count, gold) {
+  player = new Player(0, 0);
+  player.gold = gold;
+  const potion = new Item(0, 0, ITEM_TYPES.HEALTH_POTION);
+  potion.count = count;
+  player.inventory.push(potion);
+  inventory = player.inventory;
+});
+
 Given('a player with a {string} in their inventory and {int} gold', function (itemName, gold) {
   player = new Player(0, 0);
   player.gold = gold;
@@ -139,6 +152,11 @@ Given('a player with no matching inventory items and {int} gold', function (gold
 When('the shop panel is shown', function () {
   panel = new ShopPanel(createMockScene());
   panel.show('weapon', shopStock, inventory, player);
+});
+
+When('the potion shop panel is shown', function () {
+  panel = new ShopPanel(createMockScene());
+  panel.show('potion', shopStock, inventory, player);
 });
 
 When('the cursor is on the sell row for {string}', function (itemName) {
@@ -212,6 +230,13 @@ Then('a SELL_ITEM event should have been emitted for {string}', function (itemNa
 
 Then('a BUY_ITEM event should have been emitted for {string}', function (itemName) {
   assert.strictEqual(capturedBuyItem, itemName, `Expected BUY_ITEM for "${itemName}"`);
+});
+
+Then('the sell section bag count for {string} should be {int}', function (itemName, expected) {
+  const group = panel._sellGroups.find(g => g.item.name === itemName);
+  assert.ok(group, `Expected a sell group for "${itemName}"`);
+  assert.equal(group.count, expected,
+    `Expected bag count ${expected} for "${itemName}", got ${group.count}`);
 });
 
 Then('the panel should indicate there is nothing to sell', function () {
