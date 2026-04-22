@@ -65,6 +65,20 @@ Feature: Developer spawn options
   Scenario: old_bones is identified as a boss type in ENEMY_DEFS
     Then the "old_bones" enemy type should be flagged as a boss in ENEMY_DEFS
 
+  # ── Champion quantities ───────────────────────────────────────────────────
+
+  Scenario: Default champion quantities are null (use normal champion chance logic)
+    Then the dev champion quantities should be null
+
+  Scenario: Champion quantities can be set
+    When the dev champion quantities are set to goblin 2
+    Then the dev champion quantities should be goblin 2
+
+  Scenario: Reset clears champion quantities back to null
+    Given the dev champion quantities are set to goblin 1
+    When developer options are reset
+    Then the dev champion quantities should be null
+
   Scenario: buildSpawnTableFromWeights converts weights to weighted array
     When a spawn table is built from goblin 2 orc 1 troll 0
     Then the spawn table should contain 2 goblins

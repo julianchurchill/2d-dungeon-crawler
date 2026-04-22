@@ -221,6 +221,11 @@ export class GameScene extends Phaser.Scene {
       this._trySpawnOldBones(rooms);
     }
 
+    // Champion spawning: dev override places specific champion types at room centres
+    if (devOptions.championQuantities !== null) {
+      this._spawnDevChampions(rooms, devOptions.championQuantities);
+    }
+
     // Spawn items
     this._spawnItems(rooms);
 
@@ -412,6 +417,31 @@ export class GameScene extends Phaser.Scene {
         const cy = Math.floor(room.y + room.h / 2);
         if (!this._getEntityAt(cx, cy)) {
           this._spawnEnemy(cx, cy, type);
+          spawned++;
+        }
+      }
+    }
+  }
+
+  /**
+   * Dev-only: spawns an exact number of champion variants of each enemy type
+   * specified in the `championQuantities` map.  Champions are placed at the
+   * centre of non-start rooms (first-fit order).  This runs in addition to the
+   * normal enemy spawner so that dev champions appear alongside regular enemies.
+   *
+   * @param {Array<{x:number,y:number,w:number,h:number}>} rooms
+   * @param {Object.<string,number>} quantities - Map of enemy type → total champion count.
+   */
+  _spawnDevChampions(rooms, quantities) {
+    const candidates = rooms.slice(1);
+    for (const [type, count] of Object.entries(quantities)) {
+      let spawned = 0;
+      for (const room of candidates) {
+        if (spawned >= count) break;
+        const cx = Math.floor(room.x + room.w / 2);
+        const cy = Math.floor(room.y + room.h / 2);
+        if (!this._getEntityAt(cx, cy)) {
+          this._spawnEnemy(cx, cy, type, { isChampion: true });
           spawned++;
         }
       }

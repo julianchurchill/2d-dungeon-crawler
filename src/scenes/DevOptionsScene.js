@@ -47,6 +47,15 @@ const SPAWN_TABLE_KEYS = Object.keys(ENEMY_DEFS).filter(k => !ENEMY_DEFS[k].isBo
  */
 const BOSS_KEYS = Object.keys(ENEMY_DEFS).filter(k => ENEMY_DEFS[k].isBoss);
 
+/**
+ * Enemy types eligible to spawn as champions — non-solitary, non-boss types.
+ * Mirrors the exclusion logic in EnemySpawner so the dev UI only shows types
+ * that can actually become champions.
+ */
+const CHAMPION_KEYS = Object.keys(ENEMY_DEFS).filter(
+  k => !ENEMY_DEFS[k].isBoss && !ENEMY_DEFS[k].solitary,
+);
+
 export class DevOptionsScene extends Phaser.Scene {
   constructor() {
     super({ key: 'DevOptionsScene' });
@@ -190,6 +199,29 @@ export class DevOptionsScene extends Phaser.Scene {
     // "Reset to defaults" link for boss quantities
     this._makeResetLink('Reset bosses to normal logic', cx, y, () => {
       devOptions.bossQuantities = null;
+      this.scene.restart();
+    });
+    y += 32;
+
+    // Champions section heading
+    this.add.text(cx, y, 'CHAMPIONS', {
+      fontSize: '13px', fontFamily: FONT_FAMILY, color: '#ffdd88', resolution: 2,
+    }).setOrigin(0.5);
+    y += 20;
+
+    this.add.text(cx, y, 'Spawn count per level (adds to normal spawns)', {
+      fontSize: '10px', fontFamily: FONT_FAMILY, color: '#668899', resolution: 2,
+    }).setOrigin(0.5);
+    y += 22;
+
+    for (const key of CHAMPION_KEYS) {
+      this._makeChampionQuantityRow(ENEMY_DEFS[key].name, key, cx, y);
+      y += 36;
+    }
+
+    // "Reset to defaults" link for champion quantities
+    this._makeResetLink('Reset champions to normal logic', cx, y, () => {
+      devOptions.championQuantities = null;
       this.scene.restart();
     });
     y += 32;
@@ -442,6 +474,55 @@ export class DevOptionsScene extends Phaser.Scene {
         devOptions.bossQuantities = Object.fromEntries(BOSS_KEYS.map(k => [k, 0]));
       }
       devOptions.bossQuantities[key] = Math.min(5, (devOptions.bossQuantities[key] ?? 0) + 1);
+      valTxt.setText(display());
+    });
+  }
+
+  /**
+   * Creates a labelled +/− control for a champion type's total-per-level quantity
+   * in `devOptions.championQuantities`.  Displays "--" while `championQuantities`
+   * is null (normal champion-chance logic active).  The first [+] press
+   * initialises all champion quantities to 0 then increments this type.
+   * [−] from 0 on the last remaining non-zero type resets the whole map to null.
+   *
+   * @param {string} label - Human-readable enemy name.
+   * @param {string} key   - ENEMY_DEFS key, e.g. 'goblin'.
+   * @param {number} cx    - Horizontal centre of the scene.
+   * @param {number} y     - Vertical centre of this row.
+   */
+  _makeChampionQuantityRow(label, key, cx, y) {
+    const display = () =>
+      devOptions.championQuantities === null ? '--' : String(devOptions.championQuantities[key] ?? 0);
+
+    const labelMaxW = cx - CTRL_OFFSET / 2 - 8;
+    this.add.text(cx - CTRL_OFFSET / 2 - 8, y, label + ' count:', {
+      fontSize: '12px', fontFamily: FONT_FAMILY, color: '#aabbcc', resolution: 2,
+      wordWrap: { width: labelMaxW },
+    }).setOrigin(1, 0.5);
+
+    const valTxt = this.add.text(cx, y, display(), {
+      fontSize: '13px', fontFamily: FONT_FAMILY, color: '#ffffff', resolution: 2,
+    }).setOrigin(0.5);
+
+    this._makeBtn(cx - 40, y, '−', () => {
+      if (devOptions.championQuantities === null) return;
+      const current = devOptions.championQuantities[key] ?? 0;
+      if (current > 0) {
+        devOptions.championQuantities[key] = current - 1;
+      }
+      // If all types are now 0, revert to null (normal logic)
+      if (Object.values(devOptions.championQuantities).every(v => v === 0)) {
+        devOptions.championQuantities = null;
+      }
+      valTxt.setText(display());
+    });
+
+    this._makeBtn(cx + 40, y, '+', () => {
+      if (devOptions.championQuantities === null) {
+        // First edit — initialise all champion quantities to 0
+        devOptions.championQuantities = Object.fromEntries(CHAMPION_KEYS.map(k => [k, 0]));
+      }
+      devOptions.championQuantities[key] = Math.min(5, (devOptions.championQuantities[key] ?? 0) + 1);
       valTxt.setText(display());
     });
   }

@@ -73,6 +73,20 @@ Then('the {string} enemy type should be flagged as a boss in ENEMY_DEFS', functi
   assert.ok(ENEMY_DEFS[type]?.isBoss === true, `Expected ENEMY_DEFS["${type}"].isBoss to be true`);
 });
 
+// ─── Champion quantities ──────────────────────────────────────────────────
+
+defineStep('the dev champion quantities are set to goblin {int}', function (count) {
+  devOptions.championQuantities = { goblin: count };
+});
+
+Then('the dev champion quantities should be null', function () {
+  assert.equal(devOptions.championQuantities, null);
+});
+
+Then('the dev champion quantities should be goblin {int}', function (count) {
+  assert.deepEqual(devOptions.championQuantities, { goblin: count });
+});
+
 // ─── buildSpawnTableFromWeights ───────────────────────────────────────────
 
 When('a spawn table is built from goblin {int} orc {int} troll {int}',
