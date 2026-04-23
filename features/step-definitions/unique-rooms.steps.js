@@ -75,3 +75,31 @@ Then('the {string} definition should have a non-empty entry message', function (
   assert.ok(typeof def.entryMessage === 'string' && def.entryMessage.length > 0,
     `Expected "${id}" to have a non-empty entryMessage`);
 });
+
+Then('the {string} definition should have a non-empty floor key', function (id) {
+  const def = UNIQUE_ROOM_DEFS.find(d => d.id === id);
+  assert.ok(def, `No definition found for id "${id}"`);
+  assert.ok(typeof def.floorKey === 'string' && def.floorKey.length > 0,
+    `Expected "${id}" to have a non-empty floorKey`);
+});
+
+Then('the {string} floor key should differ from the default floor key', function (id) {
+  const def = UNIQUE_ROOM_DEFS.find(d => d.id === id);
+  assert.ok(def, `No definition found for id "${id}"`);
+  assert.notEqual(def.floorKey, 'tile_floor',
+    `Expected "${id}" floorKey to differ from "tile_floor"`);
+});
+
+Then('the {string} definition should have a non-empty wall key', function (id) {
+  const def = UNIQUE_ROOM_DEFS.find(d => d.id === id);
+  assert.ok(def, `No definition found for id "${id}"`);
+  assert.ok(typeof def.wallKey === 'string' && def.wallKey.length > 0,
+    `Expected "${id}" to have a non-empty wallKey`);
+});
+
+Then('the {string} wall key should differ from the default wall key', function (id) {
+  const def = UNIQUE_ROOM_DEFS.find(d => d.id === id);
+  assert.ok(def, `No definition found for id "${id}"`);
+  assert.notEqual(def.wallKey, 'tile_wall',
+    `Expected "${id}" wallKey to differ from "tile_wall"`);
+});

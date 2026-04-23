@@ -763,11 +763,51 @@ export class GameScene extends Phaser.Scene {
       }
     }
 
+    // Paint the room's themed floor and wall tiles over the base dungeon tilemap.
+    if (def.floorKey || def.wallKey) {
+      this._paintUniqueRoomTiles(room, def);
+    }
+
     // Notify the player after a short delay (same pattern as the Old Bones hint).
     this.time.delayedCall(250, () => {
       EventBus.emit(GameEvents.MESSAGE, `You sense something unusual on this floor — ${def.name}!`);
       EventBus.emit(GameEvents.MESSAGE, def.entryMessage);
     });
+  }
+
+  /**
+   * Overdraw floor and wall tiles within a unique room (and its surrounding
+   * wall border) with themed textures defined in the room's definition.
+   *
+   * The base dungeon tilemap has already been rendered to `this.mapRT`; this
+   * method draws on top of that RenderTexture for only the affected tiles,
+   * following the same pattern as the shop-door texture overrides.
+   *
+   * @param {{ x:number, y:number, w:number, h:number }} room
+   * @param {import('../dungeon/UniqueRoomDefinitions.js').UniqueRoomDef} def
+   */
+  _paintUniqueRoomTiles(room, def) {
+    const floorKey = def.floorKey ? tilesetManager.getTileKey(def.floorKey) : null;
+    const wallKey  = def.wallKey  ? tilesetManager.getTileKey(def.wallKey)  : null;
+
+    // Paint one tile outside the room bounds so the surrounding wall ring also
+    // gets the themed texture, making the visual boundary feel intentional.
+    const x0 = Math.max(0, room.x - 1);
+    const y0 = Math.max(0, room.y - 1);
+    const x1 = Math.min(this.dungeonMap.width  - 1, room.x + room.w);
+    const y1 = Math.min(this.dungeonMap.height - 1, room.y + room.h);
+
+    for (let ty = y0; ty <= y1; ty++) {
+      for (let tx = x0; tx <= x1; tx++) {
+        const tileType = this.dungeonMap.getTile(tx, ty);
+        let key = null;
+        if (tileType === TILE.FLOOR && floorKey) key = floorKey;
+        else if (tileType === TILE.WALL && wallKey) key = wallKey;
+        if (key) {
+          this.mapRT.drawFrame(key, undefined, tx * TILE_SIZE, ty * TILE_SIZE);
+        }
+      }
+    }
   }
 
   /**

@@ -65,3 +65,21 @@ Feature: Unique rooms in dungeon generation
 
   Scenario: The Necropolis Library has a named entry message
     Then the "necropolis_library" definition should have a non-empty entry message
+
+  # ── Room-specific tile textures ──────────────────────────────────────────
+
+  Scenario: The Dark Armoury has a unique floor texture key
+    Then the "dark_armoury" definition should have a non-empty floor key
+    And the "dark_armoury" floor key should differ from the default floor key
+
+  Scenario: The Dark Armoury has a unique wall texture key
+    Then the "dark_armoury" definition should have a non-empty wall key
+    And the "dark_armoury" wall key should differ from the default wall key
+
+  Scenario: The Necropolis Library has a unique floor texture key
+    Then the "necropolis_library" definition should have a non-empty floor key
+    And the "necropolis_library" floor key should differ from the default floor key
+
+  Scenario: The Necropolis Library has a unique wall texture key
+    Then the "necropolis_library" definition should have a non-empty wall key
+    And the "necropolis_library" wall key should differ from the default wall key

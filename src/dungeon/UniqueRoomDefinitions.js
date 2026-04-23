@@ -11,6 +11,9 @@
  * @property {string}   entryMessage - Flavour text emitted when the floor is entered.
  * @property {number}   minFloor     - Earliest dungeon floor on which this room can appear.
  * @property {number}   chance       - Probability [0,1] that the room spawns on an eligible floor.
+ * @property {string}   floorKey     - Base tile key for the room's floor texture (tileset prefix
+ *   is applied at render time via TilesetManager).
+ * @property {string}   wallKey      - Base tile key for the room's wall texture.
  * @property {string[]} items        - ITEM_TYPES keys guaranteed to spawn inside the room.
  * @property {Array<{type:string, isChampion?:boolean}>} [enemies]
  *   Enemy spawn specs placed inside the room.
@@ -26,6 +29,9 @@ export const UNIQUE_ROOM_DEFS = [
     entryMessage: 'You discover a hidden armoury — ancient weapons line the walls.',
     minFloor: 8,
     chance: 0.12,
+    // Blackened iron and rust — themed floor and wall tiles distinguish this room visually.
+    floorKey: 'tile_floor_dark_armoury',
+    wallKey:  'tile_wall_dark_armoury',
     // Contains the Bone Blade unique weapon and a piece of armour as guaranteed drops.
     items: ['BONE_BLADE', 'LEATHER_ARMOR'],
     // A champion orc guards the armoury.
@@ -37,6 +43,9 @@ export const UNIQUE_ROOM_DEFS = [
     entryMessage: 'A dusty library of forgotten lore… the air hums with old magic.',
     minFloor: 5,
     chance: 0.12,
+    // Obsidian floor with arcane rune glow — themed tiles distinguish the library.
+    floorKey: 'tile_floor_necropolis_library',
+    wallKey:  'tile_wall_necropolis_library',
     // Shelves stocked with restorative potions.
     items: ['MEGA_POTION', 'MEGA_POTION'],
     enemies: [],

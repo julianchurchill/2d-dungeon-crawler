@@ -23,6 +23,7 @@ export class BootScene extends Phaser.Scene {
     this._createClassicTileTextures();
     this._createModernTileTextures();
     this._createHdTileTextures();
+    this._createUniqueRoomTileTextures();
     this._createClassicEntityTextures();
     this._createModernEntityTextures();
     this._createHdEntityTextures();
@@ -3319,6 +3320,259 @@ export class BootScene extends Phaser.Scene {
       g.fillEllipse(S/2 - 2, S/2 + 3, 7, 8);
       g.fillStyle(0xffffff, 0.6);
       g.fillRect(S/2 - 4, S/2 + 2, 3, 4);
+    });
+  }
+
+  /**
+   * Generates themed tile textures for unique named rooms.  Each unique room
+   * definition has a `floorKey` and `wallKey`; these textures are generated for
+   * all three tileset sizes (classic 16px, modern 16px, HD 32px) using the
+   * same prefixing convention as standard dungeon tiles.
+   *
+   * The Dark Armoury uses a blackened-iron / rust palette.
+   * The Necropolis Library uses an obsidian / arcane-blue palette.
+   */
+  _createUniqueRoomTileTextures() {
+    // ── Classic (16px) ──────────────────────────────────────────────────────
+    const T = 16;
+
+    // Dark Armoury floor — charcoal stone with rust-red stains
+    this._genTexture('classic_tile_floor_dark_armoury', T, T, (g) => {
+      g.fillStyle(0x120c08);
+      g.fillRect(0, 0, T, T);
+      g.fillStyle(0x1e1410, 0.9);
+      g.fillRect(0, 0, T - 1, T - 1);
+      // Rust / blood stain details
+      const pts = [[3,3],[7,11],[12,5],[5,13],[11,9],[14,2],[2,8]];
+      for (const [px, py] of pts) {
+        g.fillStyle(0x4a1808, 0.7);
+        g.fillRect(px, py, 1, 1);
+      }
+    });
+
+    // Dark Armoury wall — dark iron with oxidised rust streaks
+    this._genTexture('classic_tile_wall_dark_armoury', T, T, (g) => {
+      g.fillStyle(0x382820);
+      g.fillRect(0, 0, T, T);
+      g.fillStyle(0x4e3828);
+      g.fillRect(0, 0, T, 1);
+      g.fillRect(0, 0, 1, T);
+      g.fillStyle(0x1a100a);
+      g.fillRect(0, T - 1, T, 1);
+      g.fillRect(T - 1, 0, 1, T);
+      // Rust streaks
+      g.fillStyle(0x6a2010, 0.7);
+      g.fillRect(3, 4, 4, 1);
+      g.fillRect(9, 10, 5, 1);
+      g.fillRect(6, 7, 1, 3);
+    });
+
+    // Necropolis Library floor — near-black obsidian with arcane blue dots
+    this._genTexture('classic_tile_floor_necropolis_library', T, T, (g) => {
+      g.fillStyle(0x080812);
+      g.fillRect(0, 0, T, T);
+      g.fillStyle(0x0c1020, 0.9);
+      g.fillRect(0, 0, T - 1, T - 1);
+      // Arcane rune glow dots
+      const pts = [[4,3],[8,12],[11,6],[3,10],[13,4],[6,14],[10,9]];
+      for (const [px, py] of pts) {
+        g.fillStyle(0x2840c0, 0.6);
+        g.fillRect(px, py, 1, 1);
+      }
+    });
+
+    // Necropolis Library wall — dark navy stone with blue arcane carvings
+    this._genTexture('classic_tile_wall_necropolis_library', T, T, (g) => {
+      g.fillStyle(0x0e1830);
+      g.fillRect(0, 0, T, T);
+      g.fillStyle(0x1a2848);
+      g.fillRect(0, 0, T, 1);
+      g.fillRect(0, 0, 1, T);
+      g.fillStyle(0x060c18);
+      g.fillRect(0, T - 1, T, 1);
+      g.fillRect(T - 1, 0, 1, T);
+      // Arcane carved lines
+      g.fillStyle(0x3050a0, 0.7);
+      g.fillRect(3, 4, 4, 1);
+      g.fillRect(9, 10, 5, 1);
+      g.fillRect(6, 7, 1, 3);
+    });
+
+    // ── Modern (also 16px) ───────────────────────────────────────────────────
+
+    // Dark Armoury floor — modern variant (slightly warmer rust tones)
+    this._genTexture('modern_tile_floor_dark_armoury', T, T, (g) => {
+      g.fillStyle(0x150e09);
+      g.fillRect(0, 0, T, T);
+      g.fillStyle(0x221612, 0.9);
+      g.fillRect(1, 1, T - 2, T - 2);
+      const pts = [[5,3],[9,11],[13,5],[3,13],[11,8]];
+      for (const [px, py] of pts) {
+        g.fillStyle(0x5a1c0a, 0.7);
+        g.fillRect(px, py, 1, 1);
+      }
+    });
+
+    // Dark Armoury wall — modern variant
+    this._genTexture('modern_tile_wall_dark_armoury', T, T, (g) => {
+      g.fillStyle(0x3e2e22);
+      g.fillRect(0, 0, T, T);
+      g.fillStyle(0x5a4030, 0.9);
+      g.fillRect(1, 1, T - 2, T - 2);
+      g.fillStyle(0x6e2818, 0.7);
+      g.fillRect(2, 5, T - 4, 1);
+      g.fillRect(2, 11, T - 4, 1);
+    });
+
+    // Necropolis Library floor — modern variant
+    this._genTexture('modern_tile_floor_necropolis_library', T, T, (g) => {
+      g.fillStyle(0x090912);
+      g.fillRect(0, 0, T, T);
+      g.fillStyle(0x0e1224, 0.9);
+      g.fillRect(1, 1, T - 2, T - 2);
+      const pts = [[4,4],[9,11],[12,6],[2,10],[14,3]];
+      for (const [px, py] of pts) {
+        g.fillStyle(0x3050b8, 0.6);
+        g.fillRect(px, py, 1, 1);
+      }
+    });
+
+    // Necropolis Library wall — modern variant
+    this._genTexture('modern_tile_wall_necropolis_library', T, T, (g) => {
+      g.fillStyle(0x0c1830);
+      g.fillRect(0, 0, T, T);
+      g.fillStyle(0x182040, 0.9);
+      g.fillRect(1, 1, T - 2, T - 2);
+      g.fillStyle(0x2e50a0, 0.7);
+      g.fillRect(2, 5, T - 4, 1);
+      g.fillRect(2, 11, T - 4, 1);
+    });
+
+    // ── HD (32px) ────────────────────────────────────────────────────────────
+    const S = 32;
+
+    // Dark Armoury floor HD — charcoal slabs with rust-red mortar and blood stains
+    this._genTexture('hd_tile_floor_dark_armoury', S, S, (g) => {
+      // Dark rust mortar background
+      g.fillStyle(0x0c0806);
+      g.fillRect(0, 0, S, S);
+      // Four iron/charcoal slabs
+      const slabColor   = 0x1e1410;
+      const slabHilight = 0x2e1e16;
+      const slabShadow  = 0x0e0a08;
+      const slabs = [[1,1],[17,1],[1,17],[17,17]];
+      for (const [sx, sy] of slabs) {
+        g.fillStyle(slabColor);
+        g.fillRect(sx, sy, 14, 14);
+        g.fillStyle(slabHilight);
+        g.fillRect(sx, sy, 14, 1);
+        g.fillRect(sx, sy, 1, 14);
+        g.fillStyle(slabShadow);
+        g.fillRect(sx, sy + 13, 14, 1);
+        g.fillRect(sx + 13, sy, 1, 14);
+      }
+      // Rust / blood-stain surface marks
+      const stains = [[4,4],[10,8],[20,3],[27,9],[6,21],[14,26],[23,17],[28,27]];
+      for (const [px, py] of stains) {
+        g.fillStyle(0x5a1808, 0.8);
+        g.fillRect(px, py, 2, 1);
+      }
+    });
+
+    // Dark Armoury wall HD — dark iron brickwork with rust-orange highlights
+    this._genTexture('hd_tile_wall_dark_armoury', S, S, (g) => {
+      g.fillStyle(0x22180e);
+      g.fillRect(0, 0, S, S);
+      const brickH  = 9;
+      const brickRows = [
+        { y: 1,  offsets: [1, 12, 23] },
+        { y: 12, offsets: [6, 17] },
+        { y: 23, offsets: [1, 12, 23] },
+      ];
+      for (const row of brickRows) {
+        for (const bx of row.offsets) {
+          const bw = (bx === row.offsets[row.offsets.length - 1]) ? S - bx - 1 : 9;
+          g.fillStyle(0x342416);
+          g.fillRect(bx, row.y, bw, brickH);
+          g.fillStyle(0x5a3820);
+          g.fillRect(bx, row.y, bw, 1);
+          g.fillRect(bx, row.y, 1, brickH);
+          g.fillStyle(0x100806);
+          g.fillRect(bx, row.y + brickH - 1, bw, 1);
+          g.fillRect(bx + bw - 1, row.y, 1, brickH);
+          // Rust streak
+          g.fillStyle(0x6a2010, 0.6);
+          g.fillRect(bx + 3, row.y + 3, 3, 1);
+        }
+      }
+      g.fillStyle(0x6e4030);
+      g.fillRect(0, 0, S, 1);
+      g.fillRect(0, 0, 1, S);
+      g.fillStyle(0x060402);
+      g.fillRect(0, S - 1, S, 1);
+      g.fillRect(S - 1, 0, 1, S);
+    });
+
+    // Necropolis Library floor HD — obsidian slabs with blue arcane rune glow
+    this._genTexture('hd_tile_floor_necropolis_library', S, S, (g) => {
+      // Deep void mortar
+      g.fillStyle(0x04060e);
+      g.fillRect(0, 0, S, S);
+      // Four dark obsidian slabs
+      const slabColor   = 0x0c1020;
+      const slabHilight = 0x141828;
+      const slabShadow  = 0x060810;
+      const slabs = [[1,1],[17,1],[1,17],[17,17]];
+      for (const [sx, sy] of slabs) {
+        g.fillStyle(slabColor);
+        g.fillRect(sx, sy, 14, 14);
+        g.fillStyle(slabHilight);
+        g.fillRect(sx, sy, 14, 1);
+        g.fillRect(sx, sy, 1, 14);
+        g.fillStyle(slabShadow);
+        g.fillRect(sx, sy + 13, 14, 1);
+        g.fillRect(sx + 13, sy, 1, 14);
+      }
+      // Arcane rune glow marks
+      const runes = [[4,4],[10,7],[20,3],[27,8],[6,20],[14,25],[23,18],[28,26],[9,12],[19,22]];
+      for (const [px, py] of runes) {
+        g.fillStyle(0x2840c0, 0.7);
+        g.fillRect(px, py, 2, 1);
+      }
+    });
+
+    // Necropolis Library wall HD — dark navy brickwork with arcane-blue carvings
+    this._genTexture('hd_tile_wall_necropolis_library', S, S, (g) => {
+      g.fillStyle(0x080e20);
+      g.fillRect(0, 0, S, S);
+      const brickH  = 9;
+      const brickRows = [
+        { y: 1,  offsets: [1, 12, 23] },
+        { y: 12, offsets: [6, 17] },
+        { y: 23, offsets: [1, 12, 23] },
+      ];
+      for (const row of brickRows) {
+        for (const bx of row.offsets) {
+          const bw = (bx === row.offsets[row.offsets.length - 1]) ? S - bx - 1 : 9;
+          g.fillStyle(0x101828);
+          g.fillRect(bx, row.y, bw, brickH);
+          g.fillStyle(0x1e2e50);
+          g.fillRect(bx, row.y, bw, 1);
+          g.fillRect(bx, row.y, 1, brickH);
+          g.fillStyle(0x040810);
+          g.fillRect(bx, row.y + brickH - 1, bw, 1);
+          g.fillRect(bx + bw - 1, row.y, 1, brickH);
+          // Arcane carved rune
+          g.fillStyle(0x3050a0, 0.6);
+          g.fillRect(bx + 3, row.y + 3, 3, 1);
+        }
+      }
+      g.fillStyle(0x2840a0);
+      g.fillRect(0, 0, S, 1);
+      g.fillRect(0, 0, 1, S);
+      g.fillStyle(0x020408);
+      g.fillRect(0, S - 1, S, 1);
+      g.fillRect(S - 1, 0, 1, S);
     });
   }
 }
