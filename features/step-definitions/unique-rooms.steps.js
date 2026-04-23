@@ -2,6 +2,8 @@ import { Given, When, Then } from '@cucumber/cucumber';
 import assert from 'node:assert/strict';
 import { UniqueRoomRegistry } from '../../src/dungeon/UniqueRoomRegistry.js';
 import { UNIQUE_ROOM_DEFS } from '../../src/dungeon/UniqueRoomDefinitions.js';
+import { TILE } from '../../src/utils/TileTypes.js';
+import { DungeonMap } from '../../src/dungeon/DungeonMap.js';
 
 // ─── Given ────────────────────────────────────────────────────────────────
 
@@ -102,4 +104,64 @@ Then('the {string} wall key should differ from the default wall key', function (
   assert.ok(def, `No definition found for id "${id}"`);
   assert.notEqual(def.wallKey, 'tile_wall',
     `Expected "${id}" wallKey to differ from "tile_wall"`);
+});
+
+// ─── Decoration tile types ─────────────────────────────────────────────────
+
+Then('the WEAPON_MOUNT tile type should be a non-zero integer', function () {
+  assert.ok(typeof TILE.WEAPON_MOUNT === 'number' && TILE.WEAPON_MOUNT !== 0,
+    `Expected TILE.WEAPON_MOUNT to be a non-zero integer but got ${TILE.WEAPON_MOUNT}`);
+});
+
+Then('the WEAPON_MOUNT tile type should differ from the WALL tile type', function () {
+  assert.notEqual(TILE.WEAPON_MOUNT, TILE.WALL,
+    'Expected TILE.WEAPON_MOUNT to differ from TILE.WALL');
+});
+
+Then('the BOOKCASE tile type should be a non-zero integer', function () {
+  assert.ok(typeof TILE.BOOKCASE === 'number' && TILE.BOOKCASE !== 0,
+    `Expected TILE.BOOKCASE to be a non-zero integer but got ${TILE.BOOKCASE}`);
+});
+
+Then('the BOOKCASE tile type should differ from the WALL tile type', function () {
+  assert.notEqual(TILE.BOOKCASE, TILE.WALL,
+    'Expected TILE.BOOKCASE to differ from TILE.WALL');
+});
+
+Given('a dungeon map with a WEAPON_MOUNT tile at x {int} y {int}', function (x, y) {
+  this.testMap = new DungeonMap(20, 20);
+  this.testMap.setTile(x, y, TILE.WEAPON_MOUNT);
+  this.testX = x;
+  this.testY = y;
+});
+
+Given('a dungeon map with a BOOKCASE tile at x {int} y {int}', function (x, y) {
+  this.testMap = new DungeonMap(20, 20);
+  this.testMap.setTile(x, y, TILE.BOOKCASE);
+  this.testX = x;
+  this.testY = y;
+});
+
+Then('the tile at x {int} y {int} should not be walkable', function (x, y) {
+  assert.ok(!this.testMap.isWalkable(x, y),
+    `Expected tile at (${x},${y}) to be non-walkable`);
+});
+
+Then('the tile at x {int} y {int} should be opaque', function (x, y) {
+  assert.ok(this.testMap.isOpaque(x, y),
+    `Expected tile at (${x},${y}) to be opaque`);
+});
+
+Then('the {string} definition should specify WEAPON_MOUNT decorations', function (id) {
+  const def = UNIQUE_ROOM_DEFS.find(d => d.id === id);
+  assert.ok(def, `No definition found for id "${id}"`);
+  assert.ok(def.decorations && def.decorations.tileType === 'WEAPON_MOUNT',
+    `Expected "${id}" decorations.tileType to be "WEAPON_MOUNT"`);
+});
+
+Then('the {string} definition should specify BOOKCASE decorations', function (id) {
+  const def = UNIQUE_ROOM_DEFS.find(d => d.id === id);
+  assert.ok(def, `No definition found for id "${id}"`);
+  assert.ok(def.decorations && def.decorations.tileType === 'BOOKCASE',
+    `Expected "${id}" decorations.tileType to be "BOOKCASE"`);
 });

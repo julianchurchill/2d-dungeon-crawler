@@ -14,8 +14,10 @@ const TILE_LABELS = {
   [TILE.STAIRS_UP]:   'Stairs Up',
   [TILE.TOWN_ACCENT]: 'Cobblestone',
   [TILE.SHOP_ROOF]:   'Shop Interior',
-  [TILE.HOME_DOOR]:   'Home Door',
-  [TILE.EMPTY]:       'Void',
+  [TILE.HOME_DOOR]:     'Home Door',
+  [TILE.WEAPON_MOUNT]:  'Weapon Mount',
+  [TILE.BOOKCASE]:      'Bookcase',
+  [TILE.EMPTY]:         'Void',
 };
 
 /**

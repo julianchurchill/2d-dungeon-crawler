@@ -721,6 +721,12 @@ export class GameScene extends Phaser.Scene {
     const cx = Math.floor(room.x + room.w / 2);
     const cy = Math.floor(room.y + room.h / 2);
 
+    // Place decorations first so their tiles are non-walkable before items/enemies
+    // are placed — ensuring nothing spawns on top of a weapon mount or bookcase.
+    if (def.decorations) {
+      this._placeRoomDecorations(room, def.decorations);
+    }
+
     // Place each guaranteed item at a random walkable position in the room.
     for (const itemKey of def.items) {
       const typeDef = ITEM_TYPES[itemKey];
@@ -797,15 +803,72 @@ export class GameScene extends Phaser.Scene {
     const x1 = Math.min(this.dungeonMap.width  - 1, room.x + room.w);
     const y1 = Math.min(this.dungeonMap.height - 1, room.y + room.h);
 
+    // Resolve decoration texture key once if a decoration type is defined.
+    const decorKey = def.decorations?.tileType
+      ? tilesetManager.getTileKey(`tile_${def.decorations.tileType.toLowerCase()}`)
+      : null;
+    const decorTile = def.decorations?.tileType ? TILE[def.decorations.tileType] : null;
+
     for (let ty = y0; ty <= y1; ty++) {
       for (let tx = x0; tx <= x1; tx++) {
         const tileType = this.dungeonMap.getTile(tx, ty);
         let key = null;
         if (tileType === TILE.FLOOR && floorKey) key = floorKey;
         else if (tileType === TILE.WALL && wallKey) key = wallKey;
+        else if (decorTile !== null && tileType === decorTile && decorKey) key = decorKey;
         if (key) {
           this.mapRT.drawFrame(key, undefined, tx * TILE_SIZE, ty * TILE_SIZE);
         }
+      }
+    }
+  }
+
+  /**
+   * Places decoration tiles (e.g. WEAPON_MOUNT, BOOKCASE) into the dungeon map
+   * at positions determined by the decoration's `placement` pattern.  Tiles are
+   * only placed on existing walkable floor cells so no corridor or staircase is
+   * ever blocked.
+   *
+   * Supported patterns:
+   *   - `inner_corners` — one decoration at each of the four inner corners of the
+   *     room (2 tiles in from each corner), totalling up to 4 tiles.
+   *   - `edge_rows` — decorations spaced at `spacing` intervals along every inner
+   *     edge of the room, skipping the two outermost tiles of each edge to leave
+   *     room near corridor junctions.
+   *
+   * @param {{ x:number, y:number, w:number, h:number }} room
+   * @param {{ tileType:string, placement:string, spacing?:number }} decorSpec
+   */
+  _placeRoomDecorations(room, decorSpec) {
+    const tileType = TILE[decorSpec.tileType];
+    if (tileType === undefined) return;
+
+    /** Place a decoration at (x,y) only if the tile is a plain FLOOR tile —
+     *  never overwrite stairs, doors, or other special walkable types. */
+    const place = (x, y) => {
+      if (this.dungeonMap.getTile(x, y) === TILE.FLOOR) {
+        this.dungeonMap.setTile(x, y, tileType);
+      }
+    };
+
+    if (decorSpec.placement === 'inner_corners') {
+      // One decoration two tiles in from each corner, giving an armoury wall-mount feel.
+      place(room.x + 1,           room.y + 1);
+      place(room.x + room.w - 2,  room.y + 1);
+      place(room.x + 1,           room.y + room.h - 2);
+      place(room.x + room.w - 2,  room.y + room.h - 2);
+    } else if (decorSpec.placement === 'edge_rows') {
+      const spacing = decorSpec.spacing ?? 3;
+      // Top and bottom inner rows (y = room.y and room.y+room.h-1), skip 2 tiles
+      // at each end to keep corridor entry points clear.
+      for (let x = room.x + 2; x <= room.x + room.w - 3; x += spacing) {
+        place(x, room.y);
+        place(x, room.y + room.h - 1);
+      }
+      // Left and right inner columns, same corner margin.
+      for (let y = room.y + 2; y <= room.y + room.h - 3; y += spacing) {
+        place(room.x,           y);
+        place(room.x + room.w - 1, y);
       }
     }
   }

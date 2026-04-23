@@ -66,6 +66,38 @@ Feature: Unique rooms in dungeon generation
   Scenario: The Necropolis Library has a named entry message
     Then the "necropolis_library" definition should have a non-empty entry message
 
+  # ── Room decoration tile types ───────────────────────────────────────────
+
+  Scenario: WEAPON_MOUNT tile type is defined and distinct from WALL
+    Then the WEAPON_MOUNT tile type should be a non-zero integer
+    And the WEAPON_MOUNT tile type should differ from the WALL tile type
+
+  Scenario: BOOKCASE tile type is defined and distinct from WALL
+    Then the BOOKCASE tile type should be a non-zero integer
+    And the BOOKCASE tile type should differ from the WALL tile type
+
+  Scenario: Weapon mount tiles are non-walkable
+    Given a dungeon map with a WEAPON_MOUNT tile at x 5 y 5
+    Then the tile at x 5 y 5 should not be walkable
+
+  Scenario: Bookcase tiles are non-walkable
+    Given a dungeon map with a BOOKCASE tile at x 5 y 5
+    Then the tile at x 5 y 5 should not be walkable
+
+  Scenario: Weapon mount tiles block line of sight
+    Given a dungeon map with a WEAPON_MOUNT tile at x 5 y 5
+    Then the tile at x 5 y 5 should be opaque
+
+  Scenario: Bookcase tiles block line of sight
+    Given a dungeon map with a BOOKCASE tile at x 5 y 5
+    Then the tile at x 5 y 5 should be opaque
+
+  Scenario: The Dark Armoury definition includes weapon mount decorations
+    Then the "dark_armoury" definition should specify WEAPON_MOUNT decorations
+
+  Scenario: The Necropolis Library definition includes bookcase decorations
+    Then the "necropolis_library" definition should specify BOOKCASE decorations
+
   # ── Room-specific tile textures ──────────────────────────────────────────
 
   Scenario: The Dark Armoury has a unique floor texture key
