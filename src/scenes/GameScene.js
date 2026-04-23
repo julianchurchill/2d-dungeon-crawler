@@ -10,7 +10,7 @@ import { CreepingMass } from '../entities/CreepingMass.js';
 import { OldBones } from '../entities/OldBones.js';
 import { Npc } from '../entities/Npc.js';
 import { Item } from '../items/Item.js';
-import { getFloorLoot } from '../items/ItemTypes.js';
+import { getFloorLoot, getChallengeLoot } from '../items/ItemTypes.js';
 import { computeFOV, computeDaylightFOV } from '../fov/ShadowcastFOV.js';
 import { EventBus } from '../utils/EventBus.js';
 import { GameEvents } from '../events/GameEvents.js';
@@ -22,8 +22,8 @@ import { HoldRepeatScheduler } from '../systems/HoldRepeatScheduler.js';
 import { tilesetManager } from '../systems/TilesetManager.js';
 import { RunMovementController } from '../systems/RunMovementController.js';
 import { applyToGame, devOptions } from '../systems/DevOptions.js';
-import { EnemySpawner } from '../systems/EnemySpawner.js';
-import { ENEMY_DEFS } from '../entities/EnemyTypes.js';
+import { EnemySpawner, DEFAULT_CHAMPION_CHANCE } from '../systems/EnemySpawner.js';
+import { ENEMY_DEFS, getSpawnTable } from '../entities/EnemyTypes.js';
 import { AchievementSystem } from '../achievements/AchievementSystem.js';
 import { handleMobileMenuPress } from '../systems/MobileMenuHandler.js';
 import { wrapWithRunCancel } from '../utils/ActionWrapper.js';
@@ -162,6 +162,8 @@ export class GameScene extends Phaser.Scene {
 
   _buildFloor(dungeonData) {
     const { map, rooms, startPos, shops, npcs: npcDefs } = dungeonData;
+    /** True when the current floor is a challenge floor (every 5th dungeon floor). */
+    this._isChallengeFloor = dungeonData.isChallenge ?? false;
     this.dungeonMap = map;
     this.rooms = rooms;
     // shops is populated by TownGenerator; regular dungeon floors have none.
@@ -211,19 +213,27 @@ export class GameScene extends Phaser.Scene {
       this.cameras.main.startFollow(this.playerSprite, true, 0.12, 0.12);
     }
 
-    // Spawn enemies (skip start room)
-    this._spawnEnemies(rooms);
-
-    // Boss spawning: dev override takes priority over normal floor logic
-    if (devOptions.bossQuantities !== null) {
-      this._spawnDevBosses(rooms, devOptions.bossQuantities);
+    // Challenge floors use a dedicated arena spawner instead of the normal
+    // room-by-room spawner.  The entry room (rooms[0]) is left empty so the
+    // player can safely land and assess the situation.  The arena room (rooms[1])
+    // is filled with enemies including at least one champion.
+    if (this._isChallengeFloor) {
+      this._spawnChallengeArena(rooms[1], this.floorManager.currentFloor);
     } else {
-      this._trySpawnOldBones(rooms);
-    }
+      // Spawn enemies (skip start room)
+      this._spawnEnemies(rooms);
 
-    // Champion spawning: dev override places specific champion types at room centres
-    if (devOptions.championQuantities !== null) {
-      this._spawnDevChampions(rooms, devOptions.championQuantities);
+      // Boss spawning: dev override takes priority over normal floor logic
+      if (devOptions.bossQuantities !== null) {
+        this._spawnDevBosses(rooms, devOptions.bossQuantities);
+      } else {
+        this._trySpawnOldBones(rooms);
+      }
+
+      // Champion spawning: dev override places specific champion types at room centres
+      if (devOptions.championQuantities !== null) {
+        this._spawnDevChampions(rooms, devOptions.championQuantities);
+      }
     }
 
     // Spawn items
@@ -449,6 +459,52 @@ export class GameScene extends Phaser.Scene {
   }
 
   /**
+   * Populates the challenge arena room with a large wave of enemies, including
+   * at least one champion.  Enemy types and positions are chosen from the current
+   * floor's spawn table.  Non-boss, non-solitary enemies are eligible.
+   *
+   * The arena is filled more densely than a normal room: a base of 8 enemies
+   * scaled by the difficulty `enemyCount` multiplier, with at least 1 champion
+   * guaranteed among them.
+   *
+   * @param {{ x:number, y:number, w:number, h:number }} arenaRoom
+   * @param {number} floor
+   */
+  _spawnChallengeArena(arenaRoom, floor) {
+    const spawnTable = getSpawnTable(floor, devOptions.spawnWeights);
+    // Filter out boss and solitary types — only standard enemies fill the arena.
+    const eligibleTypes = spawnTable.filter(type => {
+      const def = ENEMY_DEFS[type];
+      return !def.isBoss && !def.solitary && def.clusterMin === undefined;
+    });
+    if (eligibleTypes.length === 0) return;
+
+    const { enemyCount } = difficultyManager.getConfig();
+    const totalEnemies = Math.max(4, Math.round(8 * enemyCount));
+
+    let championSpawned = false;
+    let attempts = 0;
+    const maxAttempts = totalEnemies * 5;
+
+    for (let i = 0; i < totalEnemies && attempts < maxAttempts; i++) {
+      const type = this.rng.pick(eligibleTypes);
+      const ex = this.rng.nextInt(arenaRoom.x + 1, arenaRoom.x + arenaRoom.w - 2);
+      const ey = this.rng.nextInt(arenaRoom.y + 1, arenaRoom.y + arenaRoom.h - 2);
+      if (this._getEntityAt(ex, ey)) {
+        // Tile occupied — retry this slot
+        i--;
+        attempts++;
+        continue;
+      }
+      // Guarantee at least one champion; after that use normal 10% chance.
+      const isChampion = !championSpawned || this.rng.next() < DEFAULT_CHAMPION_CHANCE;
+      this._spawnEnemy(ex, ey, type, { isChampion });
+      if (isChampion) championSpawned = true;
+      attempts++;
+    }
+  }
+
+  /**
    * Spawns a single enemy entity at the given tile coordinates.
    *
    * @param {number} x
@@ -585,14 +641,17 @@ export class GameScene extends Phaser.Scene {
     if (getProgress('sprite_stalker', achievementStore).completed) {
       unlockedItems.add(ITEM_TYPES.POTION_OF_MINOR_TELEPORTATION.id);
     }
-    // Place 1–2 items per room (skip start room)
+    // Place 1–2 items per room (skip start room).
+    // Challenge floors use potions-only loot; regular floors use the standard pool.
     for (let i = 1; i < rooms.length; i++) {
       if (!this.rng.nextBool(0.6)) continue;
       const room = rooms[i];
       const ix = this.rng.nextInt(room.x + 1, room.x + room.w - 2);
       const iy = this.rng.nextInt(room.y + 1, room.y + room.h - 2);
       if (!this._getEntityAt(ix, iy)) {
-        const typeDef = getFloorLoot(floor, this.rng, unlockedItems);
+        const typeDef = this._isChallengeFloor
+          ? getChallengeLoot(this.rng, unlockedItems)
+          : getFloorLoot(floor, this.rng, unlockedItems);
         this._placeItem(ix, iy, typeDef);
       }
     }
@@ -1514,6 +1573,12 @@ export class GameScene extends Phaser.Scene {
     if (!this.turnManager.isAcceptingInput()) return;
     const tileType = this.dungeonMap.getTile(this.player.x, this.player.y);
     if (tileType === TILE.STAIRS_DOWN) {
+      // On challenge floors the down-staircase is locked until all enemies
+      // in the arena have been defeated.
+      if (this._isChallengeFloor && this.enemies.length > 0) {
+        EventBus.emit(GameEvents.MESSAGE, 'Defeat all enemies before you can descend!');
+        return;
+      }
       this._descend();
     } else if (tileType === TILE.STAIRS_UP) {
       this._ascend();
@@ -1531,7 +1596,11 @@ export class GameScene extends Phaser.Scene {
       this._buildFloor(dungeonData);
       this._lookCursor?.updateMap(this.dungeonMap, TILE_SIZE);
       this._syncRegistry();
-      EventBus.emit(GameEvents.MESSAGE, `You descend to floor ${this.floorManager.currentFloor}.`);
+      if (this._isChallengeFloor) {
+        EventBus.emit(GameEvents.MESSAGE, `Floor ${this.floorManager.currentFloor} — a challenge floor! Defeat all enemies to proceed.`);
+      } else {
+        EventBus.emit(GameEvents.MESSAGE, `You descend to floor ${this.floorManager.currentFloor}.`);
+      }
       this.cameras.main.fadeIn(300, 0, 0, 0);
     });
   }
