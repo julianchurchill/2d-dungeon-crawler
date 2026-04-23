@@ -96,6 +96,7 @@
 ## Special Levels
 
 - [ ] special levels are non-random layout levels such as arena, nest, dungeon market, labyrinth, boss room, with a chance of unique bosses and items
+- [x] challenge floor — every 5 floors is a challenge floor to ensure the player has levelled up enough to proceed — a small entry room to spawn in with the up staircase, leading to a big room with lots of enemies you have to kill before you can get to the next staircase down. Includes one or more champion enemies. No weapons or armour spawn, can spawn potions.
 
 ## Unique Rooms
 

@@ -183,3 +183,33 @@ export function getFloorLoot(floor, rng, unlockedItems = new Set()) {
   const pool = getFloorLootPool(floor, unlockedItems);
   return rng.pick(pool);
 }
+
+/**
+ * Returns the potion-only loot pool used for challenge floors.
+ * Challenge floors never drop weapons or armour — only consumable potions.
+ *
+ * @param {Set<string>} [unlockedItems] - Achievement-unlocked item ids.
+ * @returns {object[]} Array of ITEM_TYPES entries (may contain duplicates for weighting).
+ */
+export function getChallengeLootPool(unlockedItems = new Set()) {
+  const pool = [
+    ITEM_TYPES.HEALTH_POTION, ITEM_TYPES.HEALTH_POTION,
+    ITEM_TYPES.MEGA_POTION,   ITEM_TYPES.MEGA_POTION,
+  ];
+  if (unlockedItems.has(ITEM_TYPES.POTION_OF_MINOR_TELEPORTATION.id)) {
+    pool.push(ITEM_TYPES.POTION_OF_MINOR_TELEPORTATION);
+  }
+  return pool;
+}
+
+/**
+ * Returns a random potion for a challenge floor.
+ * No weapons or armour are ever included in the pool.
+ *
+ * @param {object} rng          - RNG with a `pick(array)` method.
+ * @param {Set<string>} [unlockedItems]
+ * @returns {object} An ITEM_TYPES entry.
+ */
+export function getChallengeLoot(rng, unlockedItems = new Set()) {
+  return rng.pick(getChallengeLootPool(unlockedItems));
+}
