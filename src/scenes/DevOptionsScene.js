@@ -15,6 +15,7 @@ import Phaser from 'phaser';
 import { devOptions, isSpawnConfigValid } from '../systems/DevOptions.js';
 import { ITEM_TYPES } from '../items/ItemTypes.js';
 import { ENEMY_DEFS } from '../entities/EnemyTypes.js';
+import { UNIQUE_ROOM_DEFS } from '../dungeon/UniqueRoomDefinitions.js';
 
 /** @type {number} Width of the [-] and [+] buttons. */
 const BTN_W = 32;
@@ -222,6 +223,28 @@ export class DevOptionsScene extends Phaser.Scene {
     // "Reset to defaults" link for champion quantities
     this._makeResetLink('Reset champions to normal logic', cx, y, () => {
       devOptions.championQuantities = null;
+      this.scene.restart();
+    });
+    y += 32;
+
+    // Unique rooms section heading
+    this.add.text(cx, y, 'UNIQUE ROOMS', {
+      fontSize: '13px', fontFamily: FONT_FAMILY, color: '#ffdd88', resolution: 2,
+    }).setOrigin(0.5);
+    y += 20;
+
+    this.add.text(cx, y, 'Force spawn on next floor (ignores chance & seen)', {
+      fontSize: '10px', fontFamily: FONT_FAMILY, color: '#668899', resolution: 2,
+    }).setOrigin(0.5);
+    y += 22;
+
+    for (const def of UNIQUE_ROOM_DEFS) {
+      this._makeUniqueRoomToggleRow(def.name, def.id, cx, y);
+      y += 36;
+    }
+
+    this._makeResetLink('Clear unique room force', cx, y, () => {
+      devOptions.forceUniqueRoom = null;
       this.scene.restart();
     });
     y += 32;
@@ -524,6 +547,42 @@ export class DevOptionsScene extends Phaser.Scene {
       }
       devOptions.championQuantities[key] = Math.min(5, (devOptions.championQuantities[key] ?? 0) + 1);
       valTxt.setText(display());
+    });
+  }
+
+  /**
+   * Creates a toggle row for a unique room.  The current state shows either
+   * "FORCED" (active, highlighted green) or "OFF" (inactive).  Pressing the
+   * button toggles the force on/off; activating one room deactivates all others
+   * since only one unique room can be forced at a time.
+   *
+   * @param {string} label - Human-readable room name.
+   * @param {string} id    - Unique room id from UniqueRoomDefinitions.
+   * @param {number} cx    - Horizontal centre of the scene.
+   * @param {number} y     - Vertical centre of this row.
+   */
+  _makeUniqueRoomToggleRow(label, id, cx, y) {
+    const labelMaxW = cx - CTRL_OFFSET / 2 - 8;
+    this.add.text(cx - CTRL_OFFSET / 2 - 8, y, label + ':', {
+      fontSize: '12px', fontFamily: FONT_FAMILY, color: '#aabbcc', resolution: 2,
+      wordWrap: { width: labelMaxW },
+    }).setOrigin(1, 0.5);
+
+    const isActive = () => devOptions.forceUniqueRoom === id;
+    const color    = () => isActive() ? '#88ff88' : '#888888';
+    const display  = () => isActive() ? 'FORCED' : 'OFF';
+
+    const valTxt = this.add.text(cx, y, display(), {
+      fontSize: '13px', fontFamily: FONT_FAMILY, color: color(), resolution: 2,
+    }).setOrigin(0.5);
+
+    // Single toggle button: clicking it toggles this room on/off.
+    this._makeBtn(cx + 40, y, '✓', () => {
+      devOptions.forceUniqueRoom = isActive() ? null : id;
+      valTxt.setText(display());
+      valTxt.setColor(color());
+      // Force scene restart so sibling rows refresh their displayed state.
+      this.scene.restart();
     });
   }
 

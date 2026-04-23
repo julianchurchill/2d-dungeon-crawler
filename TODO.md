@@ -100,7 +100,7 @@
 
 ## Unique Rooms
 
-- [ ] randomly generated levels have a small chance of generating a unique room that only appears once per game, e.g. "The Dark Armoury" or "Necropolis Library". When the player enters a level with such a room the player is alerted by a message and a special notification. Unique rooms will contain at least one unique item or enemy and may also contain a unique NPC.
+- [x] randomly generated levels have a small chance of generating a unique room that only appears once per game, e.g. "The Dark Armoury" or "Necropolis Library". When the player enters a level with such a room the player is alerted by a message and a special notification. Unique rooms will contain at least one unique item or enemy and may also contain a unique NPC.
 
 ## Saving
 
