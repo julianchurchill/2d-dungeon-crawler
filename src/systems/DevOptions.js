@@ -42,6 +42,10 @@ export const DEV_START_ITEMS = ['HEALTH_POTION', 'HEALTH_POTION', 'MEGA_POTION',
  * @property {Object.<string,number>|null} championQuantities - Map of enemy type → exact total
  *                                             count of champion variants to place on the level,
  *                                             or null to use the normal 10% champion-chance logic.
+ * @property {string|null} forceUniqueRoom   - When set to a unique-room id (e.g. 'dark_armoury'),
+ *                                             that room is forced to spawn on the next floor,
+ *                                             ignoring the probability check and the already-seen
+ *                                             guard.  Null uses normal random logic.
  */
 export const devOptions = {
   startFloor: 0,
@@ -54,6 +58,7 @@ export const devOptions = {
   playerInvincible: false,
   bossQuantities: null,
   championQuantities: null,
+  forceUniqueRoom: null,
 };
 
 /**
@@ -70,6 +75,7 @@ export function resetDevOptions() {
   devOptions.playerInvincible = false;
   devOptions.bossQuantities = null;
   devOptions.championQuantities = null;
+  devOptions.forceUniqueRoom = null;
 }
 
 /**

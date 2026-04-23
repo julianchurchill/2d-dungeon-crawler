@@ -11,6 +11,8 @@ import { OldBones } from '../entities/OldBones.js';
 import { Npc } from '../entities/Npc.js';
 import { Item } from '../items/Item.js';
 import { getFloorLoot, getChallengeLoot } from '../items/ItemTypes.js';
+import { UNIQUE_ROOM_DEFS } from '../dungeon/UniqueRoomDefinitions.js';
+import { uniqueRoomRegistry } from '../dungeon/UniqueRoomRegistry.js';
 import { computeFOV, computeDaylightFOV } from '../fov/ShadowcastFOV.js';
 import { EventBus } from '../utils/EventBus.js';
 import { GameEvents } from '../events/GameEvents.js';
@@ -126,6 +128,10 @@ export class GameScene extends Phaser.Scene {
     // Player
     this.player = new Player(0, 0, new SkillSystem(this.rng, [new LuckyStrikeSkill()], [new FerocitySkill(), new DodgeSkill()]));
 
+    // Reset unique-room tracking so each new game gets a fresh set of
+    // discoverable rooms.
+    uniqueRoomRegistry.reset();
+
     // Apply developer options (level, floor, starting items) before generating
     // the first floor so that floorManager.currentFloor is already set when
     // generateFloor() evaluates enemy spawn tables.
@@ -238,6 +244,11 @@ export class GameScene extends Phaser.Scene {
 
     // Spawn items
     this._spawnItems(rooms);
+
+    // Unique room: only on regular (non-challenge, non-town) dungeon floors.
+    if (!this._isChallengeFloor && !this.floorManager.isTown()) {
+      this._trySpawnUniqueRoom(rooms);
+    }
 
     // Spawn NPCs (town only — npcDefs is populated by TownGenerator)
     this._spawnNpcs(npcDefs ?? []);
@@ -661,6 +672,130 @@ export class GameScene extends Phaser.Scene {
     }
   }
 
+  /**
+   * Checks whether a unique room should appear on the current floor and, if so,
+   * selects an eligible definition, marks it as seen, and calls `_spawnUniqueRoom`.
+   *
+   * Unique rooms are skipped on the town (floor 0) and challenge floors.
+   * Each definition has its own `chance` probability; the dev `forceUniqueRoom`
+   * option bypasses both the chance roll and the already-seen check.
+   *
+   * At most one unique room is placed per floor visit.
+   *
+   * @param {Array<{x:number,y:number,w:number,h:number}>} rooms
+   */
+  _trySpawnUniqueRoom(rooms) {
+    const floor  = this.floorManager.currentFloor;
+    const force  = devOptions.forceUniqueRoom;
+    const eligible = uniqueRoomRegistry.getEligible(floor, UNIQUE_ROOM_DEFS, force);
+    if (eligible.length === 0) return;
+
+    // When a room is forced via dev options, select it directly so it is
+    // guaranteed to spawn regardless of what else is eligible.
+    const def = force
+      ? eligible.find(d => d.id === force) ?? this.rng.pick(eligible)
+      : this.rng.pick(eligible);
+
+    // Force option skips the probability check; otherwise roll against def.chance.
+    if (force !== def.id && this.rng.next() >= def.chance) return;
+
+    // Choose a room that is not the start room (index 0) and, where possible,
+    // not the stairs room, to give the player room to explore.
+    const candidates = rooms.length > 2 ? rooms.slice(1, -1) : rooms.slice(1);
+    if (candidates.length === 0) return;
+    const room = this.rng.pick(candidates);
+
+    uniqueRoomRegistry.markSeen(def.id);
+    this._spawnUniqueRoom(room, def);
+  }
+
+  /**
+   * Spawns the contents of a unique room: guaranteed items, optional enemies,
+   * and an optional NPC.  Emits a discovery message after a short delay so the
+   * UIScene's message log is ready to receive it.
+   *
+   * @param {{ x:number, y:number, w:number, h:number }} room  - The BSP room to populate.
+   * @param {import('../dungeon/UniqueRoomDefinitions.js').UniqueRoomDef} def
+   */
+  _spawnUniqueRoom(room, def) {
+    const cx = Math.floor(room.x + room.w / 2);
+    const cy = Math.floor(room.y + room.h / 2);
+
+    // Place each guaranteed item at a random walkable position in the room.
+    for (const itemKey of def.items) {
+      const typeDef = ITEM_TYPES[itemKey];
+      if (!typeDef) continue;
+      // Try a few positions to avoid overlap.
+      for (let attempt = 0; attempt < 8; attempt++) {
+        const ix = this.rng.nextInt(room.x + 1, room.x + room.w - 2);
+        const iy = this.rng.nextInt(room.y + 1, room.y + room.h - 2);
+        if (this.dungeonMap.isWalkable(ix, iy) && !this._getEntityAt(ix, iy)) {
+          this._placeItem(ix, iy, typeDef);
+          break;
+        }
+      }
+    }
+
+    // Spawn any enemies defined for the room, placed near the centre.
+    for (const enemySpec of def.enemies ?? []) {
+      // Try centre first, then nearby tiles.
+      const candidates = [
+        { x: cx,     y: cy     },
+        { x: cx + 1, y: cy     },
+        { x: cx - 1, y: cy     },
+        { x: cx,     y: cy + 1 },
+        { x: cx,     y: cy - 1 },
+      ];
+      for (const pos of candidates) {
+        if (this.dungeonMap.isWalkable(pos.x, pos.y) && !this._getEntityAt(pos.x, pos.y)) {
+          this._spawnEnemy(pos.x, pos.y, enemySpec.type, { isChampion: enemySpec.isChampion ?? false });
+          break;
+        }
+      }
+    }
+
+    // Spawn the unique room's NPC (if any) in the room, one tile below centre.
+    if (def.npc) {
+      const nx = cx;
+      const ny = Math.min(cy + 1, room.y + room.h - 2);
+      if (this.dungeonMap.isWalkable(nx, ny) && !this._getEntityAt(nx, ny)) {
+        this._spawnDungeonNpc(nx, ny, def.npc);
+      }
+    }
+
+    // Notify the player after a short delay (same pattern as the Old Bones hint).
+    this.time.delayedCall(250, () => {
+      EventBus.emit(GameEvents.MESSAGE, `You sense something unusual on this floor — ${def.name}!`);
+      EventBus.emit(GameEvents.MESSAGE, def.entryMessage);
+    });
+  }
+
+  /**
+   * Spawns a single NPC in a dungeon room (no roam controller — dungeon NPCs
+   * stay put).  Visibility is driven by FOV like enemies, not forced visible
+   * like town NPCs.
+   *
+   * @param {number} x
+   * @param {number} y
+   * @param {{ name:string, spriteKey:string, lines:string[] }} npcDef
+   */
+  _spawnDungeonNpc(x, y, npcDef) {
+    const npc = new Npc(x, y, npcDef);
+    const resolvedKey = tilesetManager.getTileKey(npcDef.spriteKey);
+    const textureKey = this.textures.exists(resolvedKey)
+      ? resolvedKey
+      : tilesetManager.getTileKey('entity_player');
+    const sprite = this.add.sprite(
+      x * TILE_SIZE + TILE_SIZE / 2,
+      y * TILE_SIZE + TILE_SIZE / 2,
+      textureKey,
+    ).setDepth(8).setVisible(false); // revealed by FOV like enemies
+    npc.sprite = sprite;
+    this.npcs.push(npc);
+    this.dungeonMap.setEntity(x, y, npc);
+    // No NpcRoamController — dungeon NPCs do not wander.
+  }
+
   _placeItem(x, y, typeDef) {
     const item = new Item(x, y, typeDef);
     const sprite = this.add.sprite(
@@ -783,6 +918,13 @@ export class GameScene extends Phaser.Scene {
     for (const item of this.items) {
       const visible = map.getFovState(item.x, item.y) === FOV_STATE.VISIBLE;
       if (item.sprite) item.sprite.setVisible(visible);
+    }
+    // Reveal dungeon NPCs (spawned hidden) when they enter the player's FOV.
+    // Town NPCs are spawned with setVisible(true) and are never hidden, so
+    // including them here is safe — the entire town is always fully visible.
+    for (const npc of this.npcs) {
+      const visible = map.getFovState(npc.x, npc.y) === FOV_STATE.VISIBLE;
+      if (npc.sprite) npc.sprite.setVisible(visible);
     }
   }
 
