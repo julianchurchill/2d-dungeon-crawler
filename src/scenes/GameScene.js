@@ -375,7 +375,9 @@ export class GameScene extends Phaser.Scene {
     this._enemySpawner.spawnForRooms(
       rooms,
       this.floorManager.currentFloor,
-      (x, y)       => this._getEntityAt(x, y),
+      // Treat non-walkable tiles (e.g. pillar walls inside rooms) as occupied
+      // so enemies are never placed on top of wall tiles.
+      (x, y) => !this.dungeonMap.isWalkable(x, y) || this._getEntityAt(x, y),
       (x, y, type, options) => this._spawnEnemy(x, y, type, options),
     );
   }
@@ -648,7 +650,9 @@ export class GameScene extends Phaser.Scene {
       const room = rooms[i];
       const ix = this.rng.nextInt(room.x + 1, room.x + room.w - 2);
       const iy = this.rng.nextInt(room.y + 1, room.y + room.h - 2);
-      if (!this._getEntityAt(ix, iy)) {
+      // Also guard against non-walkable tiles (e.g. pillar walls) so items
+      // are never placed inside a wall.
+      if (this.dungeonMap.isWalkable(ix, iy) && !this._getEntityAt(ix, iy)) {
         const typeDef = this._isChallengeFloor
           ? getChallengeLoot(this.rng, unlockedItems)
           : getFloorLoot(floor, this.rng, unlockedItems);

@@ -1,5 +1,6 @@
 import { DungeonMap } from './DungeonMap.js';
 import { TILE } from '../utils/TileTypes.js';
+import { RoomShaper } from './RoomShaper.js';
 
 const MAP_WIDTH = 80;
 const MAP_HEIGHT = 60;
@@ -128,7 +129,7 @@ export class BSPDungeonGenerator {
 
     const rooms = root.collectRooms();
     for (const room of rooms) {
-      map.carveRoom(room.x, room.y, room.w, room.h);
+      RoomShaper.carve(map, room);
     }
 
     root.connectChildren(map);
@@ -162,9 +163,18 @@ export class BSPDungeonGenerator {
     };
   }
 
+  /**
+   * Recursively places a room in each BSP leaf node and assigns a shape.
+   * Shape assignment consumes RNG calls immediately after room sizing so
+   * all randomness for a given seed is deterministic.
+   *
+   * @param {BSPNode} node
+   * @param {object} rng
+   */
   _placeRoomsInLeaves(node, rng) {
     if (node.isLeaf()) {
       node.placeRoom(rng);
+      if (node.room) RoomShaper.assignShape(node.room, rng);
     } else {
       if (node.left) this._placeRoomsInLeaves(node.left, rng);
       if (node.right) this._placeRoomsInLeaves(node.right, rng);
