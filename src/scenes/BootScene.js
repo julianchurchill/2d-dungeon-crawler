@@ -3468,10 +3468,6 @@ export class BootScene extends Phaser.Scene {
       }
     });
 
-    // ── Unique room themed tiles (existing method, kept below) ───────────────
-    // Dark Armoury floor — charcoal stone with rust-red stains
-    this._genTexture('classic_tile_floor_dark_armoury', T, T, (g) => {
-
     // Dark Armoury floor — charcoal stone with rust-red stains
     this._genTexture('classic_tile_floor_dark_armoury', T, T, (g) => {
       g.fillStyle(0x120c08);
@@ -3585,7 +3581,6 @@ export class BootScene extends Phaser.Scene {
     });
 
     // ── HD (32px) ────────────────────────────────────────────────────────────
-    const S = 32;
 
     // Dark Armoury floor HD — charcoal slabs with rust-red mortar and blood stains
     this._genTexture('hd_tile_floor_dark_armoury', S, S, (g) => {
