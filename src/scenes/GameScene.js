@@ -1458,6 +1458,7 @@ export class GameScene extends Phaser.Scene {
     const entryMessages = this._entryTracker.checkEntry(this.player.x, this.player.y);
     if (entryMessages) {
       entryMessages.forEach(msg => EventBus.emit(GameEvents.MESSAGE, msg));
+      EventBus.emit(GameEvents.UNIQUE_ROOM_ENTERED, this._entryTracker.getRoomId());
     }
     if (action === 'stairs') {
       this._showStairsPrompt();

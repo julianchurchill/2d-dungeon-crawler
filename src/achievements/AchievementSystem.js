@@ -4,7 +4,7 @@
  * emits ACHIEVEMENT_UNLOCKED when an achievement is completed.
  *
  * Integrates with the EventBus by subscribing to ENEMY_KILLED, PLAYER_LEVEL_UP,
- * and FLOOR_CHANGED.  All dependencies (definitions, store, eventBus) are
+ * FLOOR_CHANGED, and UNIQUE_ROOM_ENTERED.  All dependencies (definitions, store, eventBus) are
  * injectable so the system can be exercised in unit tests without side effects
  * on the singleton store or bus.
  */
@@ -33,14 +33,16 @@ export class AchievementSystem {
     this.eventBus = eventBus;
 
     // Store handler references so they can be removed by destroy().
-    this._onEnemyKilled    = (enemyType) => this._handleEnemyKilled(enemyType);
-    this._onPlayerLevelUp  = (level)     => this._handlePlayerLevelUp(level);
-    this._onFloorChanged   = (floor)     => this._handleFloorReached(floor);
+    this._onEnemyKilled       = (enemyType) => this._handleEnemyKilled(enemyType);
+    this._onPlayerLevelUp     = (level)     => this._handlePlayerLevelUp(level);
+    this._onFloorChanged      = (floor)     => this._handleFloorReached(floor);
+    this._onUniqueRoomEntered = (roomId)    => this._handleUniqueRoomEntered(roomId);
 
     // Subscribe to game events so the system updates itself automatically.
-    this.eventBus.on(GameEvents.ENEMY_KILLED,    this._onEnemyKilled);
-    this.eventBus.on(GameEvents.PLAYER_LEVEL_UP, this._onPlayerLevelUp);
-    this.eventBus.on(GameEvents.FLOOR_CHANGED,   this._onFloorChanged);
+    this.eventBus.on(GameEvents.ENEMY_KILLED,       this._onEnemyKilled);
+    this.eventBus.on(GameEvents.PLAYER_LEVEL_UP,    this._onPlayerLevelUp);
+    this.eventBus.on(GameEvents.FLOOR_CHANGED,      this._onFloorChanged);
+    this.eventBus.on(GameEvents.UNIQUE_ROOM_ENTERED, this._onUniqueRoomEntered);
   }
 
   /**
@@ -87,9 +89,10 @@ export class AchievementSystem {
    * to prevent stale listeners accumulating across game restarts.
    */
   destroy() {
-    this.eventBus.off(GameEvents.ENEMY_KILLED,    this._onEnemyKilled);
-    this.eventBus.off(GameEvents.PLAYER_LEVEL_UP, this._onPlayerLevelUp);
-    this.eventBus.off(GameEvents.FLOOR_CHANGED,   this._onFloorChanged);
+    this.eventBus.off(GameEvents.ENEMY_KILLED,        this._onEnemyKilled);
+    this.eventBus.off(GameEvents.PLAYER_LEVEL_UP,     this._onPlayerLevelUp);
+    this.eventBus.off(GameEvents.FLOOR_CHANGED,       this._onFloorChanged);
+    this.eventBus.off(GameEvents.UNIQUE_ROOM_ENTERED, this._onUniqueRoomEntered);
   }
 
   /**
@@ -175,6 +178,27 @@ export class AchievementSystem {
       if (progress.completed) continue;
 
       setProgressIfHigher(def.id, level, this.store);
+      if (progress.count >= def.condition.target) {
+        this.unlock(def);
+      }
+    }
+  }
+
+  /**
+   * Handles UNIQUE_ROOM_ENTERED events.  Unlocks any unique_room_visited
+   * achievement whose roomId matches the entered room.
+   *
+   * @param {string} roomId - The unique room id from UniqueRoomDefinitions.
+   */
+  _handleUniqueRoomEntered(roomId) {
+    for (const def of this.definitions) {
+      if (def.condition.type !== 'unique_room_visited') continue;
+      if (def.condition.roomId !== roomId) continue;
+
+      const progress = getProgress(def.id, this.store);
+      if (progress.completed) continue;
+
+      incrementProgress(def.id, 1, this.store);
       if (progress.count >= def.condition.target) {
         this.unlock(def);
       }

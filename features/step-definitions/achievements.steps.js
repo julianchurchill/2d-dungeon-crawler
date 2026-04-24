@@ -178,3 +178,14 @@ Then('the {string} achievement should be completed', function (name) {
 When('the achievement system is destroyed', function () {
   this.system.destroy();
 });
+
+When('the player enters the unique room {string}', function (roomId) {
+  this.eventBus.emit(GameEvents.UNIQUE_ROOM_ENTERED, roomId);
+});
+
+Then('the {string} achievement should not be completed', function (name) {
+  const def = ACHIEVEMENTS.find(a => a.name === name);
+  assert.ok(def, `No achievement found with name "${name}"`);
+  const { completed } = getProgress(def.id, this.store);
+  assert.strictEqual(completed, false, `Expected achievement "${name}" to not be completed`);
+});
