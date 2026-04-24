@@ -56,6 +56,15 @@ Feature: Unique rooms in dungeon generation
     Then the "dark_armoury" definition should have at least 1 item
     And the "dark_armoury" definition should have a minimum floor above 0
 
+  Scenario: The Dark Armoury contains the Night Cloak
+    Then the "dark_armoury" definition should include item "NIGHT_CLOAK"
+
+  Scenario: The Dark Armoury contains the Null Scimitar
+    Then the "dark_armoury" definition should include item "NULL_SCIMITAR"
+
+  Scenario: The Dark Armoury guardian is a champion troll
+    Then the "dark_armoury" definition should have a champion "troll" guardian
+
   Scenario: The Necropolis Library has items and a positive minimum floor
     Then the "necropolis_library" definition should have at least 1 item
     And the "necropolis_library" definition should have a minimum floor above 0

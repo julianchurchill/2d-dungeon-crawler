@@ -1348,6 +1348,33 @@ export class BootScene extends Phaser.Scene {
       g.fillRect(T/2 - 1, 13, 2, 3);
     });
 
+    // Night Cloak — dark hooded cloak with shadow shimmer
+    this._genTexture('classic_item_night_cloak', T, T, (g) => {
+      g.fillStyle(0x111122);
+      g.fillRect(3, 2, 10, 12);
+      g.fillTriangle(3, 14, 13, 14, T/2, T - 1);
+      g.fillStyle(0x2233aa, 0.5);
+      g.fillRect(4, 3, 8, 10);
+      g.fillStyle(0x4455cc, 0.4);
+      g.fillRect(5, 4, 2, 2);
+      g.fillRect(9, 7, 2, 2);
+    });
+
+    // Null Scimitar — void-energy curved blade
+    this._genTexture('classic_item_null_scimitar', T, T, (g) => {
+      g.fillStyle(0x220033);
+      g.fillRect(T/2 - 1, 1, 3, 11);
+      g.fillRect(T/2 + 1, 2, 3, 5);
+      g.fillStyle(0x9900cc);
+      g.fillRect(T/2, 2, 2, 9);
+      g.fillRect(T/2 + 1, 3, 2, 4);
+      g.fillStyle(0xdd44ff, 0.7);
+      g.fillRect(T/2, 3, 1, 6);
+      g.fillStyle(0xaaaaaa);
+      g.fillRect(T/2 - 3, 11, 7, 2);
+      g.fillRect(T/2 - 1, 13, 3, 3);
+    });
+
     // Skeleton Shield — interlocked bone segments
     this._genTexture('classic_item_skeleton_shield', T, T, (g) => {
       g.fillStyle(0xddddcc);
@@ -1564,6 +1591,51 @@ export class BootScene extends Phaser.Scene {
       g.fillRect(T/2 - 4, 11, 9, 2);
       // Handle
       g.fillStyle(0xddddcc);
+      g.fillRect(T/2 - 1, 13, 3, 3);
+    });
+
+    // Night Cloak — dark flowing cloak with blue-shadow sheen
+    this._genTexture('modern_item_night_cloak', T, T, (g) => {
+      // Outline
+      g.fillStyle(0x080810);
+      g.fillRect(2, 1, 12, 13);
+      g.fillTriangle(2, 14, 14, 14, T/2, T - 1);
+      // Cloak body — deep midnight blue
+      g.fillStyle(0x0d1133);
+      g.fillRect(3, 2, 10, 11);
+      g.fillTriangle(3, 13, 13, 13, T/2, T - 2);
+      // Shadow sheen highlights
+      g.fillStyle(0x3355bb, 0.5);
+      g.fillRect(4, 3, 3, 8);
+      g.fillStyle(0x6688ff, 0.3);
+      g.fillRect(5, 4, 1, 5);
+      g.fillRect(10, 7, 1, 3);
+      // Hood opening
+      g.fillStyle(0x000008);
+      g.fillRect(5, 2, 6, 3);
+    });
+
+    // Null Scimitar — void-purple curved blade with dark energy
+    this._genTexture('modern_item_null_scimitar', T, T, (g) => {
+      // Blade shadow
+      g.fillStyle(0x110022);
+      g.fillRect(T/2 - 2, 0, 5, 12);
+      g.fillRect(T/2, 2, 4, 7);
+      // Void blade — deep purple
+      g.fillStyle(0x6600aa);
+      g.fillRect(T/2 - 1, 1, 3, 10);
+      g.fillRect(T/2 + 1, 2, 3, 6);
+      // Void energy shine
+      g.fillStyle(0xcc44ff, 0.8);
+      g.fillRect(T/2, 2, 1, 8);
+      g.fillRect(T/2 + 2, 3, 1, 4);
+      // Guard
+      g.fillStyle(0x330044);
+      g.fillRect(T/2 - 5, 10, 10, 3);
+      g.fillStyle(0x884499);
+      g.fillRect(T/2 - 4, 11, 9, 2);
+      // Handle
+      g.fillStyle(0x555566);
       g.fillRect(T/2 - 1, 13, 3, 3);
     });
 
@@ -3120,6 +3192,78 @@ export class BootScene extends Phaser.Scene {
       // Pommel — ivory sphere
       g.fillStyle(0xf0e8d8);
       g.fillRect(S/2 - 3, 30, 7, 2);
+    });
+
+    // Night Cloak — midnight-blue flowing cloak with void shimmer
+    this._genTexture('hd_item_night_cloak', S, S, (g) => {
+      // Outline
+      g.fillStyle(0x04040e);
+      g.fillRect(4, 2, 24, 22);
+      g.fillTriangle(4, 24, 28, 24, S/2, S - 2);
+      // Cloak body — deep midnight blue
+      g.fillStyle(0x0a0d2a);
+      g.fillRect(5, 3, 22, 20);
+      g.fillTriangle(5, 23, 27, 23, S/2, S - 3);
+      // Left shadow panel
+      g.fillStyle(0x050818);
+      g.fillRect(5, 3, 7, 18);
+      // Right panel — slightly lighter
+      g.fillStyle(0x0f1440);
+      g.fillRect(13, 3, 14, 16);
+      // Blue-shadow sheen streaks
+      g.fillStyle(0x2244aa, 0.4);
+      g.fillRect(7, 5, 3, 12);
+      g.fillStyle(0x4466dd, 0.25);
+      g.fillRect(8, 6, 1, 9);
+      g.fillRect(18, 8, 2, 6);
+      // Hood opening — dark void
+      g.fillStyle(0x000005);
+      g.fillRect(9, 3, 14, 5);
+      // Subtle clasp
+      g.fillStyle(0x334466);
+      g.fillRect(S/2 - 2, 6, 4, 3);
+      g.fillStyle(0x6688bb);
+      g.fillRect(S/2 - 1, 7, 2, 1);
+    });
+
+    // Null Scimitar — void-energy curved blade with dark-purple aura
+    this._genTexture('hd_item_null_scimitar', S, S, (g) => {
+      // Blade shadow
+      g.fillStyle(0x0d0018);
+      g.fillRect(S/2 - 4, 0, 9, 22);
+      g.fillRect(S/2, 3, 7, 14);
+      // Void blade — deep purple
+      g.fillStyle(0x5500aa);
+      g.fillRect(S/2 - 3, 1, 6, 20);
+      g.fillRect(S/2 + 1, 3, 5, 12);
+      // Blade edge sheen
+      g.fillStyle(0xaa33ff, 0.8);
+      g.fillRect(S/2 - 1, 2, 2, 18);
+      g.fillRect(S/2 + 3, 4, 2, 8);
+      // Void energy sparkles
+      g.fillStyle(0xee88ff, 0.6);
+      g.fillRect(S/2, 4, 1, 1);
+      g.fillRect(S/2, 9, 1, 1);
+      g.fillRect(S/2, 14, 1, 1);
+      g.fillRect(S/2 + 4, 6, 1, 1);
+      g.fillRect(S/2 + 4, 10, 1, 1);
+      // Guard
+      g.fillStyle(0x1a0030);
+      g.fillRect(S/2 - 9, 20, 18, 5);
+      g.fillStyle(0x6622aa);
+      g.fillRect(S/2 - 8, 21, 16, 4);
+      g.fillStyle(0xaa66cc, 0.6);
+      g.fillRect(S/2 - 7, 21, 14, 1);
+      // Handle wrapping
+      g.fillStyle(0x334444);
+      g.fillRect(S/2 - 3, 25, 7, 8);
+      g.fillStyle(0x4a5566);
+      for (let i = 0; i < 4; i++) g.fillRect(S/2 - 3, 26 + i * 2, 7, 1);
+      // Pommel
+      g.fillStyle(0x220044);
+      g.fillRect(S/2 - 4, 32, 9, 3);
+      g.fillStyle(0x8833bb);
+      g.fillRect(S/2 - 2, 33, 5, 2);
     });
 
     // Skeleton Shield — bone-white with skull motif and purple soul gem

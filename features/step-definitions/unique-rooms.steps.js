@@ -66,6 +66,21 @@ Then('the {string} definition should have at least 1 item', function (id) {
     `Expected "${id}" to have at least 1 item but got ${def.items?.length ?? 0}`);
 });
 
+Then('the {string} definition should include item {string}', function (id, itemKey) {
+  const def = UNIQUE_ROOM_DEFS.find(d => d.id === id);
+  assert.ok(def, `No definition found for id "${id}"`);
+  assert.ok(def.items && def.items.includes(itemKey),
+    `Expected "${id}" items to include "${itemKey}" but got ${JSON.stringify(def.items)}`);
+});
+
+Then('the {string} definition should have a champion {string} guardian', function (id, enemyType) {
+  const def = UNIQUE_ROOM_DEFS.find(d => d.id === id);
+  assert.ok(def, `No definition found for id "${id}"`);
+  const found = def.enemies?.some(e => e.type === enemyType && e.isChampion);
+  assert.ok(found,
+    `Expected "${id}" to have a champion "${enemyType}" guardian but enemies are ${JSON.stringify(def.enemies)}`);
+});
+
 Then('the {string} definition should have a minimum floor above 0', function (id) {
   const def = UNIQUE_ROOM_DEFS.find(d => d.id === id);
   assert.ok(def, `No definition found for id "${id}"`);
