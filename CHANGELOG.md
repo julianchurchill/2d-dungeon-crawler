@@ -9,6 +9,7 @@ Entries are listed newest-first within each section.
 
 ### Added
 
+- 2026-04-24 — **The Key to Elsewhere**: a unique quest item found exclusively in The Necropolis Library, humming with portal-magic. It is not equippable and grants no combat stats — its purpose lies deeper in the dungeon. It has no sell value. Custom textures for all three tilesets.
 - 2026-04-24 — **Dark Armoury unique items**: The Dark Armoury now drops the Null Scimitar (+9 ATK, void-energy curved blade) and the Night Cloak (+4 DEF, shadow-woven armour) instead of the Bone Blade and Leather Armor. The room guard is now a champion troll. Both new items have custom textures for all three tilesets.
 - 2026-04-24 — **Unique room achievements**: discovering The Dark Armoury unlocks the "Steel and Shadow" achievement; discovering The Necropolis Library unlocks "Forbidden Knowledge". Both are triggered when the player first steps inside the room.
 - 2026-04-23 — **Unique room decorations**: The Dark Armoury now contains four weapon-mount tiles (crossed-blades rack) placed at the inner corners, and The Necropolis Library has bookcase tiles lining its inner edges at regular spacing. Both decoration types are non-walkable and opaque (blocking line of sight), with distinct textures for all three tilesets.

@@ -1375,6 +1375,25 @@ export class BootScene extends Phaser.Scene {
       g.fillRect(T/2 - 1, 13, 3, 3);
     });
 
+    // Key to Elsewhere — ornate key with arcane glow
+    this._genTexture('classic_item_key_to_elsewhere', T, T, (g) => {
+      // Shaft
+      g.fillStyle(0xccaa44);
+      g.fillRect(T/2 - 1, 2, 2, 10);
+      // Head (bow)
+      g.fillStyle(0xddbb55);
+      g.fillRect(T/2 - 3, 2, 6, 4);
+      g.fillStyle(0x111122);
+      g.fillRect(T/2 - 1, 3, 2, 2);
+      // Bit (teeth)
+      g.fillStyle(0xddbb55);
+      g.fillRect(T/2 + 1, 8, 2, 2);
+      g.fillRect(T/2 + 1, 11, 2, 2);
+      // Arcane glow
+      g.fillStyle(0x88aaff, 0.5);
+      g.fillRect(T/2 - 1, 3, 2, 1);
+    });
+
     // Skeleton Shield — interlocked bone segments
     this._genTexture('classic_item_skeleton_shield', T, T, (g) => {
       g.fillStyle(0xddddcc);
@@ -1637,6 +1656,34 @@ export class BootScene extends Phaser.Scene {
       // Handle
       g.fillStyle(0x555566);
       g.fillRect(T/2 - 1, 13, 3, 3);
+    });
+
+    // Key to Elsewhere — ornate golden key with blue arcane shimmer
+    this._genTexture('modern_item_key_to_elsewhere', T, T, (g) => {
+      // Outline
+      g.fillStyle(0x553300);
+      g.fillRect(T/2 - 2, 1, 4, 12);
+      g.fillRect(T/2 - 4, 1, 8, 5);
+      // Shaft — warm gold
+      g.fillStyle(0xddbb44);
+      g.fillRect(T/2 - 1, 2, 3, 10);
+      // Bow (head) — gold ring
+      g.fillStyle(0xeecc55);
+      g.fillRect(T/2 - 3, 2, 7, 4);
+      g.fillStyle(0x221100);
+      g.fillRect(T/2 - 1, 3, 3, 2);
+      // Teeth
+      g.fillStyle(0xeecc55);
+      g.fillRect(T/2 + 1, 8, 2, 2);
+      g.fillRect(T/2 + 1, 11, 2, 1);
+      // Gold shine
+      g.fillStyle(0xffffff, 0.4);
+      g.fillRect(T/2 - 1, 2, 1, 8);
+      // Arcane portal glow
+      g.fillStyle(0x6699ff, 0.6);
+      g.fillRect(T/2, 3, 1, 2);
+      g.fillRect(T/2 - 2, 4, 1, 1);
+      g.fillRect(T/2 + 2, 4, 1, 1);
     });
 
     // Skeleton Shield — bone-white shield with purple gem and clear cross
@@ -3264,6 +3311,46 @@ export class BootScene extends Phaser.Scene {
       g.fillRect(S/2 - 4, 32, 9, 3);
       g.fillStyle(0x8833bb);
       g.fillRect(S/2 - 2, 33, 5, 2);
+    });
+
+    // Key to Elsewhere — ornate golden key with glowing arcane portal sigil
+    this._genTexture('hd_item_key_to_elsewhere', S, S, (g) => {
+      // Outline
+      g.fillStyle(0x331100);
+      g.fillRect(S/2 - 4, 2, 8, 22);
+      g.fillRect(S/2 - 8, 2, 16, 9);
+      // Shaft — warm layered gold
+      g.fillStyle(0xcc9933);
+      g.fillRect(S/2 - 3, 3, 7, 20);
+      g.fillStyle(0xeecc44);
+      g.fillRect(S/2 - 2, 4, 5, 18);
+      // Bow (head) — decorative ring
+      g.fillStyle(0xeedd55);
+      g.fillRect(S/2 - 7, 3, 14, 8);
+      g.fillStyle(0x221100);
+      g.fillRect(S/2 - 4, 4, 8, 6);
+      // Bow inner arch highlight
+      g.fillStyle(0xfff0aa, 0.5);
+      g.fillRect(S/2 - 6, 3, 12, 2);
+      // Gold shaft shine
+      g.fillStyle(0xffffff, 0.35);
+      g.fillRect(S/2 - 1, 5, 2, 15);
+      // Teeth (bit)
+      g.fillStyle(0xeedd55);
+      g.fillRect(S/2 + 3, 16, 4, 3);
+      g.fillRect(S/2 + 3, 20, 4, 2);
+      g.fillRect(S/2 + 3, 23, 3, 2);
+      // Arcane portal sigil in bow — blue rune glow
+      g.fillStyle(0x4488ff, 0.7);
+      g.fillRect(S/2 - 2, 5, 4, 1);
+      g.fillRect(S/2 - 2, 9, 4, 1);
+      g.fillRect(S/2 - 3, 6, 1, 3);
+      g.fillRect(S/2 + 2, 6, 1, 3);
+      // Centre sigil gem
+      g.fillStyle(0x99ccff);
+      g.fillRect(S/2 - 1, 7, 2, 1);
+      g.fillStyle(0xffffff, 0.8);
+      g.fillRect(S/2, 7, 1, 1);
     });
 
     // Skeleton Shield — bone-white with skull motif and purple soul gem
