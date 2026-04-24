@@ -95,6 +95,16 @@ export const ITEM_TYPES = {
     sellPrice: 55,
     unique: true,
   },
+  KEY_TO_ELSEWHERE: {
+    id: 'key_to_elsewhere',
+    name: 'The Key to Elsewhere',
+    description: '+1 Defense — an ornate key humming with portal-magic, its purpose lies deeper in the dungeon',
+    textureKey: 'item_key_to_elsewhere',
+    type: 'amulet',
+    defenseBonus: 1,
+    sellPrice: 0,
+    unique: true,
+  },
   SHORT_BOW: {
     id: 'short_bow',
     name: 'Short Bow',

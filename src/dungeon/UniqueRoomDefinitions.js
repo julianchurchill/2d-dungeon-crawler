@@ -54,8 +54,8 @@ export const UNIQUE_ROOM_DEFS = [
     wallKey:  'tile_wall_necropolis_library',
     // Bookcases line the inner edges at regular spacing, creating a library feel.
     decorations: { tileType: 'BOOKCASE', placement: 'edge_rows', spacing: 3 },
-    // Shelves stocked with restorative potions.
-    items: ['MEGA_POTION', 'MEGA_POTION'],
+    // Shelves stocked with restorative potions and a mysterious key of unknown purpose.
+    items: ['MEGA_POTION', 'MEGA_POTION', 'KEY_TO_ELSEWHERE'],
     enemies: [],
     // An Archivist NPC offers cryptic lore about the deeper dungeon.
     npc: {

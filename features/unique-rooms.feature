@@ -69,6 +69,9 @@ Feature: Unique rooms in dungeon generation
     Then the "necropolis_library" definition should have at least 1 item
     And the "necropolis_library" definition should have a minimum floor above 0
 
+  Scenario: The Necropolis Library contains the Key to Elsewhere
+    Then the "necropolis_library" definition should include item "KEY_TO_ELSEWHERE"
+
   Scenario: The Dark Armoury has a named entry message
     Then the "dark_armoury" definition should have a non-empty entry message
 
