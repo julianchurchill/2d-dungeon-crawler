@@ -14,6 +14,7 @@ import { getFloorLoot, getChallengeLoot } from '../items/ItemTypes.js';
 import { UNIQUE_ROOM_DEFS } from '../dungeon/UniqueRoomDefinitions.js';
 import { uniqueRoomRegistry } from '../dungeon/UniqueRoomRegistry.js';
 import { placeDecorations } from '../dungeon/RoomDecorationPlacer.js';
+import { UniqueRoomEntryTracker } from '../dungeon/UniqueRoomEntryTracker.js';
 import { computeFOV, computeDaylightFOV } from '../fov/ShadowcastFOV.js';
 import { EventBus } from '../utils/EventBus.js';
 import { GameEvents } from '../events/GameEvents.js';
@@ -133,6 +134,8 @@ export class GameScene extends Phaser.Scene {
     // discoverable rooms.
     uniqueRoomRegistry.reset();
 
+    this._entryTracker = new UniqueRoomEntryTracker();
+
     // Apply developer options (level, floor, starting items) before generating
     // the first floor so that floorManager.currentFloor is already set when
     // generateFloor() evaluates enemy spawn tables.
@@ -179,6 +182,9 @@ export class GameScene extends Phaser.Scene {
       ...s,
       stock: generateShopItems(s.type, this.player.stats.level, this.rng),
     }));
+
+    // Reset per-floor unique room entry tracking.
+    this._entryTracker.reset();
 
     // Clear old sprites
     this._clearFloorEntities();
@@ -708,6 +714,13 @@ export class GameScene extends Phaser.Scene {
 
     uniqueRoomRegistry.markSeen(def.id);
     this._spawnUniqueRoom(room, def);
+    this._entryTracker.setRoom(room, def);
+
+    // Notify the player that something unusual is on this floor after a short
+    // delay so the UIScene message log is ready to receive it.
+    this.time.delayedCall(250, () => {
+      EventBus.emit(GameEvents.MESSAGE, 'You sense a place of power on this floor.');
+    });
   }
 
   /**
@@ -775,11 +788,6 @@ export class GameScene extends Phaser.Scene {
       this._paintUniqueRoomTiles(room, def);
     }
 
-    // Notify the player after a short delay (same pattern as the Old Bones hint).
-    this.time.delayedCall(250, () => {
-      EventBus.emit(GameEvents.MESSAGE, `You sense something unusual on this floor — ${def.name}!`);
-      EventBus.emit(GameEvents.MESSAGE, def.entryMessage);
-    });
   }
 
   /**
@@ -1447,6 +1455,10 @@ export class GameScene extends Phaser.Scene {
   _afterPlayerMove(action) {
     this._updateFOV();
     this._checkItemPickup();
+    const entryMessages = this._entryTracker.checkEntry(this.player.x, this.player.y);
+    if (entryMessages) {
+      entryMessages.forEach(msg => EventBus.emit(GameEvents.MESSAGE, msg));
+    }
     if (action === 'stairs') {
       this._showStairsPrompt();
     } else if (action === 'stairs_up') {

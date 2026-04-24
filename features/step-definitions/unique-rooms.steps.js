@@ -5,6 +5,7 @@ import { UNIQUE_ROOM_DEFS } from '../../src/dungeon/UniqueRoomDefinitions.js';
 import { TILE } from '../../src/utils/TileTypes.js';
 import { DungeonMap } from '../../src/dungeon/DungeonMap.js';
 import { placeDecorations } from '../../src/dungeon/RoomDecorationPlacer.js';
+import { UniqueRoomEntryTracker } from '../../src/dungeon/UniqueRoomEntryTracker.js';
 
 // ─── Given ────────────────────────────────────────────────────────────────
 
@@ -203,4 +204,38 @@ Then('the {string} definition should specify BOOKCASE decorations', function (id
   assert.ok(def, `No definition found for id "${id}"`);
   assert.ok(def.decorations && def.decorations.tileType === 'BOOKCASE',
     `Expected "${id}" decorations.tileType to be "BOOKCASE"`);
+});
+
+// ─── UniqueRoomEntryTracker ────────────────────────────────────────────────
+
+Given('a unique room entry tracker with room at x {int} y {int} width {int} height {int} for {string}',
+  function (rx, ry, rw, rh, id) {
+    const def = UNIQUE_ROOM_DEFS.find(d => d.id === id);
+    this.tracker = new UniqueRoomEntryTracker();
+    this.tracker.setRoom({ x: rx, y: ry, w: rw, h: rh }, def);
+    this.lastMessages = null;
+  });
+
+When('the player is checked at x {int} y {int}', function (px, py) {
+  this.lastMessages = this.tracker.checkEntry(px, py);
+});
+
+Then('no entry messages should be returned', function () {
+  assert.equal(this.lastMessages, null,
+    `Expected no entry messages but got ${JSON.stringify(this.lastMessages)}`);
+});
+
+Then('entry messages should be returned', function () {
+  assert.ok(this.lastMessages && this.lastMessages.length > 0,
+    'Expected entry messages to be returned but got none');
+});
+
+Then('exactly 1 entry message should be returned', function () {
+  assert.ok(this.lastMessages && this.lastMessages.length === 1,
+    `Expected exactly 1 entry message but got ${this.lastMessages?.length ?? 0}`);
+});
+
+Then('the entry message should contain {string}', function (text) {
+  assert.ok(this.lastMessages && this.lastMessages[0].includes(text),
+    `Expected entry message to contain "${text}" but got: ${this.lastMessages?.[0]}`);
 });
