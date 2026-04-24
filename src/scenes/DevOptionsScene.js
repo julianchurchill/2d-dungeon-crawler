@@ -238,14 +238,18 @@ export class DevOptionsScene extends Phaser.Scene {
     }).setOrigin(0.5);
     y += 22;
 
+    const uniqueRoomRefreshers = [];
+    const refreshAllUniqueRows = () => uniqueRoomRefreshers.forEach(r => r());
+
     for (const def of UNIQUE_ROOM_DEFS) {
-      this._makeUniqueRoomToggleRow(def.name, def.id, cx, y);
+      const refresh = this._makeUniqueRoomToggleRow(def.name, def.id, cx, y, refreshAllUniqueRows);
+      uniqueRoomRefreshers.push(refresh);
       y += 36;
     }
 
     this._makeResetLink('Clear unique room force', cx, y, () => {
       devOptions.forceUniqueRoom = null;
-      this.scene.restart();
+      refreshAllUniqueRows();
     });
     y += 32;
 
@@ -556,12 +560,14 @@ export class DevOptionsScene extends Phaser.Scene {
    * button toggles the force on/off; activating one room deactivates all others
    * since only one unique room can be forced at a time.
    *
-   * @param {string} label - Human-readable room name.
-   * @param {string} id    - Unique room id from UniqueRoomDefinitions.
-   * @param {number} cx    - Horizontal centre of the scene.
-   * @param {number} y     - Vertical centre of this row.
+   * @param {string}   label      - Human-readable room name.
+   * @param {string}   id         - Unique room id from UniqueRoomDefinitions.
+   * @param {number}   cx         - Horizontal centre of the scene.
+   * @param {number}   y          - Vertical centre of this row.
+   * @param {Function} refreshAll - Callback that refreshes all sibling toggle rows.
+   * @returns {Function} A refresh closure that updates this row's displayed state.
    */
-  _makeUniqueRoomToggleRow(label, id, cx, y) {
+  _makeUniqueRoomToggleRow(label, id, cx, y, refreshAll) {
     const labelMaxW = cx - CTRL_OFFSET / 2 - 8;
     this.add.text(cx - CTRL_OFFSET / 2 - 8, y, label + ':', {
       fontSize: '12px', fontFamily: FONT_FAMILY, color: '#aabbcc', resolution: 2,
@@ -576,14 +582,17 @@ export class DevOptionsScene extends Phaser.Scene {
       fontSize: '13px', fontFamily: FONT_FAMILY, color: color(), resolution: 2,
     }).setOrigin(0.5);
 
-    // Single toggle button: clicking it toggles this room on/off.
+    // Single toggle button: clicking it toggles this room on/off and refreshes
+    // all sibling rows so only one can appear active at a time.
     this._makeBtn(cx + 40, y, '✓', () => {
       devOptions.forceUniqueRoom = isActive() ? null : id;
+      refreshAll();
+    });
+
+    return () => {
       valTxt.setText(display());
       valTxt.setColor(color());
-      // Force scene restart so sibling rows refresh their displayed state.
-      this.scene.restart();
-    });
+    };
   }
 
   /**
