@@ -112,6 +112,24 @@ Feature: Unique rooms in dungeon generation
   Scenario: The Necropolis Library definition includes bookcase decorations
     Then the "necropolis_library" definition should specify BOOKCASE decorations
 
+  # ── Entry message — triggers on room entry, not level load ──────────────
+
+  Scenario: No entry messages when player is outside the unique room
+    Given a unique room entry tracker with room at x 5 y 5 width 4 height 4 for "dark_armoury"
+    When the player is checked at x 3 y 5
+    Then no entry messages should be returned
+
+  Scenario: Entry messages are returned when player first steps inside the unique room
+    Given a unique room entry tracker with room at x 5 y 5 width 4 height 4 for "dark_armoury"
+    When the player is checked at x 5 y 5
+    Then entry messages should be returned
+
+  Scenario: Entry messages are only returned once per floor
+    Given a unique room entry tracker with room at x 5 y 5 width 4 height 4 for "dark_armoury"
+    When the player is checked at x 5 y 5
+    And the player is checked at x 6 y 5
+    Then no entry messages should be returned
+
   # ── Room-specific tile textures ──────────────────────────────────────────
 
   Scenario: The Dark Armoury has a unique floor texture key
