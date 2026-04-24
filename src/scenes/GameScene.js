@@ -715,6 +715,12 @@ export class GameScene extends Phaser.Scene {
     uniqueRoomRegistry.markSeen(def.id);
     this._spawnUniqueRoom(room, def);
     this._entryTracker.setRoom(room, def);
+
+    // Notify the player that something unusual is on this floor after a short
+    // delay so the UIScene message log is ready to receive it.
+    this.time.delayedCall(250, () => {
+      EventBus.emit(GameEvents.MESSAGE, `You sense something unusual on this floor — ${def.name}!`);
+    });
   }
 
   /**

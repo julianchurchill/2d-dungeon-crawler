@@ -20,7 +20,7 @@ Entries are listed newest-first within each section.
 
 ### Fixed
 
-- 2026-04-24 — **Unique room entry message timing**: the discovery messages ("You sense something unusual…" and the room's flavour text) now appear when the player first steps into the unique room, not immediately when the floor loads.
+- 2026-04-24 — **Unique room entry message timing**: floor entry now shows a hint ("You sense something unusual on this floor…") immediately on arrival; the room's flavour text is shown separately only when the player first steps inside the room itself.
 - 2026-04-23 — **Unique room decoration corridor avoidance**: weapon mount and bookcase tiles are no longer placed at or adjacent to corridor doorways. Placement logic extracted into a pure `RoomDecorationPlacer` module; a two-step corridor check skips any candidate tile that is directly adjacent to a corridor entry, or one step inside a doorway tile (catching inner-corner positions).
 
 ---

@@ -45,10 +45,7 @@ export class UniqueRoomEntryTracker {
     const { x, y, w, h } = this._room;
     if (px >= x && px < x + w && py >= y && py < y + h) {
       this._announced = true;
-      return [
-        `You sense something unusual on this floor — ${this._def.name}!`,
-        this._def.entryMessage,
-      ];
+      return [this._def.entryMessage];
     }
     return null;
   }
