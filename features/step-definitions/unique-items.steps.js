@@ -50,3 +50,19 @@ Then('the sale should fail', function () {
 Then('the player should have gold equal to the sword sell price', function () {
   assert.equal(this.player.gold, ITEM_TYPES.SWORD.sellPrice);
 });
+
+Given('the Key to Elsewhere item type', function () {
+  this.item = new Item(0, 0, ITEM_TYPES.KEY_TO_ELSEWHERE);
+});
+
+Then('the item should not be equippable', function () {
+  assert.equal(this.item.isEquipment(), false, 'Expected item.isEquipment() to be false');
+});
+
+Then('the item should have no attack bonus', function () {
+  assert.ok(!this.item.attackBonus, `Expected no attackBonus, got ${this.item.attackBonus}`);
+});
+
+Then('the item should have no defense bonus', function () {
+  assert.ok(!this.item.defenseBonus, `Expected no defenseBonus, got ${this.item.defenseBonus}`);
+});

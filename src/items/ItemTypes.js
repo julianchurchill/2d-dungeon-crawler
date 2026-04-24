@@ -98,10 +98,9 @@ export const ITEM_TYPES = {
   KEY_TO_ELSEWHERE: {
     id: 'key_to_elsewhere',
     name: 'The Key to Elsewhere',
-    description: '+1 Defense — an ornate key humming with portal-magic, its purpose lies deeper in the dungeon',
+    description: 'An ornate key humming with portal-magic, its purpose lies deeper in the dungeon',
     textureKey: 'item_key_to_elsewhere',
-    type: 'amulet',
-    defenseBonus: 1,
+    type: 'quest_item',
     sellPrice: 0,
     unique: true,
   },

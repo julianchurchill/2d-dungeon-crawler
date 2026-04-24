@@ -28,3 +28,15 @@ Feature: Unique items
     And a weapon shop
     When the player sells the short sword at the weapon shop
     Then the player should have gold equal to the sword sell price
+
+  Scenario: The Key to Elsewhere is not equippable
+    Given the Key to Elsewhere item type
+    Then the item should not be equippable
+
+  Scenario: The Key to Elsewhere has no attack bonus
+    Given the Key to Elsewhere item type
+    Then the item should have no attack bonus
+
+  Scenario: The Key to Elsewhere has no defense bonus
+    Given the Key to Elsewhere item type
+    Then the item should have no defense bonus
