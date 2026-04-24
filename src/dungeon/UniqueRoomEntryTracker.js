@@ -45,7 +45,7 @@ export class UniqueRoomEntryTracker {
     const { x, y, w, h } = this._room;
     if (px >= x && px < x + w && py >= y && py < y + h) {
       this._announced = true;
-      return [this._def.entryMessage];
+      return [`${this._def.name}: ${this._def.entryMessage}`];
     }
     return null;
   }

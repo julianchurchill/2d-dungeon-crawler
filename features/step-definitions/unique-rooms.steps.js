@@ -234,3 +234,8 @@ Then('exactly 1 entry message should be returned', function () {
   assert.ok(this.lastMessages && this.lastMessages.length === 1,
     `Expected exactly 1 entry message but got ${this.lastMessages?.length ?? 0}`);
 });
+
+Then('the entry message should contain {string}', function (text) {
+  assert.ok(this.lastMessages && this.lastMessages[0].includes(text),
+    `Expected entry message to contain "${text}" but got: ${this.lastMessages?.[0]}`);
+});

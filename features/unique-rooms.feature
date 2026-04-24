@@ -129,6 +129,11 @@ Feature: Unique rooms in dungeon generation
     When the player is checked at x 5 y 5
     Then exactly 1 entry message should be returned
 
+  Scenario: The room entry message includes the unique room name
+    Given a unique room entry tracker with room at x 5 y 5 width 4 height 4 for "dark_armoury"
+    When the player is checked at x 5 y 5
+    Then the entry message should contain "The Dark Armoury"
+
   Scenario: Entry messages are only returned once per floor
     Given a unique room entry tracker with room at x 5 y 5 width 4 height 4 for "dark_armoury"
     When the player is checked at x 5 y 5
