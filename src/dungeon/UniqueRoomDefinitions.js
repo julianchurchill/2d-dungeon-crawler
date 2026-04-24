@@ -38,10 +38,10 @@ export const UNIQUE_ROOM_DEFS = [
     wallKey:  'tile_wall_dark_armoury',
     // Four weapon mounts placed at the inner corners give the room its armoury feel.
     decorations: { tileType: 'WEAPON_MOUNT', placement: 'inner_corners' },
-    // Contains the Bone Blade unique weapon and a piece of armour as guaranteed drops.
-    items: ['BONE_BLADE', 'LEATHER_ARMOR'],
-    // A champion orc guards the armoury.
-    enemies: [{ type: 'orc', isChampion: true }],
+    // Contains the Null Scimitar and Night Cloak — unique items found nowhere else.
+    items: ['NULL_SCIMITAR', 'NIGHT_CLOAK'],
+    // A champion troll guards the armoury.
+    enemies: [{ type: 'troll', isChampion: true }],
   },
   {
     id: 'necropolis_library',
