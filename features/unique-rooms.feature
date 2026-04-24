@@ -66,6 +66,20 @@ Feature: Unique rooms in dungeon generation
   Scenario: The Necropolis Library has a named entry message
     Then the "necropolis_library" definition should have a non-empty entry message
 
+  # ── Decoration placement — corridor avoidance ────────────────────────────
+
+  Scenario: Edge row decorations skip a tile that is directly adjacent to a corridor
+    Given a 10x10 dungeon map with room at x 1 y 1 width 8 height 8
+    And a corridor floor tile at x 0 y 3 entering the room from the west
+    When BOOKCASE edge_rows decorations with spacing 3 are placed for the room
+    Then no decoration should exist at x 1 y 3
+
+  Scenario: Inner corner decorations skip a tile when the corridor enters the adjacent doorway
+    Given a 10x10 dungeon map with room at x 1 y 1 width 8 height 8
+    And a corridor floor tile at x 0 y 2 entering the room from the west
+    When WEAPON_MOUNT inner_corners decorations are placed for the room
+    Then no decoration should exist at x 2 y 2
+
   # ── Room decoration tile types ───────────────────────────────────────────
 
   Scenario: WEAPON_MOUNT tile type is defined and distinct from WALL

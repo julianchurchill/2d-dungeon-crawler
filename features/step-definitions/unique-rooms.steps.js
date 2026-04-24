@@ -4,6 +4,7 @@ import { UniqueRoomRegistry } from '../../src/dungeon/UniqueRoomRegistry.js';
 import { UNIQUE_ROOM_DEFS } from '../../src/dungeon/UniqueRoomDefinitions.js';
 import { TILE } from '../../src/utils/TileTypes.js';
 import { DungeonMap } from '../../src/dungeon/DungeonMap.js';
+import { placeDecorations } from '../../src/dungeon/RoomDecorationPlacer.js';
 
 // ─── Given ────────────────────────────────────────────────────────────────
 
@@ -127,6 +128,44 @@ Then('the BOOKCASE tile type should differ from the WALL tile type', function ()
   assert.notEqual(TILE.BOOKCASE, TILE.WALL,
     'Expected TILE.BOOKCASE to differ from TILE.WALL');
 });
+
+// ─── Decoration placement — corridor avoidance ────────────────────────────
+
+Given('a {int}x{int} dungeon map with room at x {int} y {int} width {int} height {int}',
+  function (mapW, mapH, rx, ry, rw, rh) {
+    this.testMap = new DungeonMap(mapW, mapH);
+    this.testRoom = { x: rx, y: ry, w: rw, h: rh };
+    // Carve room floor tiles
+    for (let ty = ry; ty < ry + rh; ty++) {
+      for (let tx = rx; tx < rx + rw; tx++) {
+        this.testMap.setTile(tx, ty, TILE.FLOOR);
+      }
+    }
+  });
+
+Given('a corridor floor tile at x {int} y {int} entering the room from the west',
+  function (x, y) {
+    this.testMap.setTile(x, y, TILE.FLOOR);
+  });
+
+When('BOOKCASE edge_rows decorations with spacing {int} are placed for the room',
+  function (spacing) {
+    placeDecorations(this.testMap, this.testRoom,
+      { tileType: 'BOOKCASE', placement: 'edge_rows', spacing });
+  });
+
+When('WEAPON_MOUNT inner_corners decorations are placed for the room', function () {
+  placeDecorations(this.testMap, this.testRoom,
+    { tileType: 'WEAPON_MOUNT', placement: 'inner_corners' });
+});
+
+Then('no decoration should exist at x {int} y {int}', function (x, y) {
+  const tile = this.testMap.getTile(x, y);
+  assert.ok(tile !== TILE.WEAPON_MOUNT && tile !== TILE.BOOKCASE,
+    `Expected no decoration at (${x},${y}) but found tile type ${tile}`);
+});
+
+// ─── Decoration tile types ─────────────────────────────────────────────────
 
 Given('a dungeon map with a WEAPON_MOUNT tile at x {int} y {int}', function (x, y) {
   this.testMap = new DungeonMap(20, 20);
