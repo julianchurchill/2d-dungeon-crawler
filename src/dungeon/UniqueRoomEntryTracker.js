@@ -32,6 +32,15 @@ export class UniqueRoomEntryTracker {
   }
 
   /**
+   * Returns the id of the current floor's unique room, or null if none is set.
+   *
+   * @returns {string|null}
+   */
+  getRoomId() {
+    return this._def?.id ?? null;
+  }
+
+  /**
    * Call after every player move.  Returns an array of message strings on the
    * first call where the player position is inside the room bounds; returns
    * null on every other call.

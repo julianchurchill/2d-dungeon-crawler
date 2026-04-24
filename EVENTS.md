@@ -33,6 +33,8 @@ InventorySystem          ──► PLAYER_STATS_CHANGED ──► (none — rese
 FloorManager             ──► FLOOR_CHANGED        ──► GameScene → registry.set('floor')
 FloorManager             ──► FLOOR_CHANGED        ──► AchievementSystem → _handleFloorReached
 
+GameScene                ──► UNIQUE_ROOM_ENTERED  ──► AchievementSystem → _handleUniqueRoomEntered
+
 InventoryPanel (click)   ──► INVENTORY_USE        ──► GameScene._useInventoryItem
 InventoryPanel (keyboard)──► INVENTORY_USE        ──► GameScene._useInventoryItem
 
@@ -90,6 +92,7 @@ DialoguePanel (show/hide)──► DIALOGUE_TOGGLED     ──► GameScene (gat
 | `GAME_OVER` | `'game-over'` | *(none)* | GameScene | *(none)* |
 | `RESTART_GAME` | `'restart-game'` | *(none)* | GameScene (key handler) | GameScene |
 | `ENEMY_KILLED` | `'enemy-killed'` | `string` (enemy type) | GameScene | AchievementSystem |
+| `UNIQUE_ROOM_ENTERED` | `'unique-room-entered'` | `string` (room id) | GameScene | AchievementSystem |
 | `ACHIEVEMENT_UNLOCKED` | `'achievement-unlocked'` | `AchievementDefinition` | AchievementSystem | GameScene (message log), UIScene (banner) |
 | `ACHIEVEMENT_LOCKED` | `'achievement-locked'` | `AchievementDefinition` | AchievementSystem | GameScene (skill removal) |
 | `MESSAGE_LOG_TOGGLED` | `'message-log-toggled'` | `boolean` (open) | MessageLog | GameScene (ESC gate) |

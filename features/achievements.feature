@@ -93,3 +93,18 @@ Feature: Achievement system
     When the achievement system is destroyed
     And the player kills a goblin
     Then the Goblin Killer achievement progress should be 0
+
+  Scenario: Steel and Shadow is unlocked when the player enters The Dark Armoury
+    Given the achievement system is initialised
+    When the player enters the unique room "dark_armoury"
+    Then the "Steel and Shadow" achievement should be completed
+
+  Scenario: Forbidden Knowledge is unlocked when the player enters The Necropolis Library
+    Given the achievement system is initialised
+    When the player enters the unique room "necropolis_library"
+    Then the "Forbidden Knowledge" achievement should be completed
+
+  Scenario: Entering a different unique room does not unlock Steel and Shadow
+    Given the achievement system is initialised
+    When the player enters the unique room "necropolis_library"
+    Then the "Steel and Shadow" achievement should not be completed

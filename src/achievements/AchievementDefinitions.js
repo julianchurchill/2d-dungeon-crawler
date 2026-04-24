@@ -8,16 +8,18 @@
  * target value to determine completion.
  *
  * Condition types:
- *   - kill_type     : count kills of a specific enemy type (increments by 1)
- *   - floor_reached : track the highest floor reached (count = floor number)
- *   - player_level  : track the highest level reached (count = level number)
+ *   - kill_type          : count kills of a specific enemy type (increments by 1)
+ *   - floor_reached      : track the highest floor reached (count = floor number)
+ *   - player_level       : track the highest level reached (count = level number)
+ *   - unique_room_visited: unlocked once when the player enters a specific unique room
  */
 
 /**
  * @typedef {object} AchievementCondition
- * @property {'kill_type'|'floor_reached'|'player_level'} type
+ * @property {'kill_type'|'floor_reached'|'player_level'|'unique_room_visited'} type
  * @property {number} target - The value that must be reached.
  * @property {string} [enemyType] - Required when type is 'kill_type'.
+ * @property {string} [roomId]    - Required when type is 'unique_room_visited'.
  */
 
 /**
@@ -266,5 +268,19 @@ export const ACHIEVEMENTS = [
     description: 'Reach level 100',
     condition: { type: 'player_level', target: 100 },
     progressUnit: 'reached',
+  },
+  {
+    id: 'steel_and_shadow',
+    name: 'Steel and Shadow',
+    description: 'Discover The Dark Armoury',
+    condition: { type: 'unique_room_visited', roomId: 'dark_armoury', target: 1 },
+    progressUnit: 'visited',
+  },
+  {
+    id: 'forbidden_knowledge',
+    name: 'Forbidden Knowledge',
+    description: 'Discover The Necropolis Library',
+    condition: { type: 'unique_room_visited', roomId: 'necropolis_library', target: 1 },
+    progressUnit: 'visited',
   },
 ];

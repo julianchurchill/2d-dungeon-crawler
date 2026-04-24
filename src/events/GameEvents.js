@@ -123,6 +123,14 @@ export const GameEvents = {
   FLOOR_CHANGED: 'floor-changed',
 
   /**
+   * The player has stepped into a unique room for the first time on this floor.
+   * Payload: roomId (string) — the unique room's id from UniqueRoomDefinitions.
+   * Emitted by: GameScene (_afterPlayerMove)
+   * Subscribed by: AchievementSystem
+   */
+  UNIQUE_ROOM_ENTERED: 'unique-room-entered',
+
+  /**
    * The player has died and the game is over.
    * Emitted by: GameScene
    * Subscribed by: (external listeners / future game-over screen)
