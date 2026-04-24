@@ -35,7 +35,7 @@ export class DungeonMap {
 
   isOpaque(x, y) {
     const t = this.getTile(x, y);
-    return t === TILE.WALL || t === TILE.EMPTY;
+    return t === TILE.WALL || t === TILE.EMPTY || t === TILE.WEAPON_MOUNT || t === TILE.BOOKCASE;
   }
 
   getFovState(x, y) {
