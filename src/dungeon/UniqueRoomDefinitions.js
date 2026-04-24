@@ -11,6 +11,13 @@
  * @property {string}   entryMessage - Flavour text emitted when the floor is entered.
  * @property {number}   minFloor     - Earliest dungeon floor on which this room can appear.
  * @property {number}   chance       - Probability [0,1] that the room spawns on an eligible floor.
+ * @property {string}   floorKey     - Base tile key for the room's floor texture (tileset prefix
+ *   is applied at render time via TilesetManager).
+ * @property {string}   wallKey      - Base tile key for the room's wall texture.
+ * @property {{ tileType: string, placement: string, count?: number, spacing?: number }} [decorations]
+ *   Optional decoration tiles to place inside the room.  `tileType` names a key in TILE
+ *   (e.g. 'WEAPON_MOUNT').  `placement` is 'inner_corners' (one at each inner corner) or
+ *   'edge_rows' (regular spacing along all inner edges).
  * @property {string[]} items        - ITEM_TYPES keys guaranteed to spawn inside the room.
  * @property {Array<{type:string, isChampion?:boolean}>} [enemies]
  *   Enemy spawn specs placed inside the room.
@@ -26,6 +33,11 @@ export const UNIQUE_ROOM_DEFS = [
     entryMessage: 'You discover a hidden armoury — ancient weapons line the walls.',
     minFloor: 8,
     chance: 0.12,
+    // Blackened iron and rust — themed floor and wall tiles distinguish this room visually.
+    floorKey: 'tile_floor_dark_armoury',
+    wallKey:  'tile_wall_dark_armoury',
+    // Four weapon mounts placed at the inner corners give the room its armoury feel.
+    decorations: { tileType: 'WEAPON_MOUNT', placement: 'inner_corners' },
     // Contains the Bone Blade unique weapon and a piece of armour as guaranteed drops.
     items: ['BONE_BLADE', 'LEATHER_ARMOR'],
     // A champion orc guards the armoury.
@@ -37,6 +49,11 @@ export const UNIQUE_ROOM_DEFS = [
     entryMessage: 'A dusty library of forgotten lore… the air hums with old magic.',
     minFloor: 5,
     chance: 0.12,
+    // Obsidian floor with arcane rune glow — themed tiles distinguish the library.
+    floorKey: 'tile_floor_necropolis_library',
+    wallKey:  'tile_wall_necropolis_library',
+    // Bookcases line the inner edges at regular spacing, creating a library feel.
+    decorations: { tileType: 'BOOKCASE', placement: 'edge_rows', spacing: 3 },
     // Shelves stocked with restorative potions.
     items: ['MEGA_POTION', 'MEGA_POTION'],
     enemies: [],

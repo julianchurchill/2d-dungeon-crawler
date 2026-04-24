@@ -12,6 +12,10 @@ export const TILE = Object.freeze({
   STAIRS_UP: 7,
   /** The door to the player's home in the town. Triggers the display case panel. */
   HOME_DOOR: 8,
+  /** Weapon mount — a wall-mounted weapon rack used in unique dungeon rooms (e.g. The Dark Armoury). Non-walkable and opaque. */
+  WEAPON_MOUNT: 9,
+  /** Bookcase — a shelf of books used in unique dungeon rooms (e.g. The Necropolis Library). Non-walkable and opaque. */
+  BOOKCASE: 10,
 });
 
 export const FOV_STATE = Object.freeze({

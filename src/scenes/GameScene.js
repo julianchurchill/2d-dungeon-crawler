@@ -13,6 +13,7 @@ import { Item } from '../items/Item.js';
 import { getFloorLoot, getChallengeLoot } from '../items/ItemTypes.js';
 import { UNIQUE_ROOM_DEFS } from '../dungeon/UniqueRoomDefinitions.js';
 import { uniqueRoomRegistry } from '../dungeon/UniqueRoomRegistry.js';
+import { placeDecorations } from '../dungeon/RoomDecorationPlacer.js';
 import { computeFOV, computeDaylightFOV } from '../fov/ShadowcastFOV.js';
 import { EventBus } from '../utils/EventBus.js';
 import { GameEvents } from '../events/GameEvents.js';
@@ -721,6 +722,12 @@ export class GameScene extends Phaser.Scene {
     const cx = Math.floor(room.x + room.w / 2);
     const cy = Math.floor(room.y + room.h / 2);
 
+    // Place decorations first so their tiles are non-walkable before items/enemies
+    // are placed — ensuring nothing spawns on top of a weapon mount or bookcase.
+    if (def.decorations) {
+      this._placeRoomDecorations(room, def.decorations);
+    }
+
     // Place each guaranteed item at a random walkable position in the room.
     for (const itemKey of def.items) {
       const typeDef = ITEM_TYPES[itemKey];
@@ -763,11 +770,69 @@ export class GameScene extends Phaser.Scene {
       }
     }
 
+    // Paint the room's themed floor and wall tiles over the base dungeon tilemap.
+    if (def.floorKey || def.wallKey) {
+      this._paintUniqueRoomTiles(room, def);
+    }
+
     // Notify the player after a short delay (same pattern as the Old Bones hint).
     this.time.delayedCall(250, () => {
       EventBus.emit(GameEvents.MESSAGE, `You sense something unusual on this floor — ${def.name}!`);
       EventBus.emit(GameEvents.MESSAGE, def.entryMessage);
     });
+  }
+
+  /**
+   * Overdraw floor and wall tiles within a unique room (and its surrounding
+   * wall border) with themed textures defined in the room's definition.
+   *
+   * The base dungeon tilemap has already been rendered to `this.mapRT`; this
+   * method draws on top of that RenderTexture for only the affected tiles,
+   * following the same pattern as the shop-door texture overrides.
+   *
+   * @param {{ x:number, y:number, w:number, h:number }} room
+   * @param {import('../dungeon/UniqueRoomDefinitions.js').UniqueRoomDef} def
+   */
+  _paintUniqueRoomTiles(room, def) {
+    const floorKey = def.floorKey ? tilesetManager.getTileKey(def.floorKey) : null;
+    const wallKey  = def.wallKey  ? tilesetManager.getTileKey(def.wallKey)  : null;
+
+    // Paint one tile outside the room bounds so the surrounding wall ring also
+    // gets the themed texture, making the visual boundary feel intentional.
+    const x0 = Math.max(0, room.x - 1);
+    const y0 = Math.max(0, room.y - 1);
+    const x1 = Math.min(this.dungeonMap.width  - 1, room.x + room.w);
+    const y1 = Math.min(this.dungeonMap.height - 1, room.y + room.h);
+
+    // Resolve decoration texture key once if a decoration type is defined.
+    const decorKey = def.decorations?.tileType
+      ? tilesetManager.getTileKey(`tile_${def.decorations.tileType.toLowerCase()}`)
+      : null;
+    const decorTile = def.decorations?.tileType ? TILE[def.decorations.tileType] : null;
+
+    for (let ty = y0; ty <= y1; ty++) {
+      for (let tx = x0; tx <= x1; tx++) {
+        const tileType = this.dungeonMap.getTile(tx, ty);
+        let key = null;
+        if (tileType === TILE.FLOOR && floorKey) key = floorKey;
+        else if (tileType === TILE.WALL && wallKey) key = wallKey;
+        else if (decorTile !== null && tileType === decorTile && decorKey) key = decorKey;
+        if (key) {
+          this.mapRT.drawFrame(key, undefined, tx * TILE_SIZE, ty * TILE_SIZE);
+        }
+      }
+    }
+  }
+
+  /**
+   * Places decoration tiles (e.g. WEAPON_MOUNT, BOOKCASE) into the dungeon map.
+   * Delegates to RoomDecorationPlacer which handles corridor-avoidance logic.
+   *
+   * @param {{ x:number, y:number, w:number, h:number }} room
+   * @param {{ tileType:string, placement:string, spacing?:number }} decorSpec
+   */
+  _placeRoomDecorations(room, decorSpec) {
+    placeDecorations(this.dungeonMap, room, decorSpec);
   }
 
   /**
