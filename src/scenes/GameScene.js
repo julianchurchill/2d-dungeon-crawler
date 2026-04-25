@@ -14,7 +14,7 @@ import { getFloorLoot, getChallengeLoot } from '../items/ItemTypes.js';
 import { UNIQUE_ROOM_DEFS } from '../dungeon/UniqueRoomDefinitions.js';
 import { uniqueRoomRegistry } from '../dungeon/UniqueRoomRegistry.js';
 import { placeDecorations } from '../dungeon/RoomDecorationPlacer.js';
-import { getLockedRoomOrientation } from '../dungeon/LockedRoomPlacer.js';
+import { isInnerRoomSpaceAvailable } from '../dungeon/LockedRoomPlacer.js';
 import { UniqueRoomEntryTracker } from '../dungeon/UniqueRoomEntryTracker.js';
 import { computeFOV, computeDaylightFOV } from '../fov/ShadowcastFOV.js';
 import { EventBus } from '../utils/EventBus.js';
@@ -775,141 +775,141 @@ export class GameScene extends Phaser.Scene {
       }
     }
 
-    // Carve a locked alcove before NPC placement so the resolved dividerY is known.
-    let resolvedDividerY = null;
-    let lockedRoomAlcoveAtBottom = true;
+    // Carve an inner room adjacent to one wall of this room, connected only via a
+    // locked door.  Returns placement info (including innerRoom bounds) or null.
+    let innerRoom = null;
     if (def.lockedRoom) {
-      const lockedResult = this._spawnLockedRoom(room, def.lockedRoom);
-      if (lockedResult) {
-        resolvedDividerY = lockedResult.dividerY;
-        lockedRoomAlcoveAtBottom = lockedResult.alcoveAtBottom;
-      }
+      const lockedResult = this._trySpawnInnerRoom(room, def.lockedRoom);
+      if (lockedResult) innerRoom = lockedResult.innerRoom;
     }
 
-    // Spawn the unique room's NPC (if any) in the accessible zone.
+    // Spawn the unique room's NPC (if any) near the centre of the parent room.
     if (def.npc) {
-      const nx = cx;
-      let ny;
-      if (lockedRoomAlcoveAtBottom) {
-        // Accessible zone: top — keep NPC at least 2 rows above the divider so a
-        // free tile sits between them and the locked door.
-        const dividerY = resolvedDividerY ?? room.y + room.h;
-        ny = Math.min(cy + 1, dividerY - 2, room.y + room.h - 2);
-        ny = Math.max(ny, room.y + 1);
-      } else {
-        // Accessible zone: bottom — keep NPC at least 2 rows below the divider.
-        const dividerY = resolvedDividerY ?? room.y;
-        ny = Math.max(cy - 1, dividerY + 2, room.y + 1);
-        ny = Math.min(ny, room.y + room.h - 2);
-      }
-      if (this.dungeonMap.isWalkable(nx, ny) && !this._getEntityAt(nx, ny)) {
-        this._spawnDungeonNpc(nx, ny, def.npc);
-      }
-    }
-
-    // Paint the room's themed floor and wall tiles over the base dungeon tilemap.
-    if (def.floorKey || def.wallKey) {
-      this._paintUniqueRoomTiles(room, def);
-    }
-
-  }
-
-  /**
-   * Carves a locked alcove at the far end of a unique room separated from the
-   * main area by a row of WALL tiles with a single LOCKED_DOOR tile in the
-   * centre.  Items in `lockedRoomDef.items` are placed inside the alcove.
-   *
-   * @param {{ x:number, y:number, w:number, h:number }} room
-   * @param {{ keyId:string, items:string[] }} lockedRoomDef
-   */
-  _spawnLockedRoom(room, lockedRoomDef) {
-    // Determine safe alcove orientation by scanning all four room edges for BSP
-    // corridor entries.  Returns null when entries exist on both sides — in that
-    // case the locked room cannot be placed safely and we skip it.
-    const orientation = getLockedRoomOrientation(this.dungeonMap, room);
-    if (orientation === null) return null;
-
-    // alcoveAtBottom=true  → accessible zone is top, alcove is bottom.
-    // alcoveAtBottom=false → accessible zone is bottom, alcove is top.
-    const alcoveAtBottom = orientation === 'bottom';
-
-    let dividerY;
-    if (alcoveAtBottom) {
-      // Divider near 60 % height; shift upward to avoid blocking side entries.
-      dividerY = room.y + Math.max(2, Math.floor(room.h * 0.6));
-      if (dividerY >= room.y + room.h - 1) return null;
-      const maxShift = dividerY - room.y - 2;
-      for (let i = 0; i < maxShift; i++) {
-        if (
-          this.dungeonMap.getTile(room.x - 1, dividerY) !== TILE.FLOOR &&
-          this.dungeonMap.getTile(room.x + room.w, dividerY) !== TILE.FLOOR
-        ) break;
-        dividerY--;
-      }
-      if (dividerY <= room.y + 1 || dividerY >= room.y + room.h - 1) return null;
-    } else {
-      // Divider near 40 % height; shift downward to avoid blocking side entries.
-      dividerY = room.y + Math.max(2, Math.floor(room.h * 0.4));
-      if (dividerY >= room.y + room.h - 2) return null;
-      // Require at least 1 interior row in the alcove above the divider.
-      if (dividerY - room.y < 2) return null;
-      const maxShift = room.y + room.h - 2 - dividerY;
-      for (let i = 0; i < maxShift; i++) {
-        if (
-          this.dungeonMap.getTile(room.x - 1, dividerY) !== TILE.FLOOR &&
-          this.dungeonMap.getTile(room.x + room.w, dividerY) !== TILE.FLOOR
-        ) break;
-        dividerY++;
-      }
-      if (dividerY <= room.y + 1 || dividerY >= room.y + room.h - 1) return null;
-    }
-
-    // Safety check: verify no external corridor entry falls inside the alcove zone
-    // after dividerY has been shifted.  This guards against edge cases where the
-    // shift still left an entry on the wrong side.
-    const alcoveCheckMin = alcoveAtBottom ? dividerY + 1 : room.y;
-    const alcoveCheckMax = alcoveAtBottom ? room.y + room.h : dividerY;
-    for (let x = room.x; x < room.x + room.w; x++) {
-      if (this.dungeonMap.getTile(x, room.y - 1) === TILE.FLOOR && room.y >= alcoveCheckMin && room.y < alcoveCheckMax) return null;
-      if (this.dungeonMap.getTile(x, room.y + room.h) === TILE.FLOOR && (room.y + room.h - 1) >= alcoveCheckMin && (room.y + room.h - 1) < alcoveCheckMax) return null;
-    }
-    for (let y = alcoveCheckMin; y < alcoveCheckMax; y++) {
-      if (
-        this.dungeonMap.getTile(room.x - 1, y) === TILE.FLOOR ||
-        this.dungeonMap.getTile(room.x + room.w, y) === TILE.FLOOR
-      ) return null;
-    }
-
-    const doorX = room.x + Math.floor(room.w / 2);
-
-    // Place a solid wall row with a single locked door in the centre.
-    for (let x = room.x; x < room.x + room.w; x++) {
-      this.dungeonMap.setTile(x, dividerY, x === doorX ? TILE.LOCKED_DOOR : TILE.WALL);
-    }
-
-    // Place each locked-area item inside the alcove zone.
-    const alcoveMinY = alcoveAtBottom ? dividerY + 1 : room.y + 1;
-    const alcoveMaxY = alcoveAtBottom ? room.y + room.h - 2 : dividerY - 1;
-    for (const itemKey of lockedRoomDef.items) {
-      const typeDef = ITEM_TYPES[itemKey];
-      if (!typeDef) continue;
-      if (alcoveMinY > alcoveMaxY) continue; // alcove too narrow — skip item
-      for (let attempt = 0; attempt < 10; attempt++) {
-        const ix = this.rng.nextInt(room.x + 1, room.x + room.w - 2);
-        const iy = this.rng.nextInt(alcoveMinY, alcoveMaxY);
-        if (this.dungeonMap.isWalkable(ix, iy) && !this._getEntityAt(ix, iy)) {
-          this._placeItem(ix, iy, typeDef);
+      const candidates = [
+        { x: cx,     y: cy     },
+        { x: cx + 1, y: cy     },
+        { x: cx - 1, y: cy     },
+        { x: cx,     y: cy + 1 },
+        { x: cx,     y: cy - 1 },
+      ];
+      for (const pos of candidates) {
+        if (this.dungeonMap.isWalkable(pos.x, pos.y) && !this._getEntityAt(pos.x, pos.y)) {
+          this._spawnDungeonNpc(pos.x, pos.y, def.npc);
           break;
         }
       }
     }
 
-    return { dividerY, alcoveAtBottom };
+    // Paint the room's themed floor and wall tiles over the base dungeon tilemap.
+    if (def.floorKey || def.wallKey) {
+      this._paintUniqueRoomTiles(room, def, innerRoom);
+    }
+
+  }
+
+  /**
+   * Tries each of the four cardinal sides of `room` in order (bottom, right,
+   * top, left) and carves the first side where a small inner room fits without
+   * overlapping any existing floor tile.  The inner room is connected to the
+   * parent room only via a LOCKED_DOOR placed in the shared wall tile.
+   *
+   * Because the inner room is carved after BSP generation, no BSP corridor can
+   * ever reach it — the locked door is the only entrance.
+   *
+   * @param {{ x:number, y:number, w:number, h:number }} room
+   * @param {{ keyId:string, items:string[] }} lockedRoomDef
+   * @returns {{ doorX:number, doorY:number, innerRoom:{x,y,w,h} }|null}
+   */
+  _trySpawnInnerRoom(room, lockedRoomDef) {
+    const INNER_LONG  = Math.min(room.w - 2, 5);
+    const INNER_TALL  = Math.min(room.h - 2, 5);
+    const INNER_SHORT = 3;
+
+    // Each entry: a thunk returning { ix, iy, iw, ih, doorX, doorY } or null.
+    const sides = [
+      () => { // bottom
+        const iw = INNER_LONG, ih = INNER_SHORT;
+        const ix = room.x + Math.floor((room.w - iw) / 2);
+        const iy = room.y + room.h + 1;
+        if (!isInnerRoomSpaceAvailable(this.dungeonMap, ix, iy, iw, ih)) return null;
+        return { ix, iy, iw, ih, doorX: ix + Math.floor(iw / 2), doorY: iy - 1 };
+      },
+      () => { // right
+        const iw = INNER_SHORT, ih = INNER_TALL;
+        const ix = room.x + room.w + 1;
+        const iy = room.y + Math.floor((room.h - ih) / 2);
+        if (!isInnerRoomSpaceAvailable(this.dungeonMap, ix, iy, iw, ih)) return null;
+        return { ix, iy, iw, ih, doorX: ix - 1, doorY: iy + Math.floor(ih / 2) };
+      },
+      () => { // top
+        const iw = INNER_LONG, ih = INNER_SHORT;
+        const ix = room.x + Math.floor((room.w - iw) / 2);
+        const iy = room.y - ih - 1;
+        if (!isInnerRoomSpaceAvailable(this.dungeonMap, ix, iy, iw, ih)) return null;
+        return { ix, iy, iw, ih, doorX: ix + Math.floor(iw / 2), doorY: iy + ih };
+      },
+      () => { // left
+        const iw = INNER_SHORT, ih = INNER_TALL;
+        const ix = room.x - iw - 1;
+        const iy = room.y + Math.floor((room.h - ih) / 2);
+        if (!isInnerRoomSpaceAvailable(this.dungeonMap, ix, iy, iw, ih)) return null;
+        return { ix, iy, iw, ih, doorX: ix + iw, doorY: iy + Math.floor(ih / 2) };
+      },
+    ];
+
+    for (const trySide of sides) {
+      const p = trySide();
+      if (!p) continue;
+      const { ix, iy, iw, ih, doorX, doorY } = p;
+
+      // Carve inner room floor.
+      for (let y = iy; y < iy + ih; y++) {
+        for (let x = ix; x < ix + iw; x++) {
+          this.dungeonMap.setTile(x, y, TILE.FLOOR);
+        }
+      }
+
+      // Set border walls around the inner room (buildWalls has already run).
+      for (let x = ix - 1; x <= ix + iw; x++) {
+        if (this.dungeonMap.getTile(x, iy - 1) !== TILE.FLOOR)
+          this.dungeonMap.setTile(x, iy - 1, TILE.WALL);
+        if (this.dungeonMap.getTile(x, iy + ih) !== TILE.FLOOR)
+          this.dungeonMap.setTile(x, iy + ih, TILE.WALL);
+      }
+      for (let y = iy; y < iy + ih; y++) {
+        if (this.dungeonMap.getTile(ix - 1, y) !== TILE.FLOOR)
+          this.dungeonMap.setTile(ix - 1, y, TILE.WALL);
+        if (this.dungeonMap.getTile(ix + iw, y) !== TILE.FLOOR)
+          this.dungeonMap.setTile(ix + iw, y, TILE.WALL);
+      }
+
+      // Place the locked door in the shared wall between parent and inner room.
+      this.dungeonMap.setTile(doorX, doorY, TILE.LOCKED_DOOR);
+
+      // Place each item at a random walkable position inside the inner room.
+      for (const itemKey of lockedRoomDef.items) {
+        const typeDef = ITEM_TYPES[itemKey];
+        if (!typeDef) continue;
+        for (let attempt = 0; attempt < 10; attempt++) {
+          const px = this.rng.nextInt(ix, ix + iw - 1);
+          const py = this.rng.nextInt(iy, iy + ih - 1);
+          if (this.dungeonMap.isWalkable(px, py) && !this._getEntityAt(px, py)) {
+            this._placeItem(px, py, typeDef);
+            break;
+          }
+        }
+      }
+
+      return { doorX, doorY, innerRoom: { x: ix, y: iy, w: iw, h: ih } };
+    }
+
+    return null;
   }
 
   /**
    * Overdraw floor and wall tiles within a unique room (and its surrounding
-   * wall border) with themed textures defined in the room's definition.
+   * wall border) with themed textures defined in the room's definition.  When
+   * an inner room was successfully carved, its tiles are painted too.
    *
    * The base dungeon tilemap has already been rendered to `this.mapRT`; this
    * method draws on top of that RenderTexture for only the affected tiles,
@@ -917,17 +917,11 @@ export class GameScene extends Phaser.Scene {
    *
    * @param {{ x:number, y:number, w:number, h:number }} room
    * @param {import('../dungeon/UniqueRoomDefinitions.js').UniqueRoomDef} def
+   * @param {{ x:number, y:number, w:number, h:number }|null} [innerRoom]
    */
-  _paintUniqueRoomTiles(room, def) {
+  _paintUniqueRoomTiles(room, def, innerRoom = null) {
     const floorKey = def.floorKey ? tilesetManager.getTileKey(def.floorKey) : null;
     const wallKey  = def.wallKey  ? tilesetManager.getTileKey(def.wallKey)  : null;
-
-    // Paint one tile outside the room bounds so the surrounding wall ring also
-    // gets the themed texture, making the visual boundary feel intentional.
-    const x0 = Math.max(0, room.x - 1);
-    const y0 = Math.max(0, room.y - 1);
-    const x1 = Math.min(this.dungeonMap.width  - 1, room.x + room.w);
-    const y1 = Math.min(this.dungeonMap.height - 1, room.y + room.h);
 
     // Resolve decoration texture key once if a decoration type is defined.
     const decorKey = def.decorations?.tileType
@@ -940,19 +934,30 @@ export class GameScene extends Phaser.Scene {
       ? tilesetManager.getTileKey('tile_locked_door')
       : null;
 
-    for (let ty = y0; ty <= y1; ty++) {
-      for (let tx = x0; tx <= x1; tx++) {
-        const tileType = this.dungeonMap.getTile(tx, ty);
-        let key = null;
-        if (tileType === TILE.FLOOR && floorKey) key = floorKey;
-        else if (tileType === TILE.WALL && wallKey) key = wallKey;
-        else if (tileType === TILE.LOCKED_DOOR && lockedDoorKey) key = lockedDoorKey;
-        else if (decorTile !== null && tileType === decorTile && decorKey) key = decorKey;
-        if (key) {
-          this.mapRT.drawFrame(key, undefined, tx * TILE_SIZE, ty * TILE_SIZE);
+    /** Paint all tiles in the axis-aligned bounding box with 1-tile border. */
+    const paintRect = (rx, ry, rw, rh) => {
+      const x0 = Math.max(0, rx - 1);
+      const y0 = Math.max(0, ry - 1);
+      const x1 = Math.min(this.dungeonMap.width  - 1, rx + rw);
+      const y1 = Math.min(this.dungeonMap.height - 1, ry + rh);
+      for (let ty = y0; ty <= y1; ty++) {
+        for (let tx = x0; tx <= x1; tx++) {
+          const tileType = this.dungeonMap.getTile(tx, ty);
+          let key = null;
+          if (tileType === TILE.FLOOR && floorKey) key = floorKey;
+          else if (tileType === TILE.WALL && wallKey) key = wallKey;
+          else if (tileType === TILE.LOCKED_DOOR && lockedDoorKey) key = lockedDoorKey;
+          else if (decorTile !== null && tileType === decorTile && decorKey) key = decorKey;
+          if (key) this.mapRT.drawFrame(key, undefined, tx * TILE_SIZE, ty * TILE_SIZE);
         }
       }
-    }
+    };
+
+    // Paint the parent room (and its surrounding wall ring).
+    paintRect(room.x, room.y, room.w, room.h);
+
+    // Paint the inner room (and its surrounding wall ring) if one was carved.
+    if (innerRoom) paintRect(innerRoom.x, innerRoom.y, innerRoom.w, innerRoom.h);
   }
 
   /**
