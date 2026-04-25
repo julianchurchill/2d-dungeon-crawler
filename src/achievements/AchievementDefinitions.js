@@ -283,4 +283,11 @@ export const ACHIEVEMENTS = [
     condition: { type: 'unique_room_visited', roomId: 'necropolis_library', target: 1 },
     progressUnit: 'visited',
   },
+  {
+    id: 'the_deeper_dark',
+    name: 'The Deeper Dark',
+    description: 'Discover The Darker Way',
+    condition: { type: 'unique_room_visited', roomId: 'darker_way', target: 1 },
+    progressUnit: 'visited',
+  },
 ];
