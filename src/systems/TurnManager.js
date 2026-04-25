@@ -15,6 +15,7 @@ export const TURN_STATE = Object.freeze({
   SHOP:          'SHOP',
   DIALOGUE:      'DIALOGUE',
   DISPLAY_CASE:  'DISPLAY_CASE',
+  TRANSITIONING: 'TRANSITIONING',
 });
 
 export class TurnManager {
