@@ -17,6 +17,7 @@ import { EventBus } from '../utils/EventBus.js';
 import { GameEvents } from '../events/GameEvents.js';
 import { ShopSystem } from '../systems/ShopSystem.js';
 import { tilesetManager as defaultTilesetManager } from '../systems/TilesetManager.js';
+import { SHOP_NAMES } from './ShopNames.js';
 
 const PANEL_W = 240;
 const PANEL_PAD = 14;
@@ -24,9 +25,6 @@ const ROW_H = 36;
 const TITLE_H = 50;
 const SECTION_HEADER_H = 22;
 const FOOTER_H = 36;
-
-/** Maps shopType to display name. */
-const SHOP_NAMES = { potion: 'Potion Shop', weapon: 'Weapon Shop', armour: 'Armour Shop' };
 
 /**
  * @typedef {import('../items/Item.js').Item} Item

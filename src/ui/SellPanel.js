@@ -15,6 +15,7 @@ import { FONT_FAMILY } from '../utils/FontConfig.js';
 import { EventBus } from '../utils/EventBus.js';
 import { GameEvents } from '../events/GameEvents.js';
 import { ShopSystem } from '../systems/ShopSystem.js';
+import { SHOP_NAMES } from './ShopNames.js';
 
 const PANEL_W = 220;
 const PANEL_PAD = 14;
@@ -28,8 +29,6 @@ const ICON_MAP = {
   helmet: '⛑️', chest: '🦺', legs: '👖', arms: '🧤', boots: '👢',
   ring: '💍', amulet: '📿',
 };
-/** Maps shopType to display name. */
-const SHOP_NAMES = { potion: 'Potion Shop', weapon: 'Weapon Shop', armour: 'Armour Shop' };
 
 export class SellPanel {
   /**

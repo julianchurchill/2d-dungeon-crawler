@@ -55,6 +55,9 @@ function _generatePotionStock(playerLevel) {
   // Teleport potions — always one in stock
   stock.push(_fixedShopItem(ITEM_TYPES.POTION_OF_MINOR_TELEPORTATION));
 
+  // Home Seeking Scroll — always one in stock
+  stock.push(_fixedShopItem(ITEM_TYPES.HOME_SEEKING_SCROLL));
+
   return stock;
 }
 
