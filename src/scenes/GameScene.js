@@ -782,11 +782,12 @@ export class GameScene extends Phaser.Scene {
     // Spawn the unique room's NPC (if any) in the accessible zone (above any divider).
     if (def.npc) {
       const nx = cx;
-      // Constrain NPC to rows above the locked divider so they are never sealed inside.
+      // Constrain NPC at least 2 rows above the divider so a free tile exists
+      // between them and the door — preventing them from blocking door access.
       const dividerY = def.lockedRoom
         ? room.y + Math.max(2, Math.floor(room.h * 0.6))
         : room.y + room.h;
-      const ny = Math.min(cy + 1, dividerY - 1, room.y + room.h - 2);
+      const ny = Math.min(cy + 1, dividerY - 2, room.y + room.h - 2);
       if (this.dungeonMap.isWalkable(nx, ny) && !this._getEntityAt(nx, ny)) {
         this._spawnDungeonNpc(nx, ny, def.npc);
       }
