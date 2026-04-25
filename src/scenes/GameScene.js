@@ -14,6 +14,7 @@ import { getFloorLoot, getChallengeLoot } from '../items/ItemTypes.js';
 import { UNIQUE_ROOM_DEFS } from '../dungeon/UniqueRoomDefinitions.js';
 import { uniqueRoomRegistry } from '../dungeon/UniqueRoomRegistry.js';
 import { placeDecorations } from '../dungeon/RoomDecorationPlacer.js';
+import { getLockedRoomOrientation } from '../dungeon/LockedRoomPlacer.js';
 import { UniqueRoomEntryTracker } from '../dungeon/UniqueRoomEntryTracker.js';
 import { computeFOV, computeDaylightFOV } from '../fov/ShadowcastFOV.js';
 import { EventBus } from '../utils/EventBus.js';
@@ -822,28 +823,15 @@ export class GameScene extends Phaser.Scene {
    * @param {{ keyId:string, items:string[] }} lockedRoomDef
    */
   _spawnLockedRoom(room, lockedRoomDef) {
-    const midY = room.y + Math.floor(room.h / 2);
+    // Determine safe alcove orientation by scanning all four room edges for BSP
+    // corridor entries.  Returns null when entries exist on both sides — in that
+    // case the locked room cannot be placed safely and we skip it.
+    const orientation = getLockedRoomOrientation(this.dungeonMap, room);
+    if (orientation === null) return null;
 
-    // Detect whether any corridor enters the lower half of the room (below midY).
-    // BSP corridors are L-shaped; a vertical segment can enter from below the room
-    // boundary and a horizontal segment can enter through a side at any y.
-    let lowerHalfEntry = false;
-
-    // Check the bottom edge for a vertical corridor arriving from below.
-    for (let x = room.x; x < room.x + room.w && !lowerHalfEntry; x++) {
-      if (this.dungeonMap.getTile(x, room.y + room.h) === TILE.FLOOR) lowerHalfEntry = true;
-    }
-    // Check left and right sides for horizontal corridors in the lower half.
-    for (let y = midY + 1; y < room.y + room.h && !lowerHalfEntry; y++) {
-      if (
-        this.dungeonMap.getTile(room.x - 1, y) === TILE.FLOOR ||
-        this.dungeonMap.getTile(room.x + room.w, y) === TILE.FLOOR
-      ) lowerHalfEntry = true;
-    }
-
-    // alcoveAtBottom=true  → accessible zone is top, alcove is bottom (default).
-    // alcoveAtBottom=false → entry from below, so accessible zone is bottom, alcove is top.
-    const alcoveAtBottom = !lowerHalfEntry;
+    // alcoveAtBottom=true  → accessible zone is top, alcove is bottom.
+    // alcoveAtBottom=false → accessible zone is bottom, alcove is top.
+    const alcoveAtBottom = orientation === 'bottom';
 
     let dividerY;
     if (alcoveAtBottom) {
@@ -874,6 +862,22 @@ export class GameScene extends Phaser.Scene {
         dividerY++;
       }
       if (dividerY <= room.y + 1 || dividerY >= room.y + room.h - 1) return null;
+    }
+
+    // Safety check: verify no external corridor entry falls inside the alcove zone
+    // after dividerY has been shifted.  This guards against edge cases where the
+    // shift still left an entry on the wrong side.
+    const alcoveCheckMin = alcoveAtBottom ? dividerY + 1 : room.y;
+    const alcoveCheckMax = alcoveAtBottom ? room.y + room.h : dividerY;
+    for (let x = room.x; x < room.x + room.w; x++) {
+      if (this.dungeonMap.getTile(x, room.y - 1) === TILE.FLOOR && room.y >= alcoveCheckMin && room.y < alcoveCheckMax) return null;
+      if (this.dungeonMap.getTile(x, room.y + room.h) === TILE.FLOOR && (room.y + room.h - 1) >= alcoveCheckMin && (room.y + room.h - 1) < alcoveCheckMax) return null;
+    }
+    for (let y = alcoveCheckMin; y < alcoveCheckMax; y++) {
+      if (
+        this.dungeonMap.getTile(room.x - 1, y) === TILE.FLOOR ||
+        this.dungeonMap.getTile(room.x + room.w, y) === TILE.FLOOR
+      ) return null;
     }
 
     const doorX = room.x + Math.floor(room.w / 2);

@@ -7,6 +7,7 @@ import { TILE } from '../../src/utils/TileTypes.js';
 import { DungeonMap } from '../../src/dungeon/DungeonMap.js';
 import { placeDecorations } from '../../src/dungeon/RoomDecorationPlacer.js';
 import { UniqueRoomEntryTracker } from '../../src/dungeon/UniqueRoomEntryTracker.js';
+import { getLockedRoomOrientation } from '../../src/dungeon/LockedRoomPlacer.js';
 
 // ─── Given ────────────────────────────────────────────────────────────────
 
@@ -331,4 +332,52 @@ Then('the BootScene should register a texture named {string}', function (texture
     src.includes(`'${textureName}'`),
     `Expected BootScene.js to contain a _genTexture call for '${textureName}'`,
   );
+});
+
+// ─── Locked room orientation detection ────────────────────────────────────────
+
+Given('a locked room test map with a room at {int} {int} size {int} by {int}',
+  function (rx, ry, rw, rh) {
+    this.lrMap = new DungeonMap(rx + rw + 5, ry + rh + 5);
+    // Carve the room interior to FLOOR.
+    for (let y = ry; y < ry + rh; y++) {
+      for (let x = rx; x < rx + rw; x++) {
+        this.lrMap.setTile(x, y, TILE.FLOOR);
+      }
+    }
+    this.lrRoom = { x: rx, y: ry, w: rw, h: rh };
+  });
+
+Given('a corridor enters the locked room test room from above', function () {
+  const cx = this.lrRoom.x + Math.floor(this.lrRoom.w / 2);
+  this.lrMap.setTile(cx, this.lrRoom.y - 1, TILE.FLOOR);
+});
+
+Given('a corridor enters the locked room test room from below', function () {
+  const cx = this.lrRoom.x + Math.floor(this.lrRoom.w / 2);
+  this.lrMap.setTile(cx, this.lrRoom.y + this.lrRoom.h, TILE.FLOOR);
+});
+
+Given('a corridor enters the locked room test room from the left side in the upper half', function () {
+  const upperY = this.lrRoom.y + 1;
+  this.lrMap.setTile(this.lrRoom.x - 1, upperY, TILE.FLOOR);
+});
+
+Given('a corridor enters the locked room test room from the left side in the lower half', function () {
+  const lowerY = this.lrRoom.y + this.lrRoom.h - 2;
+  this.lrMap.setTile(this.lrRoom.x - 1, lowerY, TILE.FLOOR);
+});
+
+When('the locked room orientation is calculated', function () {
+  this.lrOrientation = getLockedRoomOrientation(this.lrMap, this.lrRoom);
+});
+
+Then('the locked room orientation should be {string}', function (expected) {
+  assert.equal(this.lrOrientation, expected,
+    `Expected locked room orientation "${expected}" but got "${this.lrOrientation}"`);
+});
+
+Then('the locked room orientation should be null', function () {
+  assert.equal(this.lrOrientation, null,
+    `Expected locked room orientation null but got "${this.lrOrientation}"`);
 });

@@ -242,3 +242,37 @@ Feature: Unique rooms in dungeon generation
 
   Scenario: The warrior NPC sprite is registered for the HD tileset
     Then the BootScene should register a texture named "hd_entity_npc_warrior"
+
+  # ── Locked room orientation detection ────────────────────────────────────────
+
+  Scenario: Alcove defaults to bottom when the only entry is from above
+    Given a locked room test map with a room at 2 2 size 8 by 10
+    And a corridor enters the locked room test room from above
+    When the locked room orientation is calculated
+    Then the locked room orientation should be "bottom"
+
+  Scenario: Alcove is placed at top when the only entry is from below
+    Given a locked room test map with a room at 2 2 size 8 by 10
+    And a corridor enters the locked room test room from below
+    When the locked room orientation is calculated
+    Then the locked room orientation should be "top"
+
+  Scenario: Alcove is placed at top when the only entry is a lower-side corridor
+    Given a locked room test map with a room at 2 2 size 8 by 10
+    And a corridor enters the locked room test room from the left side in the lower half
+    When the locked room orientation is calculated
+    Then the locked room orientation should be "top"
+
+  Scenario: Orientation is null when entries exist in both halves
+    Given a locked room test map with a room at 2 2 size 8 by 10
+    And a corridor enters the locked room test room from above
+    And a corridor enters the locked room test room from below
+    When the locked room orientation is calculated
+    Then the locked room orientation should be null
+
+  Scenario: Orientation is null when a top-side and lower-side entry both exist
+    Given a locked room test map with a room at 2 2 size 8 by 10
+    And a corridor enters the locked room test room from the left side in the upper half
+    And a corridor enters the locked room test room from the left side in the lower half
+    When the locked room orientation is calculated
+    Then the locked room orientation should be null
