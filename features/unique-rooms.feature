@@ -230,3 +230,15 @@ Feature: Unique rooms in dungeon generation
 
   Scenario: The Darker Way locked area requires the Key to Elsewhere to open
     Then the "darker_way" locked area should require key "key_to_elsewhere"
+
+  Scenario: Martel the Varangian uses the warrior NPC sprite key
+    Then the "darker_way" NPC should use sprite key "entity_npc_warrior"
+
+  Scenario: The warrior NPC sprite is registered for the classic tileset
+    Then the BootScene should register a texture named "classic_entity_npc_warrior"
+
+  Scenario: The warrior NPC sprite is registered for the modern tileset
+    Then the BootScene should register a texture named "modern_entity_npc_warrior"
+
+  Scenario: The warrior NPC sprite is registered for the HD tileset
+    Then the BootScene should register a texture named "hd_entity_npc_warrior"

@@ -1,5 +1,6 @@
 import { Given, When, Then } from '@cucumber/cucumber';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { UniqueRoomRegistry } from '../../src/dungeon/UniqueRoomRegistry.js';
 import { UNIQUE_ROOM_DEFS } from '../../src/dungeon/UniqueRoomDefinitions.js';
 import { TILE } from '../../src/utils/TileTypes.js';
@@ -313,4 +314,21 @@ Then('exactly 1 entry message should be returned', function () {
 Then('the entry message should contain {string}', function (text) {
   assert.ok(this.lastMessages && this.lastMessages[0].includes(text),
     `Expected entry message to contain "${text}" but got: ${this.lastMessages?.[0]}`);
+});
+
+// ─── NPC sprite key ────────────────────────────────────────────────────────
+
+Then('the {string} NPC should use sprite key {string}', function (id, expectedKey) {
+  const def = UNIQUE_ROOM_DEFS.find(d => d.id === id);
+  assert.ok(def, `No definition found for id "${id}"`);
+  assert.equal(def.npc?.spriteKey, expectedKey,
+    `Expected "${id}" npc.spriteKey to be "${expectedKey}" but got "${def.npc?.spriteKey}"`);
+});
+
+Then('the BootScene should register a texture named {string}', function (textureName) {
+  const src = readFileSync(new URL('../../src/scenes/BootScene.js', import.meta.url), 'utf8');
+  assert.ok(
+    src.includes(`'${textureName}'`),
+    `Expected BootScene.js to contain a _genTexture call for '${textureName}'`,
+  );
 });

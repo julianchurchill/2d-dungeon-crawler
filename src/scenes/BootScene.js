@@ -843,6 +843,35 @@ export class BootScene extends Phaser.Scene {
       g.fillStyle(0xffcc44);
       g.fillEllipse(T/2 + 4, T - 4, 4, 4);
     });
+
+    // Warrior — Martel the Varangian: horned iron helm, mail shirt, broad axe
+    this._genTexture('classic_entity_npc_warrior', T, T, (g) => {
+      // Tunic — worn amber leather
+      g.fillStyle(0x7a5c30);
+      g.fillRect(3, T/2, 10, 7);
+      // Mail shirt — dark iron links over tunic
+      g.fillStyle(0x4a4a5a);
+      g.fillRect(4, T/2, 8, 3);
+      // Face — weathered skin
+      g.fillStyle(0xddaa88);
+      g.fillEllipse(T/2, T/2 - 2, 8, 7);
+      // Beard — grey from years underground
+      g.fillStyle(0x998877);
+      g.fillTriangle(T/2 - 3, T/2, T/2 + 3, T/2, T/2, T/2 + 4);
+      // Helmet — dark iron nasal helm
+      g.fillStyle(0x445566);
+      g.fillRect(3, T/2 - 7, 10, 4);
+      // Horns — pale yellowed bone
+      g.fillStyle(0xccbb99);
+      g.fillRect(1, T/2 - 8, 3, 3);
+      g.fillRect(T - 4, T/2 - 8, 3, 3);
+      // Axe handle — darkened wood
+      g.fillStyle(0x774422);
+      g.fillRect(T - 3, 2, 2, T - 3);
+      // Axe blade — old iron
+      g.fillStyle(0x8899aa);
+      g.fillTriangle(T - 5, 2, T, 2, T - 2, 7);
+    });
   }
 
   // ---------------------------------------------------------------------------
@@ -1277,6 +1306,54 @@ export class BootScene extends Phaser.Scene {
       // Coin shine
       g.fillStyle(0xffee88, 0.8);
       g.fillRect(T/2 + 2, T - 6, 2, 2);
+    });
+
+    // Warrior — Martel the Varangian: horned helm, chain mail, broad axe (vivid)
+    this._genTexture('modern_entity_npc_warrior', T, T, (g) => {
+      // Body outline
+      g.fillStyle(0x3a2208);
+      g.fillRect(3, T/2 - 1, 10, 8);
+      // Tunic — rich amber leather
+      g.fillStyle(0x9a6c3a);
+      g.fillRect(4, T/2, 8, 7);
+      // Chain mail — steel-blue links
+      g.fillStyle(0x445577);
+      g.fillRect(4, T/2, 8, 3);
+      // Mail highlight
+      g.fillStyle(0x6688aa, 0.6);
+      g.fillRect(4, T/2, 4, 1);
+      // Face — warm weathered skin
+      g.fillStyle(0xcc9966);
+      g.fillEllipse(T/2, T/2 - 2, 8, 7);
+      // Eyes — dark, weary
+      g.fillStyle(0x332211);
+      g.fillRect(T/2 - 2, T/2 - 4, 2, 1);
+      g.fillRect(T/2 + 1, T/2 - 4, 2, 1);
+      // Beard — steel grey
+      g.fillStyle(0xbbbbcc);
+      g.fillTriangle(T/2 - 3, T/2, T/2 + 3, T/2, T/2, T/2 + 5);
+      // Helmet — blue-black iron
+      g.fillStyle(0x223344);
+      g.fillRect(3, T/2 - 7, 10, 4);
+      // Helmet rim highlight
+      g.fillStyle(0x556688);
+      g.fillRect(3, T/2 - 4, 10, 1);
+      // Horns — ivory with leather base
+      g.fillStyle(0xeeddcc);
+      g.fillRect(1, T/2 - 9, 3, 4);
+      g.fillRect(T - 4, T/2 - 9, 3, 4);
+      g.fillStyle(0x775544);
+      g.fillRect(1, T/2 - 6, 3, 1);
+      g.fillRect(T - 4, T/2 - 6, 3, 1);
+      // Axe handle — mahogany
+      g.fillStyle(0x8a3d1a);
+      g.fillRect(T - 3, 1, 2, T - 2);
+      // Axe head — dark iron
+      g.fillStyle(0x334455);
+      g.fillRect(T - 5, 1, 4, 6);
+      // Axe cutting edge — bright silver
+      g.fillStyle(0xaaccee);
+      g.fillTriangle(T - 5, 1, T, 1, T - 2, 6);
     });
   }
 
@@ -3122,6 +3199,127 @@ export class BootScene extends Phaser.Scene {
       // Bag tie
       g.fillStyle(0xcc8800);
       g.fillRect(S/2 + 5, S - 12, 4, 2);
+    });
+
+    // Warrior — Martel the Varangian: full figure, horned nasal helm, grey beard, broad axe
+    this._genTexture('hd_entity_npc_warrior', S, S, (g) => {
+      // Shadow
+      g.fillStyle(0x1a1008);
+      g.fillRect(5, 0, 22, 32);
+      // Boots — cracked dark leather
+      g.fillStyle(0x3a2210);
+      g.fillRect(6, 26, 8, 6);
+      g.fillRect(18, 26, 8, 6);
+      // Boot strap bands
+      g.fillStyle(0x553322);
+      g.fillRect(7, 27, 6, 1);
+      g.fillRect(19, 27, 6, 1);
+      // Leg wraps — rough patched cloth
+      g.fillStyle(0x4a3828);
+      g.fillRect(7, 20, 7, 8);
+      g.fillRect(18, 20, 7, 8);
+      // Wrap binding lines
+      g.fillStyle(0x3a2818);
+      g.fillRect(8, 22, 5, 1);
+      g.fillRect(19, 22, 5, 1);
+      g.fillRect(8, 25, 5, 1);
+      g.fillRect(19, 25, 5, 1);
+      // Mail hauberk body — tarnished iron
+      g.fillStyle(0x505068);
+      g.fillRect(7, 10, 18, 12);
+      // Mail ring rows (horizontal stripe detail)
+      g.fillStyle(0x3a3a52);
+      g.fillRect(7, 11, 18, 1);
+      g.fillRect(7, 13, 18, 1);
+      g.fillRect(7, 15, 18, 1);
+      g.fillRect(7, 17, 18, 1);
+      // Mail chest shine — worn bright patch
+      g.fillStyle(0x7080a0, 0.5);
+      g.fillRect(9, 11, 5, 6);
+      // Pauldrons — aged leather shoulder guards
+      g.fillStyle(0x7a5c30);
+      g.fillRect(5, 10, 4, 7);
+      g.fillRect(23, 10, 4, 7);
+      // Belt — dark cracked leather
+      g.fillStyle(0x442211);
+      g.fillRect(7, 20, 18, 2);
+      // Belt buckle — tarnished bronze
+      g.fillStyle(0x996633);
+      g.fillRect(S/2 - 2, 20, 4, 2);
+      // Neck / mail coif base
+      g.fillStyle(0x404058);
+      g.fillRect(12, 8, 8, 3);
+      // Head — weathered skin
+      g.fillStyle(0xcc9966);
+      g.fillEllipse(S/2, 6, 14, 12);
+      // Beard — long and grey (years in the dungeon)
+      g.fillStyle(0xbbbbcc);
+      g.fillTriangle(8, 11, 24, 11, 16, 23);
+      // Beard streak highlights
+      g.fillStyle(0xddddee, 0.5);
+      g.fillRect(12, 12, 3, 7);
+      g.fillRect(17, 13, 3, 6);
+      // Moustache — thick grey
+      g.fillStyle(0xaaaacc);
+      g.fillRect(11, 9, 10, 2);
+      // Eyes — steady but weary
+      g.fillStyle(0x2a1a08);
+      g.fillRect(10, 4, 4, 3);
+      g.fillRect(18, 4, 4, 3);
+      g.fillStyle(0xeeddcc);
+      g.fillRect(11, 4, 2, 2);
+      g.fillRect(19, 4, 2, 2);
+      g.fillStyle(0x4a3a28);
+      g.fillRect(12, 4, 1, 2);
+      g.fillRect(20, 4, 1, 2);
+      // Eyebrows — heavy and greying
+      g.fillStyle(0x998877);
+      g.fillRect(9, 3, 6, 1);
+      g.fillRect(17, 3, 6, 1);
+      // Helmet — dark iron nasal helm
+      g.fillStyle(0x334455);
+      g.fillRect(8, 0, 16, 7);
+      // Helmet shine
+      g.fillStyle(0x556688, 0.5);
+      g.fillRect(9, 0, 7, 3);
+      // Nasal guard — vertical strip over face
+      g.fillStyle(0x223344);
+      g.fillRect(S/2 - 1, 2, 2, 6);
+      // Helmet rim band
+      g.fillStyle(0x223344);
+      g.fillRect(7, 6, 18, 2);
+      // Axe handle — rune-carved dark wood
+      g.fillStyle(0x553311);
+      g.fillRect(29, 4, 3, 28);
+      // Rune notches on handle
+      g.fillStyle(0x884422, 0.6);
+      g.fillRect(29, 10, 3, 1);
+      g.fillRect(29, 17, 3, 1);
+      g.fillRect(29, 24, 3, 1);
+      // Axe head — broad bearded blade
+      g.fillStyle(0x445566);
+      g.fillRect(24, 0, 8, 12);
+      // Axe cutting edge — bright worn iron
+      g.fillStyle(0x8899bb);
+      g.fillTriangle(24, 0, 32, 0, 29, 12);
+      // Edge highlight
+      g.fillStyle(0xaabbdd);
+      g.fillRect(31, 0, 1, 9);
+      // Axe poll (butt)
+      g.fillStyle(0x445566);
+      g.fillRect(29, 11, 3, 4);
+      // Horns drawn last so the right horn renders over the axe head
+      g.fillStyle(0xddcc99);
+      g.fillRect(3, 0, 5, 7);
+      g.fillRect(24, 0, 5, 7);
+      // Horn leather wrap (base)
+      g.fillStyle(0x553322);
+      g.fillRect(3, 5, 5, 2);
+      g.fillRect(24, 5, 5, 2);
+      // Horn tip taper (darker)
+      g.fillStyle(0xccbb88);
+      g.fillRect(4, 0, 3, 2);
+      g.fillRect(25, 0, 3, 2);
     });
   }
 
