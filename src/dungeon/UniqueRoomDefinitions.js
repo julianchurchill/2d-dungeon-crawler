@@ -44,6 +44,36 @@ export const UNIQUE_ROOM_DEFS = [
     enemies: [{ type: 'troll', isChampion: true }],
   },
   {
+    id: 'darker_way',
+    name: 'The Darker Way',
+    entryMessage: 'A cold silence fills this passage — someone has been here a long time.',
+    minFloor: 10,
+    chance: 0.12,
+    prerequisites: ['necropolis_library'],
+    // Deep void-stone floor and shadow-cracked walls — heavier and darker than the armoury.
+    floorKey: 'tile_floor_darker_way',
+    wallKey:  'tile_wall_darker_way',
+    items: [],
+    enemies: [],
+    // Martel the Varangian — a soldier who wandered too deep and never found his way out.
+    npc: {
+      name: 'Martel the Varangian',
+      spriteKey: 'entity_npc_warrior',
+      lines: [
+        'You… you found me. I have been lost here for years.',
+        'There is a sealed chamber beyond that locked door. I have never been able to open it.',
+        'The Archivist upstairs spoke of a key — The Key to Elsewhere. That must be what opens it.',
+        'Whatever lies inside… I no longer have the strength to claim it. Take it. Just get out of here alive.',
+      ],
+    },
+    // A locked alcove seals the Eclipse Blade and The Key to Beyond behind a door
+    // that only yields to The Key to Elsewhere.
+    lockedRoom: {
+      keyId: 'key_to_elsewhere',
+      items: ['ECLIPSE_BLADE', 'KEY_TO_BEYOND'],
+    },
+  },
+  {
     id: 'necropolis_library',
     name: 'The Necropolis Library',
     entryMessage: 'A dusty library of forgotten lore… the air hums with old magic.',

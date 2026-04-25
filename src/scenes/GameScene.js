@@ -774,10 +774,33 @@ export class GameScene extends Phaser.Scene {
       }
     }
 
-    // Spawn the unique room's NPC (if any) in the room, one tile below centre.
+    // Carve a locked alcove before NPC placement so the resolved dividerY is known.
+    let resolvedDividerY = null;
+    let lockedRoomAlcoveAtBottom = true;
+    if (def.lockedRoom) {
+      const lockedResult = this._spawnLockedRoom(room, def.lockedRoom);
+      if (lockedResult) {
+        resolvedDividerY = lockedResult.dividerY;
+        lockedRoomAlcoveAtBottom = lockedResult.alcoveAtBottom;
+      }
+    }
+
+    // Spawn the unique room's NPC (if any) in the accessible zone.
     if (def.npc) {
       const nx = cx;
-      const ny = Math.min(cy + 1, room.y + room.h - 2);
+      let ny;
+      if (lockedRoomAlcoveAtBottom) {
+        // Accessible zone: top — keep NPC at least 2 rows above the divider so a
+        // free tile sits between them and the locked door.
+        const dividerY = resolvedDividerY ?? room.y + room.h;
+        ny = Math.min(cy + 1, dividerY - 2, room.y + room.h - 2);
+        ny = Math.max(ny, room.y + 1);
+      } else {
+        // Accessible zone: bottom — keep NPC at least 2 rows below the divider.
+        const dividerY = resolvedDividerY ?? room.y;
+        ny = Math.max(cy - 1, dividerY + 2, room.y + 1);
+        ny = Math.min(ny, room.y + room.h - 2);
+      }
       if (this.dungeonMap.isWalkable(nx, ny) && !this._getEntityAt(nx, ny)) {
         this._spawnDungeonNpc(nx, ny, def.npc);
       }
@@ -788,6 +811,96 @@ export class GameScene extends Phaser.Scene {
       this._paintUniqueRoomTiles(room, def);
     }
 
+  }
+
+  /**
+   * Carves a locked alcove at the far end of a unique room separated from the
+   * main area by a row of WALL tiles with a single LOCKED_DOOR tile in the
+   * centre.  Items in `lockedRoomDef.items` are placed inside the alcove.
+   *
+   * @param {{ x:number, y:number, w:number, h:number }} room
+   * @param {{ keyId:string, items:string[] }} lockedRoomDef
+   */
+  _spawnLockedRoom(room, lockedRoomDef) {
+    const midY = room.y + Math.floor(room.h / 2);
+
+    // Detect whether any corridor enters the lower half of the room (below midY).
+    // BSP corridors are L-shaped; a vertical segment can enter from below the room
+    // boundary and a horizontal segment can enter through a side at any y.
+    let lowerHalfEntry = false;
+
+    // Check the bottom edge for a vertical corridor arriving from below.
+    for (let x = room.x; x < room.x + room.w && !lowerHalfEntry; x++) {
+      if (this.dungeonMap.getTile(x, room.y + room.h) === TILE.FLOOR) lowerHalfEntry = true;
+    }
+    // Check left and right sides for horizontal corridors in the lower half.
+    for (let y = midY + 1; y < room.y + room.h && !lowerHalfEntry; y++) {
+      if (
+        this.dungeonMap.getTile(room.x - 1, y) === TILE.FLOOR ||
+        this.dungeonMap.getTile(room.x + room.w, y) === TILE.FLOOR
+      ) lowerHalfEntry = true;
+    }
+
+    // alcoveAtBottom=true  → accessible zone is top, alcove is bottom (default).
+    // alcoveAtBottom=false → entry from below, so accessible zone is bottom, alcove is top.
+    const alcoveAtBottom = !lowerHalfEntry;
+
+    let dividerY;
+    if (alcoveAtBottom) {
+      // Divider near 60 % height; shift upward to avoid blocking side entries.
+      dividerY = room.y + Math.max(2, Math.floor(room.h * 0.6));
+      if (dividerY >= room.y + room.h - 1) return null;
+      const maxShift = dividerY - room.y - 2;
+      for (let i = 0; i < maxShift; i++) {
+        if (
+          this.dungeonMap.getTile(room.x - 1, dividerY) !== TILE.FLOOR &&
+          this.dungeonMap.getTile(room.x + room.w, dividerY) !== TILE.FLOOR
+        ) break;
+        dividerY--;
+      }
+      if (dividerY <= room.y + 1 || dividerY >= room.y + room.h - 1) return null;
+    } else {
+      // Divider near 40 % height; shift downward to avoid blocking side entries.
+      dividerY = room.y + Math.max(2, Math.floor(room.h * 0.4));
+      if (dividerY >= room.y + room.h - 2) return null;
+      // Require at least 1 interior row in the alcove above the divider.
+      if (dividerY - room.y < 2) return null;
+      const maxShift = room.y + room.h - 2 - dividerY;
+      for (let i = 0; i < maxShift; i++) {
+        if (
+          this.dungeonMap.getTile(room.x - 1, dividerY) !== TILE.FLOOR &&
+          this.dungeonMap.getTile(room.x + room.w, dividerY) !== TILE.FLOOR
+        ) break;
+        dividerY++;
+      }
+      if (dividerY <= room.y + 1 || dividerY >= room.y + room.h - 1) return null;
+    }
+
+    const doorX = room.x + Math.floor(room.w / 2);
+
+    // Place a solid wall row with a single locked door in the centre.
+    for (let x = room.x; x < room.x + room.w; x++) {
+      this.dungeonMap.setTile(x, dividerY, x === doorX ? TILE.LOCKED_DOOR : TILE.WALL);
+    }
+
+    // Place each locked-area item inside the alcove zone.
+    const alcoveMinY = alcoveAtBottom ? dividerY + 1 : room.y + 1;
+    const alcoveMaxY = alcoveAtBottom ? room.y + room.h - 2 : dividerY - 1;
+    for (const itemKey of lockedRoomDef.items) {
+      const typeDef = ITEM_TYPES[itemKey];
+      if (!typeDef) continue;
+      if (alcoveMinY > alcoveMaxY) continue; // alcove too narrow — skip item
+      for (let attempt = 0; attempt < 10; attempt++) {
+        const ix = this.rng.nextInt(room.x + 1, room.x + room.w - 2);
+        const iy = this.rng.nextInt(alcoveMinY, alcoveMaxY);
+        if (this.dungeonMap.isWalkable(ix, iy) && !this._getEntityAt(ix, iy)) {
+          this._placeItem(ix, iy, typeDef);
+          break;
+        }
+      }
+    }
+
+    return { dividerY, alcoveAtBottom };
   }
 
   /**
@@ -818,12 +931,18 @@ export class GameScene extends Phaser.Scene {
       : null;
     const decorTile = def.decorations?.tileType ? TILE[def.decorations.tileType] : null;
 
+    // Locked door gets its own themed texture when the room has a lockedRoom.
+    const lockedDoorKey = def.lockedRoom
+      ? tilesetManager.getTileKey('tile_locked_door')
+      : null;
+
     for (let ty = y0; ty <= y1; ty++) {
       for (let tx = x0; tx <= x1; tx++) {
         const tileType = this.dungeonMap.getTile(tx, ty);
         let key = null;
         if (tileType === TILE.FLOOR && floorKey) key = floorKey;
         else if (tileType === TILE.WALL && wallKey) key = wallKey;
+        else if (tileType === TILE.LOCKED_DOOR && lockedDoorKey) key = lockedDoorKey;
         else if (decorTile !== null && tileType === decorTile && decorKey) key = decorKey;
         if (key) {
           this.mapRT.drawFrame(key, undefined, tx * TILE_SIZE, ty * TILE_SIZE);
@@ -1427,6 +1546,28 @@ export class GameScene extends Phaser.Scene {
       return;
     }
 
+    if (result.action === 'locked_door') {
+      this._runController.cancel();
+      const roomId = this._entryTracker.getRoomId();
+      const roomDef = roomId ? UNIQUE_ROOM_DEFS.find(d => d.id === roomId) : null;
+      const requiredKeyId = roomDef?.lockedRoom?.keyId;
+      const keyIdx = requiredKeyId
+        ? this.player.inventory.findIndex(i => i.id === requiredKeyId)
+        : -1;
+      if (keyIdx >= 0) {
+        this.player.removeItem(keyIdx);
+        this.dungeonMap.setTile(result.doorX, result.doorY, TILE.FLOOR);
+        // Repaint the now-open tile with the room's themed floor.
+        const floorBase = roomDef?.floorKey ?? 'tile_floor';
+        this.mapRT.drawFrame(tilesetManager.getTileKey(floorBase), undefined, result.doorX * TILE_SIZE, result.doorY * TILE_SIZE);
+        this._updateFOV();
+        EventBus.emit(GameEvents.MESSAGE, 'You use the Key to Elsewhere. The sealed door swings open.');
+      } else {
+        EventBus.emit(GameEvents.MESSAGE, 'The door is sealed. Martel mentioned a key — the Key to Elsewhere.');
+      }
+      return;
+    }
+
     this.turnManager.setState(TURN_STATE.PLAYER_ACTING);
 
     if (result.action === 'attacked') {
@@ -1458,7 +1599,9 @@ export class GameScene extends Phaser.Scene {
     const entryMessages = this._entryTracker.checkEntry(this.player.x, this.player.y);
     if (entryMessages) {
       entryMessages.forEach(msg => EventBus.emit(GameEvents.MESSAGE, msg));
-      EventBus.emit(GameEvents.UNIQUE_ROOM_ENTERED, this._entryTracker.getRoomId());
+      const enteredRoomId = this._entryTracker.getRoomId();
+      EventBus.emit(GameEvents.UNIQUE_ROOM_ENTERED, enteredRoomId);
+      if (enteredRoomId) uniqueRoomRegistry.markEntered(enteredRoomId);
     }
     if (action === 'stairs') {
       this._showStairsPrompt();

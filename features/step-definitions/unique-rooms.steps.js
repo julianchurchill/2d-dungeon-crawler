@@ -221,6 +221,66 @@ Then('the {string} definition should specify BOOKCASE decorations', function (id
     `Expected "${id}" decorations.tileType to be "BOOKCASE"`);
 });
 
+// ─── LOCKED_DOOR tile type ─────────────────────────────────────────────────
+
+Given('a dungeon map with a LOCKED_DOOR tile at x {int} y {int}', function (x, y) {
+  this.testMap = new DungeonMap(20, 20);
+  this.testMap.setTile(x, y, TILE.LOCKED_DOOR);
+  this.testX = x;
+  this.testY = y;
+});
+
+Then('the LOCKED_DOOR tile type should be a non-zero integer', function () {
+  assert.ok(typeof TILE.LOCKED_DOOR === 'number' && TILE.LOCKED_DOOR !== 0,
+    `Expected TILE.LOCKED_DOOR to be a non-zero integer but got ${TILE.LOCKED_DOOR}`);
+});
+
+Then('the LOCKED_DOOR tile type should differ from the WALL tile type', function () {
+  assert.notEqual(TILE.LOCKED_DOOR, TILE.WALL,
+    'Expected TILE.LOCKED_DOOR to differ from TILE.WALL');
+});
+
+// ─── Registry prerequisites ────────────────────────────────────────────────
+
+Given('{string} is marked as entered in the registry', function (id) {
+  this.registry.markEntered(id);
+});
+
+Then('the registry should not record {string} as entered', function (id) {
+  assert.ok(!this.registry.hasBeenEntered(id),
+    `Expected registry NOT to have "${id}" marked as entered`);
+});
+
+// ─── The Darker Way definition ─────────────────────────────────────────────
+
+Then('the {string} definition should have a minimum floor of at least {int}', function (id, minFloor) {
+  const def = UNIQUE_ROOM_DEFS.find(d => d.id === id);
+  assert.ok(def, `No definition found for id "${id}"`);
+  assert.ok(def.minFloor >= minFloor,
+    `Expected "${id}" minFloor >= ${minFloor} but got ${def.minFloor}`);
+});
+
+Then('the {string} definition should require {string} as a prerequisite', function (id, prereq) {
+  const def = UNIQUE_ROOM_DEFS.find(d => d.id === id);
+  assert.ok(def, `No definition found for id "${id}"`);
+  assert.ok(def.prerequisites && def.prerequisites.includes(prereq),
+    `Expected "${id}" prerequisites to include "${prereq}" but got ${JSON.stringify(def.prerequisites)}`);
+});
+
+Then('the {string} locked area should contain item {string}', function (id, itemKey) {
+  const def = UNIQUE_ROOM_DEFS.find(d => d.id === id);
+  assert.ok(def, `No definition found for id "${id}"`);
+  assert.ok(def.lockedRoom && def.lockedRoom.items && def.lockedRoom.items.includes(itemKey),
+    `Expected "${id}" lockedRoom.items to include "${itemKey}" but got ${JSON.stringify(def.lockedRoom?.items)}`);
+});
+
+Then('the {string} locked area should require key {string}', function (id, keyId) {
+  const def = UNIQUE_ROOM_DEFS.find(d => d.id === id);
+  assert.ok(def, `No definition found for id "${id}"`);
+  assert.equal(def.lockedRoom?.keyId, keyId,
+    `Expected "${id}" lockedRoom.keyId to be "${keyId}" but got ${def.lockedRoom?.keyId}`);
+});
+
 // ─── UniqueRoomEntryTracker ────────────────────────────────────────────────
 
 Given('a unique room entry tracker with room at x {int} y {int} width {int} height {int} for {string}',

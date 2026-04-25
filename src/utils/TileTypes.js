@@ -16,6 +16,8 @@ export const TILE = Object.freeze({
   WEAPON_MOUNT: 9,
   /** Bookcase — a shelf of books used in unique dungeon rooms (e.g. The Necropolis Library). Non-walkable and opaque. */
   BOOKCASE: 10,
+  /** Locked door — blocks passage until opened with the matching key item. Non-walkable and opaque. */
+  LOCKED_DOOR: 11,
 });
 
 export const FOV_STATE = Object.freeze({
