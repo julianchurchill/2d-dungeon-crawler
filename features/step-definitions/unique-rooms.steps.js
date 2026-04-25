@@ -7,6 +7,7 @@ import { TILE } from '../../src/utils/TileTypes.js';
 import { DungeonMap } from '../../src/dungeon/DungeonMap.js';
 import { placeDecorations } from '../../src/dungeon/RoomDecorationPlacer.js';
 import { UniqueRoomEntryTracker } from '../../src/dungeon/UniqueRoomEntryTracker.js';
+import { isInnerRoomSpaceAvailable } from '../../src/dungeon/LockedRoomPlacer.js';
 
 // ─── Given ────────────────────────────────────────────────────────────────
 
@@ -331,4 +332,33 @@ Then('the BootScene should register a texture named {string}', function (texture
     src.includes(`'${textureName}'`),
     `Expected BootScene.js to contain a _genTexture call for '${textureName}'`,
   );
+});
+
+// ─── Inner room space availability ────────────────────────────────────────────
+
+Given('a 20x20 inner-room check map with parent floor at x {int} y {int} width {int} height {int}',
+  function (rx, ry, rw, rh) {
+    this.irMap = new DungeonMap(20, 20);
+    for (let y = ry; y < ry + rh; y++) {
+      for (let x = rx; x < rx + rw; x++) {
+        this.irMap.setTile(x, y, TILE.FLOOR);
+      }
+    }
+  });
+
+Given('a floor tile at x {int} y {int} in the inner-room check map', function (x, y) {
+  this.irMap.setTile(x, y, TILE.FLOOR);
+});
+
+When('inner room space is checked at x {int} y {int} width {int} height {int}',
+  function (ix, iy, iw, ih) {
+    this.irSpaceAvailable = isInnerRoomSpaceAvailable(this.irMap, ix, iy, iw, ih);
+  });
+
+Then('the inner room space should be available', function () {
+  assert.ok(this.irSpaceAvailable, 'Expected inner room space to be available');
+});
+
+Then('the inner room space should not be available', function () {
+  assert.ok(!this.irSpaceAvailable, 'Expected inner room space to not be available');
 });

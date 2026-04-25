@@ -25,6 +25,7 @@ Entries are listed newest-first within each section.
 
 ### Fixed
 
+- 2026-04-25 — **The Darker Way locked room redesign**: replaced the wall-divider approach (which could not reliably avoid BSP corridor entries) with a self-contained inner room carved outside the parent room's footprint after BSP generation. The inner room is connected to Martel's area only via a LOCKED_DOOR tile placed in the shared wall; no BSP corridor can ever reach it. The placer tries all four sides of the parent room and uses the first clear side. `LockedRoomPlacer` now exports `isInnerRoomSpaceAvailable` (replaces `getLockedRoomOrientation`) and is covered by two dedicated unit scenarios.
 - 2026-04-24 — **Dev options scroll reset on unique room toggle**: selecting a unique room force-spawn option in Developer Options no longer scrolls the panel back to the top. Toggle rows now refresh in-place instead of restarting the scene.
 - 2026-04-24 — **Unique room entry message timing**: floor entry now shows a generic hint ("You sense a place of power on this floor.") immediately on arrival; the room's name and flavour text are shown together only when the player first steps inside the room itself.
 - 2026-04-23 — **Unique room decoration corridor avoidance**: weapon mount and bookcase tiles are no longer placed at or adjacent to corridor doorways. Placement logic extracted into a pure `RoomDecorationPlacer` module; a two-step corridor check skips any candidate tile that is directly adjacent to a corridor entry, or one step inside a doorway tile (catching inner-corner positions).

@@ -242,3 +242,16 @@ Feature: Unique rooms in dungeon generation
 
   Scenario: The warrior NPC sprite is registered for the HD tileset
     Then the BootScene should register a texture named "hd_entity_npc_warrior"
+
+  # ── Inner room space availability ─────────────────────────────────────────────
+
+  Scenario: Inner room space is available when no floor tiles exist in the candidate area
+    Given a 20x20 inner-room check map with parent floor at x 5 y 5 width 8 height 6
+    When inner room space is checked at x 6 y 12 width 4 height 3
+    Then the inner room space should be available
+
+  Scenario: Inner room space is not available when a floor tile exists in the candidate area
+    Given a 20x20 inner-room check map with parent floor at x 5 y 5 width 8 height 6
+    And a floor tile at x 8 y 12 in the inner-room check map
+    When inner room space is checked at x 6 y 12 width 4 height 3
+    Then the inner room space should not be available
