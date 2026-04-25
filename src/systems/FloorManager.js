@@ -54,6 +54,18 @@ export class FloorManager {
     return this.generateFloor();
   }
 
+  /**
+   * Teleports directly to town (floor 0) regardless of current floor.
+   * Emits a FLOOR_CHANGED event and returns the town dungeon data.
+   *
+   * @returns {{ map, rooms, startPos, stairsPos, shops }}
+   */
+  jumpToTown() {
+    this.currentFloor = 0;
+    EventBus.emit(GameEvents.FLOOR_CHANGED, this.currentFloor);
+    return this.generateFloor();
+  }
+
   reset() {
     this.currentFloor = 0;
   }

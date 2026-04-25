@@ -154,3 +154,15 @@ Then('the snapshot item count is {int}', function (count) {
   assert.equal(this.snapshot.items.length, count,
     `Expected ${count} items in snapshot but got ${this.snapshot.items.length}`);
 });
+
+// ── Player movement on RECALL_PORTAL ─────────────────────────────────────────
+
+Given('a recall portal tile at position {int}, {int}', function (x, y) {
+  this.map.setTile(x, y, TILE.RECALL_PORTAL);
+});
+
+// ── FloorManager.jumpToTown ───────────────────────────────────────────────────
+
+When('the player jumps to town', function () {
+  this.jumpResult = this.floorManager.jumpToTown();
+});

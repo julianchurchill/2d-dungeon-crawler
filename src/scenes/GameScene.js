@@ -16,6 +16,7 @@ import { uniqueRoomRegistry } from '../dungeon/UniqueRoomRegistry.js';
 import { placeDecorations } from '../dungeon/RoomDecorationPlacer.js';
 import { isInnerRoomSpaceAvailable } from '../dungeon/LockedRoomPlacer.js';
 import { startFloorTransition } from '../systems/FloorTransition.js';
+import { DungeonSnapshot } from '../dungeon/DungeonSnapshot.js';
 import { UniqueRoomEntryTracker } from '../dungeon/UniqueRoomEntryTracker.js';
 import { computeFOV, computeDaylightFOV } from '../fov/ShadowcastFOV.js';
 import { EventBus } from '../utils/EventBus.js';
@@ -128,6 +129,7 @@ export class GameScene extends Phaser.Scene {
     this.npcs = [];
     this._npcRoamControllers = [];
     this.items = [];  // floor items (not in inventory)
+    this._dungeonSnapshot = null; // saved floor state for Home Seeking Scroll recall
 
     // Player
     this.player = new Player(0, 0, new SkillSystem(this.rng, [new LuckyStrikeSkill()], [new FerocitySkill(), new DodgeSkill()]));
@@ -321,13 +323,14 @@ export class GameScene extends Phaser.Scene {
     const tk = (base) => tilesetManager.getTileKey(base);
 
     const tileKeys = isTown ? {
-      [TILE.FLOOR]:       tk('tile_town_floor'),
-      [TILE.WALL]:        tk('tile_town_wall'),
-      [TILE.DOOR]:        tk('tile_door'),
-      [TILE.STAIRS_DOWN]: tk('tile_town_stairs'),
-      [TILE.TOWN_ACCENT]: tk('tile_town_accent'),
-      [TILE.SHOP_ROOF]:   tk('tile_shop_roof'),
-      [TILE.HOME_DOOR]:   tk('tile_home_door'),
+      [TILE.FLOOR]:          tk('tile_town_floor'),
+      [TILE.WALL]:           tk('tile_town_wall'),
+      [TILE.DOOR]:           tk('tile_door'),
+      [TILE.STAIRS_DOWN]:    tk('tile_town_stairs'),
+      [TILE.TOWN_ACCENT]:    tk('tile_town_accent'),
+      [TILE.SHOP_ROOF]:      tk('tile_shop_roof'),
+      [TILE.HOME_DOOR]:      tk('tile_home_door'),
+      [TILE.RECALL_PORTAL]:  tk('tile_recall_portal'),
     } : {
       [TILE.FLOOR]:       tk('tile_floor'),
       [TILE.WALL]:        tk('tile_wall'),
@@ -1617,6 +1620,8 @@ export class GameScene extends Phaser.Scene {
       this._showStairsPrompt();
     } else if (action === 'stairs_up') {
       this._showStairsUpPrompt();
+    } else if (action === 'recall_portal') {
+      this._showRecallPortalPrompt();
     }
     this._syncRegistry();
     this._startEnemyTurns();
@@ -1921,6 +1926,132 @@ export class GameScene extends Phaser.Scene {
   }
 
   /**
+   * Shows a message when the player steps onto the recall portal.
+   */
+  _showRecallPortalPrompt() {
+    EventBus.emit(GameEvents.MESSAGE, 'A shimmering portal hums at your feet. Press > or tap ▼▼ to return to the dungeon.');
+  }
+
+  /**
+   * Teleports the player directly to town after using a Home Seeking Scroll.
+   * Saves a DungeonSnapshot so the player can return via the RECALL_PORTAL tile.
+   * Can only be called when a snapshot has already been stored by _useInventoryItem.
+   */
+  _teleportToTown() {
+    if (!startFloorTransition(this.turnManager)) return;
+    this._lookPanel?.hide();
+    this._lookCursor?.deactivate();
+    this.cameras.main.fadeOut(300, 0, 0, 0);
+    this.time.delayedCall(300, () => {
+      const dungeonData = this.floorManager.jumpToTown();
+      this._buildFloor(dungeonData);
+      this._placeRecallPortal();
+      this._lookCursor?.updateMap(this.dungeonMap, TILE_SIZE);
+      this._syncRegistry();
+      EventBus.emit(GameEvents.MESSAGE, 'You are whisked back to town. A shimmering portal lingers near the stairs.');
+      this.cameras.main.fadeIn(300, 0, 0, 0);
+      this.turnManager.setState(TURN_STATE.PLAYER_INPUT);
+    });
+  }
+
+  /**
+   * Places a RECALL_PORTAL tile in the town map, just south of the stairs accent ring.
+   * Draws the portal graphic onto the existing map RenderTexture.
+   */
+  _placeRecallPortal() {
+    // Fixed portal position: one tile below the town stairs accent ring (stairs at 10,10)
+    const portalX = 10;
+    const portalY = 12;
+    this.dungeonMap.setTile(portalX, portalY, TILE.RECALL_PORTAL);
+    const key = tilesetManager.getTileKey('tile_recall_portal');
+    this.mapRT.drawFrame(key, undefined, portalX * TILE_SIZE, portalY * TILE_SIZE);
+  }
+
+  /**
+   * Restores a dungeon floor from a previously saved DungeonSnapshot.
+   * Re-creates enemy and item sprites, places the player at the return position,
+   * and removes the snapshot so the portal can only be used once.
+   */
+  _returnFromSnapshot() {
+    if (!this._dungeonSnapshot) {
+      EventBus.emit(GameEvents.MESSAGE, 'The portal fades — there is nowhere to return to.');
+      return;
+    }
+    if (!startFloorTransition(this.turnManager)) return;
+
+    const snapshot = this._dungeonSnapshot;
+    this._dungeonSnapshot = null;
+
+    this._lookPanel?.hide();
+    this._lookCursor?.deactivate();
+    this.cameras.main.fadeOut(300, 0, 0, 0);
+    this.time.delayedCall(300, () => {
+      // Restore floor number without regenerating; emit FLOOR_CHANGED for the HUD
+      this.floorManager.currentFloor = snapshot.floor;
+      EventBus.emit(GameEvents.FLOOR_CHANGED, this.floorManager.currentFloor);
+
+      // Build map visuals from the snapshot's preserved map; rooms:[] skips spawning
+      this._buildFloor({
+        map: snapshot.dungeonMap,
+        rooms: [],
+        startPos: { x: snapshot.returnX, y: snapshot.returnY },
+        shops: [],
+        npcs: [],
+      });
+
+      // _buildFloor sets _isChallengeFloor from dungeonData.isChallenge (absent → false).
+      // Re-derive it from the restored floor number so the staircase lock stays correct.
+      this._isChallengeFloor = this.floorManager.isChallengeFloor();
+
+      // Re-create sprites for all snapshotted enemies.
+      // Multi-segment enemies (CreepingMass) are skipped — their segment topology
+      // cannot be safely rebuilt from a shallow snapshot without re-running segment logic.
+      for (const enemy of snapshot.enemies) {
+        if (enemy.segments) continue;
+        const sprite = this.add.sprite(
+          enemy.x * TILE_SIZE + TILE_SIZE / 2,
+          enemy.y * TILE_SIZE + TILE_SIZE / 2,
+          tilesetManager.getTileKey(enemy.textureKey),
+        ).setDepth(8).setVisible(false);
+        if (enemy.isChampion) {
+          sprite.setScale(CHAMPION_SCALE);
+          sprite.setTint(CHAMPION_TINT);
+        }
+        enemy.sprite = sprite;
+        this._createHealthBar(enemy);
+        this.enemies.push(enemy);
+        this.dungeonMap.setEntity(enemy.x, enemy.y, enemy);
+      }
+
+      // Re-create sprites for all snapshotted floor items
+      for (const item of snapshot.items) {
+        const sprite = this.add.sprite(
+          item.x * TILE_SIZE + TILE_SIZE / 2,
+          item.y * TILE_SIZE + TILE_SIZE / 2,
+          tilesetManager.getTileKey(item.textureKey),
+        ).setDepth(6).setVisible(false);
+        item.sprite = sprite;
+        this.items.push(item);
+      }
+
+      // Place player at the saved return position
+      this.player.x = snapshot.returnX;
+      this.player.y = snapshot.returnY;
+      this.playerSprite.setPosition(
+        snapshot.returnX * TILE_SIZE + TILE_SIZE / 2,
+        snapshot.returnY * TILE_SIZE + TILE_SIZE / 2,
+      );
+
+      this._lookCursor?.updateMap(this.dungeonMap, TILE_SIZE);
+      this._updateFOV();
+      this._syncRegistry();
+      EventBus.emit(GameEvents.MESSAGE, `You step through the portal and return to floor ${snapshot.floor}.`);
+      this.cameras.main.fadeIn(300, 0, 0, 0);
+      this.turnManager.setState(TURN_STATE.PLAYER_INPUT);
+    });
+  }
+
+  /**
    * Pauses the game and UI scenes and opens the AchievementsScene overlay.
    * The AchievementsScene will resume both scenes when the player closes it.
    */
@@ -1959,6 +2090,8 @@ export class GameScene extends Phaser.Scene {
       this._descend();
     } else if (tileType === TILE.STAIRS_UP) {
       this._ascend();
+    } else if (tileType === TILE.RECALL_PORTAL) {
+      this._returnFromSnapshot();
     } else {
       EventBus.emit(GameEvents.MESSAGE, 'No stairs here.');
     }
@@ -2206,14 +2339,40 @@ export class GameScene extends Phaser.Scene {
    * @param {number} index - Inventory slot to use.
    */
   _useInventoryItem(index) {
-    const prevX = this.player.x;
-    const prevY = this.player.y;
+    const item = this.player.inventory[index];
 
     const context = {
       rng: this.rng,
       isWalkable: (x, y) => this.dungeonMap.isWalkable(x, y),
       getEntityAt: (x, y) => this._getEntityAt(x, y),
     };
+
+    // Handle teleport_to_town before consuming the item so we can snapshot first
+    if (item?.effect?.type === 'teleport_to_town') {
+      if (this.floorManager.isTown()) {
+        EventBus.emit(GameEvents.MESSAGE, 'You are already in town — the scroll would be wasted here.');
+        return;
+      }
+      this._dungeonSnapshot = DungeonSnapshot.create(
+        this.floorManager.currentFloor,
+        this.player.x,
+        this.player.y,
+        this.dungeonMap,
+        this.enemies,
+        this.items,
+      );
+      const msg = InventorySystem.useItem(this.player, index, context);
+      EventBus.emit(GameEvents.MESSAGE, msg);
+      if (this.turnManager.state === TURN_STATE.INVENTORY) {
+        this.turnManager.setState(TURN_STATE.PLAYER_INPUT);
+        EventBus.emit(GameEvents.OPEN_INVENTORY, { inventory: this.player.inventory, player: this.player });
+      }
+      this._teleportToTown();
+      return;
+    }
+
+    const prevX = this.player.x;
+    const prevY = this.player.y;
 
     const msg = InventorySystem.useItem(this.player, index, context);
     EventBus.emit(GameEvents.MESSAGE, msg);
