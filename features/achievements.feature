@@ -104,6 +104,11 @@ Feature: Achievement system
     When the player enters the unique room "necropolis_library"
     Then the "Forbidden Knowledge" achievement should be completed
 
+  Scenario: The Deeper Dark is unlocked when the player enters The Darker Way
+    Given the achievement system is initialised
+    When the player enters the unique room "darker_way"
+    Then the "The Deeper Dark" achievement should be completed
+
   Scenario: Entering a different unique room does not unlock Steel and Shadow
     Given the achievement system is initialised
     When the player enters the unique room "necropolis_library"
