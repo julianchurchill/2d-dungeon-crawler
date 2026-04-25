@@ -776,17 +776,31 @@ export class GameScene extends Phaser.Scene {
 
     // Carve a locked alcove before NPC placement so the resolved dividerY is known.
     let resolvedDividerY = null;
+    let lockedRoomAlcoveAtBottom = true;
     if (def.lockedRoom) {
-      resolvedDividerY = this._spawnLockedRoom(room, def.lockedRoom);
+      const lockedResult = this._spawnLockedRoom(room, def.lockedRoom);
+      if (lockedResult) {
+        resolvedDividerY = lockedResult.dividerY;
+        lockedRoomAlcoveAtBottom = lockedResult.alcoveAtBottom;
+      }
     }
 
-    // Spawn the unique room's NPC (if any) in the accessible zone (above any divider).
+    // Spawn the unique room's NPC (if any) in the accessible zone.
     if (def.npc) {
       const nx = cx;
-      // Keep NPC at least 2 rows above the divider so a free tile sits between
-      // them and the door, preventing them from blocking door access.
-      const dividerY = resolvedDividerY ?? room.y + room.h;
-      const ny = Math.min(cy + 1, dividerY - 2, room.y + room.h - 2);
+      let ny;
+      if (lockedRoomAlcoveAtBottom) {
+        // Accessible zone: top — keep NPC at least 2 rows above the divider so a
+        // free tile sits between them and the locked door.
+        const dividerY = resolvedDividerY ?? room.y + room.h;
+        ny = Math.min(cy + 1, dividerY - 2, room.y + room.h - 2);
+        ny = Math.max(ny, room.y + 1);
+      } else {
+        // Accessible zone: bottom — keep NPC at least 2 rows below the divider.
+        const dividerY = resolvedDividerY ?? room.y;
+        ny = Math.max(cy - 1, dividerY + 2, room.y + 1);
+        ny = Math.min(ny, room.y + room.h - 2);
+      }
       if (this.dungeonMap.isWalkable(nx, ny) && !this._getEntityAt(nx, ny)) {
         this._spawnDungeonNpc(nx, ny, def.npc);
       }
@@ -808,21 +822,59 @@ export class GameScene extends Phaser.Scene {
    * @param {{ keyId:string, items:string[] }} lockedRoomDef
    */
   _spawnLockedRoom(room, lockedRoomDef) {
-    // Start at 60 % of the room height, then walk upward until the row has no
-    // horizontal corridor entries (floor tiles just outside either side border).
-    // BSP corridors are L-shaped: a horizontal segment enters rooms at some y;
-    // placing a WALL there would seal the room entrance.
-    let dividerY = room.y + Math.max(2, Math.floor(room.h * 0.6));
-    if (dividerY >= room.y + room.h - 1) return null; // room too small — skip
+    const midY = room.y + Math.floor(room.h / 2);
 
-    const maxAttempts = Math.max(1, dividerY - room.y - 1);
-    for (let i = 0; i < maxAttempts; i++) {
-      const leftEntry  = this.dungeonMap.getTile(room.x - 1, dividerY) === TILE.FLOOR;
-      const rightEntry = this.dungeonMap.getTile(room.x + room.w, dividerY) === TILE.FLOOR;
-      if (!leftEntry && !rightEntry) break;
-      dividerY = Math.max(room.y + 2, dividerY - 1);
+    // Detect whether any corridor enters the lower half of the room (below midY).
+    // BSP corridors are L-shaped; a vertical segment can enter from below the room
+    // boundary and a horizontal segment can enter through a side at any y.
+    let lowerHalfEntry = false;
+
+    // Check the bottom edge for a vertical corridor arriving from below.
+    for (let x = room.x; x < room.x + room.w && !lowerHalfEntry; x++) {
+      if (this.dungeonMap.getTile(x, room.y + room.h) === TILE.FLOOR) lowerHalfEntry = true;
     }
-    if (dividerY >= room.y + room.h - 1) return null;
+    // Check left and right sides for horizontal corridors in the lower half.
+    for (let y = midY + 1; y < room.y + room.h && !lowerHalfEntry; y++) {
+      if (
+        this.dungeonMap.getTile(room.x - 1, y) === TILE.FLOOR ||
+        this.dungeonMap.getTile(room.x + room.w, y) === TILE.FLOOR
+      ) lowerHalfEntry = true;
+    }
+
+    // alcoveAtBottom=true  → accessible zone is top, alcove is bottom (default).
+    // alcoveAtBottom=false → entry from below, so accessible zone is bottom, alcove is top.
+    const alcoveAtBottom = !lowerHalfEntry;
+
+    let dividerY;
+    if (alcoveAtBottom) {
+      // Divider near 60 % height; shift upward to avoid blocking side entries.
+      dividerY = room.y + Math.max(2, Math.floor(room.h * 0.6));
+      if (dividerY >= room.y + room.h - 1) return null;
+      const maxShift = dividerY - room.y - 2;
+      for (let i = 0; i < maxShift; i++) {
+        if (
+          this.dungeonMap.getTile(room.x - 1, dividerY) !== TILE.FLOOR &&
+          this.dungeonMap.getTile(room.x + room.w, dividerY) !== TILE.FLOOR
+        ) break;
+        dividerY--;
+      }
+      if (dividerY <= room.y + 1 || dividerY >= room.y + room.h - 1) return null;
+    } else {
+      // Divider near 40 % height; shift downward to avoid blocking side entries.
+      dividerY = room.y + Math.max(2, Math.floor(room.h * 0.4));
+      if (dividerY >= room.y + room.h - 2) return null;
+      // Require at least 1 interior row in the alcove above the divider.
+      if (dividerY - room.y < 2) return null;
+      const maxShift = room.y + room.h - 2 - dividerY;
+      for (let i = 0; i < maxShift; i++) {
+        if (
+          this.dungeonMap.getTile(room.x - 1, dividerY) !== TILE.FLOOR &&
+          this.dungeonMap.getTile(room.x + room.w, dividerY) !== TILE.FLOOR
+        ) break;
+        dividerY++;
+      }
+      if (dividerY <= room.y + 1 || dividerY >= room.y + room.h - 1) return null;
+    }
 
     const doorX = room.x + Math.floor(room.w / 2);
 
@@ -831,13 +883,16 @@ export class GameScene extends Phaser.Scene {
       this.dungeonMap.setTile(x, dividerY, x === doorX ? TILE.LOCKED_DOOR : TILE.WALL);
     }
 
-    // Place each locked-area item in the alcove rows (y > dividerY).
+    // Place each locked-area item inside the alcove zone.
+    const alcoveMinY = alcoveAtBottom ? dividerY + 1 : room.y + 1;
+    const alcoveMaxY = alcoveAtBottom ? room.y + room.h - 2 : dividerY - 1;
     for (const itemKey of lockedRoomDef.items) {
       const typeDef = ITEM_TYPES[itemKey];
       if (!typeDef) continue;
+      if (alcoveMinY > alcoveMaxY) continue; // alcove too narrow — skip item
       for (let attempt = 0; attempt < 10; attempt++) {
         const ix = this.rng.nextInt(room.x + 1, room.x + room.w - 2);
-        const iy = this.rng.nextInt(dividerY + 1, room.y + room.h - 2);
+        const iy = this.rng.nextInt(alcoveMinY, alcoveMaxY);
         if (this.dungeonMap.isWalkable(ix, iy) && !this._getEntityAt(ix, iy)) {
           this._placeItem(ix, iy, typeDef);
           break;
@@ -845,7 +900,7 @@ export class GameScene extends Phaser.Scene {
       }
     }
 
-    return dividerY;
+    return { dividerY, alcoveAtBottom };
   }
 
   /**
