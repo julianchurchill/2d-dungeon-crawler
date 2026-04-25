@@ -15,6 +15,7 @@ import { UNIQUE_ROOM_DEFS } from '../dungeon/UniqueRoomDefinitions.js';
 import { uniqueRoomRegistry } from '../dungeon/UniqueRoomRegistry.js';
 import { placeDecorations } from '../dungeon/RoomDecorationPlacer.js';
 import { isInnerRoomSpaceAvailable } from '../dungeon/LockedRoomPlacer.js';
+import { startFloorTransition } from '../systems/FloorTransition.js';
 import { UniqueRoomEntryTracker } from '../dungeon/UniqueRoomEntryTracker.js';
 import { computeFOV, computeDaylightFOV } from '../fov/ShadowcastFOV.js';
 import { EventBus } from '../utils/EventBus.js';
@@ -1964,6 +1965,7 @@ export class GameScene extends Phaser.Scene {
   }
 
   _descend() {
+    if (!startFloorTransition(this.turnManager)) return;
     this._lookPanel?.hide();
     this._lookCursor?.deactivate();
     this.cameras.main.fadeOut(300, 0, 0, 0);
@@ -1978,6 +1980,7 @@ export class GameScene extends Phaser.Scene {
         EventBus.emit(GameEvents.MESSAGE, `You descend to floor ${this.floorManager.currentFloor}.`);
       }
       this.cameras.main.fadeIn(300, 0, 0, 0);
+      this.turnManager.setState(TURN_STATE.PLAYER_INPUT);
     });
   }
 
@@ -1987,6 +1990,7 @@ export class GameScene extends Phaser.Scene {
    * land near the stairs they arrived from.
    */
   _ascend() {
+    if (!startFloorTransition(this.turnManager)) return;
     this._lookPanel?.hide();
     this._lookCursor?.deactivate();
     this.cameras.main.fadeOut(300, 0, 0, 0);
@@ -2013,6 +2017,7 @@ export class GameScene extends Phaser.Scene {
         EventBus.emit(GameEvents.MESSAGE, `You ascend to floor ${this.floorManager.currentFloor}.`);
       }
       this.cameras.main.fadeIn(300, 0, 0, 0);
+      this.turnManager.setState(TURN_STATE.PLAYER_INPUT);
     });
   }
 
