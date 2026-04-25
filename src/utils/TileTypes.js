@@ -18,6 +18,8 @@ export const TILE = Object.freeze({
   BOOKCASE: 10,
   /** Locked door — blocks passage until opened with the matching key item. Non-walkable and opaque. */
   LOCKED_DOOR: 11,
+  /** Recall portal — placed in town after the player uses a Home Seeking Scroll. Walkable. */
+  RECALL_PORTAL: 12,
 });
 
 export const FOV_STATE = Object.freeze({

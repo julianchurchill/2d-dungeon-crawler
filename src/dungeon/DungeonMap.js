@@ -30,7 +30,7 @@ export class DungeonMap {
 
   isWalkable(x, y) {
     const t = this.getTile(x, y);
-    return t === TILE.FLOOR || t === TILE.DOOR || t === TILE.STAIRS_DOWN || t === TILE.STAIRS_UP || t === TILE.TOWN_ACCENT;
+    return t === TILE.FLOOR || t === TILE.DOOR || t === TILE.STAIRS_DOWN || t === TILE.STAIRS_UP || t === TILE.TOWN_ACCENT || t === TILE.RECALL_PORTAL;
   }
 
   isOpaque(x, y) {

@@ -1532,6 +1532,22 @@ export class BootScene extends Phaser.Scene {
       g.fillRect(T/2 - 3, T/2 + 3, 1, 1);
     });
 
+    // Home Seeking Scroll — rolled parchment with a glowing portal rune
+    this._genTexture('classic_item_home_seeking_scroll', T, T, (g) => {
+      // Parchment body
+      g.fillStyle(0xddcc88);
+      g.fillRect(3, 4, 10, 8);
+      // Rolled ends
+      g.fillStyle(0xbbaa66);
+      g.fillRect(3, 3, 10, 2);
+      g.fillRect(3, 11, 10, 2);
+      // Portal rune — cyan glyph
+      g.fillStyle(0x44ddff);
+      g.fillRect(T/2 - 1, 5, 2, 2);
+      g.fillRect(T/2 - 2, 7, 5, 1);
+      g.fillRect(T/2 - 1, 9, 2, 2);
+    });
+
     // Helmet — rounded cap shape
     this._genTexture('classic_item_helmet', T, T, (g) => {
       g.fillStyle(0x8899aa);
@@ -1899,6 +1915,30 @@ export class BootScene extends Phaser.Scene {
       g.fillRect(T/2 + 2, T/2 - 1, 1, 1);
       g.fillRect(T/2 + 3, T/2 + 2, 1, 1);
       g.fillRect(T/2 - 4, T/2 + 4, 1, 1);
+    });
+
+    // Home Seeking Scroll — rolled parchment with portal rune (modern)
+    this._genTexture('modern_item_home_seeking_scroll', T, T, (g) => {
+      // Parchment shadow
+      g.fillStyle(0xaa9944);
+      g.fillRect(4, 4, 10, 9);
+      // Parchment body
+      g.fillStyle(0xeedd99);
+      g.fillRect(3, 3, 10, 9);
+      // Rolled ends (darker)
+      g.fillStyle(0xccbb77);
+      g.fillRect(3, 3, 10, 2);
+      g.fillRect(3, 10, 10, 2);
+      // Portal rune — bright cyan
+      g.fillStyle(0x00eeff);
+      g.fillRect(T/2 - 1, 5, 2, 1);
+      g.fillRect(T/2 - 2, 6, 5, 1);
+      g.fillRect(T/2 - 1, 7, 1, 2);
+      g.fillRect(T/2 + 1, 7, 1, 2);
+      g.fillRect(T/2 - 2, 9, 5, 1);
+      // Glow dot
+      g.fillStyle(0xffffff, 0.8);
+      g.fillRect(T/2, 6, 1, 1);
     });
 
     // Helmet — polished metal cap with cheekguard shadow
@@ -3803,6 +3843,36 @@ export class BootScene extends Phaser.Scene {
       g.fillStyle(0xffffff, 0.8);
       g.fillRect(S/2 + 5, S * 0.39, 1, 1);
       g.fillRect(S/2 + 4, S * 0.66, 1, 1);
+    });
+
+    // Home Seeking Scroll — detailed parchment with portal rune (HD)
+    this._genTexture('hd_item_home_seeking_scroll', S, S, (g) => {
+      // Drop shadow
+      g.fillStyle(0x887733, 0.4);
+      g.fillRect(8, 8, 18, 18);
+      // Parchment body
+      g.fillStyle(0xeedd99);
+      g.fillRect(6, 6, 18, 18);
+      // Parchment edge detail
+      g.fillStyle(0xddcc88);
+      g.fillRect(6, 6, 18, 3);
+      g.fillRect(6, 21, 18, 3);
+      // Rolled end highlights
+      g.fillStyle(0xffeebb, 0.7);
+      g.fillRect(7, 7, 16, 1);
+      g.fillRect(7, 22, 16, 1);
+      // Portal rune — glowing cyan frame
+      g.fillStyle(0x00ddff);
+      g.fillRect(S/2 - 3, 10, 6, 2);
+      g.fillRect(S/2 - 4, 12, 2, 6);
+      g.fillRect(S/2 + 2, 12, 2, 6);
+      g.fillRect(S/2 - 3, 18, 6, 2);
+      // Inner rune glow
+      g.fillStyle(0x44eeff, 0.8);
+      g.fillRect(S/2 - 2, 12, 4, 6);
+      // Rune centre spark
+      g.fillStyle(0xffffff, 0.9);
+      g.fillRect(S/2 - 1, S * 0.48, 2, 2);
     });
 
     // Helmet — polished metal helm with visor shadow

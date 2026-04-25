@@ -45,7 +45,7 @@
 
 ## Items
 
-- [ ] home seeking scroll - item appears from floor 10 onwards, fairly rare. Rarely appears in the magic (was potions) shop. When used takes you out of the current floor and to the Town level outside your home. Once used the item is destroyed. A portal remains next to your home until used that can be used to return to the floor you left. The floor should be preserved in the state you left it, including enemies and items.
+- [x] home seeking scroll - item appears from floor 10 onwards, fairly rare. Rarely appears in the magic (was potions) shop. When used takes you out of the current floor and to the Town level outside your home. Once used the item is destroyed. A portal remains next to your home until used that can be used to return to the floor you left. The floor should be preserved in the state you left it, including enemies and items.
 
 ## UI
 
@@ -87,7 +87,7 @@
 
 ## Town
 
-- [ ] rename the 'Potion shop' to be the 'Magic shop' for future expansion with new magical items besides potions
+- [x] rename the 'Potion shop' to be the 'Magic shop' for future expansion with new magical items besides potions
 - [x] the town contains shops that can be entered where the player can buy items with currency. The items will have randomly generated stats and may include occasional rare items that are powerful for the players level. They will not include unique items that can only be found by exploring the dungeon.
 - [x] the town contains shops that can be entered where items from the players inventory can be sold for currency
 - [x] the town is a special level, always appears at level 0 and is the starting place for a new game. It has a non-random layout and combat is disabled there.

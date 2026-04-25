@@ -63,6 +63,9 @@ export class Item {
         player.y = dest.y;
         return `You drink the ${this.name} and vanish in a flash!`;
       }
+      if (this.effect?.type === 'teleport_to_town') {
+        return `You read the ${this.name} and are whisked back to town!`;
+      }
     } else if (this.itemType === 'weapon') {
       player.equippedWeapon = this;
       return `You equip the ${this.name}. (+${this.attackBonus} ATK)`;

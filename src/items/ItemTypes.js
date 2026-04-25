@@ -152,6 +152,15 @@ export const ITEM_TYPES = {
     sellPrice: 8,
     stackable: true,
   },
+  HOME_SEEKING_SCROLL: {
+    id: 'home_seeking_scroll',
+    name: 'Home Seeking Scroll',
+    description: 'Teleports you to town instantly. Leaves a portal so you can return.',
+    textureKey: 'item_home_seeking_scroll',
+    type: 'consumable',
+    effect: { type: 'teleport_to_town' },
+    sellPrice: 15,
+  },
 };
 
 // ── Additional equipment slot items ───────────────────────────────────────────
@@ -187,6 +196,7 @@ export function getFloorLootPool(floor, unlockedItems = new Set()) {
     pool.push(
       ITEM_TYPES.SWORD, ITEM_TYPES.LEATHER_ARMOR, ITEM_TYPES.SHORT_BOW,
       ITEM_TYPES.LEATHER_BOOTS, ITEM_TYPES.LEATHER_BOOTS,
+      ITEM_TYPES.HOME_SEEKING_SCROLL,
     );
   }
   if (floor >= 2) {
