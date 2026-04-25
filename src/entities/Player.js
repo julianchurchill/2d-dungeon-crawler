@@ -88,6 +88,9 @@ export class Player {
     // Walking into the home door opens the display case panel
     if (map.getTile(nx, ny) === TILE.HOME_DOOR) return { action: 'home' };
 
+    // Walking into a locked door — caller decides whether the player has the key
+    if (map.getTile(nx, ny) === TILE.LOCKED_DOOR) return { action: 'locked_door', doorX: nx, doorY: ny };
+
     if (!map.isWalkable(nx, ny)) return { action: 'blocked' };
 
     const tileType = map.getTile(nx, ny);

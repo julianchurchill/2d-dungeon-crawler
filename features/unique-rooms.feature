@@ -169,3 +169,64 @@ Feature: Unique rooms in dungeon generation
   Scenario: The Necropolis Library has a unique wall texture key
     Then the "necropolis_library" definition should have a non-empty wall key
     And the "necropolis_library" wall key should differ from the default wall key
+
+  # ── LOCKED_DOOR tile type ────────────────────────────────────────────────────
+
+  Scenario: LOCKED_DOOR tile type is defined and distinct from WALL
+    Then the LOCKED_DOOR tile type should be a non-zero integer
+    And the LOCKED_DOOR tile type should differ from the WALL tile type
+
+  Scenario: Locked door tiles are non-walkable
+    Given a dungeon map with a LOCKED_DOOR tile at x 5 y 5
+    Then the tile at x 5 y 5 should not be walkable
+
+  Scenario: Locked door tiles block line of sight
+    Given a dungeon map with a LOCKED_DOOR tile at x 5 y 5
+    Then the tile at x 5 y 5 should be opaque
+
+  # ── Registry — prerequisites ─────────────────────────────────────────────────
+
+  Scenario: A room with an unmet prerequisite is not eligible even on a deep floor
+    Given a fresh unique room registry
+    When eligible unique rooms are fetched for floor 15
+    Then the room "darker_way" should not be eligible
+
+  Scenario: A room becomes eligible once its prerequisite room has been entered
+    Given a fresh unique room registry
+    And "necropolis_library" is marked as entered in the registry
+    When eligible unique rooms are fetched for floor 15
+    Then the room "darker_way" should be eligible
+
+  Scenario: Resetting the registry clears entered rooms
+    Given a fresh unique room registry
+    And "necropolis_library" is marked as entered in the registry
+    When the registry is reset
+    Then the registry should not record "necropolis_library" as entered
+
+  # ── The Darker Way definition ─────────────────────────────────────────────────
+
+  Scenario: The Darker Way has a minimum floor of at least 10
+    Then the "darker_way" definition should have a minimum floor of at least 10
+
+  Scenario: The Darker Way requires the Necropolis Library to have been entered
+    Then the "darker_way" definition should require "necropolis_library" as a prerequisite
+
+  Scenario: The Darker Way has a non-empty entry message
+    Then the "darker_way" definition should have a non-empty entry message
+
+  Scenario: The Darker Way has a unique floor texture key
+    Then the "darker_way" definition should have a non-empty floor key
+    And the "darker_way" floor key should differ from the default floor key
+
+  Scenario: The Darker Way has a unique wall texture key
+    Then the "darker_way" definition should have a non-empty wall key
+    And the "darker_way" wall key should differ from the default wall key
+
+  Scenario: The Darker Way locked area contains the Eclipse Blade
+    Then the "darker_way" locked area should contain item "ECLIPSE_BLADE"
+
+  Scenario: The Darker Way locked area contains the Key to Beyond
+    Then the "darker_way" locked area should contain item "KEY_TO_BEYOND"
+
+  Scenario: The Darker Way locked area requires the Key to Elsewhere to open
+    Then the "darker_way" locked area should require key "key_to_elsewhere"

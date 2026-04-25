@@ -1394,6 +1394,41 @@ export class BootScene extends Phaser.Scene {
       g.fillRect(T/2 - 1, 3, 2, 1);
     });
 
+    // Eclipse Blade — void-dark sword that drinks light
+    this._genTexture('classic_item_eclipse_blade', T, T, (g) => {
+      // Blade — deep black with dim void shimmer
+      g.fillStyle(0x080808);
+      g.fillRect(T/2 - 1, 1, 3, 10);
+      g.fillStyle(0x222244, 0.6);
+      g.fillRect(T/2, 2, 1, 8);
+      // Guard — dark iron bar
+      g.fillStyle(0x1a1a1a);
+      g.fillRect(T/2 - 4, 11, 9, 2);
+      // Handle — wrapped grip
+      g.fillStyle(0x111111);
+      g.fillRect(T/2 - 1, 13, 3, 3);
+    });
+
+    // Key to Beyond — heavy iron key with indecipherable runes
+    this._genTexture('classic_item_key_to_beyond', T, T, (g) => {
+      // Shaft — dark iron
+      g.fillStyle(0x333333);
+      g.fillRect(T/2 - 1, 2, 2, 11);
+      // Head (bow) — chunky ring
+      g.fillStyle(0x444444);
+      g.fillRect(T/2 - 3, 2, 7, 5);
+      g.fillStyle(0x111111);
+      g.fillRect(T/2 - 1, 3, 3, 3);
+      // Bit (teeth) — heavy notches
+      g.fillStyle(0x444444);
+      g.fillRect(T/2 + 1, 8, 2, 2);
+      g.fillRect(T/2 + 1, 11, 3, 2);
+      // Rune marks — faint reddish
+      g.fillStyle(0x550000, 0.6);
+      g.fillRect(T/2 - 1, 5, 1, 1);
+      g.fillRect(T/2,     8, 1, 1);
+    });
+
     // Skeleton Shield — interlocked bone segments
     this._genTexture('classic_item_skeleton_shield', T, T, (g) => {
       g.fillStyle(0xddddcc);
@@ -1684,6 +1719,57 @@ export class BootScene extends Phaser.Scene {
       g.fillRect(T/2, 3, 1, 2);
       g.fillRect(T/2 - 2, 4, 1, 1);
       g.fillRect(T/2 + 2, 4, 1, 1);
+    });
+
+    // Eclipse Blade — void-dark sword outlined in deep shadow
+    this._genTexture('modern_item_eclipse_blade', T, T, (g) => {
+      // Blade outline
+      g.fillStyle(0x050505);
+      g.fillRect(T/2 - 2, 0, 5, 12);
+      // Blade body — polished void-black
+      g.fillStyle(0x0c0c14);
+      g.fillRect(T/2 - 1, 1, 3, 10);
+      // Eclipse shimmer — faint dark-blue edge
+      g.fillStyle(0x1a1a44, 0.7);
+      g.fillRect(T/2, 2, 1, 8);
+      // Guard — dark iron
+      g.fillStyle(0x151515);
+      g.fillRect(T/2 - 5, 11, 11, 2);
+      g.fillStyle(0x2a2a3a);
+      g.fillRect(T/2 - 4, 11, 9, 1);
+      // Handle
+      g.fillStyle(0x0a0a0a);
+      g.fillRect(T/2 - 1, 13, 3, 3);
+      g.fillStyle(0x222233, 0.5);
+      g.fillRect(T/2, 14, 1, 2);
+    });
+
+    // Key to Beyond — heavy iron key etched with unknown runes
+    this._genTexture('modern_item_key_to_beyond', T, T, (g) => {
+      // Outline
+      g.fillStyle(0x111111);
+      g.fillRect(T/2 - 2, 1, 5, 13);
+      g.fillRect(T/2 - 4, 1, 9, 6);
+      // Shaft — dark iron
+      g.fillStyle(0x2e2e2e);
+      g.fillRect(T/2 - 1, 2, 3, 11);
+      // Bow — heavy ring
+      g.fillStyle(0x3a3a3a);
+      g.fillRect(T/2 - 3, 2, 7, 5);
+      g.fillStyle(0x0d0d0d);
+      g.fillRect(T/2 - 1, 3, 3, 3);
+      // Shine
+      g.fillStyle(0x666677, 0.35);
+      g.fillRect(T/2 - 1, 2, 1, 9);
+      // Teeth — heavy notches
+      g.fillStyle(0x3a3a3a);
+      g.fillRect(T/2 + 2, 9, 2, 2);
+      g.fillRect(T/2 + 2, 12, 3, 2);
+      // Rune etching — faint crimson
+      g.fillStyle(0x660000, 0.7);
+      g.fillRect(T/2 - 1, 6, 1, 1);
+      g.fillRect(T/2,     9, 1, 1);
+      g.fillRect(T/2 - 1, 12, 1, 1);
     });
 
     // Skeleton Shield — bone-white shield with purple gem and clear cross
@@ -3353,6 +3439,81 @@ export class BootScene extends Phaser.Scene {
       g.fillRect(S/2, 7, 1, 1);
     });
 
+    // Eclipse Blade HD — void-forged blade that drinks surrounding light
+    this._genTexture('hd_item_eclipse_blade', S, S, (g) => {
+      // Blade shadow silhouette
+      g.fillStyle(0x020204);
+      g.fillRect(S/2 - 4, 0, 9, 22);
+      // Blade body — near-absolute black with blue-void tint
+      g.fillStyle(0x06060f);
+      g.fillRect(S/2 - 3, 1, 7, 20);
+      // Edge bevel — left
+      g.fillStyle(0x0a0a1a, 0.8);
+      g.fillRect(S/2 - 2, 2, 2, 18);
+      // Eclipse shimmer — faint midnight-blue centre streak
+      g.fillStyle(0x151540, 0.6);
+      g.fillRect(S/2, 3, 2, 16);
+      // Void sparkles along blade
+      g.fillStyle(0x2020aa, 0.5);
+      g.fillRect(S/2, 5, 1, 1);
+      g.fillRect(S/2 + 1, 10, 1, 1);
+      g.fillRect(S/2, 15, 1, 1);
+      // Guard — dark iron, wide
+      g.fillStyle(0x0e0e0e);
+      g.fillRect(S/2 - 10, 22, 20, 4);
+      g.fillStyle(0x1c1c2a);
+      g.fillRect(S/2 - 9, 23, 18, 2);
+      // Handle — dark wrapped grip
+      g.fillStyle(0x080808);
+      g.fillRect(S/2 - 3, 26, 7, 7);
+      g.fillStyle(0x151515);
+      for (let i = 0; i < 3; i++) g.fillRect(S/2 - 3, 27 + i * 2, 7, 1);
+      // Pommel
+      g.fillStyle(0x0c0c1c);
+      g.fillRect(S/2 - 4, 33, 9, 3);
+      g.fillStyle(0x1e1e44);
+      g.fillRect(S/2 - 2, 34, 5, 1);
+    });
+
+    // Key to Beyond HD — massive iron key bearing indecipherable void runes
+    this._genTexture('hd_item_key_to_beyond', S, S, (g) => {
+      // Outline
+      g.fillStyle(0x0a0a0a);
+      g.fillRect(S/2 - 5, 2, 10, 24);
+      g.fillRect(S/2 - 9, 2, 18, 11);
+      // Shaft — dark layered iron
+      g.fillStyle(0x252525);
+      g.fillRect(S/2 - 4, 3, 8, 22);
+      g.fillStyle(0x303030);
+      g.fillRect(S/2 - 3, 4, 6, 20);
+      // Bow — heavy chunky ring
+      g.fillStyle(0x383838);
+      g.fillRect(S/2 - 8, 3, 16, 10);
+      g.fillStyle(0x0d0d0d);
+      g.fillRect(S/2 - 5, 4, 10, 8);
+      // Bow inner highlight
+      g.fillStyle(0x555566, 0.3);
+      g.fillRect(S/2 - 7, 3, 14, 2);
+      // Shaft shine
+      g.fillStyle(0x666677, 0.25);
+      g.fillRect(S/2 - 2, 5, 2, 17);
+      // Teeth — wide heavy notches
+      g.fillStyle(0x383838);
+      g.fillRect(S/2 + 4, 18, 5, 4);
+      g.fillRect(S/2 + 4, 23, 6, 4);
+      g.fillRect(S/2 + 4, 28, 4, 3);
+      // Rune etchings — faint dark crimson marks along shaft
+      g.fillStyle(0x660000, 0.65);
+      g.fillRect(S/2 - 2, 8, 2, 1);
+      g.fillRect(S/2 - 1, 12, 3, 1);
+      g.fillRect(S/2 - 2, 16, 2, 1);
+      g.fillRect(S/2 - 1, 20, 2, 1);
+      // Dim rune glow
+      g.fillStyle(0x330000, 0.4);
+      g.fillRect(S/2 - 3, 9, 1, 1);
+      g.fillRect(S/2 + 2, 13, 1, 1);
+    });
+
     // Skeleton Shield — bone-white with skull motif and purple soul gem
     this._genTexture('hd_item_skeleton_shield', S, S, (g) => {
       // Outline
@@ -3935,6 +4096,171 @@ export class BootScene extends Phaser.Scene {
       g.fillStyle(0x020408);
       g.fillRect(0, S - 1, S, 1);
       g.fillRect(S - 1, 0, 1, S);
+    });
+
+    // ── The Darker Way tiles ─────────────────────────────────────────────────
+
+    // Locked door — iron-bound door with glowing keyhole
+    this._genTexture('classic_tile_locked_door', T, T, (g) => {
+      g.fillStyle(0x1a1008);
+      g.fillRect(0, 0, T, T);
+      g.fillStyle(0x2a1a0a);
+      g.fillRect(1, 1, T - 2, T - 2);
+      // Door planks
+      g.fillStyle(0x3a2010);
+      g.fillRect(2, 2, T - 4, 5);
+      g.fillRect(2, 9, T - 4, 5);
+      // Iron banding
+      g.fillStyle(0x111111);
+      g.fillRect(2, 7, T - 4, 2);
+      // Keyhole
+      g.fillStyle(0xaa7700);
+      g.fillRect(T/2 - 1, 10, 2, 3);
+      g.fillRect(T/2 - 1, 10, 3, 2);
+    });
+
+    this._genTexture('modern_tile_locked_door', T, T, (g) => {
+      g.fillStyle(0x0e0e0e);
+      g.fillRect(0, 0, T, T);
+      g.fillStyle(0x181818);
+      g.fillRect(1, 1, T - 2, T - 2);
+      // Iron panels
+      g.fillStyle(0x222222);
+      g.fillRect(2, 2, T - 4, 5);
+      g.fillRect(2, 9, T - 4, 5);
+      // Panel rivets
+      g.fillStyle(0x333333);
+      g.fillRect(3, 4, 1, 1);
+      g.fillRect(T - 4, 4, 1, 1);
+      g.fillRect(3, 11, 1, 1);
+      g.fillRect(T - 4, 11, 1, 1);
+      // Keyhole — golden glow
+      g.fillStyle(0xcc9900, 0.9);
+      g.fillRect(T/2 - 1, 10, 2, 3);
+      g.fillRect(T/2 - 1, 10, 3, 2);
+    });
+
+    this._genTexture('hd_tile_locked_door', S, S, (g) => {
+      g.fillStyle(0x080808);
+      g.fillRect(0, 0, S, S);
+      g.fillStyle(0x101010);
+      g.fillRect(1, 1, S - 2, S - 2);
+      // Door panels — dark iron
+      g.fillStyle(0x1c1c1c);
+      g.fillRect(2, 2, S - 4, 12);
+      g.fillRect(2, 18, S - 4, 12);
+      // Panel highlights
+      g.fillStyle(0x2a2a2a);
+      g.fillRect(2, 2, S - 4, 1);
+      g.fillRect(2, 18, S - 4, 1);
+      // Rivets
+      g.fillStyle(0x383838);
+      for (const [rx, ry] of [[3,3],[S-5,3],[3,9],[S-5,9],[3,19],[S-5,19],[3,25],[S-5,25]]) {
+        g.fillRect(rx, ry, 2, 2);
+      }
+      // Iron banding across centre
+      g.fillStyle(0x141414);
+      g.fillRect(2, 14, S - 4, 4);
+      // Keyhole — warm amber glow
+      g.fillStyle(0xcc8800, 0.95);
+      g.fillRect(S/2 - 2, 20, 4, 6);
+      g.fillRect(S/2 - 2, 20, 5, 4);
+      g.fillStyle(0xffcc44, 0.6);
+      g.fillRect(S/2 - 1, 21, 2, 3);
+    });
+
+    // The Darker Way floor — deep void-stone, darker than the armoury
+    this._genTexture('classic_tile_floor_darker_way', T, T, (g) => {
+      g.fillStyle(0x080810);
+      g.fillRect(0, 0, T, T);
+      g.fillStyle(0x0d0d1a);
+      g.fillRect(2, 2, T - 4, T - 4);
+      // Faint void cracks
+      g.fillStyle(0x040408, 0.8);
+      g.fillRect(3, T/2, 4, 1);
+      g.fillRect(T/2, 3, 1, 4);
+    });
+
+    this._genTexture('modern_tile_floor_darker_way', T, T, (g) => {
+      g.fillStyle(0x060610);
+      g.fillRect(0, 0, T, T);
+      g.fillStyle(0x0c0c1e);
+      g.fillRect(1, 1, T - 2, T - 2);
+      // Grid lines — very faint
+      g.fillStyle(0x050510, 0.7);
+      g.fillRect(0, T/2, T, 1);
+      g.fillRect(T/2, 0, 1, T);
+      // Void shimmer dot
+      g.fillStyle(0x111133, 0.5);
+      g.fillRect(T/2 - 1, T/2 - 1, 2, 2);
+    });
+
+    this._genTexture('hd_tile_floor_darker_way', S, S, (g) => {
+      g.fillStyle(0x060610);
+      g.fillRect(0, 0, S, S);
+      g.fillStyle(0x0a0a1c);
+      g.fillRect(1, 1, S - 2, S - 2);
+      // Stone slab lines
+      g.fillStyle(0x040408);
+      g.fillRect(0, S/2, S, 1);
+      g.fillRect(S/2, 0, 1, S);
+      // Void cracks
+      g.fillStyle(0x080814, 0.6);
+      g.fillRect(4, 8, 6, 1);
+      g.fillRect(20, 18, 5, 1);
+      g.fillRect(12, 26, 4, 1);
+      // Subtle shimmer
+      g.fillStyle(0x0f0f33, 0.4);
+      g.fillRect(S/2 - 2, S/2 - 2, 4, 4);
+    });
+
+    // The Darker Way wall — shadow-cracked stone, almost lightless
+    this._genTexture('classic_tile_wall_darker_way', T, T, (g) => {
+      g.fillStyle(0x050508);
+      g.fillRect(0, 0, T, T);
+      g.fillStyle(0x0a0a10);
+      g.fillRect(1, 1, T - 2, T - 2);
+      // Crack marks
+      g.fillStyle(0x020205);
+      g.fillRect(2, 4, 3, 1);
+      g.fillRect(8, 9, 4, 1);
+      g.fillRect(4, 13, 3, 1);
+    });
+
+    this._genTexture('modern_tile_wall_darker_way', T, T, (g) => {
+      g.fillStyle(0x040408);
+      g.fillRect(0, 0, T, T);
+      g.fillStyle(0x090910);
+      g.fillRect(1, 1, T - 2, T - 2);
+      g.fillStyle(0x111120, 0.4);
+      g.fillRect(2, 2, T - 4, T - 4);
+      // Subtle fissure
+      g.fillStyle(0x020204);
+      g.fillRect(3, 6, 5, 1);
+      g.fillRect(7, 11, 4, 1);
+    });
+
+    this._genTexture('hd_tile_wall_darker_way', S, S, (g) => {
+      g.fillStyle(0x030306);
+      g.fillRect(0, 0, S, S);
+      g.fillStyle(0x07070e);
+      g.fillRect(1, 1, S - 2, S - 2);
+      // Brickwork — barely visible
+      const brickRows = [{ y: 1, offsets: [1, 12, 23] }, { y: 12, offsets: [6, 17] }, { y: 23, offsets: [1, 12, 23] }];
+      for (const row of brickRows) {
+        for (const bx of row.offsets) {
+          const bw = bx === row.offsets[row.offsets.length - 1] ? S - bx - 1 : 9;
+          g.fillStyle(0x080810);
+          g.fillRect(bx, row.y, bw, 9);
+          g.fillStyle(0x0c0c18);
+          g.fillRect(bx, row.y, bw, 1);
+        }
+      }
+      // Deep shadow cracks
+      g.fillStyle(0x010104);
+      g.fillRect(3, 5, 7, 1);
+      g.fillRect(18, 14, 6, 1);
+      g.fillRect(7, 25, 8, 1);
     });
   }
 }

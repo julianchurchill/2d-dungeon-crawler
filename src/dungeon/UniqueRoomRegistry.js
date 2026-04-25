@@ -11,6 +11,8 @@ export class UniqueRoomRegistry {
   constructor() {
     /** @type {Set<string>} IDs of unique rooms that have already spawned this run. */
     this._seen = new Set();
+    /** @type {Set<string>} IDs of unique rooms the player has physically entered this run. */
+    this._entered = new Set();
   }
 
   /**
@@ -34,11 +36,31 @@ export class UniqueRoomRegistry {
   }
 
   /**
-   * Clears all seen-room records.  Call at the start of each new game so
-   * unique rooms can appear again in the new run.
+   * Records that the player has physically entered the room with the given id.
+   *
+   * @param {string} id
+   */
+  markEntered(id) {
+    this._entered.add(id);
+  }
+
+  /**
+   * Returns true if the player has entered the room with the given id this run.
+   *
+   * @param {string} id
+   * @returns {boolean}
+   */
+  hasBeenEntered(id) {
+    return this._entered.has(id);
+  }
+
+  /**
+   * Clears all seen-room and entered-room records.  Call at the start of each
+   * new game so unique rooms can appear again in the new run.
    */
   reset() {
     this._seen.clear();
+    this._entered.clear();
   }
 
   /**
@@ -59,7 +81,10 @@ export class UniqueRoomRegistry {
   getEligible(floor, defs, force = null) {
     return defs.filter(def => {
       if (force === def.id) return true;
-      return floor >= def.minFloor && !this._seen.has(def.id);
+      if (floor < def.minFloor) return false;
+      if (this._seen.has(def.id)) return false;
+      if (def.prerequisites && def.prerequisites.some(p => !this._entered.has(p))) return false;
+      return true;
     });
   }
 }

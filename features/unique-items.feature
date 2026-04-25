@@ -29,6 +29,23 @@ Feature: Unique items
     When the player sells the short sword at the weapon shop
     Then the player should have gold equal to the sword sell price
 
+  Scenario: The Eclipse Blade is a unique weapon with 12 attack bonus
+    Given the Eclipse Blade item type
+    Then the item should be marked as unique
+    And the item should have attack bonus 12
+
+  Scenario: The Key to Beyond is a non-equippable quest item
+    Given the Key to Beyond item type
+    Then the item should not be equippable
+
+  Scenario: The Key to Beyond has no attack bonus
+    Given the Key to Beyond item type
+    Then the item should have no attack bonus
+
+  Scenario: The Key to Beyond has no defense bonus
+    Given the Key to Beyond item type
+    Then the item should have no defense bonus
+
   Scenario: The Key to Elsewhere is not equippable
     Given the Key to Elsewhere item type
     Then the item should not be equippable

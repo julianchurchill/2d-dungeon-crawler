@@ -1,5 +1,13 @@
 Feature: Player Movement
 
+  Scenario: Walking into a locked door tile returns a locked_door action
+    Given a player at position 5, 5
+    And a floor tile at position 5, 5
+    And a locked door tile at position 6, 5
+    When the player moves right
+    Then the move result should be "locked_door"
+    And the player position should remain 5, 5
+
   Scenario: Player moves to an adjacent walkable floor tile
     Given a player at position 5, 5
     And a floor tile at position 6, 5

@@ -51,6 +51,19 @@ Then('the player should have gold equal to the sword sell price', function () {
   assert.equal(this.player.gold, ITEM_TYPES.SWORD.sellPrice);
 });
 
+Given('the Eclipse Blade item type', function () {
+  this.item = new Item(0, 0, ITEM_TYPES.ECLIPSE_BLADE);
+});
+
+Given('the Key to Beyond item type', function () {
+  this.item = new Item(0, 0, ITEM_TYPES.KEY_TO_BEYOND);
+});
+
+Then('the item should have attack bonus {int}', function (bonus) {
+  assert.equal(this.item.attackBonus, bonus,
+    `Expected attackBonus to be ${bonus} but got ${this.item.attackBonus}`);
+});
+
 Given('the Key to Elsewhere item type', function () {
   this.item = new Item(0, 0, ITEM_TYPES.KEY_TO_ELSEWHERE);
 });

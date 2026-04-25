@@ -100,6 +100,7 @@
 
 ## Unique Rooms
 
+- [ ] The Darker Way — a hidden passage that appears only after the player has visited The Necropolis Library (floor 10+). Contains Martel the Varangian (lost soldier NPC) and a locked alcove sealed by a LOCKED_DOOR tile. The player must have The Key to Elsewhere in their inventory to open the door, consuming the key. Inside: the Eclipse Blade (+12 ATK, most powerful weapon) and The Key to Beyond (quest item for future use).
 - [x] randomly generated levels have a small chance of generating a unique room that only appears once per game, e.g. "The Dark Armoury" or "Necropolis Library". When the player enters a level with such a room the player is alerted by a message and a special notification. Unique rooms will contain at least one unique item or enemy and may also contain a unique NPC.
 
 ## Saving
