@@ -774,19 +774,18 @@ export class GameScene extends Phaser.Scene {
       }
     }
 
-    // Carve a locked alcove before NPC placement so the divider row is known.
+    // Carve a locked alcove before NPC placement so the resolved dividerY is known.
+    let resolvedDividerY = null;
     if (def.lockedRoom) {
-      this._spawnLockedRoom(room, def.lockedRoom);
+      resolvedDividerY = this._spawnLockedRoom(room, def.lockedRoom);
     }
 
     // Spawn the unique room's NPC (if any) in the accessible zone (above any divider).
     if (def.npc) {
       const nx = cx;
-      // Constrain NPC at least 2 rows above the divider so a free tile exists
-      // between them and the door — preventing them from blocking door access.
-      const dividerY = def.lockedRoom
-        ? room.y + Math.max(2, Math.floor(room.h * 0.6))
-        : room.y + room.h;
+      // Keep NPC at least 2 rows above the divider so a free tile sits between
+      // them and the door, preventing them from blocking door access.
+      const dividerY = resolvedDividerY ?? room.y + room.h;
       const ny = Math.min(cy + 1, dividerY - 2, room.y + room.h - 2);
       if (this.dungeonMap.isWalkable(nx, ny) && !this._getEntityAt(nx, ny)) {
         this._spawnDungeonNpc(nx, ny, def.npc);
@@ -809,9 +808,21 @@ export class GameScene extends Phaser.Scene {
    * @param {{ keyId:string, items:string[] }} lockedRoomDef
    */
   _spawnLockedRoom(room, lockedRoomDef) {
-    // Divider sits at 60 % of the room's height, leaving at least 1 row of alcove.
-    const dividerY = room.y + Math.max(2, Math.floor(room.h * 0.6));
-    if (dividerY >= room.y + room.h - 1) return; // room too small — skip
+    // Start at 60 % of the room height, then walk upward until the row has no
+    // horizontal corridor entries (floor tiles just outside either side border).
+    // BSP corridors are L-shaped: a horizontal segment enters rooms at some y;
+    // placing a WALL there would seal the room entrance.
+    let dividerY = room.y + Math.max(2, Math.floor(room.h * 0.6));
+    if (dividerY >= room.y + room.h - 1) return null; // room too small — skip
+
+    const maxAttempts = Math.max(1, dividerY - room.y - 1);
+    for (let i = 0; i < maxAttempts; i++) {
+      const leftEntry  = this.dungeonMap.getTile(room.x - 1, dividerY) === TILE.FLOOR;
+      const rightEntry = this.dungeonMap.getTile(room.x + room.w, dividerY) === TILE.FLOOR;
+      if (!leftEntry && !rightEntry) break;
+      dividerY = Math.max(room.y + 2, dividerY - 1);
+    }
+    if (dividerY >= room.y + room.h - 1) return null;
 
     const doorX = room.x + Math.floor(room.w / 2);
 
@@ -833,6 +844,8 @@ export class GameScene extends Phaser.Scene {
         }
       }
     }
+
+    return dividerY;
   }
 
   /**
