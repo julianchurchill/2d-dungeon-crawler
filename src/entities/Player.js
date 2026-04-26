@@ -99,6 +99,7 @@ export class Player {
 
     if (tileType === TILE.STAIRS_DOWN) return { action: 'stairs' };
     if (tileType === TILE.STAIRS_UP) return { action: 'stairs_up' };
+    if (tileType === TILE.RECALL_PORTAL) return { action: 'recall_portal' };
     return { action: 'moved' };
   }
 

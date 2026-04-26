@@ -4437,6 +4437,59 @@ export class BootScene extends Phaser.Scene {
       g.fillRect(S/2 - 1, 21, 2, 3);
     });
 
+    // Recall Portal tile — a shimmering floor tile that returns the player to their last floor
+    this._genTexture('classic_tile_recall_portal', T, T, (g) => {
+      // Base: town accent floor
+      g.fillStyle(0x557755);
+      g.fillRect(0, 0, T, T);
+      // Portal ring
+      g.fillStyle(0x44ddff);
+      g.fillEllipse(T/2, T/2, T - 2, T - 2);
+      // Inner glow
+      g.fillStyle(0x88eeff);
+      g.fillEllipse(T/2, T/2, T - 6, T - 6);
+      // Centre spark
+      g.fillStyle(0xffffff, 0.9);
+      g.fillRect(T/2 - 1, T/2 - 1, 2, 2);
+    });
+
+    this._genTexture('modern_tile_recall_portal', T, T, (g) => {
+      g.fillStyle(0x446644);
+      g.fillRect(0, 0, T, T);
+      g.fillStyle(0x220044);
+      g.fillEllipse(T/2, T/2, T - 1, T - 1);
+      g.fillStyle(0x3399ff);
+      g.fillEllipse(T/2, T/2, T - 3, T - 3);
+      g.fillStyle(0x88ddff, 0.8);
+      g.fillEllipse(T/2, T/2, T - 7, T - 7);
+      g.fillStyle(0xffffff, 0.7);
+      g.fillRect(T/2 - 1, T/2 - 1, 2, 2);
+    });
+
+    this._genTexture('hd_tile_recall_portal', S, S, (g) => {
+      g.fillStyle(0x334433);
+      g.fillRect(0, 0, S, S);
+      // Outer dark ring
+      g.fillStyle(0x110033);
+      g.fillEllipse(S/2, S/2, S - 2, S - 2);
+      // Portal glow layers
+      g.fillStyle(0x2255cc);
+      g.fillEllipse(S/2, S/2, S - 4, S - 4);
+      g.fillStyle(0x44aaff);
+      g.fillEllipse(S/2, S/2, S - 8, S - 8);
+      g.fillStyle(0x88ddff, 0.7);
+      g.fillEllipse(S/2, S/2, S - 14, S - 14);
+      // Sparkle lines
+      g.fillStyle(0xaaeeff, 0.9);
+      g.fillRect(S/2 - 1, 4, 2, 8);
+      g.fillRect(S/2 - 1, S - 12, 2, 8);
+      g.fillRect(4, S/2 - 1, 8, 2);
+      g.fillRect(S - 12, S/2 - 1, 8, 2);
+      // Centre spark
+      g.fillStyle(0xffffff, 0.9);
+      g.fillRect(S/2 - 2, S/2 - 2, 4, 4);
+    });
+
     // The Darker Way floor — deep void-stone, darker than the armoury
     this._genTexture('classic_tile_floor_darker_way', T, T, (g) => {
       g.fillStyle(0x080810);

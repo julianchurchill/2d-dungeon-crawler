@@ -78,3 +78,25 @@ Feature: Home Seeking Scroll
   Scenario: DungeonSnapshot records floor items
     Given a dungeon snapshot created with 3 items
     Then the snapshot item count is 3
+
+  # ── Player movement on RECALL_PORTAL ─────────────────────────────────────────
+
+  Scenario: Moving onto a RECALL_PORTAL tile returns a recall_portal action
+    Given a player at position 5, 5
+    And a floor tile at position 5, 5
+    And a recall portal tile at position 6, 5
+    When the player moves right
+    Then the player position should be 6, 5
+    And the move result should be "recall_portal"
+
+  # ── FloorManager.jumpToTown ───────────────────────────────────────────────────
+
+  Scenario: jumpToTown sets the floor to 0
+    Given a FloorManager on floor 3
+    When the player jumps to town
+    Then the current floor is 0
+
+  Scenario: jumpToTown returns town dungeon data
+    Given a FloorManager on floor 3
+    When the player jumps to town
+    Then the floor is the town
