@@ -241,7 +241,7 @@ Feature: Unique rooms in dungeon generation
     Then the "ModernTextures" should register a texture named "modern_entity_npc_warrior"
 
   Scenario: The warrior NPC sprite is registered for the HD tileset
-    Then the "BootScene" should register a texture named "hd_entity_npc_warrior"
+    Then the "HdTextures" should register a texture named "hd_entity_npc_warrior"
 
   # ── Inner room space availability ─────────────────────────────────────────────
 
