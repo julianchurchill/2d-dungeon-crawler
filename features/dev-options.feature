@@ -51,7 +51,7 @@ Feature: Developer options
     And the start level is set to 3
     When developer options are applied to the game
     Then the player should be level 3
-    And the player attack should be 7
+    And the player attack should be 5
     And the player max HP should be 40
 
   Scenario: applyToGame sets the floor manager to the configured floor

@@ -67,9 +67,9 @@
 
 ## Character
 
-- [ ] increase defense when a character levels up
 - [ ] character graphic
 - [ ] show a character sheet by pressing 'c' which shows all the players stats currently. Provide a button for the mobile interface.
+- [x] increase defense when a character levels up
 - [x] add equipment slots for helmet, rings, boots, legs, chest, arms, amulet and some basic items that can be found in the dungeon but only helmet and chest can only be found deeper than floor 10. Legs, chest and arms can only be found deeper than floor 20 and rings and amulets can only be found deeper than floor 30. Rings and amulets are rare.   These types of items only appear in the shops once the player has reached the corresponding minimum floor.
 - [x] add a ranged weapon equipment slot to the player and add 2 basic ranged weapons that may be found in the dungeon
 - [x] create an equipment area next to the inventory panel that shows equipment slots for melee weapon and shield
