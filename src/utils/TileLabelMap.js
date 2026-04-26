@@ -18,6 +18,9 @@ const TILE_LABELS = {
   [TILE.WEAPON_MOUNT]:  'Weapon Mount',
   [TILE.BOOKCASE]:      'Bookcase',
   [TILE.EMPTY]:         'Void',
+  [TILE.TRASH_PILE_1]:  'Trash Pile',
+  [TILE.TRASH_PILE_2]:  'Trash Pile',
+  [TILE.TRASH_PILE_3]:  'Trash Pile',
 };
 
 /**

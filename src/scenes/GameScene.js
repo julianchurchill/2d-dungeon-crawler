@@ -332,11 +332,14 @@ export class GameScene extends Phaser.Scene {
       [TILE.HOME_DOOR]:      tk('tile_home_door'),
       [TILE.RECALL_PORTAL]:  tk('tile_recall_portal'),
     } : {
-      [TILE.FLOOR]:       tk('tile_floor'),
-      [TILE.WALL]:        tk('tile_wall'),
-      [TILE.DOOR]:        tk('tile_door'),
-      [TILE.STAIRS_DOWN]: tk('tile_stairs'),
-      [TILE.STAIRS_UP]:   tk('tile_stairs_up'),
+      [TILE.FLOOR]:          tk('tile_floor'),
+      [TILE.WALL]:           tk('tile_wall'),
+      [TILE.DOOR]:           tk('tile_door'),
+      [TILE.STAIRS_DOWN]:    tk('tile_stairs'),
+      [TILE.STAIRS_UP]:      tk('tile_stairs_up'),
+      [TILE.TRASH_PILE_1]:   tk('tile_trash_pile_1'),
+      [TILE.TRASH_PILE_2]:   tk('tile_trash_pile_2'),
+      [TILE.TRASH_PILE_3]:   tk('tile_trash_pile_3'),
     };
 
     // Build position → texture-key overrides for typed shop doors (town only)

@@ -20,6 +20,12 @@ export const TILE = Object.freeze({
   LOCKED_DOOR: 11,
   /** Recall portal — placed in town after the player uses a Home Seeking Scroll. Walkable. */
   RECALL_PORTAL: 12,
+  /** Trash pile variant 1 — scattered debris. Non-walkable, not opaque. */
+  TRASH_PILE_1: 13,
+  /** Trash pile variant 2 — scattered debris. Non-walkable, not opaque. */
+  TRASH_PILE_2: 14,
+  /** Trash pile variant 3 — scattered debris. Non-walkable, not opaque. */
+  TRASH_PILE_3: 15,
 });
 
 export const FOV_STATE = Object.freeze({
