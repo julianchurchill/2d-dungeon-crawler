@@ -18,7 +18,7 @@ const T = 16; // tile size in pixels
  */
 export function createModernTileTextures(generateTextureFn) {
   // Dungeon floor — dark teal-slate with a 2×2 stone block grid
-  this._genTexture('modern_tile_floor', T, T, (g) => {
+  generateTextureFn('modern_tile_floor', T, T, (g) => {
     // Mortar background
     g.fillStyle(0x141820);
     g.fillRect(0, 0, T, T);
@@ -38,7 +38,7 @@ export function createModernTileTextures(generateTextureFn) {
   });
 
   // Dungeon wall — slate-blue brick with strong bevel and mortar
-  this._genTexture('modern_tile_wall', T, T, (g) => {
+  generateTextureFn('modern_tile_wall', T, T, (g) => {
     // Stone base
     g.fillStyle(0x304050);
     g.fillRect(0, 0, T, T);
@@ -64,7 +64,7 @@ export function createModernTileTextures(generateTextureFn) {
   });
 
   // Door — dark mahogany with ornate gold handle
-  this._genTexture('modern_tile_door', T, T, (g) => {
+  generateTextureFn('modern_tile_door', T, T, (g) => {
     // Door frame — very dark brown
     g.fillStyle(0x3a1e08);
     g.fillRect(0, 0, T, T);
@@ -89,7 +89,7 @@ export function createModernTileTextures(generateTextureFn) {
   });
 
   // Dungeon stairs down — dark teal base with bright green-tinted steps
-  this._genTexture('modern_tile_stairs', T, T, (g) => {
+  generateTextureFn('modern_tile_stairs', T, T, (g) => {
     g.fillStyle(0x141820);
     g.fillRect(0, 0, T, T);
     // Steps — brightest at top (nearest the viewer)
@@ -106,7 +106,7 @@ export function createModernTileTextures(generateTextureFn) {
   });
 
   // Dungeon stairs up — dark teal base with bright blue steps
-  this._genTexture('modern_tile_stairs_up', T, T, (g) => {
+  generateTextureFn('modern_tile_stairs_up', T, T, (g) => {
     g.fillStyle(0x141820);
     g.fillRect(0, 0, T, T);
     const stepColors = [0x60a8e0, 0x4080b8, 0x285890, 0x183868];
@@ -121,7 +121,7 @@ export function createModernTileTextures(generateTextureFn) {
   });
 
   // Town floor — warm sandstone with clear offset cobblestone joints
-  this._genTexture('modern_tile_town_floor', T, T, (g) => {
+  generateTextureFn('modern_tile_town_floor', T, T, (g) => {
     // Mortar
     g.fillStyle(0x5a4432);
     g.fillRect(0, 0, T, T);
@@ -144,7 +144,7 @@ export function createModernTileTextures(generateTextureFn) {
   });
 
   // Town wall — cream limestone blocks with clear mortar
-  this._genTexture('modern_tile_town_wall', T, T, (g) => {
+  generateTextureFn('modern_tile_town_wall', T, T, (g) => {
     // Mortar
     g.fillStyle(0x7a6848);
     g.fillRect(0, 0, T, T);
@@ -169,7 +169,7 @@ export function createModernTileTextures(generateTextureFn) {
   });
 
   // Town stairs down — warm limestone steps
-  this._genTexture('modern_tile_town_stairs', T, T, (g) => {
+  generateTextureFn('modern_tile_town_stairs', T, T, (g) => {
     g.fillStyle(0x8a7050);
     g.fillRect(0, 0, T, T);
     const stepHighlights = [0xe8c890, 0xc8a870, 0xa88850, 0x886840];
@@ -184,7 +184,7 @@ export function createModernTileTextures(generateTextureFn) {
   });
 
   // Shop roof — dark mahogany planks with prominent grain
-  this._genTexture('modern_tile_shop_roof', T, T, (g) => {
+  generateTextureFn('modern_tile_shop_roof', T, T, (g) => {
     g.fillStyle(0x281408);
     g.fillRect(0, 0, T, T);
     // Wide planks
@@ -208,7 +208,7 @@ export function createModernTileTextures(generateTextureFn) {
   });
 
   // Town accent — polished pale limestone with subtle veining
-  this._genTexture('modern_tile_town_accent', T, T, (g) => {
+  generateTextureFn('modern_tile_town_accent', T, T, (g) => {
     // Mortar (lighter than regular town floor)
     g.fillStyle(0x9a8868);
     g.fillRect(0, 0, T, T);
@@ -232,8 +232,8 @@ export function createModernTileTextures(generateTextureFn) {
   });
 
   // Potion shop door — mahogany with flask icon
-  this._genTexture('modern_tile_door_potion', T, T, (g) => {
-    this._drawModernDoorBase(g);
+  generateTextureFn('modern_tile_door_potion', T, T, (g) => {
+    _drawModernDoorBase(g);
     // Flask body
     g.fillStyle(0xee3366);
     g.fillEllipse(T / 2, 9, 5, 5);
@@ -249,8 +249,8 @@ export function createModernTileTextures(generateTextureFn) {
   });
 
   // Weapon shop door — mahogany with sword icon
-  this._genTexture('modern_tile_door_weapon', T, T, (g) => {
-    this._drawModernDoorBase(g);
+  generateTextureFn('modern_tile_door_weapon', T, T, (g) => {
+    _drawModernDoorBase(g);
     // Blade
     g.fillStyle(0xeeeeff);
     g.fillRect(T / 2 - 1, 2, 2, 8);
@@ -266,8 +266,8 @@ export function createModernTileTextures(generateTextureFn) {
   });
 
   // Armour shop door — mahogany with shield icon
-  this._genTexture('modern_tile_door_armour', T, T, (g) => {
-    this._drawModernDoorBase(g);
+  generateTextureFn('modern_tile_door_armour', T, T, (g) => {
+    _drawModernDoorBase(g);
     // Shield body
     g.fillStyle(0x5080b0);
     g.fillRect(T / 2 - 3, 3, 6, 5);
@@ -282,7 +282,7 @@ export function createModernTileTextures(generateTextureFn) {
   });
 
   // Home door — rich oak with ornate gold house icon
-  this._genTexture('modern_tile_home_door', T, T, (g) => {
+  generateTextureFn('modern_tile_home_door', T, T, (g) => {
     // Frame — very dark oak
     g.fillStyle(0x281408);
     g.fillRect(0, 0, T, T);
@@ -341,7 +341,7 @@ function _drawModernDoorBase(g) {
  */
 export function createModernEntityTextures(generateTextureFn) {
   // Player — vivid electric-blue diamond with sharper facets
-  this._genTexture('modern_entity_player', T, T, (g) => {
+  generateTextureFn('modern_entity_player', T, T, (g) => {
     // Outer outline (dark border 1px)
     g.fillStyle(0x002266);
     g.fillTriangle(T/2, 0, T-1, T/2, T/2, T);
@@ -361,7 +361,7 @@ export function createModernEntityTextures(generateTextureFn) {
   });
 
   // Cockroach — dark chitinous brown with visible segmented legs
-  this._genTexture('modern_entity_cockroach', T, T, (g) => {
+  generateTextureFn('modern_entity_cockroach', T, T, (g) => {
     // Dark outline
     g.fillStyle(0x220800);
     g.fillRect(4, 2, 8, 12);
@@ -386,7 +386,7 @@ export function createModernEntityTextures(generateTextureFn) {
   });
 
   // Sprite — star-bright fairy with vivid white-gold glow
-  this._genTexture('modern_entity_sprite', T, T, (g) => {
+  generateTextureFn('modern_entity_sprite', T, T, (g) => {
     // Wing glow (light blue)
     g.fillStyle(0x88ccff, 0.5);
     g.fillRect(1, 4, 4, 8);
@@ -411,7 +411,7 @@ export function createModernEntityTextures(generateTextureFn) {
   });
 
   // Goblin — vivid lime green with clear head/torso, yellow slit pupils
-  this._genTexture('modern_entity_goblin', T, T, (g) => {
+  generateTextureFn('modern_entity_goblin', T, T, (g) => {
     // Outline
     g.fillStyle(0x114411);
     g.fillRect(3, 3, 10, 12);
@@ -438,7 +438,7 @@ export function createModernEntityTextures(generateTextureFn) {
   });
 
   // Orc — muscular red-brown bruiser with prominent tusks
-  this._genTexture('modern_entity_orc', T, T, (g) => {
+  generateTextureFn('modern_entity_orc', T, T, (g) => {
     // Outline
     g.fillStyle(0x440000);
     g.fillRect(2, 2, 12, 13);
@@ -468,7 +468,7 @@ export function createModernEntityTextures(generateTextureFn) {
   });
 
   // Troll — towering stone-grey mass filling most of the tile
-  this._genTexture('modern_entity_troll', T, T, (g) => {
+  generateTextureFn('modern_entity_troll', T, T, (g) => {
     // Outline
     g.fillStyle(0x0a0a0a);
     g.fillRect(1, 0, 14, 15);
@@ -495,7 +495,7 @@ export function createModernEntityTextures(generateTextureFn) {
   });
 
   // Skeleton — crisply drawn bone figure with stark white on black
-  this._genTexture('modern_entity_skeleton', T, T, (g) => {
+  generateTextureFn('modern_entity_skeleton', T, T, (g) => {
     // Dark background silhouette
     g.fillStyle(0x111111);
     g.fillRect(5, 0, 6, 16);
@@ -525,7 +525,7 @@ export function createModernEntityTextures(generateTextureFn) {
   });
 
   // Skeleton Warrior — armoured skeleton with bold metal highlights
-  this._genTexture('modern_entity_skeleton_warrior', T, T, (g) => {
+  generateTextureFn('modern_entity_skeleton_warrior', T, T, (g) => {
     // Dark silhouette
     g.fillStyle(0x111111);
     g.fillRect(4, 0, 8, 16);
@@ -556,7 +556,7 @@ export function createModernEntityTextures(generateTextureFn) {
   });
 
   // Skeleton Mage — robed skeleton with vivid arcane glow
-  this._genTexture('modern_entity_skeleton_mage', T, T, (g) => {
+  generateTextureFn('modern_entity_skeleton_mage', T, T, (g) => {
     // Dark silhouette
     g.fillStyle(0x110022);
     g.fillRect(4, 0, 8, 16);
@@ -588,7 +588,7 @@ export function createModernEntityTextures(generateTextureFn) {
   });
 
   // Old Bones — imposing ivory boss with strong silhouette and crown
-  this._genTexture('modern_entity_old_bones', T, T, (g) => {
+  generateTextureFn('modern_entity_old_bones', T, T, (g) => {
     // Dark outline / shadow
     g.fillStyle(0x111100);
     g.fillRect(2, 0, 12, 16);
@@ -625,7 +625,7 @@ export function createModernEntityTextures(generateTextureFn) {
   });
 
   // Creeping Mass — toxic electric-green ooze blob
-  this._genTexture('modern_entity_creeping_mass', T, T, (g) => {
+  generateTextureFn('modern_entity_creeping_mass', T, T, (g) => {
     // Outer dark shell
     g.fillStyle(0x082808);
     g.fillRect(1, 1, 14, 14);
@@ -653,7 +653,7 @@ export function createModernEntityTextures(generateTextureFn) {
   });
 
   // Spitter — acid-green blob with glowing toxic core and spit gland
-  this._genTexture('modern_entity_spitter', T, T, (g) => {
+  generateTextureFn('modern_entity_spitter', T, T, (g) => {
     // Dark outer shell
     g.fillStyle(0x1a3300);
     g.fillRect(2, 3, 12, 10);
@@ -679,7 +679,7 @@ export function createModernEntityTextures(generateTextureFn) {
   });
 
   // Elder — vivid white-gold robes with ornate staff
-  this._genTexture('modern_entity_npc_elder', T, T, (g) => {
+  generateTextureFn('modern_entity_npc_elder', T, T, (g) => {
     // Robe outline
     g.fillStyle(0x888877);
     g.fillRect(2, T/2 - 1, 12, 9);
@@ -708,7 +708,7 @@ export function createModernEntityTextures(generateTextureFn) {
   });
 
   // Guard — polished steel armour with bright visor
-  this._genTexture('modern_entity_npc_guard', T, T, (g) => {
+  generateTextureFn('modern_entity_npc_guard', T, T, (g) => {
     // Armour outline
     g.fillStyle(0x223344);
     g.fillRect(3, T/2 - 8, 10, 15);
@@ -736,7 +736,7 @@ export function createModernEntityTextures(generateTextureFn) {
   });
 
   // Merchant — rich emerald cloak with prominent gold coin bag
-  this._genTexture('modern_entity_npc_merchant', T, T, (g) => {
+  generateTextureFn('modern_entity_npc_merchant', T, T, (g) => {
     // Cloak outline
     g.fillStyle(0x112211);
     g.fillRect(3, T/2 - 8, 10, 15);
@@ -766,7 +766,7 @@ export function createModernEntityTextures(generateTextureFn) {
   });
 
   // Warrior — Martel the Varangian: horned helm, chain mail, broad axe (vivid)
-  this._genTexture('modern_entity_npc_warrior', T, T, (g) => {
+  generateTextureFn('modern_entity_npc_warrior', T, T, (g) => {
     // Body outline
     g.fillStyle(0x3a2208);
     g.fillRect(3, T/2 - 1, 10, 8);
@@ -825,7 +825,7 @@ export function createModernEntityTextures(generateTextureFn) {
  */
 export function createModernItemTextures(generateTextureFn) {
   // Health potion — vivid ruby vial with glass shine
-  this._genTexture('modern_item_potion_health', T, T, (g) => {
+  generateTextureFn('modern_item_potion_health', T, T, (g) => {
     // Outline
     g.fillStyle(0x440011);
     g.fillEllipse(T/2, T/2 + 2, 10, 11);
@@ -847,7 +847,7 @@ export function createModernItemTextures(generateTextureFn) {
   });
 
   // Weapon — longsword with gleaming blade and gold cross-guard
-  this._genTexture('modern_item_weapon', T, T, (g) => {
+  generateTextureFn('modern_item_weapon', T, T, (g) => {
     // Blade shadow (dark edge line)
     g.fillStyle(0x444444);
     g.fillRect(T/2 - 2, 1, 4, 11);
@@ -871,7 +871,7 @@ export function createModernItemTextures(generateTextureFn) {
   });
 
   // Armor — heater shield with metallic sheen and gem
-  this._genTexture('modern_item_armor', T, T, (g) => {
+  generateTextureFn('modern_item_armor', T, T, (g) => {
     // Shield outline
     g.fillStyle(0x1a2a3a);
     g.fillRect(2, 1, 12, 10);
@@ -893,7 +893,7 @@ export function createModernItemTextures(generateTextureFn) {
   });
 
   // Ranged weapon — detailed bow with colour-shaded stave and taut string
-  this._genTexture('modern_item_ranged_weapon', T, T, (g) => {
+  generateTextureFn('modern_item_ranged_weapon', T, T, (g) => {
     // Bow stave shadow
     g.fillStyle(0x442211);
     g.fillRect(T/2 - 2, 1, 3, 14);
@@ -920,7 +920,7 @@ export function createModernItemTextures(generateTextureFn) {
   });
 
   // Bone Blade — gleaming bone blade with vivid amber guard
-  this._genTexture('modern_item_bone_blade', T, T, (g) => {
+  generateTextureFn('modern_item_bone_blade', T, T, (g) => {
     // Blade shadow
     g.fillStyle(0x555544);
     g.fillRect(T/2 - 2, 0, 4, 12);
@@ -946,7 +946,7 @@ export function createModernItemTextures(generateTextureFn) {
   });
 
   // Night Cloak — dark flowing cloak with blue-shadow sheen
-  this._genTexture('modern_item_night_cloak', T, T, (g) => {
+  generateTextureFn('modern_item_night_cloak', T, T, (g) => {
     // Outline
     g.fillStyle(0x080810);
     g.fillRect(2, 1, 12, 13);
@@ -967,7 +967,7 @@ export function createModernItemTextures(generateTextureFn) {
   });
 
   // Null Scimitar — void-purple curved blade with dark energy
-  this._genTexture('modern_item_null_scimitar', T, T, (g) => {
+  generateTextureFn('modern_item_null_scimitar', T, T, (g) => {
     // Blade shadow
     g.fillStyle(0x110022);
     g.fillRect(T/2 - 2, 0, 5, 12);
@@ -991,7 +991,7 @@ export function createModernItemTextures(generateTextureFn) {
   });
 
   // Key to Elsewhere — ornate golden key with blue arcane shimmer
-  this._genTexture('modern_item_key_to_elsewhere', T, T, (g) => {
+  generateTextureFn('modern_item_key_to_elsewhere', T, T, (g) => {
     // Outline
     g.fillStyle(0x553300);
     g.fillRect(T/2 - 2, 1, 4, 12);
@@ -1019,7 +1019,7 @@ export function createModernItemTextures(generateTextureFn) {
   });
 
   // Eclipse Blade — void-dark sword outlined in deep shadow
-  this._genTexture('modern_item_eclipse_blade', T, T, (g) => {
+  generateTextureFn('modern_item_eclipse_blade', T, T, (g) => {
     // Blade outline
     g.fillStyle(0x050505);
     g.fillRect(T/2 - 2, 0, 5, 12);
@@ -1042,7 +1042,7 @@ export function createModernItemTextures(generateTextureFn) {
   });
 
   // Key to Beyond — heavy iron key etched with unknown runes
-  this._genTexture('modern_item_key_to_beyond', T, T, (g) => {
+  generateTextureFn('modern_item_key_to_beyond', T, T, (g) => {
     // Outline
     g.fillStyle(0x111111);
     g.fillRect(T/2 - 2, 1, 5, 13);
@@ -1070,7 +1070,7 @@ export function createModernItemTextures(generateTextureFn) {
   });
 
   // Skeleton Shield — bone-white shield with purple gem and clear cross
-  this._genTexture('modern_item_skeleton_shield', T, T, (g) => {
+  generateTextureFn('modern_item_skeleton_shield', T, T, (g) => {
     // Outline
     g.fillStyle(0x333322);
     g.fillRect(2, 1, 12, 10);
@@ -1095,7 +1095,7 @@ export function createModernItemTextures(generateTextureFn) {
   });
 
   // Teleport potion — deep violet vial with swirling star sparkles
-  this._genTexture('modern_item_potion_teleport', T, T, (g) => {
+  generateTextureFn('modern_item_potion_teleport', T, T, (g) => {
     // Outline
     g.fillStyle(0x220044);
     g.fillEllipse(T/2, T/2 + 2, 10, 11);
@@ -1122,7 +1122,7 @@ export function createModernItemTextures(generateTextureFn) {
   });
 
   // Home Seeking Scroll — rolled parchment with portal rune (modern)
-  this._genTexture('modern_item_home_seeking_scroll', T, T, (g) => {
+  generateTextureFn('modern_item_home_seeking_scroll', T, T, (g) => {
     // Parchment shadow
     g.fillStyle(0xaa9944);
     g.fillRect(4, 4, 10, 9);
@@ -1146,7 +1146,7 @@ export function createModernItemTextures(generateTextureFn) {
   });
 
   // Helmet — polished metal cap with cheekguard shadow
-  this._genTexture('modern_item_helmet', T, T, (g) => {
+  generateTextureFn('modern_item_helmet', T, T, (g) => {
     g.fillStyle(0x445566);
     g.fillRect(3, 5, 10, 8);
     g.fillRect(4, 3, 8, 3);
@@ -1159,7 +1159,7 @@ export function createModernItemTextures(generateTextureFn) {
   });
 
   // Chest — layered breastplate with rivets
-  this._genTexture('modern_item_chest', T, T, (g) => {
+  generateTextureFn('modern_item_chest', T, T, (g) => {
     g.fillStyle(0x445566);
     g.fillRect(2, 1, 12, 14);
     g.fillStyle(0x8899bb);
@@ -1172,7 +1172,7 @@ export function createModernItemTextures(generateTextureFn) {
   });
 
   // Legs — greaves with knee guard
-  this._genTexture('modern_item_legs', T, T, (g) => {
+  generateTextureFn('modern_item_legs', T, T, (g) => {
     g.fillStyle(0x445566);
     g.fillRect(2, 1, 12, 7);
     g.fillRect(2, 9, 5, 6);
@@ -1186,7 +1186,7 @@ export function createModernItemTextures(generateTextureFn) {
   });
 
   // Arms — armoured gauntlet with knuckle plates
-  this._genTexture('modern_item_arms', T, T, (g) => {
+  generateTextureFn('modern_item_arms', T, T, (g) => {
     g.fillStyle(0x445566);
     g.fillRect(3, 2, 10, 12);
     g.fillStyle(0x8899bb);
@@ -1199,7 +1199,7 @@ export function createModernItemTextures(generateTextureFn) {
   });
 
   // Boots — armoured sabatons
-  this._genTexture('modern_item_boots', T, T, (g) => {
+  generateTextureFn('modern_item_boots', T, T, (g) => {
     g.fillStyle(0x445566);
     g.fillRect(3, 1, 8, 11);
     g.fillRect(2, 12, 10, 3);
@@ -1212,7 +1212,7 @@ export function createModernItemTextures(generateTextureFn) {
   });
 
   // Ring — gold band with gemstone
-  this._genTexture('modern_item_ring', T, T, (g) => {
+  generateTextureFn('modern_item_ring', T, T, (g) => {
     g.fillStyle(0x996600);
     g.fillEllipse(T/2, T/2, 13, 13);
     g.fillStyle(0x111122);
@@ -1228,7 +1228,7 @@ export function createModernItemTextures(generateTextureFn) {
   });
 
   // Amulet — golden teardrop pendant with cyan gem
-  this._genTexture('modern_item_amulet', T, T, (g) => {
+  generateTextureFn('modern_item_amulet', T, T, (g) => {
     g.fillStyle(0x996600);
     g.fillRect(T/2 - 1, 1, 3, 6);
     g.fillRect(T/2 - 5, 2, 10, 3);
