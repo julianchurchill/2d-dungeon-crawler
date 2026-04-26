@@ -50,7 +50,6 @@ import { ShopSystem } from '../systems/ShopSystem.js';
 import { generateShopItems } from '../items/ShopInventory.js';
 import { isTouchDevice } from '../utils/TouchDeviceDetector.js';
 import { NpcRoamController } from '../systems/NpcRoamController.js';
-import { LookPanel } from '../ui/LookPanel.js';
 import { LookCursor } from '../ui/LookCursor.js';
 import { findRangedTarget, resolveRangedAttack } from '../systems/RangedCombat.js';
 
@@ -156,11 +155,7 @@ export class GameScene extends Phaser.Scene {
     this._runStartItems  = new Set();
     this._setupInput();
 
-    // Look panel — shows cell info on click/touch; does not advance the turn.
-    this._lookPanel = new LookPanel(this);
-    this._onLookResize = ({ width, height }) => this._lookPanel.resize(width, height);
-    this.scale.on('resize', this._onLookResize);
-    this.events.once('shutdown', () => this.scale.off('resize', this._onLookResize));
+
 
     // Look cursor — keyboard-driven cell inspector for non-touch devices.
     this._lookCursor = new LookCursor(this, this.dungeonMap, TILE_SIZE);
@@ -1161,7 +1156,7 @@ export class GameScene extends Phaser.Scene {
       this.input.keyboard.on('keydown-L', wrapWithRunCancel(this._runController, () => {
         if (this._lookCursor?.active) {
           this._lookCursor.deactivate();
-          this._lookPanel.hide();
+          EventBus.emit(GameEvents.LOOK_HIDE);
         } else {
           this._lookCursor?.activate(this.player.x, this.player.y);
           this._showLookInfoAt(this.player.x, this.player.y);
@@ -1180,7 +1175,7 @@ export class GameScene extends Phaser.Scene {
       // Look cursor takes highest priority — ESC deactivates it first.
       if (this._lookCursor?.active) {
         this._lookCursor.deactivate();
-        this._lookPanel.hide();
+        EventBus.emit(GameEvents.LOOK_HIDE);
         return;
       }
       // Ranged aim mode — ESC cancels it.
@@ -1513,7 +1508,7 @@ export class GameScene extends Phaser.Scene {
   // ─── Player Actions ───────────────────────────────────────────────────────
 
   _doPlayerMove(dx, dy) {
-    this._lookPanel?.hide();
+    EventBus.emit(GameEvents.LOOK_HIDE);
 
     const result = this.player.move(dx, dy, this.dungeonMap, (x, y) => this._getEntityAt(x, y));
 
@@ -1942,7 +1937,7 @@ export class GameScene extends Phaser.Scene {
    */
   _teleportToTown() {
     if (!startFloorTransition(this.turnManager)) return;
-    this._lookPanel?.hide();
+    EventBus.emit(GameEvents.LOOK_HIDE);
     this._lookCursor?.deactivate();
     this.cameras.main.fadeOut(300, 0, 0, 0);
     this.time.delayedCall(300, () => {
@@ -1985,7 +1980,7 @@ export class GameScene extends Phaser.Scene {
     const snapshot = this._dungeonSnapshot;
     this._dungeonSnapshot = null;
 
-    this._lookPanel?.hide();
+    EventBus.emit(GameEvents.LOOK_HIDE);
     this._lookCursor?.deactivate();
     this.cameras.main.fadeOut(300, 0, 0, 0);
     this.time.delayedCall(300, () => {
@@ -2102,7 +2097,7 @@ export class GameScene extends Phaser.Scene {
 
   _descend() {
     if (!startFloorTransition(this.turnManager)) return;
-    this._lookPanel?.hide();
+    EventBus.emit(GameEvents.LOOK_HIDE);
     this._lookCursor?.deactivate();
     this.cameras.main.fadeOut(300, 0, 0, 0);
     this.time.delayedCall(300, () => {
@@ -2127,7 +2122,7 @@ export class GameScene extends Phaser.Scene {
    */
   _ascend() {
     if (!startFloorTransition(this.turnManager)) return;
-    this._lookPanel?.hide();
+    EventBus.emit(GameEvents.LOOK_HIDE);
     this._lookCursor?.deactivate();
     this.cameras.main.fadeOut(300, 0, 0, 0);
     this.time.delayedCall(300, () => {
@@ -2737,27 +2732,27 @@ export class GameScene extends Phaser.Scene {
     if (entity && entity !== this.player) {
       if (entity.stats) {
         // Enemies have a stats object.
-        this._lookPanel.showEnemy(entity);
+        EventBus.emit(GameEvents.LOOK_SHOW_ENEMY, entity);
       } else {
         // NPCs have a name but no stats; show their name as the tile label.
-        this._lookPanel.showTile(entity.name);
+        EventBus.emit(GameEvents.LOOK_SHOW_TILE, entity.name);
       }
       return;
     }
 
     const item = this.items.find(i => i.x === tx && i.y === ty);
     if (item) {
-      this._lookPanel.showItem(item);
+      EventBus.emit(GameEvents.LOOK_SHOW_ITEM, item);
       return;
     }
 
-    this._lookPanel.showTile(this.dungeonMap.getTile(tx, ty));
+    EventBus.emit(GameEvents.LOOK_SHOW_TILE, this.dungeonMap.getTile(tx, ty));
   }
 
   // ─── Game Over ────────────────────────────────────────────────────────────
 
   _gameOver() {
-    this._lookPanel?.hide();
+    EventBus.emit(GameEvents.LOOK_HIDE);
     this._lookCursor?.deactivate();
     EventBus.emit(GameEvents.GAME_OVER);
     this.turnManager.setState(TURN_STATE.GAME_OVER);
@@ -2767,7 +2762,7 @@ export class GameScene extends Phaser.Scene {
   }
 
   _restart() {
-    this._lookPanel?.hide();
+    EventBus.emit(GameEvents.LOOK_HIDE);
     this._lookCursor?.deactivate();
     // Clean up event listeners
     EventBus.removeAllListeners();

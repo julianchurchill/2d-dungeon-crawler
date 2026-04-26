@@ -353,4 +353,31 @@ export const GameEvents = {
    * @type {boolean} true = aim mode active, false = aim mode cancelled.
    */
   RANGED_AIM_MODE_CHANGED: 'ranged-aim-mode-changed',
+
+  /**
+   * Emitted by: GameScene (_showLookInfoAt)
+   * Subscribed by: UIScene → LookPanel.showEnemy()
+   * @type {{ name: string, stats: { hp: number, maxHp: number } }}
+   */
+  LOOK_SHOW_ENEMY: 'look-show-enemy',
+
+  /**
+   * Emitted by: GameScene (_showLookInfoAt)
+   * Subscribed by: UIScene → LookPanel.showItem()
+   * @type {{ name: string, description: string }}
+   */
+  LOOK_SHOW_ITEM: 'look-show-item',
+
+  /**
+   * Emitted by: GameScene (_showLookInfoAt)
+   * Subscribed by: UIScene → LookPanel.showTile()
+   * @type {number|string} TILE constant or display string
+   */
+  LOOK_SHOW_TILE: 'look-show-tile',
+
+  /**
+   * Emitted by: GameScene (cursor deactivated, player moves, floor changes, etc.)
+   * Subscribed by: UIScene → LookPanel.hide()
+   */
+  LOOK_HIDE: 'look-hide',
 };
