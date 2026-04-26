@@ -1,6 +1,7 @@
 import { DungeonMap } from './DungeonMap.js';
 import { TILE } from '../utils/TileTypes.js';
 import { RoomShaper } from './RoomShaper.js';
+import { TrashPilePlacer } from './TrashPilePlacer.js';
 
 const MAP_WIDTH = 80;
 const MAP_HEIGHT = 60;
@@ -153,6 +154,8 @@ export class BSPDungeonGenerator {
     // back to town; on floors 2+ they lead back to the previous floor.
     const stairsUpPos = { x: startRoom.cx + 1, y: startRoom.cy };
     map.setTile(stairsUpPos.x, stairsUpPos.y, TILE.STAIRS_UP);
+
+    new TrashPilePlacer().placeTrash(map, rooms, rng);
 
     return {
       map,

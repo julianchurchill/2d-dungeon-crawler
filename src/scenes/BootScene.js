@@ -4583,5 +4583,128 @@ export class BootScene extends Phaser.Scene {
       g.fillRect(18, 14, 6, 1);
       g.fillRect(7, 25, 8, 1);
     });
+
+    // ── Trash pile textures (all tilesets) ──────────────────────────────────
+    // Each texture opens with an exact copy of the floor drawing code so the
+    // pile appears to rest ON the stone.  A cast shadow darkens the floor just
+    // beneath the pile, then the debris pieces are painted on top with a lighter
+    // top-face highlight to suggest raised, three-dimensional objects.
+
+    // Helper: draw the classic floor pattern onto g (16×16)
+    const drawClassicFloor = (g) => {
+      g.fillStyle(0x1a1a2e); g.fillRect(0, 0, T, T);
+      g.fillStyle(0x16213e); g.fillRect(0, 0, T - 1, T - 1);
+      for (const [px, py] of [[3,3],[7,11],[12,5],[5,13],[11,9],[14,2],[2,8]]) {
+        g.fillStyle(0x222244); g.fillRect(px, py, 1, 1);
+      }
+    };
+
+    // Helper: draw the modern floor pattern onto g (16×16)
+    const drawModernFloor = (g) => {
+      g.fillStyle(0x141820); g.fillRect(0, 0, T, T);
+      g.fillStyle(0x252a38);
+      g.fillRect(1, 1, 6, 6); g.fillRect(9, 1, 6, 6);
+      g.fillRect(5, 9, 6, 6); g.fillRect(0, 9, 4, 6); g.fillRect(12, 9, 3, 6);
+      g.fillStyle(0x303545);
+      g.fillRect(1, 1, 6, 1); g.fillRect(9, 1, 6, 1); g.fillRect(5, 9, 6, 1);
+    };
+
+    // Helper: draw the HD floor pattern onto g (32×32)
+    const drawHDFloor = (g) => {
+      g.fillStyle(0x0e1018); g.fillRect(0, 0, S, S);
+      for (const [sx, sy] of [[1,1],[17,1],[1,17],[17,17]]) {
+        g.fillStyle(0x22283a); g.fillRect(sx, sy, 14, 14);
+        g.fillStyle(0x2e3650); g.fillRect(sx, sy, 14, 1); g.fillRect(sx, sy, 1, 14);
+        g.fillStyle(0x181d28); g.fillRect(sx, sy + 13, 14, 1); g.fillRect(sx + 13, sy, 1, 14);
+      }
+      for (const [px, py] of [[4,4],[10,7],[20,3],[27,8],[6,20],[14,25],[23,18],[28,26],[9,12],[19,22]]) {
+        g.fillStyle(0x131820); g.fillRect(px, py, 2, 1);
+      }
+    };
+
+    // ── Variant 1: compact rounded cluster of stone chips ────────────────────
+    this._genTexture('classic_tile_trash_pile_1', T, T, (g) => {
+      drawClassicFloor(g);
+      g.fillStyle(0x0c0c20); g.fillRect(5, 10, 7, 3);  // cast shadow on floor
+      g.fillStyle(0x32324e); g.fillRect(5, 8, 6, 4);   // pile body
+      g.fillStyle(0x3e3e5c); g.fillRect(6, 8, 4, 1);   // top-face highlight
+      g.fillStyle(0x3e3e5c); g.fillRect(5, 9, 1, 1);
+      g.fillStyle(0x26263e); g.fillRect(9, 10, 2, 2);  // right-side shadow
+    });
+    this._genTexture('modern_tile_trash_pile_1', T, T, (g) => {
+      drawModernFloor(g);
+      g.fillStyle(0x0c0e18); g.fillRect(5, 10, 7, 3);
+      g.fillStyle(0x303548); g.fillRect(5, 8, 6, 4);
+      g.fillStyle(0x3c4058); g.fillRect(6, 8, 4, 1);
+      g.fillStyle(0x3c4058); g.fillRect(5, 9, 1, 1);
+      g.fillStyle(0x242838); g.fillRect(9, 10, 2, 2);
+    });
+    this._genTexture('hd_tile_trash_pile_1', S, S, (g) => {
+      drawHDFloor(g);
+      g.fillStyle(0x0a0c18); g.fillRect(10, 20, 12, 6); // cast shadow
+      g.fillStyle(0x303660); g.fillRect(10, 14, 10, 8); // pile body
+      g.fillStyle(0x3c4470); g.fillRect(11, 14, 8, 2);  // top highlight
+      g.fillStyle(0x3c4470); g.fillRect(10, 16, 2, 4);  // left highlight
+      g.fillStyle(0x222848); g.fillRect(16, 18, 4, 4);  // right shadow face
+      g.fillStyle(0x1a1e3a); g.fillRect(12, 20, 6, 2);  // base shadow
+    });
+
+    // ── Variant 2: two separate angular stone chips ───────────────────────────
+    this._genTexture('classic_tile_trash_pile_2', T, T, (g) => {
+      drawClassicFloor(g);
+      g.fillStyle(0x0c0c20); g.fillRect(3, 11, 4, 2);  // shadow left chip
+      g.fillStyle(0x0c0c20); g.fillRect(9, 11, 4, 2);  // shadow right chip
+      g.fillStyle(0x32324e); g.fillRect(3, 9, 4, 3);   // left chip body
+      g.fillStyle(0x32324e); g.fillRect(9, 9, 4, 3);   // right chip body
+      g.fillStyle(0x3e3e5c); g.fillRect(3, 9, 4, 1);   // left top-face
+      g.fillStyle(0x3e3e5c); g.fillRect(9, 9, 4, 1);   // right top-face
+    });
+    this._genTexture('modern_tile_trash_pile_2', T, T, (g) => {
+      drawModernFloor(g);
+      g.fillStyle(0x0c0e18); g.fillRect(3, 11, 4, 2);
+      g.fillStyle(0x0c0e18); g.fillRect(9, 11, 4, 2);
+      g.fillStyle(0x303548); g.fillRect(3, 9, 4, 3);
+      g.fillStyle(0x303548); g.fillRect(9, 9, 4, 3);
+      g.fillStyle(0x3c4058); g.fillRect(3, 9, 4, 1);
+      g.fillStyle(0x3c4058); g.fillRect(9, 9, 4, 1);
+    });
+    this._genTexture('hd_tile_trash_pile_2', S, S, (g) => {
+      drawHDFloor(g);
+      g.fillStyle(0x0a0c18); g.fillRect(5, 21, 8, 4);  // shadow left
+      g.fillStyle(0x0a0c18); g.fillRect(19, 21, 8, 4); // shadow right
+      g.fillStyle(0x303660); g.fillRect(5, 14, 8, 8);  // left chip body
+      g.fillStyle(0x303660); g.fillRect(19, 16, 8, 6); // right chip body
+      g.fillStyle(0x3c4470); g.fillRect(5, 14, 8, 2);  // left top-face
+      g.fillStyle(0x3c4470); g.fillRect(19, 16, 8, 2); // right top-face
+      g.fillStyle(0x222848); g.fillRect(11, 18, 2, 4); // left side shadow
+      g.fillStyle(0x222848); g.fillRect(25, 20, 2, 2); // right side shadow
+    });
+
+    // ── Variant 3: flat elongated grit strip ─────────────────────────────────
+    this._genTexture('classic_tile_trash_pile_3', T, T, (g) => {
+      drawClassicFloor(g);
+      g.fillStyle(0x0c0c20); g.fillRect(2, 11, 12, 2); // cast shadow
+      g.fillStyle(0x32324e); g.fillRect(2, 9, 12, 3);  // grit body (low and wide)
+      g.fillStyle(0x3e3e5c); g.fillRect(3, 9, 10, 1);  // top highlight
+      g.fillStyle(0x26263e); g.fillRect(2, 11, 12, 1); // base edge shadow
+    });
+    this._genTexture('modern_tile_trash_pile_3', T, T, (g) => {
+      drawModernFloor(g);
+      g.fillStyle(0x0c0e18); g.fillRect(2, 11, 12, 2);
+      g.fillStyle(0x303548); g.fillRect(2, 9, 12, 3);
+      g.fillStyle(0x3c4058); g.fillRect(3, 9, 10, 1);
+      g.fillStyle(0x242838); g.fillRect(2, 11, 12, 1);
+    });
+    this._genTexture('hd_tile_trash_pile_3', S, S, (g) => {
+      drawHDFloor(g);
+      g.fillStyle(0x0a0c18); g.fillRect(3, 22, 26, 4); // cast shadow
+      g.fillStyle(0x303660); g.fillRect(3, 16, 26, 7); // grit body
+      g.fillStyle(0x3c4470); g.fillRect(4, 16, 24, 2); // top highlight
+      g.fillStyle(0x1a1e3a); g.fillRect(3, 21, 26, 2); // base edge shadow
+      // A few pebble bumps on the strip surface
+      g.fillStyle(0x424870); g.fillRect(7, 17, 3, 2);
+      g.fillStyle(0x424870); g.fillRect(14, 18, 3, 2);
+      g.fillStyle(0x424870); g.fillRect(22, 17, 3, 2);
+    });
   }
 }
