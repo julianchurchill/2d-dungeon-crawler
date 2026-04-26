@@ -13,6 +13,7 @@ import { DisplayCasePanel } from '../ui/DisplayCasePanel.js';
 import { ShopPanel } from '../ui/ShopPanel.js';
 import { DialoguePanel } from '../ui/DialoguePanel.js';
 import { EquipmentPanel } from '../ui/EquipmentPanel.js';
+import { LookPanel } from '../ui/LookPanel.js';
 
 export class UIScene extends Phaser.Scene {
   constructor() {
@@ -36,7 +37,15 @@ export class UIScene extends Phaser.Scene {
     // Show touch controls only on devices that support touch input
     this.dpad.setVisible(isTouchDevice());
 
+    this.lookPanel = new LookPanel(this);
+
     this._setupShopKeyboard();
+
+    // Look panel — GameScene emits these when the cursor highlights a cell
+    EventBus.on(GameEvents.LOOK_SHOW_ENEMY, (entity) => this.lookPanel.showEnemy(entity), this);
+    EventBus.on(GameEvents.LOOK_SHOW_ITEM,  (item)   => this.lookPanel.showItem(item),    this);
+    EventBus.on(GameEvents.LOOK_SHOW_TILE,  (label)  => this.lookPanel.showTile(label),   this);
+    EventBus.on(GameEvents.LOOK_HIDE,       ()       => this.lookPanel.hide(),             this);
 
     // Messages from game
     EventBus.on(GameEvents.MESSAGE, (text) => this.messageLog.addMessage(text), this);

@@ -55,3 +55,8 @@ Feature: Look
   Scenario: The look panel starts hidden
     Given a LookPanel
     Then the look panel should not be visible
+
+  Scenario: Panel is positioned in the bottom-right corner
+    Given a LookPanel
+    Then the panel position x should be 592
+    And the panel position y should be 534

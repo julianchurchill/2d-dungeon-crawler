@@ -120,3 +120,7 @@ DialoguePanel (show/hide)──► DIALOGUE_TOGGLED     ──► GameScene (gat
 | `DISPLAY_CASE_CHANGED` | `'display-case-changed'` | `{ displayCase, inventory }` | GameScene (after store/retrieve) | UIScene → DisplayCasePanel.refresh() |
 | `TOGGLE_RANGED_AIM` | `'toggle-ranged-aim'` | *(none)* | GameScene (R key), DPad (BOW button) | GameScene._handleToggleRangedAim |
 | `RANGED_AIM_MODE_CHANGED` | `'ranged-aim-mode-changed'` | `boolean` (active) | GameScene (aim mode toggle/cancel) | DPad (BOW button highlight) |
+| `LOOK_SHOW_ENEMY` | `'look-show-enemy'` | `{ name, stats: { hp, maxHp } }` | GameScene (_showLookInfoAt) | UIScene → LookPanel.showEnemy() |
+| `LOOK_SHOW_ITEM` | `'look-show-item'` | `{ name, description }` | GameScene (_showLookInfoAt) | UIScene → LookPanel.showItem() |
+| `LOOK_SHOW_TILE` | `'look-show-tile'` | `number\|string` (TILE constant or label) | GameScene (_showLookInfoAt) | UIScene → LookPanel.showTile() |
+| `LOOK_HIDE` | `'look-hide'` | *(none)* | GameScene (cursor deactivated, player moves, floor change) | UIScene → LookPanel.hide() |
