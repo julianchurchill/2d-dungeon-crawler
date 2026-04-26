@@ -327,7 +327,7 @@ Then('the {string} NPC should use sprite key {string}', function (id, expectedKe
 });
 
 Then('the {string} should register a texture named {string}', function (textureModule, textureName) {
-  const src = readFileSync(new URL(`../../src/scenes/${textureModule}.js`, import.meta.url), 'utf8');
+  const src = readFileSync(new URL(`../../src/scenes/textures/${textureModule}.js`, import.meta.url), 'utf8');
   assert.ok(
     src.includes(`'${textureName}'`),
     `Expected ${textureModule}.js to contain a _genTexture call for '${textureName}'`,

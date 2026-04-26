@@ -1243,3 +1243,232 @@ export function createModernItemTextures(generateTextureFn) {
     g.fillRect(T/2 - 2, T/2 + 1, 2, 3);
   });
 }
+
+/**
+ * Generates themed tile textures for unique named rooms.  Each unique room
+ * definition has a `floorKey` and `wallKey`.
+ *
+ * The Dark Armoury uses a blackened-iron / rust palette.
+ * The Necropolis Library uses an obsidian / arcane-blue palette.
+ * @param {function(string, number, number, function(Phaser.GameObjects.Graphics)):void} generateTextureFn
+ */
+export function createModernUniqueRoomTileTextures(generateTextureFn) {
+  // ── Decoration tile textures ─────────────────────────────
+  // Weapon mount — dark iron bracket with two crossed blades (steel gray)
+  generateTextureFn('modern_tile_weapon_mount', T, T, (g) => {
+    // Iron wall backing (armoury wall colour)
+    g.fillStyle(0x1e1410);
+    g.fillRect(0, 0, T, T);
+    // Mounting bracket — dark metal frame
+    g.fillStyle(0x302010);
+    g.fillRect(5, 5, 6, 6);
+    g.fillRect(6, 6, 4, 4);
+    // First blade — diagonal top-left → bottom-right (steel)
+    g.fillStyle(0x8090a0);
+    g.fillRect(2, 2, 2, 2);
+    g.fillRect(4, 4, 2, 2);
+    g.fillRect(10, 10, 2, 2);
+    g.fillRect(12, 12, 2, 2);
+    // Second blade — diagonal top-right → bottom-left (slightly darker)
+    g.fillStyle(0x607080);
+    g.fillRect(12, 2, 2, 2);
+    g.fillRect(10, 4, 2, 2);
+    g.fillRect(4, 10, 2, 2);
+    g.fillRect(2, 12, 2, 2);
+    // Centre crossguard
+    g.fillStyle(0xc0a840);
+    g.fillRect(7, 7, 2, 2);
+  });
+  // Bookcase — 16px classic/modern (dark wood shelves with coloured book spines)
+  generateTextureFn('modern_tile_bookcase', T, T, (g) => {
+    // Dark wood backing
+    g.fillStyle(0x140c06);
+    g.fillRect(0, 0, T, T);
+    // Wood frame
+    g.fillStyle(0x1e1008);
+    g.fillRect(1, 1, T - 2, T - 2);
+    // Shelf dividers
+    g.fillStyle(0x0e0806);
+    g.fillRect(1, 5, T - 2, 1);
+    g.fillRect(1, 10, T - 2, 1);
+    // Top shelf books (y 1–4): alternating coloured spines (2px wide each)
+    const topBooks  = [0x5a1818, 0x184a18, 0x18244a, 0x4a3610, 0x381838];
+    const midBooks  = [0x184a18, 0x4a3610, 0x5a1818, 0x381838, 0x18244a];
+    const botBooks  = [0x4a3610, 0x5a1818, 0x381838, 0x18244a, 0x184a18];
+    for (let i = 0; i < topBooks.length; i++) {
+      g.fillStyle(topBooks[i]);
+      g.fillRect(1 + i * 3, 2, 2, 3);
+    }
+    for (let i = 0; i < midBooks.length; i++) {
+      g.fillStyle(midBooks[i]);
+      g.fillRect(1 + i * 3, 6, 2, 3);
+    }
+    for (let i = 0; i < botBooks.length; i++) {
+      g.fillStyle(botBooks[i]);
+      g.fillRect(1 + i * 3, 11, 2, 3);
+    }
+  });
+
+  // ── Modern (also 16px) ───────────────────────────────────────────────────
+
+  // Dark Armoury floor — modern variant (slightly warmer rust tones)
+  generateTextureFn('modern_tile_floor_dark_armoury', T, T, (g) => {
+    g.fillStyle(0x150e09);
+    g.fillRect(0, 0, T, T);
+    g.fillStyle(0x221612, 0.9);
+    g.fillRect(1, 1, T - 2, T - 2);
+    const pts = [[5,3],[9,11],[13,5],[3,13],[11,8]];
+    for (const [px, py] of pts) {
+      g.fillStyle(0x5a1c0a, 0.7);
+      g.fillRect(px, py, 1, 1);
+    }
+  });
+
+  // Dark Armoury wall — modern variant
+  generateTextureFn('modern_tile_wall_dark_armoury', T, T, (g) => {
+    g.fillStyle(0x3e2e22);
+    g.fillRect(0, 0, T, T);
+    g.fillStyle(0x5a4030, 0.9);
+    g.fillRect(1, 1, T - 2, T - 2);
+    g.fillStyle(0x6e2818, 0.7);
+    g.fillRect(2, 5, T - 4, 1);
+    g.fillRect(2, 11, T - 4, 1);
+  });
+
+  // Necropolis Library floor — modern variant
+  generateTextureFn('modern_tile_floor_necropolis_library', T, T, (g) => {
+    g.fillStyle(0x090912);
+    g.fillRect(0, 0, T, T);
+    g.fillStyle(0x0e1224, 0.9);
+    g.fillRect(1, 1, T - 2, T - 2);
+    const pts = [[4,4],[9,11],[12,6],[2,10],[14,3]];
+    for (const [px, py] of pts) {
+      g.fillStyle(0x3050b8, 0.6);
+      g.fillRect(px, py, 1, 1);
+    }
+  });
+
+  // Necropolis Library wall — modern variant
+  generateTextureFn('modern_tile_wall_necropolis_library', T, T, (g) => {
+    g.fillStyle(0x0c1830);
+    g.fillRect(0, 0, T, T);
+    g.fillStyle(0x182040, 0.9);
+    g.fillRect(1, 1, T - 2, T - 2);
+    g.fillStyle(0x2e50a0, 0.7);
+    g.fillRect(2, 5, T - 4, 1);
+    g.fillRect(2, 11, T - 4, 1);
+  });
+
+  // ── The Darker Way tiles ─────────────────────────────────────────────────
+
+  // Locked door — iron-bound door with glowing keyhole
+  generateTextureFn('modern_tile_locked_door', T, T, (g) => {
+    g.fillStyle(0x0e0e0e);
+    g.fillRect(0, 0, T, T);
+    g.fillStyle(0x181818);
+    g.fillRect(1, 1, T - 2, T - 2);
+    // Iron panels
+    g.fillStyle(0x222222);
+    g.fillRect(2, 2, T - 4, 5);
+    g.fillRect(2, 9, T - 4, 5);
+    // Panel rivets
+    g.fillStyle(0x333333);
+    g.fillRect(3, 4, 1, 1);
+    g.fillRect(T - 4, 4, 1, 1);
+    g.fillRect(3, 11, 1, 1);
+    g.fillRect(T - 4, 11, 1, 1);
+    // Keyhole — golden glow
+    g.fillStyle(0xcc9900, 0.9);
+    g.fillRect(T/2 - 1, 10, 2, 3);
+    g.fillRect(T/2 - 1, 10, 3, 2);
+  });
+
+  // Recall Portal tile — a shimmering floor tile that returns the player to their last floor
+  generateTextureFn('modern_tile_recall_portal', T, T, (g) => {
+    g.fillStyle(0x446644);
+    g.fillRect(0, 0, T, T);
+    g.fillStyle(0x220044);
+    g.fillEllipse(T/2, T/2, T - 1, T - 1);
+    g.fillStyle(0x3399ff);
+    g.fillEllipse(T/2, T/2, T - 3, T - 3);
+    g.fillStyle(0x88ddff, 0.8);
+    g.fillEllipse(T/2, T/2, T - 7, T - 7);
+    g.fillStyle(0xffffff, 0.7);
+    g.fillRect(T/2 - 1, T/2 - 1, 2, 2);
+  });
+
+  // The Darker Way floor — deep void-stone, darker than the armoury
+  generateTextureFn('modern_tile_floor_darker_way', T, T, (g) => {
+    g.fillStyle(0x060610);
+    g.fillRect(0, 0, T, T);
+    g.fillStyle(0x0c0c1e);
+    g.fillRect(1, 1, T - 2, T - 2);
+    // Grid lines — very faint
+    g.fillStyle(0x050510, 0.7);
+    g.fillRect(0, T/2, T, 1);
+    g.fillRect(T/2, 0, 1, T);
+    // Void shimmer dot
+    g.fillStyle(0x111133, 0.5);
+    g.fillRect(T/2 - 1, T/2 - 1, 2, 2);
+  });
+
+  // The Darker Way wall — shadow-cracked stone, almost lightless
+  generateTextureFn('modern_tile_wall_darker_way', T, T, (g) => {
+    g.fillStyle(0x040408);
+    g.fillRect(0, 0, T, T);
+    g.fillStyle(0x090910);
+    g.fillRect(1, 1, T - 2, T - 2);
+    g.fillStyle(0x111120, 0.4);
+    g.fillRect(2, 2, T - 4, T - 4);
+    // Subtle fissure
+    g.fillStyle(0x020204);
+    g.fillRect(3, 6, 5, 1);
+    g.fillRect(7, 11, 4, 1);
+  });
+
+  // ── Trash pile textures ──────────────────────────────────
+  // Each texture opens with an exact copy of the floor drawing code so the
+  // pile appears to rest ON the stone.  A cast shadow darkens the floor just
+  // beneath the pile, then the debris pieces are painted on top with a lighter
+  // top-face highlight to suggest raised, three-dimensional objects.
+
+  // Helper: draw the modern floor pattern onto g (16×16)
+  const drawModernFloor = (g) => {
+    g.fillStyle(0x141820); g.fillRect(0, 0, T, T);
+    g.fillStyle(0x252a38);
+    g.fillRect(1, 1, 6, 6); g.fillRect(9, 1, 6, 6);
+    g.fillRect(5, 9, 6, 6); g.fillRect(0, 9, 4, 6); g.fillRect(12, 9, 3, 6);
+    g.fillStyle(0x303545);
+    g.fillRect(1, 1, 6, 1); g.fillRect(9, 1, 6, 1); g.fillRect(5, 9, 6, 1);
+  };
+
+  // ── Variant 1: compact rounded cluster of stone chips ────────────────────
+  generateTextureFn('modern_tile_trash_pile_1', T, T, (g) => {
+    drawModernFloor(g);
+    g.fillStyle(0x0c0e18); g.fillRect(5, 10, 7, 3);
+    g.fillStyle(0x303548); g.fillRect(5, 8, 6, 4);
+    g.fillStyle(0x3c4058); g.fillRect(6, 8, 4, 1);
+    g.fillStyle(0x3c4058); g.fillRect(5, 9, 1, 1);
+    g.fillStyle(0x242838); g.fillRect(9, 10, 2, 2);
+  });
+
+  // ── Variant 2: two separate angular stone chips ───────────────────────────
+  generateTextureFn('modern_tile_trash_pile_2', T, T, (g) => {
+    drawModernFloor(g);
+    g.fillStyle(0x0c0e18); g.fillRect(3, 11, 4, 2);
+    g.fillStyle(0x0c0e18); g.fillRect(9, 11, 4, 2);
+    g.fillStyle(0x303548); g.fillRect(3, 9, 4, 3);
+    g.fillStyle(0x303548); g.fillRect(9, 9, 4, 3);
+    g.fillStyle(0x3c4058); g.fillRect(3, 9, 4, 1);
+    g.fillStyle(0x3c4058); g.fillRect(9, 9, 4, 1);
+  });
+
+  // ── Variant 3: flat elongated grit strip ─────────────────────────────────
+  generateTextureFn('modern_tile_trash_pile_3', T, T, (g) => {
+    drawModernFloor(g);
+    g.fillStyle(0x0c0e18); g.fillRect(2, 11, 12, 2);
+    g.fillStyle(0x303548); g.fillRect(2, 9, 12, 3);
+    g.fillStyle(0x3c4058); g.fillRect(3, 9, 10, 1);
+    g.fillStyle(0x242838); g.fillRect(2, 11, 12, 1);
+  });
+}
