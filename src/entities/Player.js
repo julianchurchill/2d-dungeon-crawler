@@ -20,6 +20,7 @@ export class Player {
       level: 1,
       xp: 0,
       xpToNext: 20,
+      statPoints: 0,
     };
     /** @type {number} Gold currency owned by the player. */
     this.gold = 0;
@@ -130,8 +131,19 @@ export class Player {
     this.stats.level++;
     this.stats.maxHp += 5;
     this.stats.hp = Math.min(this.stats.hp + 5, this.stats.maxHp);
-    this.stats.attack += 1;
+    this.stats.statPoints += 2;
     this.stats.xpToNext = Math.floor(this.stats.xpToNext * 1.5);
+  }
+
+  /**
+   * Spend one stat point to increase the given stat by 1.
+   * Does nothing if no stat points remain.
+   * @param {'attack'|'defense'} stat
+   */
+  applyStatPoint(stat) {
+    if (this.stats.statPoints <= 0) return;
+    this.stats[stat] += 1;
+    this.stats.statPoints--;
   }
 
   isDead() {

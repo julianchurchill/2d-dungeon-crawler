@@ -11,7 +11,7 @@ Feature: Character Progression
     When the player gains 20 XP
     Then the player should be level 2
     And the player max HP should have increased by 5
-    And the player attack should have increased by 1
+    And the player has 2 stat points to distribute
     And the XP threshold for the next level should be 30
 
   Scenario: Player can gain multiple levels from a single XP reward

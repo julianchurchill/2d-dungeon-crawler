@@ -2295,25 +2295,21 @@ export class GameScene extends Phaser.Scene {
   }
 
   /**
-   * Launches SkillLevelUpScene if there are skills to activate or upgrade.
-   * Sleeps GameScene and UIScene while the choice overlay is shown.
+   * Launches StatDistributionScene so the player can spend their new stat points.
+   * StatDistributionScene chains to SkillLevelUpScene when finished if skill choices exist.
+   * Sleeps GameScene and UIScene for the duration of both overlay scenes.
    */
   _tryLaunchSkillLevelUp() {
-    const skillSystem = this.player.skillSystem;
-    if (!skillSystem) return;
-
-    const hasInactive   = skillSystem.getInactiveSkills().length > 0;
-    const hasUpgradeable = skillSystem.getSkills().some(s => s.canUpgrade);
-
-    if (hasInactive || hasUpgradeable) {
-      // Clear movement state before sleeping so missed key-release events
-      // cannot cause phantom auto-repeat or run movement on wake.
-      this.heldMovement.clear();
-      this._runController.cancel();
-      this.scene.launch('SkillLevelUpScene', { skillSystem });
-      this.scene.sleep('UIScene');
-      this.scene.sleep('GameScene');
-    }
+    // Clear movement state before sleeping so missed key-release events
+    // cannot cause phantom auto-repeat or run movement on wake.
+    this.heldMovement.clear();
+    this._runController.cancel();
+    this.scene.launch('StatDistributionScene', {
+      player:      this.player,
+      skillSystem: this.player.skillSystem ?? null,
+    });
+    this.scene.sleep('UIScene');
+    this.scene.sleep('GameScene');
   }
 
   /**
