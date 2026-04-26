@@ -326,6 +326,14 @@ Then('the {string} NPC should use sprite key {string}', function (id, expectedKe
     `Expected "${id}" npc.spriteKey to be "${expectedKey}" but got "${def.npc?.spriteKey}"`);
 });
 
+Then('the ClassicTextures should register a texture named {string}', function (textureName) {
+  const src = readFileSync(new URL('../../src/scenes/ClassicTextures.js', import.meta.url), 'utf8');
+  assert.ok(
+    src.includes(`'${textureName}'`),
+    `Expected ClassicTextures.js to contain a _genTexture call for '${textureName}'`,
+  );
+});
+
 Then('the BootScene should register a texture named {string}', function (textureName) {
   const src = readFileSync(new URL('../../src/scenes/BootScene.js', import.meta.url), 'utf8');
   assert.ok(
