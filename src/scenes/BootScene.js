@@ -4585,144 +4585,92 @@ export class BootScene extends Phaser.Scene {
     });
 
     // ── Trash pile textures (all tilesets) ──────────────────────────────────
-    // Variant 1 — scattered bones and rags (grey-brown pile)
-    for (const prefix of ['classic', 'modern']) {
-      this._genTexture(`${prefix}_tile_trash_pile_1`, T, T, (g) => {
-        // Floor base
-        g.fillStyle(0x2a1f15);
-        g.fillRect(0, 0, T, T);
-        // Pile shadow
-        g.fillStyle(0x1a1208);
-        g.fillRect(2, 8, 12, 5);
-        // Pale rags
-        g.fillStyle(0x887060);
-        g.fillRect(3, 9, 4, 3);
-        g.fillRect(8, 10, 5, 2);
-        // Bone fragments
-        g.fillStyle(0xa09080);
-        g.fillRect(4, 7, 2, 2);
-        g.fillRect(9, 8, 3, 1);
-        g.fillRect(6, 11, 2, 2);
-        // Dark debris
-        g.fillStyle(0x3a2a1a);
-        g.fillRect(2, 10, 2, 2);
-        g.fillRect(11, 9, 2, 3);
-      });
-    }
+    // All variants use the floor's own dark-navy palette as the tile base so
+    // the pile sits naturally on the stone.  Debris colours are cold and only
+    // 1–2 shades off the floor to avoid warm tones clashing with the dungeon.
+
+    // classic: floor base 0x1a1a2e — pile built from 0x13132a / 0x232340 / 0x2c2c4a
+    // Variant 1 — compact stone-chip cluster (centre)
+    this._genTexture('classic_tile_trash_pile_1', T, T, (g) => {
+      g.fillStyle(0x1a1a2e); g.fillRect(0, 0, T, T);
+      g.fillStyle(0x13132a); g.fillRect(5, 9, 6, 3);   // shadow under pile
+      g.fillStyle(0x232340); g.fillRect(5, 8, 5, 3);   // pile body
+      g.fillStyle(0x2c2c4a); g.fillRect(6, 8, 2, 1);   // chip highlight
+      g.fillStyle(0x2c2c4a); g.fillRect(9, 9, 1, 2);
+    });
+    // Variant 2 — scattered angular fragments (off-centre)
+    this._genTexture('classic_tile_trash_pile_2', T, T, (g) => {
+      g.fillStyle(0x1a1a2e); g.fillRect(0, 0, T, T);
+      g.fillStyle(0x13132a); g.fillRect(3, 10, 8, 2);  // shadow
+      g.fillStyle(0x232340); g.fillRect(4, 9, 3, 2);   // left fragment
+      g.fillStyle(0x232340); g.fillRect(8, 10, 3, 1);  // right chip
+      g.fillStyle(0x2c2c4a); g.fillRect(5, 9, 1, 1);   // bright spec
+      g.fillStyle(0x2c2c4a); g.fillRect(9, 10, 1, 1);
+    });
+    // Variant 3 — low flat strip of grit (horizontal)
+    this._genTexture('classic_tile_trash_pile_3', T, T, (g) => {
+      g.fillStyle(0x1a1a2e); g.fillRect(0, 0, T, T);
+      g.fillStyle(0x111128); g.fillRect(3, 10, 10, 2); // shadow
+      g.fillStyle(0x202038); g.fillRect(4, 9, 8, 2);   // flat pile
+      g.fillStyle(0x282848); g.fillRect(5, 9, 3, 1);   // highlight patch
+      g.fillStyle(0x282848); g.fillRect(9, 10, 3, 1);
+    });
+
+    // modern: floor mortar 0x141820, blocks 0x252a38 — pile from 0x0f1018 / 0x1c2030 / 0x252838
+    // Variant 1 — stone-chip cluster
+    this._genTexture('modern_tile_trash_pile_1', T, T, (g) => {
+      g.fillStyle(0x141820); g.fillRect(0, 0, T, T);
+      g.fillStyle(0x0f1018); g.fillRect(5, 9, 6, 3);
+      g.fillStyle(0x1c2030); g.fillRect(5, 8, 5, 3);
+      g.fillStyle(0x252838); g.fillRect(6, 8, 2, 1);
+      g.fillStyle(0x252838); g.fillRect(9, 9, 1, 2);
+    });
+    // Variant 2 — scattered fragments
+    this._genTexture('modern_tile_trash_pile_2', T, T, (g) => {
+      g.fillStyle(0x141820); g.fillRect(0, 0, T, T);
+      g.fillStyle(0x0f1018); g.fillRect(3, 10, 8, 2);
+      g.fillStyle(0x1c2030); g.fillRect(4, 9, 3, 2);
+      g.fillStyle(0x1c2030); g.fillRect(8, 10, 3, 1);
+      g.fillStyle(0x252838); g.fillRect(5, 9, 1, 1);
+      g.fillStyle(0x252838); g.fillRect(9, 10, 1, 1);
+    });
+    // Variant 3 — flat grit strip
+    this._genTexture('modern_tile_trash_pile_3', T, T, (g) => {
+      g.fillStyle(0x141820); g.fillRect(0, 0, T, T);
+      g.fillStyle(0x0c0e15); g.fillRect(3, 10, 10, 2);
+      g.fillStyle(0x182028); g.fillRect(4, 9, 8, 2);
+      g.fillStyle(0x202838); g.fillRect(5, 9, 3, 1);
+      g.fillStyle(0x202838); g.fillRect(9, 10, 3, 1);
+    });
+
+    // HD: slab 0x22283a, mortar 0x0e1018 — pile from 0x181d2c / 0x2a3050 / 0x343c5c
+    // Variant 1 — stone-chip cluster
     this._genTexture('hd_tile_trash_pile_1', S, S, (g) => {
-      g.fillStyle(0x2a1f15);
-      g.fillRect(0, 0, S, S);
-      g.fillStyle(0x1a1208);
-      g.fillRect(4, 16, 24, 10);
-      // Rags
-      g.fillStyle(0x887060);
-      g.fillRect(6, 18, 8, 6);
-      g.fillRect(16, 19, 10, 4);
-      // Bones
-      g.fillStyle(0xa09080);
-      g.fillRect(8, 14, 4, 4);
-      g.fillRect(18, 16, 6, 2);
-      g.fillRect(12, 22, 4, 4);
-      // Small debris
-      g.fillStyle(0x3a2a1a);
-      g.fillRect(4, 20, 4, 4);
-      g.fillRect(22, 18, 4, 6);
-      // Highlight on bone
-      g.fillStyle(0xc0b0a0);
-      g.fillRect(9, 14, 2, 2);
+      g.fillStyle(0x22283a); g.fillRect(0, 0, S, S);
+      g.fillStyle(0x181d2c); g.fillRect(10, 18, 12, 6); // shadow
+      g.fillStyle(0x2a3050); g.fillRect(10, 16, 10, 6); // pile body
+      g.fillStyle(0x343c5c); g.fillRect(11, 16, 4, 2);  // chip highlight
+      g.fillStyle(0x343c5c); g.fillRect(17, 18, 2, 4);
+      g.fillStyle(0x1e2438); g.fillRect(14, 20, 6, 2);  // inner shadow
     });
-
-    // Variant 2 — broken pots and rubble (grey-stone pile)
-    for (const prefix of ['classic', 'modern']) {
-      this._genTexture(`${prefix}_tile_trash_pile_2`, T, T, (g) => {
-        // Floor base
-        g.fillStyle(0x2a1f15);
-        g.fillRect(0, 0, T, T);
-        // Rubble shadow
-        g.fillStyle(0x1c1c1c);
-        g.fillRect(3, 7, 10, 6);
-        // Broken pot shards (terracotta)
-        g.fillStyle(0x7a4020);
-        g.fillRect(4, 8, 3, 4);
-        g.fillRect(9, 9, 3, 3);
-        // Stone chips
-        g.fillStyle(0x606060);
-        g.fillRect(3, 7, 2, 2);
-        g.fillRect(7, 11, 3, 2);
-        g.fillRect(11, 8, 2, 2);
-        // Dirt
-        g.fillStyle(0x4a3520);
-        g.fillRect(5, 12, 5, 1);
-      });
-    }
+    // Variant 2 — scattered fragments
     this._genTexture('hd_tile_trash_pile_2', S, S, (g) => {
-      g.fillStyle(0x2a1f15);
-      g.fillRect(0, 0, S, S);
-      g.fillStyle(0x1c1c1c);
-      g.fillRect(6, 14, 20, 12);
-      // Broken pots
-      g.fillStyle(0x7a4020);
-      g.fillRect(8, 16, 6, 8);
-      g.fillRect(18, 18, 6, 6);
-      // Curved shard highlight
-      g.fillStyle(0x9a6040);
-      g.fillRect(9, 16, 2, 4);
-      g.fillRect(19, 18, 2, 4);
-      // Stone rubble
-      g.fillStyle(0x606060);
-      g.fillRect(6, 14, 4, 4);
-      g.fillRect(14, 22, 6, 4);
-      g.fillRect(22, 16, 4, 4);
-      // Grit
-      g.fillStyle(0x4a3520);
-      g.fillRect(10, 24, 10, 2);
+      g.fillStyle(0x22283a); g.fillRect(0, 0, S, S);
+      g.fillStyle(0x181d2c); g.fillRect(6, 19, 14, 4);  // shadow
+      g.fillStyle(0x2a3050); g.fillRect(7, 17, 6, 4);   // left fragment
+      g.fillStyle(0x2a3050); g.fillRect(15, 19, 6, 2);  // right chip
+      g.fillStyle(0x343c5c); g.fillRect(8, 17, 2, 2);   // bright spec
+      g.fillStyle(0x343c5c); g.fillRect(16, 19, 2, 2);
+      g.fillStyle(0x1e2438); g.fillRect(10, 20, 4, 2);  // gap shadow
     });
-
-    // Variant 3 — mouldy cloth and scraps (dark green-grey pile)
-    for (const prefix of ['classic', 'modern']) {
-      this._genTexture(`${prefix}_tile_trash_pile_3`, T, T, (g) => {
-        // Floor base
-        g.fillStyle(0x2a1f15);
-        g.fillRect(0, 0, T, T);
-        // Mouldy heap shadow
-        g.fillStyle(0x181e18);
-        g.fillRect(2, 8, 12, 5);
-        // Cloth scraps (dark grey-green)
-        g.fillStyle(0x3a4a30);
-        g.fillRect(3, 9, 5, 3);
-        g.fillRect(9, 8, 4, 4);
-        // Mould patches
-        g.fillStyle(0x2a3a20);
-        g.fillRect(4, 10, 3, 2);
-        g.fillRect(10, 9, 2, 3);
-        // Old leather scraps
-        g.fillStyle(0x504030);
-        g.fillRect(6, 11, 4, 2);
-        g.fillRect(2, 9, 2, 3);
-      });
-    }
+    // Variant 3 — flat grit strip
     this._genTexture('hd_tile_trash_pile_3', S, S, (g) => {
-      g.fillStyle(0x2a1f15);
-      g.fillRect(0, 0, S, S);
-      g.fillStyle(0x181e18);
-      g.fillRect(4, 16, 24, 10);
-      // Mouldy cloth
-      g.fillStyle(0x3a4a30);
-      g.fillRect(6, 18, 10, 6);
-      g.fillRect(18, 17, 8, 8);
-      // Mould patches
-      g.fillStyle(0x2a3a20);
-      g.fillRect(8, 20, 6, 4);
-      g.fillRect(20, 19, 4, 6);
-      // Leather scraps
-      g.fillStyle(0x504030);
-      g.fillRect(12, 22, 8, 4);
-      g.fillRect(4, 17, 4, 6);
-      // Pale mould spore dots
-      g.fillStyle(0x607050);
-      g.fillRect(10, 18, 2, 2);
-      g.fillRect(22, 20, 2, 2);
-      g.fillRect(16, 24, 2, 2);
+      g.fillStyle(0x22283a); g.fillRect(0, 0, S, S);
+      g.fillStyle(0x141824); g.fillRect(6, 20, 20, 4);  // shadow
+      g.fillStyle(0x242c44); g.fillRect(7, 18, 18, 4);  // flat strip
+      g.fillStyle(0x2e3850); g.fillRect(9, 18, 6, 2);   // highlight patch
+      g.fillStyle(0x2e3850); g.fillRect(17, 19, 6, 2);
+      g.fillStyle(0x1a2030); g.fillRect(13, 20, 6, 2);  // centre shadow
     });
   }
 }
