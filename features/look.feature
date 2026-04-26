@@ -56,7 +56,8 @@ Feature: Look
     Given a LookPanel
     Then the look panel should not be visible
 
-  Scenario: Panel position compensates for camera zoom
+  Scenario: Panel position and scale compensate for camera zoom
     Given a LookPanel in a scene with camera zoom 2
     Then the panel position x should be 296
     And the panel position y should be 267
+    And the panel scale should be 0.5
