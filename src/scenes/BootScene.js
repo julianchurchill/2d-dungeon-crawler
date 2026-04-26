@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
-import { createClassicEntityTextures, createClassicItemTextures, createClassicTileTextures, createClassicUniqueRoomTileTextures } from './ClassicTextures.js';
-import { createModernEntityTextures, createModernItemTextures, createModernTileTextures, createModernUniqueRoomTileTextures } from './ModernTextures.js';
-import { createHdEntityTextures, createHdItemTextures, createHdTileTextures, createHdUniqueRoomTileTextures } from './HdTextures.js';
+import { createClassicEntityTextures, createClassicItemTextures, createClassicTileTextures, createClassicUniqueRoomTileTextures } from './textures/ClassicTextures.js';
+import { createModernEntityTextures, createModernItemTextures, createModernTileTextures, createModernUniqueRoomTileTextures } from './textures/ModernTextures.js';
+import { createHdEntityTextures, createHdItemTextures, createHdTileTextures, createHdUniqueRoomTileTextures } from './textures/HdTextures.js';
 
 /**
  * BootScene is the first scene to run.  It generates all procedural textures
