@@ -235,13 +235,13 @@ Feature: Unique rooms in dungeon generation
     Then the "darker_way" NPC should use sprite key "entity_npc_warrior"
 
   Scenario: The warrior NPC sprite is registered for the classic tileset
-    Then the ClassicTextures should register a texture named "classic_entity_npc_warrior"
+    Then the "ClassicTextures" should register a texture named "classic_entity_npc_warrior"
 
   Scenario: The warrior NPC sprite is registered for the modern tileset
-    Then the BootScene should register a texture named "modern_entity_npc_warrior"
+    Then the "ModernTextures" should register a texture named "modern_entity_npc_warrior"
 
   Scenario: The warrior NPC sprite is registered for the HD tileset
-    Then the BootScene should register a texture named "hd_entity_npc_warrior"
+    Then the "BootScene" should register a texture named "hd_entity_npc_warrior"
 
   # ── Inner room space availability ─────────────────────────────────────────────
 
