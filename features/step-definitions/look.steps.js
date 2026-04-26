@@ -21,7 +21,9 @@ function makeFluent() {
   obj.setDepth        = chain;
   obj.setScrollFactor = chain;
   obj.setVisible      = (v) => { obj._visible = v; return obj; };
-  obj.setPosition     = chain;
+  obj._x = 0;
+  obj._y = 0;
+  obj.setPosition = (x, y) => { obj._x = x; obj._y = y; return obj; };
   obj.setStrokeStyle  = chain;
   obj.setInteractive  = chain;
   obj.setFillStyle    = chain;
@@ -42,10 +44,11 @@ function makeFluent() {
  * Builds a minimal Phaser.Scene mock for LookPanel construction.
  * @returns {object}
  */
-function createMockScene() {
+function createMockScene(zoom = 1) {
   const texts = [];
   return {
     scale: { width: 800, height: 600 },
+    cameras: { main: { zoom } },
     add: {
       container: () => {
         const c = makeFluent();
@@ -69,6 +72,11 @@ function createMockScene() {
 
 Given('a LookPanel', function () {
   this.mockScene = createMockScene();
+  this.lookPanel = new LookPanel(this.mockScene);
+});
+
+Given('a LookPanel in a scene with camera zoom {float}', function (zoom) {
+  this.mockScene = createMockScene(zoom);
   this.lookPanel = new LookPanel(this.mockScene);
 });
 
@@ -122,4 +130,14 @@ Then('the look panel should display the name {string}', function (expected) {
 Then('the look panel should display the detail {string}', function (expected) {
   assert.equal(this.lookPanel._detailText._text, expected,
     `Expected detail text "${expected}" but got "${this.lookPanel._detailText._text}"`);
+});
+
+Then('the panel position x should be {int}', function (expected) {
+  assert.equal(this.lookPanel._container._x, expected,
+    `Expected panel x ${expected} but got ${this.lookPanel._container._x}`);
+});
+
+Then('the panel position y should be {int}', function (expected) {
+  assert.equal(this.lookPanel._container._y, expected,
+    `Expected panel y ${expected} but got ${this.lookPanel._container._y}`);
 });

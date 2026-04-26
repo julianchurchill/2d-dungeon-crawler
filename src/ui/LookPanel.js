@@ -114,9 +114,10 @@ export class LookPanel {
 
   /** Positions the panel in the bottom-right corner. */
   _setPosition(width, height) {
+    const zoom = this.scene.cameras?.main?.zoom ?? 1;
     this._container.setPosition(
-      width  - PANEL_W - MARGIN,
-      height - PANEL_H - MARGIN,
+      (width  - PANEL_W - MARGIN) / zoom,
+      (height - PANEL_H - MARGIN) / zoom,
     );
   }
 
