@@ -1585,7 +1585,7 @@ export class GameScene extends Phaser.Scene {
 
     if (result.action === 'attacked') {
       this._playerAttack(result.target);
-    } else if (result.action === 'moved' || result.action === 'stairs' || result.action === 'stairs_up') {
+    } else if (result.action === 'moved' || result.action === 'stairs' || result.action === 'stairs_up' || result.action === 'recall_portal') {
       // Update entity map
       this.dungeonMap.setEntity(this.player.x - dx, this.player.y - dy, null);
       // Animate
