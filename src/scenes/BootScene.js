@@ -53,7 +53,7 @@ export class BootScene extends Phaser.Scene {
    */
   _genTexture(key, w, h, drawFn) {
     const g = this._gfx();
-    this._genTextureExternal(key, w, h, drawFn, g);
+    this._genTextureWithGfx(key, w, h, drawFn, g);
   }
 
   /**
