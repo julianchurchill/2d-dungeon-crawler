@@ -1931,3 +1931,369 @@ export function createHdItemTextures(generateTextureFn) {
     g.fillRect(S/2 - 4, S/2 + 2, 3, 4);
   });
 }
+
+/**
+ * Generates themed tile textures for unique named rooms.  Each unique room
+ * definition has a `floorKey` and `wallKey`.
+ *
+ * The Dark Armoury uses a blackened-iron / rust palette.
+ * The Necropolis Library uses an obsidian / arcane-blue palette.
+ * @param {function(string, number, number, function(Phaser.GameObjects.Graphics)):void} generateTextureFn
+ */
+export function createHdUniqueRoomTileTextures(generateTextureFn) {
+  // ── Decoration tile textures ─────────────────────────────
+  // ── Weapon mount HD (32px) ───────────────────────────────────────────────
+  generateTextureFn('hd_tile_weapon_mount', S, S, (g) => {
+    // Iron wall backing
+    g.fillStyle(0x1e1410);
+    g.fillRect(0, 0, S, S);
+    // Central mounting plaque
+    g.fillStyle(0x2e2018);
+    g.fillRect(8, 8, 16, 16);
+    g.fillStyle(0x3e3020);
+    g.fillRect(9, 9, 14, 14);
+    // First blade (sword) — top-left to bottom-right, steel with highlight
+    const blade1 = [[2,2],[4,4],[6,6],[18,18],[20,20],[22,22],[24,24]];
+    for (const [bx, by] of blade1) {
+      g.fillStyle(0x7888a0);
+      g.fillRect(bx, by, 3, 3);
+      g.fillStyle(0xa0b0c0);
+      g.fillRect(bx, by, 1, 1);
+    }
+    // Second blade (spear) — top-right to bottom-left, darker steel
+    const blade2 = [[24,2],[22,4],[20,6],[12,14],[10,16],[8,18],[6,20],[4,22],[2,24]];
+    for (const [bx, by] of blade2) {
+      g.fillStyle(0x5a6878);
+      g.fillRect(bx, by, 3, 3);
+    }
+    // Gold crossguard at centre crossing
+    g.fillStyle(0xd4a830);
+    g.fillRect(13, 13, 6, 6);
+    g.fillStyle(0xf0c850);
+    g.fillRect(14, 14, 4, 4);
+  });
+
+  // ── Bookcase HD (32px) ───────────────────────────────────────────────────
+  generateTextureFn('hd_tile_bookcase', S, S, (g) => {
+    // Deep dark wood
+    g.fillStyle(0x120a04);
+    g.fillRect(0, 0, S, S);
+    // Wood case frame
+    g.fillStyle(0x1c1008);
+    g.fillRect(2, 2, S - 4, S - 4);
+    // Shelf dividers
+    g.fillStyle(0x100806);
+    g.fillRect(2, 10, S - 4, 2);
+    g.fillRect(2, 20, S - 4, 2);
+    // Book tops (slight protrusion highlight)
+    g.fillStyle(0x281810);
+    g.fillRect(2, 9, S - 4, 1);
+    g.fillRect(2, 19, S - 4, 1);
+    // Top shelf books (y 2–8, 4px wide books)
+    const topBooks = [0x6a2020,0x1e5a1e,0x1e2e5a,0x5a4212,0x481848,0x5a2020,0x1e5a1e];
+    const midBooks = [0x1e2e5a,0x5a4212,0x6a2020,0x481848,0x1e5a1e,0x1e2e5a,0x5a4212];
+    const botBooks = [0x481848,0x6a2020,0x1e2e5a,0x1e5a1e,0x5a4212,0x6a2020,0x481848];
+    for (let i = 0; i < topBooks.length; i++) {
+      g.fillStyle(topBooks[i]);
+      g.fillRect(3 + i * 4, 3, 3, 6);
+      // Spine highlight
+      g.fillStyle(0xffffff, 0.1);
+      g.fillRect(3 + i * 4, 3, 1, 6);
+    }
+    for (let i = 0; i < midBooks.length; i++) {
+      g.fillStyle(midBooks[i]);
+      g.fillRect(3 + i * 4, 12, 3, 7);
+      g.fillStyle(0xffffff, 0.1);
+      g.fillRect(3 + i * 4, 12, 1, 7);
+    }
+    for (let i = 0; i < botBooks.length; i++) {
+      g.fillStyle(botBooks[i]);
+      g.fillRect(3 + i * 4, 22, 3, 7);
+      g.fillStyle(0xffffff, 0.1);
+      g.fillRect(3 + i * 4, 22, 1, 7);
+    }
+  });
+
+  // ── HD (32px) ────────────────────────────────────────────────────────────
+
+  // Dark Armoury floor HD — charcoal slabs with rust-red mortar and blood stains
+  generateTextureFn('hd_tile_floor_dark_armoury', S, S, (g) => {
+    // Dark rust mortar background
+    g.fillStyle(0x0c0806);
+    g.fillRect(0, 0, S, S);
+    // Four iron/charcoal slabs
+    const slabColor   = 0x1e1410;
+    const slabHilight = 0x2e1e16;
+    const slabShadow  = 0x0e0a08;
+    const slabs = [[1,1],[17,1],[1,17],[17,17]];
+    for (const [sx, sy] of slabs) {
+      g.fillStyle(slabColor);
+      g.fillRect(sx, sy, 14, 14);
+      g.fillStyle(slabHilight);
+      g.fillRect(sx, sy, 14, 1);
+      g.fillRect(sx, sy, 1, 14);
+      g.fillStyle(slabShadow);
+      g.fillRect(sx, sy + 13, 14, 1);
+      g.fillRect(sx + 13, sy, 1, 14);
+    }
+    // Rust / blood-stain surface marks
+    const stains = [[4,4],[10,8],[20,3],[27,9],[6,21],[14,26],[23,17],[28,27]];
+    for (const [px, py] of stains) {
+      g.fillStyle(0x5a1808, 0.8);
+      g.fillRect(px, py, 2, 1);
+    }
+  });
+
+  // Dark Armoury wall HD — dark iron brickwork with rust-orange highlights
+  generateTextureFn('hd_tile_wall_dark_armoury', S, S, (g) => {
+    g.fillStyle(0x22180e);
+    g.fillRect(0, 0, S, S);
+    const brickH  = 9;
+    const brickRows = [
+      { y: 1,  offsets: [1, 12, 23] },
+      { y: 12, offsets: [6, 17] },
+      { y: 23, offsets: [1, 12, 23] },
+    ];
+    for (const row of brickRows) {
+      for (const bx of row.offsets) {
+        const bw = (bx === row.offsets[row.offsets.length - 1]) ? S - bx - 1 : 9;
+        g.fillStyle(0x342416);
+        g.fillRect(bx, row.y, bw, brickH);
+        g.fillStyle(0x5a3820);
+        g.fillRect(bx, row.y, bw, 1);
+        g.fillRect(bx, row.y, 1, brickH);
+        g.fillStyle(0x100806);
+        g.fillRect(bx, row.y + brickH - 1, bw, 1);
+        g.fillRect(bx + bw - 1, row.y, 1, brickH);
+        // Rust streak
+        g.fillStyle(0x6a2010, 0.6);
+        g.fillRect(bx + 3, row.y + 3, 3, 1);
+      }
+    }
+    g.fillStyle(0x6e4030);
+    g.fillRect(0, 0, S, 1);
+    g.fillRect(0, 0, 1, S);
+    g.fillStyle(0x060402);
+    g.fillRect(0, S - 1, S, 1);
+    g.fillRect(S - 1, 0, 1, S);
+  });
+
+  // Necropolis Library floor HD — obsidian slabs with blue arcane rune glow
+  generateTextureFn('hd_tile_floor_necropolis_library', S, S, (g) => {
+    // Deep void mortar
+    g.fillStyle(0x04060e);
+    g.fillRect(0, 0, S, S);
+    // Four dark obsidian slabs
+    const slabColor   = 0x0c1020;
+    const slabHilight = 0x141828;
+    const slabShadow  = 0x060810;
+    const slabs = [[1,1],[17,1],[1,17],[17,17]];
+    for (const [sx, sy] of slabs) {
+      g.fillStyle(slabColor);
+      g.fillRect(sx, sy, 14, 14);
+      g.fillStyle(slabHilight);
+      g.fillRect(sx, sy, 14, 1);
+      g.fillRect(sx, sy, 1, 14);
+      g.fillStyle(slabShadow);
+      g.fillRect(sx, sy + 13, 14, 1);
+      g.fillRect(sx + 13, sy, 1, 14);
+    }
+    // Arcane rune glow marks
+    const runes = [[4,4],[10,7],[20,3],[27,8],[6,20],[14,25],[23,18],[28,26],[9,12],[19,22]];
+    for (const [px, py] of runes) {
+      g.fillStyle(0x2840c0, 0.7);
+      g.fillRect(px, py, 2, 1);
+    }
+  });
+
+  // Necropolis Library wall HD — dark navy brickwork with arcane-blue carvings
+  generateTextureFn('hd_tile_wall_necropolis_library', S, S, (g) => {
+    g.fillStyle(0x080e20);
+    g.fillRect(0, 0, S, S);
+    const brickH  = 9;
+    const brickRows = [
+      { y: 1,  offsets: [1, 12, 23] },
+      { y: 12, offsets: [6, 17] },
+      { y: 23, offsets: [1, 12, 23] },
+    ];
+    for (const row of brickRows) {
+      for (const bx of row.offsets) {
+        const bw = (bx === row.offsets[row.offsets.length - 1]) ? S - bx - 1 : 9;
+        g.fillStyle(0x101828);
+        g.fillRect(bx, row.y, bw, brickH);
+        g.fillStyle(0x1e2e50);
+        g.fillRect(bx, row.y, bw, 1);
+        g.fillRect(bx, row.y, 1, brickH);
+        g.fillStyle(0x040810);
+        g.fillRect(bx, row.y + brickH - 1, bw, 1);
+        g.fillRect(bx + bw - 1, row.y, 1, brickH);
+        // Arcane carved rune
+        g.fillStyle(0x3050a0, 0.6);
+        g.fillRect(bx + 3, row.y + 3, 3, 1);
+      }
+    }
+    g.fillStyle(0x2840a0);
+    g.fillRect(0, 0, S, 1);
+    g.fillRect(0, 0, 1, S);
+    g.fillStyle(0x020408);
+    g.fillRect(0, S - 1, S, 1);
+    g.fillRect(S - 1, 0, 1, S);
+  });
+
+  // ── The Darker Way tiles ─────────────────────────────────────────────────
+
+  // Locked door — iron-bound door with glowing keyhole
+  generateTextureFn('hd_tile_locked_door', S, S, (g) => {
+    g.fillStyle(0x080808);
+    g.fillRect(0, 0, S, S);
+    g.fillStyle(0x101010);
+    g.fillRect(1, 1, S - 2, S - 2);
+    // Door panels — dark iron
+    g.fillStyle(0x1c1c1c);
+    g.fillRect(2, 2, S - 4, 12);
+    g.fillRect(2, 18, S - 4, 12);
+    // Panel highlights
+    g.fillStyle(0x2a2a2a);
+    g.fillRect(2, 2, S - 4, 1);
+    g.fillRect(2, 18, S - 4, 1);
+    // Rivets
+    g.fillStyle(0x383838);
+    for (const [rx, ry] of [[3,3],[S-5,3],[3,9],[S-5,9],[3,19],[S-5,19],[3,25],[S-5,25]]) {
+      g.fillRect(rx, ry, 2, 2);
+    }
+    // Iron banding across centre
+    g.fillStyle(0x141414);
+    g.fillRect(2, 14, S - 4, 4);
+    // Keyhole — warm amber glow
+    g.fillStyle(0xcc8800, 0.95);
+    g.fillRect(S/2 - 2, 20, 4, 6);
+    g.fillRect(S/2 - 2, 20, 5, 4);
+    g.fillStyle(0xffcc44, 0.6);
+    g.fillRect(S/2 - 1, 21, 2, 3);
+  });
+
+  // Recall Portal tile — a shimmering floor tile that returns the player to their last floor
+  generateTextureFn('hd_tile_recall_portal', S, S, (g) => {
+    g.fillStyle(0x334433);
+    g.fillRect(0, 0, S, S);
+    // Outer dark ring
+    g.fillStyle(0x110033);
+    g.fillEllipse(S/2, S/2, S - 2, S - 2);
+    // Portal glow layers
+    g.fillStyle(0x2255cc);
+    g.fillEllipse(S/2, S/2, S - 4, S - 4);
+    g.fillStyle(0x44aaff);
+    g.fillEllipse(S/2, S/2, S - 8, S - 8);
+    g.fillStyle(0x88ddff, 0.7);
+    g.fillEllipse(S/2, S/2, S - 14, S - 14);
+    // Sparkle lines
+    g.fillStyle(0xaaeeff, 0.9);
+    g.fillRect(S/2 - 1, 4, 2, 8);
+    g.fillRect(S/2 - 1, S - 12, 2, 8);
+    g.fillRect(4, S/2 - 1, 8, 2);
+    g.fillRect(S - 12, S/2 - 1, 8, 2);
+    // Centre spark
+    g.fillStyle(0xffffff, 0.9);
+    g.fillRect(S/2 - 2, S/2 - 2, 4, 4);
+  });
+
+  // The Darker Way floor — deep void-stone, darker than the armoury
+  generateTextureFn('hd_tile_floor_darker_way', S, S, (g) => {
+    g.fillStyle(0x060610);
+    g.fillRect(0, 0, S, S);
+    g.fillStyle(0x0a0a1c);
+    g.fillRect(1, 1, S - 2, S - 2);
+    // Stone slab lines
+    g.fillStyle(0x040408);
+    g.fillRect(0, S/2, S, 1);
+    g.fillRect(S/2, 0, 1, S);
+    // Void cracks
+    g.fillStyle(0x080814, 0.6);
+    g.fillRect(4, 8, 6, 1);
+    g.fillRect(20, 18, 5, 1);
+    g.fillRect(12, 26, 4, 1);
+    // Subtle shimmer
+    g.fillStyle(0x0f0f33, 0.4);
+    g.fillRect(S/2 - 2, S/2 - 2, 4, 4);
+  });
+
+  // The Darker Way wall — shadow-cracked stone, almost lightless
+  generateTextureFn('hd_tile_wall_darker_way', S, S, (g) => {
+    g.fillStyle(0x030306);
+    g.fillRect(0, 0, S, S);
+    g.fillStyle(0x07070e);
+    g.fillRect(1, 1, S - 2, S - 2);
+    // Brickwork — barely visible
+    const brickRows = [{ y: 1, offsets: [1, 12, 23] }, { y: 12, offsets: [6, 17] }, { y: 23, offsets: [1, 12, 23] }];
+    for (const row of brickRows) {
+      for (const bx of row.offsets) {
+        const bw = bx === row.offsets[row.offsets.length - 1] ? S - bx - 1 : 9;
+        g.fillStyle(0x080810);
+        g.fillRect(bx, row.y, bw, 9);
+        g.fillStyle(0x0c0c18);
+        g.fillRect(bx, row.y, bw, 1);
+      }
+    }
+    // Deep shadow cracks
+    g.fillStyle(0x010104);
+    g.fillRect(3, 5, 7, 1);
+    g.fillRect(18, 14, 6, 1);
+    g.fillRect(7, 25, 8, 1);
+  });
+
+  // ── Trash pile textures ──────────────────────────────────
+  // Each texture opens with an exact copy of the floor drawing code so the
+  // pile appears to rest ON the stone.  A cast shadow darkens the floor just
+  // beneath the pile, then the debris pieces are painted on top with a lighter
+  // top-face highlight to suggest raised, three-dimensional objects.
+
+  // Helper: draw the HD floor pattern onto g (32×32)
+  const drawHDFloor = (g) => {
+    g.fillStyle(0x0e1018); g.fillRect(0, 0, S, S);
+    for (const [sx, sy] of [[1,1],[17,1],[1,17],[17,17]]) {
+      g.fillStyle(0x22283a); g.fillRect(sx, sy, 14, 14);
+      g.fillStyle(0x2e3650); g.fillRect(sx, sy, 14, 1); g.fillRect(sx, sy, 1, 14);
+      g.fillStyle(0x181d28); g.fillRect(sx, sy + 13, 14, 1); g.fillRect(sx + 13, sy, 1, 14);
+    }
+    for (const [px, py] of [[4,4],[10,7],[20,3],[27,8],[6,20],[14,25],[23,18],[28,26],[9,12],[19,22]]) {
+      g.fillStyle(0x131820); g.fillRect(px, py, 2, 1);
+    }
+  };
+
+  // ── Variant 1: compact rounded cluster of stone chips ────────────────────
+  generateTextureFn('hd_tile_trash_pile_1', S, S, (g) => {
+    drawHDFloor(g);
+    g.fillStyle(0x0a0c18); g.fillRect(10, 20, 12, 6); // cast shadow
+    g.fillStyle(0x303660); g.fillRect(10, 14, 10, 8); // pile body
+    g.fillStyle(0x3c4470); g.fillRect(11, 14, 8, 2);  // top highlight
+    g.fillStyle(0x3c4470); g.fillRect(10, 16, 2, 4);  // left highlight
+    g.fillStyle(0x222848); g.fillRect(16, 18, 4, 4);  // right shadow face
+    g.fillStyle(0x1a1e3a); g.fillRect(12, 20, 6, 2);  // base shadow
+  });
+
+  // ── Variant 2: two separate angular stone chips ───────────────────────────
+  generateTextureFn('hd_tile_trash_pile_2', S, S, (g) => {
+    drawHDFloor(g);
+    g.fillStyle(0x0a0c18); g.fillRect(5, 21, 8, 4);  // shadow left
+    g.fillStyle(0x0a0c18); g.fillRect(19, 21, 8, 4); // shadow right
+    g.fillStyle(0x303660); g.fillRect(5, 14, 8, 8);  // left chip body
+    g.fillStyle(0x303660); g.fillRect(19, 16, 8, 6); // right chip body
+    g.fillStyle(0x3c4470); g.fillRect(5, 14, 8, 2);  // left top-face
+    g.fillStyle(0x3c4470); g.fillRect(19, 16, 8, 2); // right top-face
+    g.fillStyle(0x222848); g.fillRect(11, 18, 2, 4); // left side shadow
+    g.fillStyle(0x222848); g.fillRect(25, 20, 2, 2); // right side shadow
+  });
+
+  // ── Variant 3: flat elongated grit strip ─────────────────────────────────
+  generateTextureFn('hd_tile_trash_pile_3', S, S, (g) => {
+    drawHDFloor(g);
+    g.fillStyle(0x0a0c18); g.fillRect(3, 22, 26, 4); // cast shadow
+    g.fillStyle(0x303660); g.fillRect(3, 16, 26, 7); // grit body
+    g.fillStyle(0x3c4470); g.fillRect(4, 16, 24, 2); // top highlight
+    g.fillStyle(0x1a1e3a); g.fillRect(3, 21, 26, 2); // base edge shadow
+    // A few pebble bumps on the strip surface
+    g.fillStyle(0x424870); g.fillRect(7, 17, 3, 2);
+    g.fillStyle(0x424870); g.fillRect(14, 18, 3, 2);
+    g.fillStyle(0x424870); g.fillRect(22, 17, 3, 2);
+  });
+}
