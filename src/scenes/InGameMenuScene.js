@@ -17,6 +17,8 @@ import { FONT_FAMILY } from '../utils/FontConfig.js';
 import Phaser from 'phaser';
 import { isDevEnvironment } from '../utils/Environment.js';
 import { MenuNavigator } from '../utils/MenuNavigator.js';
+import { EventBus } from '../utils/EventBus.js';
+import { GameEvents } from '../events/GameEvents.js';
 
 /** Height of the fixed header area. */
 const HEADER_H = 80;
@@ -80,18 +82,19 @@ export class InGameMenuScene extends Phaser.Scene {
   _buildButtons(width, height) {
     const cx = width / 2;
     const devMode = isDevEnvironment();
-    // Space buttons evenly; an extra row is added in dev mode for DEV OPTIONS.
-    const rowCount = devMode ? 4 : 3;
+    // Space buttons evenly; extra rows for SAVE AND EXIT and dev mode.
+    const rowCount = devMode ? 5 : 4;
     const totalH   = (rowCount - 1) * 60;
     const startY   = HEADER_H + (height - HEADER_H) / 2 - totalH / 2;
 
-    this._addMenuButton(cx, startY,       'ACHIEVEMENTS', '#ffdd88', '#664400', () => this._openAchievements());
-    this._addMenuButton(cx, startY + 60,  'HELP',         '#aaddff', '#004466', () => this._openHelp());
+    this._addMenuButton(cx, startY,       'ACHIEVEMENTS',  '#ffdd88', '#664400', () => this._openAchievements());
+    this._addMenuButton(cx, startY + 60,  'HELP',          '#aaddff', '#004466', () => this._openHelp());
+    this._addMenuButton(cx, startY + 120, 'SAVE AND EXIT', '#aaffcc', '#004422', () => this._saveAndExit());
     if (devMode) {
-      this._addMenuButton(cx, startY + 120, 'DEV OPTIONS', '#ff9999', '#660000', () => this._openDevMenu());
-      this._addMenuButton(cx, startY + 180, 'BACK',        '#888888', '#333333', () => this._back());
+      this._addMenuButton(cx, startY + 180, 'DEV OPTIONS', '#ff9999', '#660000', () => this._openDevMenu());
+      this._addMenuButton(cx, startY + 240, 'BACK',        '#888888', '#333333', () => this._back());
     } else {
-      this._addMenuButton(cx, startY + 120, 'BACK',        '#888888', '#333333', () => this._back());
+      this._addMenuButton(cx, startY + 180, 'BACK',        '#888888', '#333333', () => this._back());
     }
   }
 
@@ -191,5 +194,16 @@ export class InGameMenuScene extends Phaser.Scene {
     this.scene.wake('GameScene');
     this.scene.wake('UIScene');
     this.scene.stop();
+  }
+
+  /**
+   * Emits SAVE_AND_EXIT so GameScene can save state and return to the main
+   * menu.  GameScene and UIScene are woken first so the event handler runs.
+   */
+  _saveAndExit() {
+    this.scene.wake('GameScene');
+    this.scene.wake('UIScene');
+    this.scene.stop();
+    EventBus.emit(GameEvents.SAVE_AND_EXIT);
   }
 }
