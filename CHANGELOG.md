@@ -9,6 +9,7 @@ Entries are listed newest-first within each section.
 
 ### Added
 
+- 2026-04-27 — **Achievement persistence**: achievement progress is now saved to `localStorage` on every update and restored when the game loads. Each new game resets all achievement progress so achievements are correctly scoped to a single run. A `setStorage()` injection point allows tests to run without touching real browser storage.
 - 2026-04-26 — **Trash piles**: some dungeon rooms now contain 1–3 randomly placed trash pile tiles (40% chance per room). Three visual variants exist — scattered bones and rags, broken pots and rubble, mouldy cloth and scraps. All variants are non-walkable but transparent (they do not block line of sight). Trash piles are never placed adjacent to corridor entries so room access is always clear. The Look feature identifies them as "Trash Pile".
 - 2026-04-25 — **Stat distribution on level up**: levelling up now awards 2 stat points instead of automatically increasing Attack. A new `StatDistributionScene` overlay lets the player freely spend each point on either Attack or Defense before returning to the game. After spending all points the scene chains to `SkillLevelUpScene` if skill choices are also available. `Player.applyStatPoint(stat)` added; `Player.levelUp()` no longer auto-increments `attack`.
 - 2026-04-25 — **Home Seeking Scroll (scene wiring)**: using the scroll now triggers a full floor transition — the current dungeon floor is saved as a `DungeonSnapshot` (enemies, items, map), the player is faded to town, and a glowing `RECALL_PORTAL` tile is placed near the town stairs. Stepping on the portal and pressing `>` restores the exact floor state and returns the player to where they left. The portal disappears after one use. `FloorManager.jumpToTown()` added. Portal textures for all three tilesets.
@@ -27,6 +28,10 @@ Entries are listed newest-first within each section.
 - 2026-04-22 — **Dev option — spawn champions**: a new CHAMPIONS section in the Developer Options screen lets testers set exact per-level spawn counts for champion variants of any eligible enemy type. Counts are independent of the normal 10% champion-chance logic (both can apply simultaneously). Resetting returns to the default random-chance behaviour.
 - 2026-04-22 — **Champion enemies**: normal enemies now have a 10 % chance to spawn as a champion variant. Champions have 1.5× HP, 1.3× attack, and at least +1 defense compared to the base type, award twice the XP on defeat, are rendered with a gold tint and at 1.35× scale to distinguish them visually, and always drop a random item from the floor loot pool (drawn from the current floor up to 5 floors deeper) when killed. Solitary and boss enemy types (Creeping Mass, Old Bones) are exempt from the champion mechanic.
 - 2026-04-22 — **Stackable inventory items**: potions (Health Potion, Mega Potion, Potion of Minor Teleportation) now stack in a single inventory slot. The slot label shows the current count (e.g. `Health Potion x3`). Using a stacked consumable or selling one at a shop only affects one item at a time — the stack count decrements rather than the slot disappearing until the last item is consumed or sold. The inventory panel and sell panel both reflect stack counts accurately.
+
+### Changed
+
+- 2026-04-27 — **Achievements removed from main menu**: the Achievements button has been removed from the main menu. Achievements are scoped to a single run so they have no meaning before a game starts; they remain accessible from the in-game ESC menu throughout a run.
 
 ### Fixed
 

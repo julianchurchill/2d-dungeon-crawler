@@ -45,7 +45,7 @@ import { DodgeSkill } from '../skills/DodgeSkill.js';
 import { HuntingSkill } from '../skills/HuntingSkill.js';
 import { NightVisionSkill } from '../skills/NightVisionSkill.js';
 import { ITEM_TYPES } from '../items/ItemTypes.js';
-import { getProgress, achievementStore } from '../achievements/AchievementStore.js';
+import { getProgress, achievementStore, resetAchievementStore } from '../achievements/AchievementStore.js';
 import { ShopSystem } from '../systems/ShopSystem.js';
 import { generateShopItems } from '../items/ShopInventory.js';
 import { isTouchDevice } from '../utils/TouchDeviceDetector.js';
@@ -86,6 +86,9 @@ export class GameScene extends Phaser.Scene {
     this.floorManager = new FloorManager();
     this.turnManager = new TurnManager();
     this.rng = createRNG(Date.now());
+    // Wipe achievements from any previous run before this new game starts.
+    resetAchievementStore();
+
     // AchievementSystem self-registers on the EventBus in its constructor.
     // Store the reference so listeners can be cleaned up when the scene stops,
     // preventing stale handlers accumulating if the player starts a new game.
@@ -2065,9 +2068,8 @@ export class GameScene extends Phaser.Scene {
   }
 
   /**
-   * Opens the Achievements screen directly as an overlay.
-   * Used by InGameMenuScene when the player clicks "ACHIEVEMENTS".
-   * Left in place so AchievementsScene can still be reached from the main menu.
+   * Opens the Achievements screen as an overlay.
+   * Called by InGameMenuScene when the player selects "ACHIEVEMENTS".
    */
   _openAchievements() {
     this.scene.launch('AchievementsScene', { fromScene: 'GameScene' });

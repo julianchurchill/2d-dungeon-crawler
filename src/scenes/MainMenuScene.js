@@ -103,40 +103,8 @@ export class MainMenuScene extends Phaser.Scene {
       ease: 'Sine.easeInOut',
     });
 
-    // Achievements button
-    const achBtnY = btnY + 56;
-    const achBg = this.add.rectangle(width / 2, achBtnY, 200, 34, 0x1a2a3a)
-      .setStrokeStyle(1, 0x336677)
-      .setInteractive({ useHandCursor: true });
-
-    const achTxt = this.add.text(width / 2, achBtnY, '★  ACHIEVEMENTS', {
-      fontSize: '12px', fontFamily: FONT_FAMILY, color: '#6699aa', resolution: 2,
-    }).setOrigin(0.5);
-
-    const goAchievements = () => {
-      this.cameras.main.fadeOut(200, 0, 0, 0);
-      this.time.delayedCall(200, () =>
-        this.scene.start('AchievementsScene', { fromScene: 'MainMenuScene' }));
-    };
-    achBg.on('pointerover', () => {
-      achBg.setFillStyle(0x223344);
-      achTxt.setColor('#ffdd88');
-    });
-    achBg.on('pointerout', () => {
-      achBg.setFillStyle(0x1a2a3a);
-      const isFocused = this._nav && this._nav.focusedIndex === this._navItems.length;
-      achTxt.setColor(isFocused ? COLOR_FOCUSED : '#6699aa');
-    });
-    achBg.on('pointerdown', goAchievements);
-
-    this._navItems.push({
-      onFocus:  () => { achBg.setFillStyle(0x223344); achTxt.setColor(COLOR_FOCUSED); },
-      onBlur:   () => { achBg.setFillStyle(0x1a2a3a); achTxt.setColor('#6699aa'); },
-      onSelect: goAchievements,
-    });
-
     // OPTIONS button
-    const optBtnY = achBtnY + 44;
+    const optBtnY = btnY + 56;
     const optBg = this.add.rectangle(width / 2, optBtnY, 200, 34, 0x1a2a3a)
       .setStrokeStyle(1, 0x336677)
       .setInteractive({ useHandCursor: true });
