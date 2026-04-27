@@ -52,6 +52,8 @@ import { isTouchDevice } from '../utils/TouchDeviceDetector.js';
 import { NpcRoamController } from '../systems/NpcRoamController.js';
 import { LookCursor } from '../ui/LookCursor.js';
 import { findRangedTarget, resolveRangedAttack } from '../systems/RangedCombat.js';
+import { saveGame, loadGame, hasSave, deleteSave } from '../save/SaveGame.js';
+import { createSkillFromData } from '../save/SkillFactory.js';
 
 // TILE_SIZE is initialised from TilesetManager in GameScene.create() so it
 // reflects the active tileset (16 for Classic/Modern, 32 for HD) each time
@@ -73,7 +75,7 @@ export class GameScene extends Phaser.Scene {
     super({ key: 'GameScene' });
   }
 
-  create() {
+  create(data = {}) {
     this.cameras.main.fadeIn(400, 0, 0, 0);
 
     // Resolve tile size and camera zoom from the active tileset.
@@ -86,8 +88,10 @@ export class GameScene extends Phaser.Scene {
     this.floorManager = new FloorManager();
     this.turnManager = new TurnManager();
     this.rng = createRNG(Date.now());
-    // Wipe achievements from any previous run before this new game starts.
-    resetAchievementStore();
+    // Wipe achievements at the start of a new run; preserve them on continue.
+    if (data.mode !== 'continue') {
+      resetAchievementStore();
+    }
 
     // AchievementSystem self-registers on the EventBus in its constructor.
     // Store the reference so listeners can be cleaned up when the scene stops,
@@ -126,6 +130,8 @@ export class GameScene extends Phaser.Scene {
       if (!open) this.turnManager.setState(TURN_STATE.PLAYER_INPUT);
     }, this);
 
+    EventBus.on(GameEvents.SAVE_AND_EXIT, () => this._handleSaveAndExit(), this);
+
     // Entities lists
     this.enemies = [];
     this.npcs = [];
@@ -146,6 +152,14 @@ export class GameScene extends Phaser.Scene {
     // the first floor so that floorManager.currentFloor is already set when
     // generateFloor() evaluates enemy spawn tables.
     applyToGame(this.player, this.floorManager);
+
+    // Continue an existing run or start fresh.  Applied after applyToGame so
+    // save data takes priority over dev option defaults.
+    if (data.mode === 'continue' && hasSave()) {
+      this._applyLoadedSave(loadGame());
+    } else {
+      deleteSave();
+    }
 
     // EnemySpawner reads devOptions automatically (uses singleton by default).
     this._enemySpawner = new EnemySpawner(this.rng);
@@ -2077,6 +2091,71 @@ export class GameScene extends Phaser.Scene {
     this.scene.sleep('GameScene');
   }
 
+  /**
+   * Saves game state then returns to the main menu without deleting the save,
+   * so the player can continue from this point later.
+   */
+  _handleSaveAndExit() {
+    saveGame(this.player, this.floorManager);
+    this._restart();
+  }
+
+  /**
+   * Applies a loaded save object to the current player and floorManager,
+   * restoring stats, gold, inventory, equipment, skills, and floor number.
+   *
+   * @param {object} saveData - Plain object returned by loadGame().
+   */
+  _applyLoadedSave(saveData) {
+    if (!saveData) return;
+
+    // Stats and gold
+    Object.assign(this.player.stats, saveData.player.stats);
+    this.player.gold = saveData.player.gold;
+
+    // Inventory — reconstruct Item objects from saved ids
+    const findTypeDef = id => Object.values(ITEM_TYPES).find(t => t.id === id);
+    this.player.inventory = saveData.player.inventory
+      .map(({ id, count }) => {
+        const typeDef = findTypeDef(id);
+        if (!typeDef) return null;
+        const item = new Item(0, 0, typeDef);
+        item.count = count;
+        return item;
+      })
+      .filter(Boolean);
+
+    // Equipment slots
+    const makeEquipped = id => {
+      if (!id) return null;
+      const typeDef = findTypeDef(id);
+      return typeDef ? new Item(0, 0, typeDef) : null;
+    };
+    const eq = saveData.player.equipped;
+    this.player.equippedWeapon       = makeEquipped(eq.weapon);
+    this.player.equippedRangedWeapon = makeEquipped(eq.rangedWeapon);
+    this.player.equippedArmor        = makeEquipped(eq.armor);
+    this.player.equippedHelmet       = makeEquipped(eq.helmet);
+    this.player.equippedChest        = makeEquipped(eq.chest);
+    this.player.equippedLegs         = makeEquipped(eq.legs);
+    this.player.equippedArms         = makeEquipped(eq.arms);
+    this.player.equippedBoots        = makeEquipped(eq.boots);
+    this.player.equippedRing1        = makeEquipped(eq.ring1);
+    this.player.equippedRing2        = makeEquipped(eq.ring2);
+    this.player.equippedAmulet       = makeEquipped(eq.amulet);
+
+    // Skills
+    if (this.player.skillSystem && saveData.player.activeSkills) {
+      this.player.skillSystem._activeSkills =
+        saveData.player.activeSkills.map(createSkillFromData).filter(Boolean);
+      this.player.skillSystem._inactiveSkills =
+        saveData.player.inactiveSkills.map(createSkillFromData).filter(Boolean);
+    }
+
+    // Floor — set before generateFloor() so it generates the correct floor
+    this.floorManager.currentFloor = saveData.floor;
+  }
+
   _tryUseStairs() {
     if (!this.turnManager.isAcceptingInput()) return;
     const tileType = this.dungeonMap.getTile(this.player.x, this.player.y);
@@ -2105,6 +2184,7 @@ export class GameScene extends Phaser.Scene {
     this.time.delayedCall(300, () => {
       const dungeonData = this.floorManager.descend();
       this._buildFloor(dungeonData);
+      saveGame(this.player, this.floorManager);
       this._lookCursor?.updateMap(this.dungeonMap, TILE_SIZE);
       this._syncRegistry();
       if (this._isChallengeFloor) {
@@ -2130,6 +2210,7 @@ export class GameScene extends Phaser.Scene {
     this.time.delayedCall(300, () => {
       const dungeonData = this.floorManager.ascend();
       this._buildFloor(dungeonData);
+      saveGame(this.player, this.floorManager);
       this._lookCursor?.updateMap(this.dungeonMap, TILE_SIZE);
       // Place the player at the stairs position of the destination floor,
       // and sync the sprite so the camera centres on the correct tile.
@@ -2756,6 +2837,7 @@ export class GameScene extends Phaser.Scene {
   _gameOver() {
     EventBus.emit(GameEvents.LOOK_HIDE);
     this._lookCursor?.deactivate();
+    deleteSave();
     EventBus.emit(GameEvents.GAME_OVER);
     this.turnManager.setState(TURN_STATE.GAME_OVER);
     EventBus.emit(GameEvents.MESSAGE, 'You died! Press R to restart.');

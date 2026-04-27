@@ -9,6 +9,7 @@ Entries are listed newest-first within each section.
 
 ### Added
 
+- 2026-04-27 — **Save / Load system (player state)**: player stats, gold, inventory, equipment, and skill upgrade state are now saved to `localStorage` on each floor transition and when choosing "Save and Exit" from the in-game menu. The main menu now shows a **CONTINUE** button (active only when a save exists) alongside **NEW GAME**. Starting a new game clears any existing save; dying also clears it. A `SaveGame` module with injectable storage and a `SkillFactory` for skill reconstruction are introduced.
 - 2026-04-27 — **Achievement persistence**: achievement progress is now saved to `localStorage` on every update and restored when the game loads. Each new game resets all achievement progress so achievements are correctly scoped to a single run. A `setStorage()` injection point allows tests to run without touching real browser storage.
 - 2026-04-26 — **Trash piles**: some dungeon rooms now contain 1–3 randomly placed trash pile tiles (40% chance per room). Three visual variants exist — scattered bones and rags, broken pots and rubble, mouldy cloth and scraps. All variants are non-walkable but transparent (they do not block line of sight). Trash piles are never placed adjacent to corridor entries so room access is always clear. The Look feature identifies them as "Trash Pile".
 - 2026-04-25 — **Stat distribution on level up**: levelling up now awards 2 stat points instead of automatically increasing Attack. A new `StatDistributionScene` overlay lets the player freely spend each point on either Attack or Defense before returning to the game. After spending all points the scene chains to `SkillLevelUpScene` if skill choices are also available. `Player.applyStatPoint(stat)` added; `Player.levelUp()` no longer auto-increments `attack`.
@@ -31,6 +32,7 @@ Entries are listed newest-first within each section.
 
 ### Changed
 
+- 2026-04-27 — **Main menu reworked for save/load**: "START GAME" is replaced by **CONTINUE** (disabled when no save exists) and **NEW GAME**. The in-game ESC menu gains a **SAVE AND EXIT** option.
 - 2026-04-27 — **Achievements removed from main menu**: the Achievements button has been removed from the main menu. Achievements are scoped to a single run so they have no meaning before a game starts; they remain accessible from the in-game ESC menu throughout a run.
 
 ### Fixed

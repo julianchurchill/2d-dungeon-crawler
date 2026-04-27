@@ -124,3 +124,4 @@ DialoguePanel (show/hide)──► DIALOGUE_TOGGLED     ──► GameScene (gat
 | `LOOK_SHOW_ITEM` | `'look-show-item'` | `{ name, description }` | GameScene (_showLookInfoAt) | UIScene → LookPanel.showItem() |
 | `LOOK_SHOW_TILE` | `'look-show-tile'` | `number\|string` (TILE constant or label) | GameScene (_showLookInfoAt) | UIScene → LookPanel.showTile() |
 | `LOOK_HIDE` | `'look-hide'` | *(none)* | GameScene (cursor deactivated, player moves, floor change) | UIScene → LookPanel.hide() |
+| `SAVE_AND_EXIT` | `'save-and-exit'` | *(none)* | InGameMenuScene (SAVE AND EXIT button) | GameScene._handleSaveAndExit |

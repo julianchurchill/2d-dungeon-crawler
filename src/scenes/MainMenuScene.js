@@ -4,6 +4,7 @@ import { APP_VERSION_STRING } from '../utils/AppVersion.js';
 import { resetDevOptions } from '../systems/DevOptions.js';
 import { isDevEnvironment } from '../utils/Environment.js';
 import { MenuNavigator } from '../utils/MenuNavigator.js';
+import { hasSave } from '../save/SaveGame.js';
 
 /** Text colour applied to the currently keyboard-focused menu item. */
 const COLOR_FOCUSED = '#ffffff';
@@ -65,46 +66,81 @@ export class MainMenuScene extends Phaser.Scene {
   }
 
   _buildMenu(width, height) {
-    const btnY = height * 0.58;
+    const btnY = height * 0.52;
+    const saveExists = hasSave();
 
-    // Start button
-    const startBg = this.add.rectangle(width / 2, btnY, 200, 44, 0x224466, 1)
+    // CONTINUE button — only active when a save exists
+    const contColor  = saveExists ? '#88ffcc' : '#445555';
+    const contFill   = saveExists ? 0x224433   : 0x1a2a2a;
+    const contHover  = saveExists ? 0x336655   : 0x1a2a2a;
+    const contBg = this.add.rectangle(width / 2, btnY, 200, 44, contFill, 1)
+      .setStrokeStyle(2, saveExists ? 0x44cc88 : 0x334444);
+    if (saveExists) contBg.setInteractive({ useHandCursor: true });
+
+    const contTxt = this.add.text(width / 2, btnY, '▶  CONTINUE', {
+      fontSize: '16px', fontFamily: FONT_FAMILY, color: contColor, resolution: 2,
+    }).setOrigin(0.5);
+
+    const goContinue = () => {
+      if (!saveExists) return;
+      this.cameras.main.fadeOut(300, 0, 0, 0);
+      this.time.delayedCall(300, () => {
+        this.scene.start('GameScene', { mode: 'continue' });
+        this.scene.launch('UIScene');
+      });
+    };
+    if (saveExists) {
+      contBg.on('pointerover', () => { contBg.setFillStyle(contHover); contTxt.setColor('#ffffff'); });
+      contBg.on('pointerout',  () => {
+        contBg.setFillStyle(contFill);
+        const isFocused = this._nav && this._nav.focusedIndex === 0;
+        contTxt.setColor(isFocused ? COLOR_FOCUSED : contColor);
+      });
+      contBg.on('pointerdown', goContinue);
+
+      // Pulse animation on continue button
+      this.tweens.add({
+        targets: [contBg, contTxt],
+        alpha: { from: 1, to: 0.6 },
+        duration: 900,
+        yoyo: true,
+        repeat: -1,
+        ease: 'Sine.easeInOut',
+      });
+    }
+
+    this._navItems.push({
+      onFocus:  () => { if (saveExists) { contBg.setFillStyle(contHover); contTxt.setColor(COLOR_FOCUSED); } },
+      onBlur:   () => { contBg.setFillStyle(contFill); contTxt.setColor(contColor); },
+      onSelect: goContinue,
+    });
+
+    // NEW GAME button
+    const newBtnY = btnY + 56;
+    const newBg = this.add.rectangle(width / 2, newBtnY, 200, 44, 0x224466, 1)
       .setStrokeStyle(2, 0x4488cc)
       .setInteractive({ useHandCursor: true });
 
-    const startTxt = this.add.text(width / 2, btnY, '▶  START GAME', {
+    const newTxt = this.add.text(width / 2, newBtnY, '✦  NEW GAME', {
       fontSize: '16px', fontFamily: FONT_FAMILY, color: '#88ccff', resolution: 2,
     }).setOrigin(0.5);
 
-    startBg.on('pointerover', () => {
-      startBg.setFillStyle(0x336688);
-      startTxt.setColor('#ffffff');
+    newBg.on('pointerover', () => { newBg.setFillStyle(0x336688); newTxt.setColor('#ffffff'); });
+    newBg.on('pointerout',  () => {
+      newBg.setFillStyle(0x224466);
+      const isFocused = this._nav && this._nav.focusedIndex === 1;
+      newTxt.setColor(isFocused ? COLOR_FOCUSED : '#88ccff');
     });
-    startBg.on('pointerout', () => {
-      startBg.setFillStyle(0x224466);
-      const isFocused = this._nav && this._nav.focusedIndex === 0;
-      startTxt.setColor(isFocused ? COLOR_FOCUSED : '#88ccff');
-    });
-    startBg.on('pointerdown', () => this._startGame());
+    newBg.on('pointerdown', () => this._startGame());
 
     this._navItems.push({
-      onFocus:  () => { startBg.setFillStyle(0x336688); startTxt.setColor(COLOR_FOCUSED); },
-      onBlur:   () => { startBg.setFillStyle(0x224466); startTxt.setColor('#88ccff'); },
+      onFocus:  () => { newBg.setFillStyle(0x336688); newTxt.setColor(COLOR_FOCUSED); },
+      onBlur:   () => { newBg.setFillStyle(0x224466); newTxt.setColor('#88ccff'); },
       onSelect: () => this._startGame(),
     });
 
-    // Pulse animation on start button
-    this.tweens.add({
-      targets: [startBg, startTxt],
-      alpha: { from: 1, to: 0.6 },
-      duration: 900,
-      yoyo: true,
-      repeat: -1,
-      ease: 'Sine.easeInOut',
-    });
-
     // OPTIONS button
-    const optBtnY = btnY + 56;
+    const optBtnY = newBtnY + 56;
     const optBg = this.add.rectangle(width / 2, optBtnY, 200, 34, 0x1a2a3a)
       .setStrokeStyle(1, 0x336677)
       .setInteractive({ useHandCursor: true });
@@ -117,11 +153,8 @@ export class MainMenuScene extends Phaser.Scene {
       this.cameras.main.fadeOut(200, 0, 0, 0);
       this.time.delayedCall(200, () => this.scene.start('OptionsScene'));
     };
-    optBg.on('pointerover', () => {
-      optBg.setFillStyle(0x223344);
-      optTxt.setColor('#88ccff');
-    });
-    optBg.on('pointerout', () => {
+    optBg.on('pointerover', () => { optBg.setFillStyle(0x223344); optTxt.setColor('#88ccff'); });
+    optBg.on('pointerout',  () => {
       optBg.setFillStyle(0x1a2a3a);
       const isFocused = this._nav && this._nav.focusedIndex === this._navItems.length;
       optTxt.setColor(isFocused ? COLOR_FOCUSED : '#6699aa');
@@ -149,11 +182,8 @@ export class MainMenuScene extends Phaser.Scene {
       this.time.delayedCall(200, () =>
         this.scene.start('HelpScene', { fromScene: 'MainMenuScene' }));
     };
-    helpBg.on('pointerover', () => {
-      helpBg.setFillStyle(0x223344);
-      helpTxt.setColor('#aaddff');
-    });
-    helpBg.on('pointerout', () => {
+    helpBg.on('pointerover', () => { helpBg.setFillStyle(0x223344); helpTxt.setColor('#aaddff'); });
+    helpBg.on('pointerout',  () => {
       helpBg.setFillStyle(0x1a2a3a);
       const isFocused = this._nav && this._nav.focusedIndex === this._navItems.length;
       helpTxt.setColor(isFocused ? COLOR_FOCUSED : '#6699aa');
@@ -181,11 +211,8 @@ export class MainMenuScene extends Phaser.Scene {
         this.cameras.main.fadeOut(200, 0, 0, 0);
         this.time.delayedCall(200, () => this.scene.start('DevOptionsScene'));
       };
-      devBg.on('pointerover', () => {
-        devBg.setFillStyle(0x223344);
-        devTxt.setColor('#88ccff');
-      });
-      devBg.on('pointerout', () => {
+      devBg.on('pointerover', () => { devBg.setFillStyle(0x223344); devTxt.setColor('#88ccff'); });
+      devBg.on('pointerout',  () => {
         devBg.setFillStyle(0x1a2a3a);
         const isFocused = this._nav && this._nav.focusedIndex === this._navItems.length;
         devTxt.setColor(isFocused ? COLOR_FOCUSED : '#6699aa');
@@ -198,7 +225,6 @@ export class MainMenuScene extends Phaser.Scene {
         onSelect: goDevOptions,
       });
     }
-
   }
 
   /**
@@ -207,6 +233,9 @@ export class MainMenuScene extends Phaser.Scene {
    */
   _setupKeyboardNav() {
     this._nav = new MenuNavigator(this._navItems.length);
+    // Start focus on NEW GAME (index 1) when no save exists so the first
+    // actionable button is immediately selected.
+    if (!hasSave()) this._nav._index = 1;
     this._updateFocus();
 
     this.input.keyboard.on('keydown-UP',    () => { this._nav.prev(); this._updateFocus(); });
@@ -236,7 +265,7 @@ export class MainMenuScene extends Phaser.Scene {
   _startGame() {
     this.cameras.main.fadeOut(300, 0, 0, 0);
     this.time.delayedCall(300, () => {
-      this.scene.start('GameScene');
+      this.scene.start('GameScene', { mode: 'new' });
       this.scene.launch('UIScene');
     });
   }

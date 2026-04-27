@@ -380,4 +380,11 @@ export const GameEvents = {
    * Subscribed by: UIScene → LookPanel.hide()
    */
   LOOK_HIDE: 'look-hide',
+
+  /**
+   * Request to save the current game state and return to the main menu.
+   * Emitted by: InGameMenuScene (SAVE AND EXIT button)
+   * Subscribed by: GameScene (_handleSaveAndExit)
+   */
+  SAVE_AND_EXIT: 'save-and-exit',
 };
