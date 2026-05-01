@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { BootScene } from './scenes/BootScene.js';
 import { MainMenuScene } from './scenes/MainMenuScene.js';
+import { SaveSlotScene } from './scenes/SaveSlotScene.js';
 import { DevOptionsScene } from './scenes/DevOptionsScene.js';
 import { AchievementsScene } from './scenes/AchievementsScene.js';
 import { InGameMenuScene } from './scenes/InGameMenuScene.js';
@@ -24,7 +25,7 @@ const config = {
     width: window.innerWidth,
     height: window.innerHeight,
   },
-  scene: [BootScene, MainMenuScene, OptionsScene, DevOptionsScene, AchievementsScene, InGameMenuScene, HelpScene, DevMenuScene, StatDistributionScene, SkillLevelUpScene, GameScene, UIScene],
+  scene: [BootScene, MainMenuScene, SaveSlotScene, OptionsScene, DevOptionsScene, AchievementsScene, InGameMenuScene, HelpScene, DevMenuScene, StatDistributionScene, SkillLevelUpScene, GameScene, UIScene],
 };
 
 /**

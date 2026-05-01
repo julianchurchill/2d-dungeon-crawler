@@ -80,6 +80,9 @@ export class GameScene extends Phaser.Scene {
   create(data = {}) {
     this.cameras.main.fadeIn(400, 0, 0, 0);
 
+    /** The save slot this session reads from and writes to. */
+    this._slot = data.slot ?? 0;
+
     // Resolve tile size and camera zoom from the active tileset.
     // TILE_SIZE is a module-level let so all methods in this file pick it up
     // without needing it passed as a parameter.
@@ -106,7 +109,8 @@ export class GameScene extends Phaser.Scene {
     this._autosaveTimer = new AutosaveTimer(
       120_000,
       () => saveGame(this.player, this.floorManager,
-        serializeFloor(this.dungeonMap, this.enemies, this.items, this.player, uniqueRoomRegistry)),
+        serializeFloor(this.dungeonMap, this.enemies, this.items, this.player, uniqueRoomRegistry),
+        this._slot),
     );
     this._autosaveTimer.start();
 
@@ -166,10 +170,10 @@ export class GameScene extends Phaser.Scene {
 
     // Continue an existing run or start fresh.  Applied after applyToGame so
     // save data takes priority over dev option defaults.
-    if (data.mode === 'continue' && hasSave()) {
-      this._applyLoadedSave(loadGame());
+    if (data.mode === 'continue' && hasSave(this._slot)) {
+      this._applyLoadedSave(loadGame(this._slot));
     } else {
-      deleteSave();
+      deleteSave(this._slot);
     }
 
     // EnemySpawner reads devOptions automatically (uses singleton by default).
@@ -2270,7 +2274,8 @@ export class GameScene extends Phaser.Scene {
    */
   _handleSaveAndExit() {
     saveGame(this.player, this.floorManager,
-      serializeFloor(this.dungeonMap, this.enemies, this.items, this.player, uniqueRoomRegistry));
+      serializeFloor(this.dungeonMap, this.enemies, this.items, this.player, uniqueRoomRegistry),
+      this._slot);
     this._restart();
   }
 
@@ -2370,7 +2375,8 @@ export class GameScene extends Phaser.Scene {
       const dungeonData = this.floorManager.descend();
       this._buildFloor(dungeonData);
       saveGame(this.player, this.floorManager,
-        serializeFloor(this.dungeonMap, this.enemies, this.items, this.player, uniqueRoomRegistry));
+        serializeFloor(this.dungeonMap, this.enemies, this.items, this.player, uniqueRoomRegistry),
+        this._slot);
       this._lookCursor?.updateMap(this.dungeonMap, TILE_SIZE);
       this._syncRegistry();
       if (this._isChallengeFloor) {
@@ -2397,7 +2403,8 @@ export class GameScene extends Phaser.Scene {
       const dungeonData = this.floorManager.ascend();
       this._buildFloor(dungeonData);
       saveGame(this.player, this.floorManager,
-        serializeFloor(this.dungeonMap, this.enemies, this.items, this.player, uniqueRoomRegistry));
+        serializeFloor(this.dungeonMap, this.enemies, this.items, this.player, uniqueRoomRegistry),
+        this._slot);
       this._lookCursor?.updateMap(this.dungeonMap, TILE_SIZE);
       // Place the player at the stairs position of the destination floor,
       // and sync the sprite so the camera centres on the correct tile.
@@ -3024,7 +3031,7 @@ export class GameScene extends Phaser.Scene {
   _gameOver() {
     EventBus.emit(GameEvents.LOOK_HIDE);
     this._lookCursor?.deactivate();
-    deleteSave();
+    deleteSave(this._slot);
     EventBus.emit(GameEvents.GAME_OVER);
     this.turnManager.setState(TURN_STATE.GAME_OVER);
     EventBus.emit(GameEvents.MESSAGE, 'You died! Press R to restart.');
