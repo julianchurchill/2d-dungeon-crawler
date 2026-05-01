@@ -16,7 +16,7 @@
 import Phaser from 'phaser';
 import { FONT_FAMILY } from '../utils/FontConfig.js';
 import { MenuNavigator } from '../utils/MenuNavigator.js';
-import { listSaves, TOTAL_SLOTS } from '../save/SaveGame.js';
+import { listSaves, exportSave, importSave, TOTAL_SLOTS } from '../save/SaveGame.js';
 
 const CARD_W      = 440;
 const CARD_H      = 66;
@@ -133,7 +133,26 @@ export class SaveSlotScene extends Phaser.Scene {
         bg.on('pointerdown',  () => this._selectCard(i));
       }
 
-      const card = { bg, slotTxt, mainTxt, dateTxt, entry, enabled, index: i };
+      // Export button (occupied slots only, right edge of card)
+      let actionTxt = null;
+      if (!entry.empty) {
+        actionTxt = this.add.text(cx + CARD_W / 2 - 12, cardY, '[ EXPORT ]', {
+          fontSize: '10px', fontFamily: FONT_FAMILY, color: '#3a7a88', resolution: 2,
+        }).setOrigin(1, 0.5).setInteractive({ useHandCursor: true });
+        actionTxt.on('pointerover',  () => actionTxt.setColor('#66ccdd'));
+        actionTxt.on('pointerout',   () => actionTxt.setColor('#3a7a88'));
+        actionTxt.on('pointerdown',  (ptr) => { ptr.event?.stopPropagation?.(); this._exportSlot(i); });
+      } else if (this._mode === 'new') {
+        // Import button on empty slots in new-game mode
+        actionTxt = this.add.text(cx + CARD_W / 2 - 12, cardY, '[ IMPORT ]', {
+          fontSize: '10px', fontFamily: FONT_FAMILY, color: '#3a6677', resolution: 2,
+        }).setOrigin(1, 0.5).setInteractive({ useHandCursor: true });
+        actionTxt.on('pointerover',  () => actionTxt.setColor('#66aacc'));
+        actionTxt.on('pointerout',   () => actionTxt.setColor('#3a6677'));
+        actionTxt.on('pointerdown',  (ptr) => { ptr.event?.stopPropagation?.(); this._importSlot(i); });
+      }
+
+      const card = { bg, slotTxt, mainTxt, dateTxt, actionTxt, entry, enabled, index: i };
 
       return card;
     });
@@ -144,9 +163,13 @@ export class SaveSlotScene extends Phaser.Scene {
    * @param {number} height
    */
   _buildHints(width, height) {
-    this.add.text(width / 2, height * 0.94, 'ESC — Back    ↑↓ — Navigate    Enter — Select', {
-      fontSize: '11px', fontFamily: FONT_FAMILY, color: '#445566', resolution: 2,
-    }).setOrigin(0.5);
+    const extra = this._mode === 'new'
+      ? '    E — Export    I — Import'
+      : '    E — Export';
+    this.add.text(width / 2, height * 0.94,
+      `ESC — Back    ↑↓ — Navigate    Enter — Select${extra}`, {
+        fontSize: '11px', fontFamily: FONT_FAMILY, color: '#445566', resolution: 2,
+      }).setOrigin(0.5);
   }
 
   // ─── Interaction ──────────────────────────────────────────────────────────
@@ -256,6 +279,8 @@ export class SaveSlotScene extends Phaser.Scene {
     this.input.keyboard.on('keydown-ENTER', () => this._selectCard(this._nav.focusedIndex));
     this.input.keyboard.on('keydown-SPACE', () => this._selectCard(this._nav.focusedIndex));
     this.input.keyboard.on('keydown-ESC',   () => this._goBack());
+    this.input.keyboard.on('keydown-E',     () => this._exportSlot(this._nav.focusedIndex));
+    this.input.keyboard.on('keydown-I',     () => this._importSlot(this._nav.focusedIndex));
   }
 
   /**
@@ -288,6 +313,64 @@ export class SaveSlotScene extends Phaser.Scene {
     card.mainTxt.setText(mainLine).setColor('#88ccff').setFontSize('15px');
     card.dateTxt.setText(card.entry.savedAt ? formatDate(card.entry.savedAt) : '');
     card.bg.setFillStyle(0x1a3050).setStrokeStyle(2, 0x66aaff);
+  }
+
+  /**
+   * Exports the save in the given slot to the clipboard and shows a toast.
+   * @param {number} index
+   */
+  _exportSlot(index) {
+    const card = this._cards[index];
+    if (!card || card.entry.empty) return;
+
+    const encoded = exportSave(index);
+    if (!encoded) return;
+
+    if (navigator.clipboard?.writeText) {
+      navigator.clipboard.writeText(encoded)
+        .then(() => this._showToast(index, '✓ Copied to clipboard!', '#66ffcc'))
+        .catch(() => this._showToast(index, '✗ Clipboard unavailable', '#ff8866'));
+    } else {
+      this._showToast(index, '✗ Clipboard unavailable', '#ff8866');
+    }
+  }
+
+  /**
+   * Prompts the player to paste an export string and imports it into the slot.
+   * @param {number} index
+   */
+  _importSlot(index) {
+    // eslint-disable-next-line no-alert
+    const code = window.prompt('Paste save code to import into this slot:');
+    if (!code) return;
+    const ok = importSave(index, code.trim());
+    if (ok) {
+      this.scene.restart({ mode: this._mode });
+    } else {
+      this._showToast(index, '✗ Invalid save code', '#ff8866');
+    }
+  }
+
+  /**
+   * Briefly shows a status message overlaid on a card, then fades it out.
+   * @param {number} index - Card index.
+   * @param {string} message
+   * @param {string} color  - Hex colour string.
+   */
+  _showToast(index, message, color) {
+    const card = this._cards[index];
+    const toast = this.add.text(
+      card.bg.x, card.bg.y, message,
+      { fontSize: '12px', fontFamily: FONT_FAMILY, color, resolution: 2 },
+    ).setOrigin(0.5).setDepth(10);
+
+    this.tweens.add({
+      targets: toast,
+      alpha: { from: 1, to: 0 },
+      duration: 1800,
+      delay: 600,
+      onComplete: () => toast.destroy(),
+    });
   }
 
   _goBack() {

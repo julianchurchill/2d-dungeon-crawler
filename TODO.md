@@ -105,8 +105,8 @@
 
 ## Saving
 
-- [ ] export save as text file/string option
 - [ ] cloud save (Google?)
+- [x] export save as text file/string option
 - [x] multiple save slots
 - [x] local save (cookies)
 
