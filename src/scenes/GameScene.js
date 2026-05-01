@@ -11,6 +11,7 @@ import { OldBones } from '../entities/OldBones.js';
 import { Npc } from '../entities/Npc.js';
 import { Item } from '../items/Item.js';
 import { getFloorLoot, getChallengeLoot } from '../items/ItemTypes.js';
+import { DungeonMap } from '../dungeon/DungeonMap.js';
 import { UNIQUE_ROOM_DEFS } from '../dungeon/UniqueRoomDefinitions.js';
 import { uniqueRoomRegistry } from '../dungeon/UniqueRoomRegistry.js';
 import { placeDecorations } from '../dungeon/RoomDecorationPlacer.js';
@@ -52,7 +53,7 @@ import { isTouchDevice } from '../utils/TouchDeviceDetector.js';
 import { NpcRoamController } from '../systems/NpcRoamController.js';
 import { LookCursor } from '../ui/LookCursor.js';
 import { findRangedTarget, resolveRangedAttack } from '../systems/RangedCombat.js';
-import { saveGame, loadGame, hasSave, deleteSave } from '../save/SaveGame.js';
+import { saveGame, serializeFloor, loadGame, hasSave, deleteSave } from '../save/SaveGame.js';
 import { createSkillFromData } from '../save/SkillFactory.js';
 
 // TILE_SIZE is initialised from TilesetManager in GameScene.create() so it
@@ -164,8 +165,13 @@ export class GameScene extends Phaser.Scene {
     // EnemySpawner reads devOptions automatically (uses singleton by default).
     this._enemySpawner = new EnemySpawner(this.rng);
 
-    // Generate first floor
-    this._buildFloor(this.floorManager.generateFloor());
+    // Restore saved floor or generate a fresh one.
+    if (this._pendingFloorRestore) {
+      this._restoreFloor(this._pendingFloorRestore);
+      this._pendingFloorRestore = null;
+    } else {
+      this._buildFloor(this.floorManager.generateFloor());
+    }
 
     // Input
     this._runController  = new RunMovementController();
@@ -277,6 +283,148 @@ export class GameScene extends Phaser.Scene {
     this._spawnNpcs(npcDefs ?? []);
 
     // Update FOV
+    this._updateFOV();
+  }
+
+  /**
+   * Reconstructs a dungeon floor from a serialised floor state produced by
+   * serializeFloor(), bypassing procedural generation entirely.
+   *
+   * @param {object} floorState - Plain object produced by serializeFloor().
+   */
+  _restoreFloor(floorState) {
+    this._isChallengeFloor = false;
+    this.rooms = [];
+    this.shops = [];
+    this._entryTracker.reset();
+
+    // Reconstruct the DungeonMap from saved tile data
+    const map = new DungeonMap(floorState.width, floorState.height);
+    for (let i = 0; i < floorState.tiles.length; i++) {
+      map.tiles[i] = floorState.tiles[i];
+    }
+    this.dungeonMap = map;
+
+    this._clearFloorEntities();
+    this._buildTilemap(map);
+
+    // Restore player position
+    this.player.x = floorState.playerX;
+    this.player.y = floorState.playerY;
+
+    if (!this.playerSprite) {
+      this.playerSprite = this.add.sprite(
+        floorState.playerX * TILE_SIZE + TILE_SIZE / 2,
+        floorState.playerY * TILE_SIZE + TILE_SIZE / 2,
+        tilesetManager.getTileKey('entity_player'),
+      ).setDepth(10);
+      this.player.sprite = this.playerSprite;
+    } else {
+      this.playerSprite.setPosition(
+        floorState.playerX * TILE_SIZE + TILE_SIZE / 2,
+        floorState.playerY * TILE_SIZE + TILE_SIZE / 2,
+      );
+    }
+
+    // Camera
+    const mapW = map.width * TILE_SIZE;
+    const mapH = map.height * TILE_SIZE;
+    this.cameras.main.setBounds(0, 0, mapW, mapH);
+    this.cameras.main.startFollow(this.playerSprite, true, 0.12, 0.12);
+
+    // Restore enemies
+    const findTypeDef = id => Object.values(ITEM_TYPES).find(t => t.id === id);
+    for (const saved of floorState.enemies) {
+      if (saved.type === 'creeping_mass') {
+        const mass = new CreepingMass(saved.segments.map(s => ({ x: s.x, y: s.y })));
+        mass.stats.hp    = saved.hp;
+        mass.stats.maxHp = saved.maxHp;
+        for (const seg of mass.segments) {
+          const sprite = this.add.sprite(
+            seg.x * TILE_SIZE + TILE_SIZE / 2,
+            seg.y * TILE_SIZE + TILE_SIZE / 2,
+            tilesetManager.getTileKey(mass.textureKey),
+          ).setDepth(8).setVisible(false);
+          seg.sprite = sprite;
+        }
+        mass.sprite = mass.segments[0].sprite;
+        this.enemies.push(mass);
+        for (const seg of mass.segments) this.dungeonMap.setEntity(seg.x, seg.y, mass);
+      } else if (saved.isBoss) {
+        const boss = new OldBones(saved.x, saved.y, this.rng);
+        boss.stats.hp         = saved.hp;
+        boss.stats.maxHp      = saved.maxHp;
+        boss.stats.attack     = saved.attack;
+        boss.stats.defense    = saved.defense;
+        boss.xp               = saved.xp;
+        boss.minionsSpawned   = saved.minionsSpawned ?? false;
+        if (saved.dropItemId) {
+          const typeDef = findTypeDef(saved.dropItemId);
+          if (typeDef) boss.dropItem = new Item(saved.x, saved.y, typeDef);
+        }
+        const sprite = this.add.sprite(
+          saved.x * TILE_SIZE + TILE_SIZE / 2,
+          saved.y * TILE_SIZE + TILE_SIZE / 2,
+          tilesetManager.getTileKey(boss.textureKey),
+        ).setDepth(8).setVisible(false);
+        boss.sprite = sprite;
+        this._createHealthBar(boss);
+        this.enemies.push(boss);
+        this.dungeonMap.setEntity(saved.x, saved.y, boss);
+      } else if (saved.isChampion) {
+        const champ = new Champion(saved.x, saved.y, saved.type, this.floorManager.currentFloor, this.rng);
+        champ.stats.hp      = saved.hp;
+        champ.stats.maxHp   = saved.maxHp;
+        champ.stats.attack  = saved.attack;
+        champ.stats.defense = saved.defense;
+        champ.xp            = saved.xp;
+        if (saved.dropItemId) {
+          const typeDef = findTypeDef(saved.dropItemId);
+          if (typeDef) champ.dropItem = new Item(saved.x, saved.y, typeDef);
+        }
+        const sprite = this.add.sprite(
+          saved.x * TILE_SIZE + TILE_SIZE / 2,
+          saved.y * TILE_SIZE + TILE_SIZE / 2,
+          tilesetManager.getTileKey(champ.textureKey),
+        ).setDepth(8).setVisible(false).setScale(CHAMPION_SCALE).setTint(CHAMPION_TINT);
+        champ.sprite = sprite;
+        this._createHealthBar(champ);
+        this.enemies.push(champ);
+        this.dungeonMap.setEntity(saved.x, saved.y, champ);
+      } else {
+        const enemy = new Enemy(saved.x, saved.y, saved.type);
+        enemy.stats.hp      = saved.hp;
+        enemy.stats.maxHp   = saved.maxHp;
+        enemy.stats.attack  = saved.attack;
+        enemy.stats.defense = saved.defense;
+        enemy.xp            = saved.xp;
+        const sprite = this.add.sprite(
+          saved.x * TILE_SIZE + TILE_SIZE / 2,
+          saved.y * TILE_SIZE + TILE_SIZE / 2,
+          tilesetManager.getTileKey(enemy.textureKey),
+        ).setDepth(8).setVisible(false);
+        enemy.sprite = sprite;
+        this._createHealthBar(enemy);
+        this.enemies.push(enemy);
+        this.dungeonMap.setEntity(saved.x, saved.y, enemy);
+      }
+    }
+
+    // Restore floor items
+    for (const saved of floorState.items) {
+      const typeDef = findTypeDef(saved.id);
+      if (!typeDef) continue;
+      const item = new Item(saved.x, saved.y, typeDef);
+      item.count = saved.count ?? 1;
+      const sprite = this.add.sprite(
+        saved.x * TILE_SIZE + TILE_SIZE / 2,
+        saved.y * TILE_SIZE + TILE_SIZE / 2,
+        tilesetManager.getTileKey(item.textureKey),
+      ).setDepth(6).setVisible(false);
+      item.sprite = sprite;
+      this.items.push(item);
+    }
+
     this._updateFOV();
   }
 
@@ -2096,7 +2244,8 @@ export class GameScene extends Phaser.Scene {
    * so the player can continue from this point later.
    */
   _handleSaveAndExit() {
-    saveGame(this.player, this.floorManager);
+    saveGame(this.player, this.floorManager,
+      serializeFloor(this.dungeonMap, this.enemies, this.items, this.player, uniqueRoomRegistry));
     this._restart();
   }
 
@@ -2154,6 +2303,17 @@ export class GameScene extends Phaser.Scene {
 
     // Floor — set before generateFloor() so it generates the correct floor
     this.floorManager.currentFloor = saveData.floor;
+
+    // Unique room registry — restore seen/entered sets from saved floor state
+    // so rooms already visited are not re-discoverable on continue.
+    if (saveData.floorState?.uniqueRooms) {
+      const { seen, entered } = saveData.floorState.uniqueRooms;
+      for (const id of seen)    uniqueRoomRegistry.markSeen(id);
+      for (const id of entered) uniqueRoomRegistry.markEntered(id);
+    }
+
+    // Store floor state for restore after EnemySpawner init (in create()).
+    this._pendingFloorRestore = saveData.floorState ?? null;
   }
 
   _tryUseStairs() {
@@ -2184,7 +2344,8 @@ export class GameScene extends Phaser.Scene {
     this.time.delayedCall(300, () => {
       const dungeonData = this.floorManager.descend();
       this._buildFloor(dungeonData);
-      saveGame(this.player, this.floorManager);
+      saveGame(this.player, this.floorManager,
+        serializeFloor(this.dungeonMap, this.enemies, this.items, this.player, uniqueRoomRegistry));
       this._lookCursor?.updateMap(this.dungeonMap, TILE_SIZE);
       this._syncRegistry();
       if (this._isChallengeFloor) {
@@ -2210,7 +2371,8 @@ export class GameScene extends Phaser.Scene {
     this.time.delayedCall(300, () => {
       const dungeonData = this.floorManager.ascend();
       this._buildFloor(dungeonData);
-      saveGame(this.player, this.floorManager);
+      saveGame(this.player, this.floorManager,
+        serializeFloor(this.dungeonMap, this.enemies, this.items, this.player, uniqueRoomRegistry));
       this._lookCursor?.updateMap(this.dungeonMap, TILE_SIZE);
       // Place the player at the stairs position of the destination floor,
       // and sync the sprite so the camera centres on the correct tile.
