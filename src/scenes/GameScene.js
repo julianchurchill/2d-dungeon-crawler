@@ -55,6 +55,7 @@ import { LookCursor } from '../ui/LookCursor.js';
 import { findRangedTarget, resolveRangedAttack } from '../systems/RangedCombat.js';
 import { saveGame, serializeFloor, loadGame, hasSave, deleteSave } from '../save/SaveGame.js';
 import { createSkillFromData } from '../save/SkillFactory.js';
+import { AutosaveTimer } from '../save/AutosaveTimer.js';
 
 // TILE_SIZE is initialised from TilesetManager in GameScene.create() so it
 // reflects the active tileset (16 for Classic/Modern, 32 for HD) each time
@@ -99,6 +100,15 @@ export class GameScene extends Phaser.Scene {
     // preventing stale handlers accumulating if the player starts a new game.
     this._achievementSystem = new AchievementSystem();
     this.events.once('shutdown', () => this._achievementSystem.destroy());
+
+    // Autosave every 2 minutes so progress is preserved even if the browser
+    // is closed without using Save and Exit.
+    this._autosaveTimer = new AutosaveTimer(
+      120_000,
+      () => saveGame(this.player, this.floorManager,
+        serializeFloor(this.dungeonMap, this.enemies, this.items, this.player, uniqueRoomRegistry)),
+    );
+    this._autosaveTimer.start();
 
     // Track whether the message log history panel is open so the ESC handler
     // can close it instead of opening the Achievements screen.
@@ -3023,6 +3033,7 @@ export class GameScene extends Phaser.Scene {
   }
 
   _restart() {
+    this._autosaveTimer?.stop();
     EventBus.emit(GameEvents.LOOK_HIDE);
     this._lookCursor?.deactivate();
     // Clean up event listeners
