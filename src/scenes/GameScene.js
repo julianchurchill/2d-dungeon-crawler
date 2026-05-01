@@ -167,8 +167,23 @@ export class GameScene extends Phaser.Scene {
 
     // Restore saved floor or generate a fresh one.
     if (this._pendingFloorRestore) {
-      this._restoreFloor(this._pendingFloorRestore);
+      const floorState = this._pendingFloorRestore;
       this._pendingFloorRestore = null;
+      if (this.floorManager.isTown()) {
+        // Town NPCs have non-serialisable contextual-line functions, and shop
+        // door textures require the shops metadata array — regenerate the town
+        // fresh and restore only the player's saved position within it.
+        this._buildFloor(this.floorManager.generateFloor());
+        this.player.x = floorState.playerX;
+        this.player.y = floorState.playerY;
+        this.playerSprite.setPosition(
+          floorState.playerX * TILE_SIZE + TILE_SIZE / 2,
+          floorState.playerY * TILE_SIZE + TILE_SIZE / 2,
+        );
+        this._updateFOV();
+      } else {
+        this._restoreFloor(floorState);
+      }
     } else {
       this._buildFloor(this.floorManager.generateFloor());
     }
