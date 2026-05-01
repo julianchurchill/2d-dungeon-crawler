@@ -4,7 +4,7 @@ import { APP_VERSION_STRING } from '../utils/AppVersion.js';
 import { resetDevOptions } from '../systems/DevOptions.js';
 import { isDevEnvironment } from '../utils/Environment.js';
 import { MenuNavigator } from '../utils/MenuNavigator.js';
-import { hasSave } from '../save/SaveGame.js';
+import { hasAnySave } from '../save/SaveGame.js';
 
 /** Text colour applied to the currently keyboard-focused menu item. */
 const COLOR_FOCUSED = '#ffffff';
@@ -67,7 +67,7 @@ export class MainMenuScene extends Phaser.Scene {
 
   _buildMenu(width, height) {
     const btnY = height * 0.52;
-    const saveExists = hasSave();
+    const saveExists = hasAnySave();
 
     // CONTINUE button — only active when a save exists
     const contColor  = saveExists ? '#88ffcc' : '#445555';
@@ -84,10 +84,7 @@ export class MainMenuScene extends Phaser.Scene {
     const goContinue = () => {
       if (!saveExists) return;
       this.cameras.main.fadeOut(300, 0, 0, 0);
-      this.time.delayedCall(300, () => {
-        this.scene.start('GameScene', { mode: 'continue' });
-        this.scene.launch('UIScene');
-      });
+      this.time.delayedCall(300, () => this.scene.start('SaveSlotScene', { mode: 'continue' }));
     };
     if (saveExists) {
       contBg.on('pointerover', () => { contBg.setFillStyle(contHover); contTxt.setColor('#ffffff'); });
@@ -235,7 +232,7 @@ export class MainMenuScene extends Phaser.Scene {
     this._nav = new MenuNavigator(this._navItems.length);
     // Start focus on NEW GAME (index 1) when no save exists so the first
     // actionable button is immediately selected.
-    if (!hasSave()) this._nav._index = 1;
+    if (!hasAnySave()) this._nav._index = 1;
     this._updateFocus();
 
     this.input.keyboard.on('keydown-UP',    () => { this._nav.prev(); this._updateFocus(); });
@@ -264,10 +261,7 @@ export class MainMenuScene extends Phaser.Scene {
 
   _startGame() {
     this.cameras.main.fadeOut(300, 0, 0, 0);
-    this.time.delayedCall(300, () => {
-      this.scene.start('GameScene', { mode: 'new' });
-      this.scene.launch('UIScene');
-    });
+    this.time.delayedCall(300, () => this.scene.start('SaveSlotScene', { mode: 'new' }));
   }
 
   /**

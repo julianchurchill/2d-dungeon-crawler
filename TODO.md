@@ -106,8 +106,8 @@
 ## Saving
 
 - [ ] export save as text file/string option
-- [ ] multiple save slots
 - [ ] cloud save (Google?)
+- [x] multiple save slots
 - [x] local save (cookies)
 
 ## Hall of Legends

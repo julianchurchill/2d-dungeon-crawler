@@ -22,9 +22,15 @@
  *     uniqueRooms: { seen: string[], entered: string[] },
  *   } | null,
  * }
+ *
+ * Each slot uses the key `save_game_<slot>` (0-indexed).
  */
 
-const SAVE_KEY = 'save_game';
+/** Total number of independent save slots. */
+export const TOTAL_SLOTS = 5;
+
+/** Returns the localStorage key for a given slot index. */
+const SAVE_KEY = (slot) => `save_game_${slot}`;
 
 /** Storage backend — defaults to localStorage when available. */
 let _storage = typeof localStorage !== 'undefined' ? localStorage : null;
@@ -131,7 +137,13 @@ export function serializeFloor(dungeonMap, enemies, items, player, uniqueRoomReg
   };
 }
 
-export function saveGame(player, floorManager, floorData = null) {
+/**
+ * @param {object} player
+ * @param {object} floorManager
+ * @param {object|null} [floorData]
+ * @param {number} [slot] - Save slot index (0–4). Defaults to 0.
+ */
+export function saveGame(player, floorManager, floorData = null, slot = 0) {
   if (!_storage) return;
 
   const skillSystem = player.skillSystem;
@@ -139,6 +151,7 @@ export function saveGame(player, floorManager, floorData = null) {
   const inactiveSkills = skillSystem ? skillSystem._inactiveSkills.map(skillToSaveData) : [];
 
   const data = {
+    savedAt: new Date().toISOString(),
     floor: floorManager.currentFloor,
     player: {
       stats:    { ...player.stats },
@@ -163,16 +176,17 @@ export function saveGame(player, floorManager, floorData = null) {
     floorState: floorData ?? null,
   };
 
-  _storage.setItem(SAVE_KEY, JSON.stringify(data));
+  _storage.setItem(SAVE_KEY(slot), JSON.stringify(data));
 }
 
 /**
  * Loads and parses the saved game data from storage.
+ * @param {number} [slot] - Save slot index (0–4). Defaults to 0.
  * @returns {object|null} Parsed save data, or null if none exists.
  */
-export function loadGame() {
+export function loadGame(slot = 0) {
   if (!_storage) return null;
-  const raw = _storage.getItem(SAVE_KEY);
+  const raw = _storage.getItem(SAVE_KEY(slot));
   if (!raw) return null;
   try {
     return JSON.parse(raw);
@@ -182,17 +196,45 @@ export function loadGame() {
 }
 
 /**
- * Returns true if a save exists in storage.
+ * Returns true if a save exists in the given slot.
+ * @param {number} [slot] - Save slot index (0–4). Defaults to 0.
  * @returns {boolean}
  */
-export function hasSave() {
+export function hasSave(slot = 0) {
   if (!_storage) return false;
-  return _storage.getItem(SAVE_KEY) !== null;
+  return _storage.getItem(SAVE_KEY(slot)) !== null;
 }
 
 /**
- * Removes the save from storage.
+ * Returns true if any slot contains a save.
+ * @returns {boolean}
  */
-export function deleteSave() {
-  if (_storage) _storage.removeItem(SAVE_KEY);
+export function hasAnySave() {
+  return listSaves().some(s => !s.empty);
+}
+
+/**
+ * Removes the save from the given slot.
+ * @param {number} [slot] - Save slot index (0–4). Defaults to 0.
+ */
+export function deleteSave(slot = 0) {
+  if (_storage) _storage.removeItem(SAVE_KEY(slot));
+}
+
+/**
+ * Returns a summary of every save slot for the slot selection screen.
+ * @returns {Array<{slot:number,empty:boolean,floor?:number,level?:number,savedAt?:string}>}
+ */
+export function listSaves() {
+  return Array.from({ length: TOTAL_SLOTS }, (_, i) => {
+    const save = loadGame(i);
+    if (!save) return { slot: i, empty: true };
+    return {
+      slot:    i,
+      empty:   false,
+      floor:   save.floor,
+      level:   save.player?.stats?.level ?? 1,
+      savedAt: save.savedAt ?? null,
+    };
+  });
 }
