@@ -7,13 +7,20 @@
  * {
  *   floor: number,
  *   player: {
- *     stats:        { hp, maxHp, attack, defense, level, xp, xpToNext, statPoints },
- *     gold:         number,
- *     inventory:    [{ id, count }],
- *     equipped:     { weapon, rangedWeapon, armor, helmet, chest, legs, arms, boots, ring1, ring2, amulet },
- *     activeSkills: [{ id, ...upgradeState }],
+ *     stats:          { hp, maxHp, attack, defense, level, xp, xpToNext, statPoints },
+ *     gold:           number,
+ *     inventory:      [{ id, count }],
+ *     equipped:       { weapon, rangedWeapon, armor, helmet, chest, legs, arms, boots, ring1, ring2, amulet },
+ *     activeSkills:   [{ id, ...upgradeState }],
  *     inactiveSkills: [{ id, ...upgradeState }],
- *   }
+ *   },
+ *   floorState: {
+ *     width, height, tiles: number[],
+ *     enemies: [{ type, x, y, hp, maxHp, attack, defense, xp, isChampion, isBoss, dropItemId?, ... }],
+ *     items:   [{ id, x, y, count }],
+ *     playerX, playerY,
+ *     uniqueRooms: { seen: string[], entered: string[] },
+ *   } | null,
  * }
  */
 
@@ -63,7 +70,68 @@ function equippedId(item) {
  * @param {object} player       - Player instance (or duck-typed equivalent).
  * @param {object} floorManager - FloorManager instance.
  */
-export function saveGame(player, floorManager) {
+/**
+ * Serialises a single enemy instance to a plain save object.
+ * @param {object} enemy
+ * @returns {object}
+ */
+function serializeEnemy(enemy) {
+  if (enemy.segments) {
+    return {
+      type: 'creeping_mass',
+      segments: enemy.segments.map(s => ({ x: s.x, y: s.y })),
+      hp:    enemy.stats.hp,
+      maxHp: enemy.stats.maxHp,
+    };
+  }
+  const data = {
+    type:       enemy.type,
+    x:          enemy.x,
+    y:          enemy.y,
+    hp:         enemy.stats.hp,
+    maxHp:      enemy.stats.maxHp,
+    attack:     enemy.stats.attack,
+    defense:    enemy.stats.defense,
+    xp:         enemy.xp,
+    isChampion: enemy.isChampion ?? false,
+    isBoss:     enemy.isBoss    ?? false,
+  };
+  if (enemy.isChampion) data.dropItemId = enemy.dropItem?.id ?? null;
+  if (enemy.isBoss) {
+    data.dropItemId    = enemy.dropItem?.id ?? null;
+    data.dropGold      = enemy.dropGold     ?? 0;
+    data.minionsSpawned = enemy.minionsSpawned ?? false;
+  }
+  return data;
+}
+
+/**
+ * Builds a serialisable snapshot of the current dungeon floor.
+ *
+ * @param {object}   dungeonMap        - DungeonMap instance (must have .tiles, .width, .height).
+ * @param {object[]} enemies           - Array of enemy instances on the floor.
+ * @param {object[]} items             - Array of Item instances currently on the floor (not in inventory).
+ * @param {object}   player            - Player instance (for position).
+ * @param {object}   uniqueRoomRegistry - Registry instance with ._seen and ._entered Sets.
+ * @returns {object} Plain object suitable for JSON serialisation.
+ */
+export function serializeFloor(dungeonMap, enemies, items, player, uniqueRoomRegistry) {
+  return {
+    width:   dungeonMap.width,
+    height:  dungeonMap.height,
+    tiles:   Array.from(dungeonMap.tiles),
+    enemies: enemies.map(serializeEnemy),
+    items:   items.map(i => ({ id: i.id, x: i.x, y: i.y, count: i.count ?? 1 })),
+    playerX: player.x,
+    playerY: player.y,
+    uniqueRooms: {
+      seen:    Array.from(uniqueRoomRegistry._seen),
+      entered: Array.from(uniqueRoomRegistry._entered),
+    },
+  };
+}
+
+export function saveGame(player, floorManager, floorData = null) {
   if (!_storage) return;
 
   const skillSystem = player.skillSystem;
@@ -92,6 +160,7 @@ export function saveGame(player, floorManager) {
       activeSkills,
       inactiveSkills,
     },
+    floorState: floorData ?? null,
   };
 
   _storage.setItem(SAVE_KEY, JSON.stringify(data));

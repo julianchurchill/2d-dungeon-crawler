@@ -105,10 +105,10 @@
 
 ## Saving
 
-- [ ] local save (cookies)
 - [ ] export save as text file/string option
 - [ ] multiple save slots
 - [ ] cloud save (Google?)
+- [x] local save (cookies)
 
 ## Hall of Legends
 
