@@ -1798,10 +1798,11 @@ export class GameScene extends Phaser.Scene {
         this.dungeonMap, result.wallX, result.wallY, result.dx, result.dy, this.rng,
       );
       for (const { x, y, tile } of alcoveChanges) {
-        const tileKey = tile === TILE.FLOOR
-          ? tilesetManager.getTileKey(_bwFloorBase)
-          : tilesetManager.getTileKey('tile_breakable_wall');
-        this.mapRT.drawFrame(tileKey, undefined, x * TILE_SIZE, y * TILE_SIZE);
+        let tileKey;
+        if (tile === TILE.FLOOR)           tileKey = tilesetManager.getTileKey(_bwFloorBase);
+        else if (tile === TILE.WALL)       tileKey = tilesetManager.getTileKey('tile_wall');
+        else if (tile === TILE.BREAKABLE_WALL) tileKey = tilesetManager.getTileKey('tile_breakable_wall');
+        if (tileKey) this.mapRT.drawFrame(tileKey, undefined, x * TILE_SIZE, y * TILE_SIZE);
       }
       this.turnManager.setState(TURN_STATE.PLAYER_ACTING);
       this._updateFOV();
