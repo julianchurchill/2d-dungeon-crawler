@@ -114,7 +114,7 @@ function serializeEnemy(enemy) {
 /**
  * Builds a serialisable snapshot of the current dungeon floor.
  *
- * @param {object}   dungeonMap        - DungeonMap instance (must have .tiles, .width, .height).
+ * @param {object}   dungeonMap        - DungeonMap instance (must have .tiles, .fovState, .width, .height).
  * @param {object[]} enemies           - Array of enemy instances on the floor.
  * @param {object[]} items             - Array of Item instances currently on the floor (not in inventory).
  * @param {object}   player            - Player instance (for position).
@@ -126,6 +126,7 @@ export function serializeFloor(dungeonMap, enemies, items, player, uniqueRoomReg
     width:   dungeonMap.width,
     height:  dungeonMap.height,
     tiles:   Array.from(dungeonMap.tiles),
+    fovState: Array.from(dungeonMap.fovState),
     enemies: enemies.map(serializeEnemy),
     items:   items.map(i => ({ id: i.id, x: i.x, y: i.y, count: i.count ?? 1 })),
     playerX: player.x,

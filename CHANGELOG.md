@@ -42,6 +42,7 @@ Entries are listed newest-first within each section.
 
 ### Fixed
 
+- 2026-05-02 — **Save now remembers revealed dungeon tiles**: `serializeFloor` now includes the full FOV explored-state array alongside tile data. Continuing a save restores which areas the player had previously revealed, so the fog of war is correctly preserved across sessions. Backward compatible — old saves without `fovState` simply start with everything unexplored.
 - 2026-05-02 — **Home Seeking Scroll now stacks**: the item type was missing `stackable: true`, so multiple scrolls occupied separate inventory slots. They now stack like potions.
 - 2026-04-26 — **Look panel invisible on Classic/Modern tilesets**: the look panel was created inside GameScene, which uses camera zoom=2 for Classic and Modern tilesets. Phaser applies zoom to all objects in the scene, so the panel appeared at 2× its intended screen coordinates. Moved LookPanel to UIScene (which always runs at zoom=1, matching every other UI panel) and wired it through four new EventBus events (`LOOK_SHOW_ENEMY`, `LOOK_SHOW_ITEM`, `LOOK_SHOW_TILE`, `LOOK_HIDE`). The panel now renders correctly in the bottom-right corner on all tilesets.
 - 2026-04-25 — **Stair double-descent**: pressing '>' or '.' rapidly on stairs could trigger multiple floor transitions. `_descend()` and `_ascend()` now call `startFloorTransition(turnManager)` which immediately sets the turn state to `TRANSITIONING`, blocking any further stair input until the new floor finishes loading and resets to `PLAYER_INPUT`.

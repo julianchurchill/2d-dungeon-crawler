@@ -70,3 +70,14 @@ Feature: Save Floor State
     And a dungeon map 10 wide and 10 tall with tile 1 at position 3,4
     When the game is saved with floor state
     Then the loaded save should contain floor state data
+
+  Scenario: Serialised floor state includes FOV explored tiles
+    Given a real dungeon map 10 wide and 10 tall with explored tile at 3,4
+    When the floor state is serialised
+    Then the floor state fovState at 3,4 should be EXPLORED
+    And the floor state fovState at 0,0 should be UNEXPLORED
+
+  Scenario: FOV explored state survives a serialise and restore round-trip
+    Given a real dungeon map 10 wide and 10 tall with explored tile at 3,4
+    When the floor state is serialised
+    Then a DungeonMap restored from the floor state has EXPLORED fovState at 3,4
