@@ -90,6 +90,48 @@ export function createHdTileTextures(generateTextureFn) {
     g.fillRect(S - 1, 0, 1, S);
   });
 
+  // Breakable wall — same as hd_tile_wall with a subtle crack across the centre brick
+  generateTextureFn('hd_tile_breakable_wall', S, S, (g) => {
+    g.fillStyle(0x2e3a4e);
+    g.fillRect(0, 0, S, S);
+    const brickH   = 9;
+    const brickRows = [
+      { y: 1,  offsets: [1, 12, 23] },
+      { y: 12, offsets: [6, 17] },
+      { y: 23, offsets: [1, 12, 23] },
+    ];
+    for (const row of brickRows) {
+      for (const bx of row.offsets) {
+        const bw = (bx === row.offsets[row.offsets.length - 1]) ? S - bx - 1 : 9;
+        g.fillStyle(0x3e4e66);
+        g.fillRect(bx, row.y, bw, brickH);
+        g.fillStyle(0x5a7098);
+        g.fillRect(bx, row.y, bw, 1);
+        g.fillRect(bx, row.y, 1, brickH);
+        g.fillStyle(0x1e2a38);
+        g.fillRect(bx, row.y + brickH - 1, bw, 1);
+        g.fillRect(bx + bw - 1, row.y, 1, brickH);
+        g.fillStyle(0x344258, 0.6);
+        g.fillRect(bx + 3, row.y + 3, 3, 1);
+      }
+    }
+    g.fillStyle(0x6888b0);
+    g.fillRect(0, 0, S, 1);
+    g.fillRect(0, 0, 1, S);
+    g.fillStyle(0x0a1018);
+    g.fillRect(0, S - 1, S, 1);
+    g.fillRect(S - 1, 0, 1, S);
+    // Subtle crack running through the centre brick row (y=12–20)
+    g.fillStyle(0x0a0e14);
+    g.fillRect(13, 13, 1, 5);
+    g.fillRect(12, 17, 1, 4);
+    g.fillRect(13, 20, 1, 3);
+    g.fillStyle(0x6888b0);
+    g.fillRect(14, 13, 1, 5);
+    g.fillRect(13, 17, 1, 4);
+    g.fillRect(14, 20, 1, 3);
+  });
+
   // Dungeon door — dark mahogany with ornate mouldings and gold hardware
   generateTextureFn('hd_tile_door', S, S, (g) => {
     // Stone door-frame

@@ -45,6 +45,31 @@ export function createClassicTileTextures(generateTextureFn) {
     g.fillRect(6, 7, 1, 3);
   });
 
+  // Breakable wall — identical to tile_wall but with a faint crack hinting at weakness
+  generateTextureFn('classic_tile_breakable_wall', T, T, (g) => {
+    g.fillStyle(0x4a4a5a);
+    g.fillRect(0, 0, T, T);
+    g.fillStyle(0x6a6a7a);
+    g.fillRect(0, 0, T, 1);
+    g.fillRect(0, 0, 1, T);
+    g.fillStyle(0x2a2a3a);
+    g.fillRect(0, T - 1, T, 1);
+    g.fillRect(T - 1, 0, 1, T);
+    g.fillStyle(0x333344, 0.7);
+    g.fillRect(3, 4, 4, 1);
+    g.fillRect(9, 10, 5, 1);
+    g.fillRect(6, 7, 1, 3);
+    // Subtle crack — dark line with a lighter edge to suggest depth
+    g.fillStyle(0x1a1a28);
+    g.fillRect(9, 2, 1, 4);
+    g.fillRect(8, 6, 1, 3);
+    g.fillRect(9, 9, 1, 3);
+    g.fillStyle(0x7a7a8a);
+    g.fillRect(10, 2, 1, 4);
+    g.fillRect(9, 6, 1, 3);
+    g.fillRect(10, 9, 1, 3);
+  });
+
   // Door — wooden brown with handle and panel lines
   generateTextureFn('classic_tile_door', T, T, (g) => {
     g.fillStyle(0x5c3a1e);

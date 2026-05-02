@@ -208,7 +208,6 @@ export function getFloorLootPool(floor, unlockedItems = new Set()) {
       ITEM_TYPES.SWORD, ITEM_TYPES.LEATHER_ARMOR, ITEM_TYPES.SHORT_BOW,
       ITEM_TYPES.LEATHER_BOOTS, ITEM_TYPES.LEATHER_BOOTS,
       ITEM_TYPES.HOME_SEEKING_SCROLL,
-      ITEM_TYPES.PICK_AXE,
     );
   }
   if (floor >= 2) {

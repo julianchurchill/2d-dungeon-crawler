@@ -63,6 +63,36 @@ export function createModernTileTextures(generateTextureFn) {
     g.fillRect(T - 1, 0, 1, T);
   });
 
+  // Breakable wall — same as tile_wall with a faint crack across one brick face
+  generateTextureFn('modern_tile_breakable_wall', T, T, (g) => {
+    g.fillStyle(0x304050);
+    g.fillRect(0, 0, T, T);
+    g.fillStyle(0x1a2530);
+    g.fillRect(0, 5, T, 1);
+    g.fillRect(0, 11, T, 1);
+    g.fillRect(8, 0, 1, 5);
+    g.fillRect(4, 6, 1, 5);
+    g.fillRect(11, 6, 1, 5);
+    g.fillRect(8, 12, 1, 4);
+    g.fillStyle(0x6070a0);
+    g.fillRect(0, 0, T, 1);
+    g.fillRect(0, 0, 1, 5);
+    g.fillRect(0, 6, 1, 5);
+    g.fillRect(0, 12, 1, 4);
+    g.fillStyle(0x0e1520);
+    g.fillRect(0, T - 1, T, 1);
+    g.fillRect(T - 1, 0, 1, T);
+    // Subtle crack cutting down through the middle brick row
+    g.fillStyle(0x0a1018);
+    g.fillRect(6, 1, 1, 4);
+    g.fillRect(5, 4, 1, 2);
+    g.fillRect(6, 6, 1, 5);
+    g.fillStyle(0x7090c0);
+    g.fillRect(7, 1, 1, 4);
+    g.fillRect(6, 4, 1, 2);
+    g.fillRect(7, 6, 1, 5);
+  });
+
   // Door — dark mahogany with ornate gold handle
   generateTextureFn('modern_tile_door', T, T, (g) => {
     // Door frame — very dark brown

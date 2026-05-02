@@ -536,7 +536,7 @@ export class GameScene extends Phaser.Scene {
       [TILE.TRASH_PILE_1]:   tk('tile_trash_pile_1'),
       [TILE.TRASH_PILE_2]:   tk('tile_trash_pile_2'),
       [TILE.TRASH_PILE_3]:   tk('tile_trash_pile_3'),
-      [TILE.BREAKABLE_WALL]: tk('tile_wall'),
+      [TILE.BREAKABLE_WALL]: tk('tile_breakable_wall'),
     };
 
     // Build position → texture-key overrides for typed shop doors (town only)
