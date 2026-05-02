@@ -238,3 +238,35 @@ export function listSaves() {
     };
   });
 }
+
+/**
+ * Encodes the save in the given slot as a portable Base64 string.
+ * Returns null if the slot is empty.
+ * @param {number} [slot]
+ * @returns {string|null}
+ */
+export function exportSave(slot = 0) {
+  const save = loadGame(slot);
+  if (!save) return null;
+  // encodeURIComponent handles any non-ASCII characters before base64 encoding.
+  return btoa(encodeURIComponent(JSON.stringify(save)));
+}
+
+/**
+ * Decodes an exported save string and writes it into the given slot.
+ * Returns true on success, false if the string is invalid.
+ * @param {number} [slot]
+ * @param {string} encoded
+ * @returns {boolean}
+ */
+export function importSave(slot = 0, encoded) {
+  if (!_storage || !encoded) return false;
+  try {
+    const save = JSON.parse(decodeURIComponent(atob(encoded)));
+    if (typeof save.floor !== 'number' || !save.player) return false;
+    _storage.setItem(SAVE_KEY(slot), JSON.stringify(save));
+    return true;
+  } catch {
+    return false;
+  }
+}
