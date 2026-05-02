@@ -536,6 +536,7 @@ export class GameScene extends Phaser.Scene {
       [TILE.TRASH_PILE_1]:   tk('tile_trash_pile_1'),
       [TILE.TRASH_PILE_2]:   tk('tile_trash_pile_2'),
       [TILE.TRASH_PILE_3]:   tk('tile_trash_pile_3'),
+      [TILE.BREAKABLE_WALL]: tk('tile_wall'),
     };
 
     // Build position → texture-key overrides for typed shop doors (town only)
@@ -1778,6 +1779,24 @@ export class GameScene extends Phaser.Scene {
       } else {
         EventBus.emit(GameEvents.MESSAGE, 'The door is sealed. Martel mentioned a key — the Key to Elsewhere.');
       }
+      return;
+    }
+
+    if (result.action === 'break_wall') {
+      this._runController.cancel();
+      this.dungeonMap.setTile(result.wallX, result.wallY, TILE.FLOOR);
+      const _bwRoomId = this._entryTracker.getRoomId();
+      const _bwRoomDef = _bwRoomId ? UNIQUE_ROOM_DEFS.find(d => d.id === _bwRoomId) : null;
+      const _bwFloorBase = _bwRoomDef?.floorKey ?? 'tile_floor';
+      this.mapRT.drawFrame(
+        tilesetManager.getTileKey(_bwFloorBase), undefined,
+        result.wallX * TILE_SIZE, result.wallY * TILE_SIZE,
+      );
+      this.turnManager.setState(TURN_STATE.PLAYER_ACTING);
+      this._updateFOV();
+      EventBus.emit(GameEvents.MESSAGE, 'You swing your pick axe and break through the rocky wall!');
+      this._syncRegistry();
+      this._startEnemyTurns();
       return;
     }
 

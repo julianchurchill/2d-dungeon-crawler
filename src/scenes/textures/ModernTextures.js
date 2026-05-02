@@ -1242,6 +1242,34 @@ export function createModernItemTextures(generateTextureFn) {
     g.fillStyle(0xaaeeff, 0.8);
     g.fillRect(T/2 - 2, T/2 + 1, 2, 3);
   });
+
+  // Pick Axe — polished steel head with wrapped handle
+  generateTextureFn('modern_item_pick_axe', T, T, (g) => {
+    // Handle shadow
+    g.fillStyle(0x3a1a05);
+    g.fillRect(T/2 - 2, 4, 4, 12);
+    // Handle — rich brown
+    g.fillStyle(0x8b4513);
+    g.fillRect(T/2 - 1, 5, 2, 11);
+    // Handle highlight
+    g.fillStyle(0xbb7744, 0.6);
+    g.fillRect(T/2, 6, 1, 9);
+    // Head outline
+    g.fillStyle(0x222222);
+    g.fillRect(1, 1, 14, 6);
+    // Head face — polished steel
+    g.fillStyle(0xaabbcc);
+    g.fillRect(2, 2, 12, 4);
+    // Top shine on head
+    g.fillStyle(0xddeeff, 0.7);
+    g.fillRect(2, 2, 12, 1);
+    // Pick tip — bright point (left)
+    g.fillStyle(0xeeeeff);
+    g.fillRect(1, 3, 2, 2);
+    // Poll end — darker blunt right
+    g.fillStyle(0x7788aa);
+    g.fillRect(13, 2, 2, 4);
+  });
 }
 
 /**

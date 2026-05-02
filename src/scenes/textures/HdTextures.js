@@ -1930,6 +1930,51 @@ export function createHdItemTextures(generateTextureFn) {
     g.fillStyle(0xffffff, 0.6);
     g.fillRect(S/2 - 4, S/2 + 2, 3, 4);
   });
+
+  // Pick Axe — high-detail steel head with hardwood handle
+  generateTextureFn('hd_item_pick_axe', S, S, (g) => {
+    // Handle shadow
+    g.fillStyle(0x2a0e02);
+    g.fillRect(S/2 - 3, 9, 6, 23);
+    // Handle — dark hardwood
+    g.fillStyle(0x7a3010);
+    g.fillRect(S/2 - 2, 10, 4, 22);
+    // Handle highlight
+    g.fillStyle(0xaa5025, 0.5);
+    g.fillRect(S/2, 11, 2, 20);
+    // Head outline
+    g.fillStyle(0x111111);
+    g.fillRect(2, 2, 28, 9);
+    // Head face — polished steel
+    g.fillStyle(0x8899aa);
+    g.fillRect(3, 3, 26, 7);
+    // Head top shine
+    g.fillStyle(0xccddee, 0.8);
+    g.fillRect(3, 3, 26, 2);
+    g.fillStyle(0xeef4ff, 0.5);
+    g.fillRect(3, 3, 26, 1);
+    // Pick tip — tapered point (left)
+    g.fillStyle(0x7788aa);
+    g.fillRect(1, 4, 3, 5);
+    g.fillStyle(0xaabbcc);
+    g.fillRect(1, 5, 2, 3);
+    g.fillStyle(0xddeeff);
+    g.fillRect(1, 6, 1, 1);
+    // Poll end — blunt right
+    g.fillStyle(0x667799);
+    g.fillRect(29, 3, 3, 7);
+    g.fillStyle(0x8899bb, 0.5);
+    g.fillRect(29, 3, 3, 2);
+    // Metal grain lines on head
+    g.fillStyle(0x667788, 0.35);
+    g.fillRect(5, 5, 21, 1);
+    g.fillRect(5, 8, 21, 1);
+    // Socket — head-handle join
+    g.fillStyle(0x445566);
+    g.fillRect(S/2 - 3, 8, 6, 4);
+    g.fillStyle(0x556677, 0.5);
+    g.fillRect(S/2 - 2, 9, 4, 2);
+  });
 }
 
 /**

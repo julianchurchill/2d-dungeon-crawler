@@ -761,6 +761,25 @@ export function createClassicItemTextures(generateTextureFn) {
     g.fillStyle(0x44aadd);
     g.fillEllipse(T/2, T/2 + 3, 5, 6);
   });
+
+  // Pick Axe — horizontal head with wooden handle
+  generateTextureFn('classic_item_pick_axe', T, T, (g) => {
+    // Handle — wood
+    g.fillStyle(0x885533);
+    g.fillRect(T/2 - 1, 5, 2, 11);
+    // Head outline — dark steel
+    g.fillStyle(0x444444);
+    g.fillRect(2, 1, 12, 5);
+    // Head face — steel grey
+    g.fillStyle(0xaaaaaa);
+    g.fillRect(3, 2, 10, 3);
+    // Pick tip — bright point (left side)
+    g.fillStyle(0xcccccc);
+    g.fillRect(1, 3, 2, 1);
+    // Poll end — blunt right
+    g.fillStyle(0x888888);
+    g.fillRect(12, 2, 2, 3);
+  });
 }
 
 /**

@@ -18,6 +18,7 @@ export class Item {
     this.effect = typeDef.effect || null;
     this.attackBonus = typeDef.attackBonus || 0;
     this.defenseBonus = typeDef.defenseBonus || 0;
+    this.canBreakWalls = typeDef.canBreakWalls ?? false;
     this.sprite = null; // set by GameScene
   }
 

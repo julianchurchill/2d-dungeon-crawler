@@ -26,6 +26,8 @@ export const TILE = Object.freeze({
   TRASH_PILE_2: 14,
   /** Trash pile variant 3 — scattered debris. Non-walkable, not opaque. */
   TRASH_PILE_3: 15,
+  /** Breakable wall — looks like a regular wall but can be destroyed by a player equipped with a pick axe. Non-walkable, opaque. */
+  BREAKABLE_WALL: 16,
 });
 
 export const FOV_STATE = Object.freeze({
