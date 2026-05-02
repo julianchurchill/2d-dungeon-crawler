@@ -3,7 +3,7 @@
 ## Bugs
 
 - [x] home seeking scrolls should stack
-- [ ] home seeking scroll is not consumed when used and it should be
+- [x] home seeking scroll is not consumed when used and it should be
 - [ ] save doesn't remember which parts of the dungeon you have revealed
 - [x] UI menu help tidy up - 'help' screen is missing 'k' for skills. Move 'Controls' information from main menu into a 'help' menu accessible from the main menu - the same 'help' menu as available in-game.
 - [x] dev options screen 'Bosses' section 'total per level (overrides normal boss logic)' text overlaps the buttons below it
