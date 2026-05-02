@@ -14,7 +14,7 @@ import { tilesetManager as defaultTilesetManager } from '../systems/TilesetManag
  * @returns {string}
  */
 export function getInventoryPanelTitle(isTouchDev) {
-  return isTouchDev ? 'Inventory' : 'Inventory  [I] close  [↵] use/equip';
+  return isTouchDev ? 'Inventory' : 'Inventory  [I] close  [↵] use/equip  [D] drop';
 }
 
 const COLS = 4;
@@ -78,6 +78,16 @@ export class InventoryPanel {
       // Emit TOGGLE_INVENTORY so GameScene handles the TurnManager state transition.
       closeBtn.on('pointerdown', () => EventBus.emit(GameEvents.TOGGLE_INVENTORY));
       this._container.add(closeBtn);
+
+      // DROP button — lets touch players drop the highlighted item without a keyboard.
+      const dropBtn = s.add.text(PANEL_PAD / 2, 10, '[DROP]', {
+        fontSize: '12px', fontFamily: FONT_FAMILY, color: '#cc8844',
+        stroke: '#000000', strokeThickness: 2, resolution: 2,
+      }).setOrigin(0, 0).setInteractive({ useHandCursor: true });
+      dropBtn.on('pointerover', () => dropBtn.setColor('#ffbb66'));
+      dropBtn.on('pointerout',  () => dropBtn.setColor('#cc8844'));
+      dropBtn.on('pointerdown', () => this._dropCurrentSlot());
+      this._container.add(dropBtn);
     }
 
     // Slots
@@ -217,6 +227,7 @@ export class InventoryPanel {
     this._kbLeft  = () => this._navigate('left');
     this._kbRight = () => this._navigate('right');
     this._kbEnter = () => this._useCurrentSlot();
+    this._kbDrop  = () => this._dropCurrentSlot();
 
     kb.on('keydown-UP',    this._kbUp);
     kb.on('keydown-DOWN',  this._kbDown);
@@ -225,8 +236,8 @@ export class InventoryPanel {
     kb.on('keydown-W',     this._kbUp);
     kb.on('keydown-S',     this._kbDown);
     kb.on('keydown-A',     this._kbLeft);
-    kb.on('keydown-D',     this._kbRight);
     kb.on('keydown-ENTER', this._kbEnter);
+    kb.on('keydown-D',     this._kbDrop);
   }
 
   /**
@@ -242,9 +253,9 @@ export class InventoryPanel {
     kb.off('keydown-W',     this._kbUp);
     kb.off('keydown-S',     this._kbDown);
     kb.off('keydown-A',     this._kbLeft);
-    kb.off('keydown-D',     this._kbRight);
     kb.off('keydown-ENTER', this._kbEnter);
-    this._kbUp = this._kbDown = this._kbLeft = this._kbRight = this._kbEnter = null;
+    kb.off('keydown-D',     this._kbDrop);
+    this._kbUp = this._kbDown = this._kbLeft = this._kbRight = this._kbEnter = this._kbDrop = null;
   }
 
   /**
@@ -269,6 +280,16 @@ export class InventoryPanel {
     const idx = this._cursor.index;
     if (idx < this.inventory.length) {
       EventBus.emit(GameEvents.INVENTORY_USE, idx);
+    }
+  }
+
+  /**
+   * Drops the item at the current cursor slot onto the floor, if any.
+   */
+  _dropCurrentSlot() {
+    const idx = this._cursor.index;
+    if (idx < this.inventory.length) {
+      EventBus.emit(GameEvents.INVENTORY_DROP, idx);
     }
   }
 

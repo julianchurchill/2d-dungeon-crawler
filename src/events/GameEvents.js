@@ -44,6 +44,14 @@ export const GameEvents = {
   INVENTORY_USE: 'inventory-use',
 
   /**
+   * Drop the inventory item at the given index onto the floor.
+   * Emitted by: InventoryPanel (D key or mobile DROP button)
+   * Subscribed by: GameScene
+   * @type {number} Zero-based inventory index.
+   */
+  INVENTORY_DROP: 'inventory-drop',
+
+  /**
    * The player's inventory contents have changed.
    * Emitted by: InventorySystem
    * Subscribed by: InventoryPanel (refreshes display)

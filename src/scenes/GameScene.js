@@ -1441,7 +1441,8 @@ export class GameScene extends Phaser.Scene {
     EventBus.on(GameEvents.DOWNGRADE_SKILL, ({ skillId }) => this._handleDowngradeSkill(skillId), this);
     EventBus.on(GameEvents.ACTIVATE_SKILL,  ({ skillId }) => this._handleActivateSkill(skillId),  this);
     EventBus.on(GameEvents.USE_STAIRS, wrapWithRunCancel(this._runController, () => this._tryUseStairs()), this);
-    EventBus.on(GameEvents.INVENTORY_USE, (index) => this._useInventoryItem(index), this);
+    EventBus.on(GameEvents.INVENTORY_USE,  (index) => this._useInventoryItem(index),  this);
+    EventBus.on(GameEvents.INVENTORY_DROP, (index) => this._dropInventoryItem(index), this);
     EventBus.on(GameEvents.SELL_ITEM, ({ shopType, item }) => this._handleSellItem(shopType, item), this);
     EventBus.on(GameEvents.BUY_ITEM, ({ shopType, shopItem }) => this._handleBuyItem(shopType, shopItem), this);
     EventBus.on(GameEvents.STORE_ITEM, ({ index }) => this._handleStoreItem(index), this);
@@ -2674,6 +2675,29 @@ export class GameScene extends Phaser.Scene {
     if (this.player.isDead()) {
       this._gameOver();
     }
+  }
+
+  /**
+   * Handles INVENTORY_DROP: removes the item from the player's inventory and
+   * places it as a floor item at the player's current position.
+   *
+   * @param {number} index - Zero-based inventory index to drop.
+   */
+  _dropInventoryItem(index) {
+    const result = InventorySystem.dropItem(this.player, index);
+    if (!result) return;
+
+    const { item, message } = result;
+    const sprite = this.add.sprite(
+      item.x * TILE_SIZE + TILE_SIZE / 2,
+      item.y * TILE_SIZE + TILE_SIZE / 2,
+      tilesetManager.getTileKey(item.textureKey),
+    ).setDepth(6).setVisible(
+      this.dungeonMap.getFovState(item.x, item.y) === FOV_STATE.VISIBLE,
+    );
+    item.sprite = sprite;
+    this.items.push(item);
+    EventBus.emit(GameEvents.MESSAGE, message);
   }
 
   /**
