@@ -40,6 +40,15 @@ Feature: Alcove Carving
     When the alcove is carved at 6, 5 moving in direction 1, 0 with always-carve RNG
     Then the tile at 8, 5 is still FLOOR
 
+  # ── EMPTY tile carving ──────────────────────────────────────────────────────
+  # In real dungeons, tiles beyond the room-perimeter wall are EMPTY (not WALL),
+  # because buildWalls() only places WALL tiles adjacent to FLOOR.
+
+  Scenario: Breaking a wall carves EMPTY tiles beyond it
+    Given a 20x20 map with only a wall at 6, 5 and floor at 5, 5
+    When the alcove is carved at 6, 5 moving in direction 1, 0 with always-carve RNG
+    Then the tile at 7, 5 is FLOOR
+
   # ── Out-of-bounds safety ────────────────────────────────────────────────────
 
   Scenario: Alcove carving near a map edge does not throw

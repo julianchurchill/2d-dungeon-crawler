@@ -49,7 +49,9 @@ export class AlcoveCarver {
 
     for (const { x, y, chance } of candidates) {
       if (!map.inBounds(x, y)) continue;
-      if (map.getTile(x, y) !== TILE.WALL) continue;
+      const t = map.getTile(x, y);
+      // Carve WALL tiles (room perimeter) and EMPTY tiles (void beyond walls).
+      if (t !== TILE.WALL && t !== TILE.EMPTY) continue;
       if (rng.next() < chance) {
         map.setTile(x, y, TILE.FLOOR);
         newFloors.push({ x, y });

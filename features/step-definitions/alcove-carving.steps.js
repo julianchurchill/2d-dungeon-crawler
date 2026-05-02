@@ -27,6 +27,13 @@ Given('a FLOOR tile at {int}, {int}', function (x, y) {
   this.map.setTile(x, y, TILE.FLOOR);
 });
 
+Given('a 20x20 map with only a wall at {int}, {int} and floor at {int}, {int}', function (wx, wy, fx, fy) {
+  this.map = new DungeonMap(20, 20);
+  // All tiles default to EMPTY (0) — mirrors real dungeon tiles beyond room walls
+  this.map.setTile(fx, fy, TILE.FLOOR);
+  this.map.setTile(wx, wy, TILE.WALL);
+});
+
 When('the alcove is carved at {int}, {int} moving in direction {int}, {int} with always-carve RNG',
   function (wx, wy, dx, dy) {
     this.carveError = null;
