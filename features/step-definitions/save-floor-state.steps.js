@@ -12,6 +12,8 @@ import {
   saveGame,
   loadGame,
 } from '../../src/save/SaveGame.js';
+import { DungeonMap } from '../../src/dungeon/DungeonMap.js';
+import { FOV_STATE } from '../../src/utils/TileTypes.js';
 
 // ── Helpers ───────────────────────────────────────────────────────────────
 
@@ -34,6 +36,7 @@ function makeDungeonMap(width, height) {
     width,
     height,
     tiles: new Uint8Array(width * height).fill(0),
+    fovState: new Uint8Array(width * height).fill(0),
   };
 }
 
@@ -207,3 +210,39 @@ Then('the loaded save should contain floor state data', function () {
   assert.ok(save.floorState, 'Expected save to contain floorState');
   assert.ok(save.floorState.tiles, 'Expected floorState to contain tiles');
 });
+
+// ── FOV state serialization ───────────────────────────────────────────────────
+
+Given('a real dungeon map {int} wide and {int} tall with explored tile at {int},{int}',
+  function (width, height, tx, ty) {
+    const map = new DungeonMap(width, height);
+    map.setFovState(tx, ty, FOV_STATE.EXPLORED);
+    this.dungeonMap = map;
+    this.player     = this.player ?? makePlayer();
+    this.enemies    = [];
+    this.floorItems = [];
+    this.registry   = this.registry ?? makeRegistry();
+  });
+
+Then('the floor state fovState at {int},{int} should be EXPLORED', function (x, y) {
+  const idx = y * this.floorState.width + x;
+  assert.equal(this.floorState.fovState[idx], FOV_STATE.EXPLORED,
+    `Expected fovState[${x},${y}] to be EXPLORED (1) but got ${this.floorState.fovState?.[idx]}`);
+});
+
+Then('the floor state fovState at {int},{int} should be UNEXPLORED', function (x, y) {
+  const idx = y * this.floorState.width + x;
+  assert.equal(this.floorState.fovState[idx], FOV_STATE.UNEXPLORED,
+    `Expected fovState[${x},${y}] to be UNEXPLORED (0) but got ${this.floorState.fovState?.[idx]}`);
+});
+
+Then('a DungeonMap restored from the floor state has EXPLORED fovState at {int},{int}',
+  function (x, y) {
+    assert.ok(this.floorState.fovState, 'Expected fovState to be present in floor state');
+    const restoredMap = new DungeonMap(this.floorState.width, this.floorState.height);
+    for (let i = 0; i < this.floorState.fovState.length; i++) {
+      restoredMap.fovState[i] = this.floorState.fovState[i];
+    }
+    assert.equal(restoredMap.getFovState(x, y), FOV_STATE.EXPLORED,
+      `Expected restored fovState at ${x},${y} to be EXPLORED`);
+  });

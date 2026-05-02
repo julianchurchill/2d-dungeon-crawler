@@ -332,6 +332,13 @@ export class GameScene extends Phaser.Scene {
     for (let i = 0; i < floorState.tiles.length; i++) {
       map.tiles[i] = floorState.tiles[i];
     }
+    // Restore explored state so previously revealed tiles remain visible on reload.
+    // Guard for backward compat with saves that predate fovState serialization.
+    if (floorState.fovState) {
+      for (let i = 0; i < floorState.fovState.length; i++) {
+        map.fovState[i] = floorState.fovState[i];
+      }
+    }
     this.dungeonMap = map;
 
     this._clearFloorEntities();
