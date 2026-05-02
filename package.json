@@ -1,6 +1,6 @@
 {
   "name": "dungeon-crawler",
-  "version": "0.72.0",
+  "version": "0.72.1",
   "type": "module",
   "scripts": {
     "predev": "node scripts/gen-build-info.js",
