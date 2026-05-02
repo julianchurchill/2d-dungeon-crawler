@@ -2,6 +2,7 @@ import { DungeonMap } from './DungeonMap.js';
 import { TILE } from '../utils/TileTypes.js';
 import { RoomShaper } from './RoomShaper.js';
 import { TrashPilePlacer } from './TrashPilePlacer.js';
+import { BreakableWallPlacer } from './BreakableWallPlacer.js';
 
 const MAP_WIDTH = 80;
 const MAP_HEIGHT = 60;
@@ -156,6 +157,7 @@ export class BSPDungeonGenerator {
     map.setTile(stairsUpPos.x, stairsUpPos.y, TILE.STAIRS_UP);
 
     new TrashPilePlacer().placeTrash(map, rooms, rng);
+    new BreakableWallPlacer().placeWalls(map, rooms, rng);
 
     return {
       map,

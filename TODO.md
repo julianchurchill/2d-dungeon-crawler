@@ -48,8 +48,8 @@
 
 ## Items
 
-- [ ] pick axe - this is a fairly weak weapon but has another purpose. The player can destroy breakable walls when equipping and using a pick axe. When 'look' is used on the breakable wall it has an additional adjective such as 'Rocky Stone Wall' to give the player a clue it can be broken.
 - [ ] potion of speed - lets the player have 2 actions per turn instead of 1 for a limited number of turns
+- [x] pick axe - this is a fairly weak weapon but has another purpose. The player can destroy breakable walls when equipping and using a pick axe. When 'look' is used on the breakable wall it has an additional adjective such as 'Rocky Stone Wall' to give the player a clue it can be broken.
 - [x] home seeking scroll - item appears from floor 10 onwards, fairly rare. Rarely appears in the magic (was potions) shop. When used takes you out of the current floor and to the Town level outside your home. Once used the item is destroyed. A portal remains next to your home until used that can be used to return to the floor you left. The floor should be preserved in the state you left it, including enemies and items.
 
 ## UI

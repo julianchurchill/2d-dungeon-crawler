@@ -63,6 +63,36 @@ export function createModernTileTextures(generateTextureFn) {
     g.fillRect(T - 1, 0, 1, T);
   });
 
+  // Breakable wall — same as tile_wall with a faint crack across one brick face
+  generateTextureFn('modern_tile_breakable_wall', T, T, (g) => {
+    g.fillStyle(0x304050);
+    g.fillRect(0, 0, T, T);
+    g.fillStyle(0x1a2530);
+    g.fillRect(0, 5, T, 1);
+    g.fillRect(0, 11, T, 1);
+    g.fillRect(8, 0, 1, 5);
+    g.fillRect(4, 6, 1, 5);
+    g.fillRect(11, 6, 1, 5);
+    g.fillRect(8, 12, 1, 4);
+    g.fillStyle(0x6070a0);
+    g.fillRect(0, 0, T, 1);
+    g.fillRect(0, 0, 1, 5);
+    g.fillRect(0, 6, 1, 5);
+    g.fillRect(0, 12, 1, 4);
+    g.fillStyle(0x0e1520);
+    g.fillRect(0, T - 1, T, 1);
+    g.fillRect(T - 1, 0, 1, T);
+    // Subtle crack cutting down through the middle brick row
+    g.fillStyle(0x0a1018);
+    g.fillRect(6, 1, 1, 4);
+    g.fillRect(5, 4, 1, 2);
+    g.fillRect(6, 6, 1, 5);
+    g.fillStyle(0x7090c0);
+    g.fillRect(7, 1, 1, 4);
+    g.fillRect(6, 4, 1, 2);
+    g.fillRect(7, 6, 1, 5);
+  });
+
   // Door — dark mahogany with ornate gold handle
   generateTextureFn('modern_tile_door', T, T, (g) => {
     // Door frame — very dark brown
@@ -1241,6 +1271,34 @@ export function createModernItemTextures(generateTextureFn) {
     g.fillEllipse(T/2, T/2 + 3, 6, 7);
     g.fillStyle(0xaaeeff, 0.8);
     g.fillRect(T/2 - 2, T/2 + 1, 2, 3);
+  });
+
+  // Pick Axe — polished steel head with wrapped handle
+  generateTextureFn('modern_item_pick_axe', T, T, (g) => {
+    // Handle shadow
+    g.fillStyle(0x3a1a05);
+    g.fillRect(T/2 - 2, 4, 4, 12);
+    // Handle — rich brown
+    g.fillStyle(0x8b4513);
+    g.fillRect(T/2 - 1, 5, 2, 11);
+    // Handle highlight
+    g.fillStyle(0xbb7744, 0.6);
+    g.fillRect(T/2, 6, 1, 9);
+    // Head outline
+    g.fillStyle(0x222222);
+    g.fillRect(1, 1, 14, 6);
+    // Head face — polished steel
+    g.fillStyle(0xaabbcc);
+    g.fillRect(2, 2, 12, 4);
+    // Top shine on head
+    g.fillStyle(0xddeeff, 0.7);
+    g.fillRect(2, 2, 12, 1);
+    // Pick tip — bright point (left)
+    g.fillStyle(0xeeeeff);
+    g.fillRect(1, 3, 2, 2);
+    // Poll end — darker blunt right
+    g.fillStyle(0x7788aa);
+    g.fillRect(13, 2, 2, 4);
   });
 }
 

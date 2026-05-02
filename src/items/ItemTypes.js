@@ -152,6 +152,16 @@ export const ITEM_TYPES = {
     sellPrice: 8,
     stackable: true,
   },
+  PICK_AXE: {
+    id: 'pick_axe',
+    name: 'Pick Axe',
+    description: '+2 Attack. Equip to break Rocky Stone Walls by moving into them.',
+    textureKey: 'item_pick_axe',
+    type: 'weapon',
+    attackBonus: 2,
+    canBreakWalls: true,
+    sellPrice: 8,
+  },
   HOME_SEEKING_SCROLL: {
     id: 'home_seeking_scroll',
     name: 'Home Seeking Scroll',

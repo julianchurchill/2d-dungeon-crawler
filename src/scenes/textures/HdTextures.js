@@ -90,6 +90,48 @@ export function createHdTileTextures(generateTextureFn) {
     g.fillRect(S - 1, 0, 1, S);
   });
 
+  // Breakable wall — same as hd_tile_wall with a subtle crack across the centre brick
+  generateTextureFn('hd_tile_breakable_wall', S, S, (g) => {
+    g.fillStyle(0x2e3a4e);
+    g.fillRect(0, 0, S, S);
+    const brickH   = 9;
+    const brickRows = [
+      { y: 1,  offsets: [1, 12, 23] },
+      { y: 12, offsets: [6, 17] },
+      { y: 23, offsets: [1, 12, 23] },
+    ];
+    for (const row of brickRows) {
+      for (const bx of row.offsets) {
+        const bw = (bx === row.offsets[row.offsets.length - 1]) ? S - bx - 1 : 9;
+        g.fillStyle(0x3e4e66);
+        g.fillRect(bx, row.y, bw, brickH);
+        g.fillStyle(0x5a7098);
+        g.fillRect(bx, row.y, bw, 1);
+        g.fillRect(bx, row.y, 1, brickH);
+        g.fillStyle(0x1e2a38);
+        g.fillRect(bx, row.y + brickH - 1, bw, 1);
+        g.fillRect(bx + bw - 1, row.y, 1, brickH);
+        g.fillStyle(0x344258, 0.6);
+        g.fillRect(bx + 3, row.y + 3, 3, 1);
+      }
+    }
+    g.fillStyle(0x6888b0);
+    g.fillRect(0, 0, S, 1);
+    g.fillRect(0, 0, 1, S);
+    g.fillStyle(0x0a1018);
+    g.fillRect(0, S - 1, S, 1);
+    g.fillRect(S - 1, 0, 1, S);
+    // Subtle crack running through the centre brick row (y=12–20)
+    g.fillStyle(0x0a0e14);
+    g.fillRect(13, 13, 1, 5);
+    g.fillRect(12, 17, 1, 4);
+    g.fillRect(13, 20, 1, 3);
+    g.fillStyle(0x6888b0);
+    g.fillRect(14, 13, 1, 5);
+    g.fillRect(13, 17, 1, 4);
+    g.fillRect(14, 20, 1, 3);
+  });
+
   // Dungeon door — dark mahogany with ornate mouldings and gold hardware
   generateTextureFn('hd_tile_door', S, S, (g) => {
     // Stone door-frame
@@ -1929,6 +1971,51 @@ export function createHdItemTextures(generateTextureFn) {
     g.fillEllipse(S/2 - 2, S/2 + 3, 7, 8);
     g.fillStyle(0xffffff, 0.6);
     g.fillRect(S/2 - 4, S/2 + 2, 3, 4);
+  });
+
+  // Pick Axe — high-detail steel head with hardwood handle
+  generateTextureFn('hd_item_pick_axe', S, S, (g) => {
+    // Handle shadow
+    g.fillStyle(0x2a0e02);
+    g.fillRect(S/2 - 3, 9, 6, 23);
+    // Handle — dark hardwood
+    g.fillStyle(0x7a3010);
+    g.fillRect(S/2 - 2, 10, 4, 22);
+    // Handle highlight
+    g.fillStyle(0xaa5025, 0.5);
+    g.fillRect(S/2, 11, 2, 20);
+    // Head outline
+    g.fillStyle(0x111111);
+    g.fillRect(2, 2, 28, 9);
+    // Head face — polished steel
+    g.fillStyle(0x8899aa);
+    g.fillRect(3, 3, 26, 7);
+    // Head top shine
+    g.fillStyle(0xccddee, 0.8);
+    g.fillRect(3, 3, 26, 2);
+    g.fillStyle(0xeef4ff, 0.5);
+    g.fillRect(3, 3, 26, 1);
+    // Pick tip — tapered point (left)
+    g.fillStyle(0x7788aa);
+    g.fillRect(1, 4, 3, 5);
+    g.fillStyle(0xaabbcc);
+    g.fillRect(1, 5, 2, 3);
+    g.fillStyle(0xddeeff);
+    g.fillRect(1, 6, 1, 1);
+    // Poll end — blunt right
+    g.fillStyle(0x667799);
+    g.fillRect(29, 3, 3, 7);
+    g.fillStyle(0x8899bb, 0.5);
+    g.fillRect(29, 3, 3, 2);
+    // Metal grain lines on head
+    g.fillStyle(0x667788, 0.35);
+    g.fillRect(5, 5, 21, 1);
+    g.fillRect(5, 8, 21, 1);
+    // Socket — head-handle join
+    g.fillStyle(0x445566);
+    g.fillRect(S/2 - 3, 8, 6, 4);
+    g.fillStyle(0x556677, 0.5);
+    g.fillRect(S/2 - 2, 9, 4, 2);
   });
 }
 

@@ -21,6 +21,7 @@ const TILE_LABELS = {
   [TILE.TRASH_PILE_1]:  'Trash Pile',
   [TILE.TRASH_PILE_2]:  'Trash Pile',
   [TILE.TRASH_PILE_3]:  'Trash Pile',
+  [TILE.BREAKABLE_WALL]: 'Rocky Stone Wall',
 };
 
 /**
