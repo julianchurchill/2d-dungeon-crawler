@@ -160,6 +160,7 @@ export const ITEM_TYPES = {
     type: 'consumable',
     effect: { type: 'teleport_to_town' },
     sellPrice: 15,
+    stackable: true,
   },
 };
 

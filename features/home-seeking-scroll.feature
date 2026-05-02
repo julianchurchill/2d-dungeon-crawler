@@ -16,6 +16,10 @@ Feature: Home Seeking Scroll
     Given the Home Seeking Scroll item type
     Then its sell price is greater than 0
 
+  Scenario: Home Seeking Scroll is stackable
+    Given the Home Seeking Scroll item type
+    Then it is stackable
+
   # ── Loot pool ────────────────────────────────────────────────────────────────
 
   Scenario: Home Seeking Scroll is in the floor loot pool from floor 1

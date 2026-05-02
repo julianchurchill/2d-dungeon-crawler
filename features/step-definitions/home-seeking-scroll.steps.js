@@ -30,6 +30,11 @@ Then('its sell price is greater than 0', function () {
     `Expected sellPrice > 0 but got ${this.itemType.sellPrice}`);
 });
 
+Then('it is stackable', function () {
+  assert.ok(this.itemType.stackable === true,
+    `Expected ${this.itemType.name} to be stackable`);
+});
+
 // ── Loot pool ────────────────────────────────────────────────────────────────
 
 When('getFloorLootPool is called for floor {int}', function (floor) {
