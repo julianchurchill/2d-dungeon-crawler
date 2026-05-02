@@ -37,6 +37,8 @@ GameScene                ──► UNIQUE_ROOM_ENTERED  ──► AchievementSys
 
 InventoryPanel (click)   ──► INVENTORY_USE        ──► GameScene._useInventoryItem
 InventoryPanel (keyboard)──► INVENTORY_USE        ──► GameScene._useInventoryItem
+InventoryPanel (D key)   ──► INVENTORY_DROP       ──► GameScene._dropInventoryItem
+InventoryPanel (DROP btn)──► INVENTORY_DROP       ──► GameScene._dropInventoryItem
 
 DPad (arrow buttons)     ──► DPAD_PRESS           ──► GameScene._handleDir
 DPad (arrow pointerdown) ──► DPAD_HOLD_START      ──► HeldMovementTracker (auto-repeat)
@@ -79,6 +81,7 @@ DialoguePanel (show/hide)──► DIALOGUE_TOGGLED     ──► GameScene (gat
 | `PLAYER_LEVEL_UP` | `'player-level-up'` | `number` (new level) | GameScene | UIScene → level-up banner, AchievementSystem |
 | `OPEN_INVENTORY` | `'open-inventory'` | `{ inventory, player }` | GameScene | UIScene → InventoryPanel |
 | `INVENTORY_USE` | `'inventory-use'` | `number` (index) | InventoryPanel | GameScene |
+| `INVENTORY_DROP` | `'inventory-drop'` | `number` (index) | InventoryPanel | GameScene |
 | `INVENTORY_CHANGED` | `'inventory-changed'` | `Item[]` | InventorySystem, GameScene (after sell) | InventoryPanel, UIScene → ShopPanel |
 | `PLAYER_STATS_CHANGED` | `'player-stats-changed'` | `object` (stats) | InventorySystem | *(none)* |
 | `FLOOR_CHANGED` | `'floor-changed'` | `number` (floor) | FloorManager | GameScene, AchievementSystem |
