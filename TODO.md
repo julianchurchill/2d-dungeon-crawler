@@ -2,6 +2,9 @@
 
 ## Bugs
 
+- [ ] home seeking scrolls should stack
+- [ ] home seeking scroll is not consumed when used and it should be
+- [ ] save doesn't remember which parts of the dungeon you have revealed
 - [x] UI menu help tidy up - 'help' screen is missing 'k' for skills. Move 'Controls' information from main menu into a 'help' menu accessible from the main menu - the same 'help' menu as available in-game.
 - [x] dev options screen 'Bosses' section 'total per level (overrides normal boss logic)' text overlaps the buttons below it
 - [x] options menu has "choose the visual style for dungeons tiles" overlaps the tileset buttons and 'active' text overlaps icons on buttons. Fix the text overlap and remove the 'active' text entirely as it is not needed.
@@ -15,6 +18,7 @@
 
 ## General
 
+- [ ] hidden passages behind breakable walls. Breakable walls have a chance of concealing a hidden passage that leads to a room that can only be reached by the hidden passage. The firs time a player goes near a breakable wall that leads to a hidden passage (within 8 tiles) the UI shows a message in the message log 'you feel a draft nearby'.
 - [ ] music
 - [ ] stats - deepest level reached, monster types kill count, unique bosses kill count
 - [x] variable difficulty setting in options — Easy / Normal / Hard affects enemy count per room and enemy HP/ATK multipliers; persisted across sessions
@@ -36,7 +40,6 @@
 
 ## Inventory
 
-- [ ] show details of inventory item when highlighted
 - [ ] destroy items to get collectable materials that could be used later to create new items or enhance existing ones. Use 'D' when in inventory and provide a button for mobile interface. Protect unique items by asking the player to confirm the action.
 - [x] drop items with 'x' when in inventory. Provide a button for mobile interface.
 - [x] stackable items - some items can stack, such as potions and scrolls, so they only take up one slot in the inventory. The number of items in that slot should be visible in the inventory panel slot. Using a stacked item only uses 1 item at a time. Selling a stacked item only sells 1 item at a time.
@@ -45,6 +48,8 @@
 
 ## Items
 
+- [ ] pick axe - this is a fairly weak weapon but has another purpose. The player can destroy breakable walls when equipping and using a pick axe. When 'look' is used on the breakable wall it has an additional adjective such as 'Rocky Stone Wall' to give the player a clue it can be broken.
+- [ ] potion of speed - lets the player have 2 actions per turn instead of 1 for a limited number of turns
 - [x] home seeking scroll - item appears from floor 10 onwards, fairly rare. Rarely appears in the magic (was potions) shop. When used takes you out of the current floor and to the Town level outside your home. Once used the item is destroyed. A portal remains next to your home until used that can be used to return to the floor you left. The floor should be preserved in the state you left it, including enemies and items.
 
 ## UI
