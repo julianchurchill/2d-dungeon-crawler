@@ -14,7 +14,7 @@ import { tilesetManager as defaultTilesetManager } from '../systems/TilesetManag
  * @returns {string}
  */
 export function getInventoryPanelTitle(isTouchDev) {
-  return isTouchDev ? 'Inventory' : 'Inventory  [I] close  [↵] use/equip  [D] drop';
+  return isTouchDev ? 'Inventory' : 'Inventory  [I] close  [↵] use/equip  [X] drop';
 }
 
 const COLS = 4;
@@ -237,7 +237,7 @@ export class InventoryPanel {
     kb.on('keydown-S',     this._kbDown);
     kb.on('keydown-A',     this._kbLeft);
     kb.on('keydown-ENTER', this._kbEnter);
-    kb.on('keydown-D',     this._kbDrop);
+    kb.on('keydown-X',     this._kbDrop);
   }
 
   /**
@@ -254,7 +254,7 @@ export class InventoryPanel {
     kb.off('keydown-S',     this._kbDown);
     kb.off('keydown-A',     this._kbLeft);
     kb.off('keydown-ENTER', this._kbEnter);
-    kb.off('keydown-D',     this._kbDrop);
+    kb.off('keydown-X',     this._kbDrop);
     this._kbUp = this._kbDown = this._kbLeft = this._kbRight = this._kbEnter = this._kbDrop = null;
   }
 

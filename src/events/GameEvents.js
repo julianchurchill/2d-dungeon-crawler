@@ -45,7 +45,7 @@ export const GameEvents = {
 
   /**
    * Drop the inventory item at the given index onto the floor.
-   * Emitted by: InventoryPanel (D key or mobile DROP button)
+   * Emitted by: InventoryPanel (X key or mobile DROP button)
    * Subscribed by: GameScene
    * @type {number} Zero-based inventory index.
    */

@@ -1,19 +1,19 @@
 Feature: Drop items from inventory
 
   The player can drop an item from their inventory onto the current floor
-  tile by pressing D while the inventory panel is open.  On touch devices
+  tile by pressing X while the inventory panel is open.  On touch devices
   a DROP button is shown instead.  Dropping removes the item from the
   player's inventory and returns it to the floor.
 
   Scenario: Title shows drop hint on non-touch devices
     Given the device is not a touch device
     When the inventory panel title text is retrieved
-    Then the title should include "[D] drop"
+    Then the title should include "[X] drop"
 
   Scenario: Title hides drop hint on touch devices
     Given the device is a touch device
     When the inventory panel title text is retrieved
-    Then the title should not include "[D] drop"
+    Then the title should not include "[X] drop"
 
   Scenario: Dropping an item removes it from the player's inventory
     Given a player carrying a "health_potion" in inventory slot 0
