@@ -2752,6 +2752,7 @@ export class GameScene extends Phaser.Scene {
     item.sprite = sprite;
     this.items.push(item);
     EventBus.emit(GameEvents.MESSAGE, message);
+    this._syncRegistry();
   }
 
   /**

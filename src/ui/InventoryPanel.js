@@ -36,6 +36,7 @@ export class InventoryPanel {
     this.visible = false;
     this.inventory = [];
     this._cursor = new InventoryCursor(COLS, ROWS);
+    this._pendingDropIndex = -1;
     this._build();
   }
 
@@ -170,6 +171,7 @@ export class InventoryPanel {
 
   hide() {
     this.visible = false;
+    this._pendingDropIndex = -1;
     this._container.setVisible(false);
     this._clearCursorHighlight();
     this._removeKeyListeners();
@@ -264,6 +266,7 @@ export class InventoryPanel {
    * @param {'up'|'down'|'left'|'right'} direction
    */
   _navigate(direction) {
+    this._pendingDropIndex = -1;
     switch (direction) {
       case 'up':    this._cursor.moveUp();    break;
       case 'down':  this._cursor.moveDown();  break;
@@ -284,13 +287,26 @@ export class InventoryPanel {
   }
 
   /**
-   * Drops the item at the current cursor slot onto the floor, if any.
+   * Drops the item at the current cursor slot onto the floor.
+   * If the item is equipped a confirmation is required: the first press emits
+   * a warning message; the second press (on the same slot) confirms the drop.
    */
   _dropCurrentSlot() {
     const idx = this._cursor.index;
-    if (idx < this.inventory.length) {
-      EventBus.emit(GameEvents.INVENTORY_DROP, idx);
+    if (idx >= this.inventory.length) return;
+
+    const item = this.inventory[idx];
+    const isEquipped = this._player?.isEquipped?.(item);
+
+    if (isEquipped && this._pendingDropIndex !== idx) {
+      this._pendingDropIndex = idx;
+      EventBus.emit(GameEvents.MESSAGE,
+        `${item.name} is equipped! Press X again to confirm drop.`);
+      return;
     }
+
+    this._pendingDropIndex = -1;
+    EventBus.emit(GameEvents.INVENTORY_DROP, idx);
   }
 
   // ─── Content refresh ─────────────────────────────────────────────────────

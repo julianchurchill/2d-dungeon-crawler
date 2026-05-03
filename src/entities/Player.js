@@ -158,6 +158,22 @@ export class Player {
   }
 
   /**
+   * Returns the equipment slot name that holds the given item, or null if it
+   * is not currently equipped. Used by InventorySystem to unequip on drop.
+   *
+   * @param {object} item - The item instance to look for.
+   * @returns {string|null} Slot name (e.g. 'equippedWeapon') or null.
+   */
+  isEquipped(item) {
+    const slots = [
+      'equippedWeapon', 'equippedRangedWeapon', 'equippedArmor',
+      'equippedHelmet', 'equippedChest', 'equippedLegs', 'equippedArms',
+      'equippedBoots', 'equippedRing1', 'equippedRing2', 'equippedAmulet',
+    ];
+    return slots.find(slot => this[slot] === item) ?? null;
+  }
+
+  /**
    * Restores the player to full HP without altering any other stats.
    * Used by the dev-mode resurrect option after death.
    */
