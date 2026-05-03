@@ -38,7 +38,7 @@ Feature: Equipment Panel
   Scenario: Shield slot shows equipped armour name
     Given an equipment panel with a player who has leather armor equipped
     When the equipment panel is shown
-    Then the shield slot label is "Leather Armor"
+    Then the shield slot label is "Leather Shield"
 
   # ── Live refresh ─────────────────────────────────────────────────────────────
 
@@ -52,7 +52,7 @@ Feature: Equipment Panel
     Given an equipment panel with an unequipped player
     And the equipment panel is shown
     When leather armor is equipped via the inventory changed event
-    Then the shield slot label is "Leather Armor"
+    Then the shield slot label is "Leather Shield"
 
   # ── Slot icons ───────────────────────────────────────────────────────────────
 

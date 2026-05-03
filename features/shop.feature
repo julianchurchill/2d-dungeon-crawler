@@ -16,8 +16,8 @@ Feature: Town Shops
     And the mega potion sell price should be 10
     And the short sword sell price should be 15
     And the long sword sell price should be 25
-    And the leather armor sell price should be 12
-    And the chain mail sell price should be 20
+    And the leather shield sell price should be 12
+    And the iron shield sell price should be 20
     And the teleport potion sell price should be 8
 
   # --- Selling ---

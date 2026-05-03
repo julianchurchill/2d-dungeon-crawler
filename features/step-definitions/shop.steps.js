@@ -82,11 +82,11 @@ Then('the long sword sell price should be {int}', function (expected) {
   assert.equal(ITEM_TYPES.LONG_SWORD.sellPrice, expected);
 });
 
-Then('the leather armor sell price should be {int}', function (expected) {
+Then('the leather shield sell price should be {int}', function (expected) {
   assert.equal(ITEM_TYPES.LEATHER_ARMOR.sellPrice, expected);
 });
 
-Then('the chain mail sell price should be {int}', function (expected) {
+Then('the iron shield sell price should be {int}', function (expected) {
   assert.equal(ITEM_TYPES.CHAIN_MAIL.sellPrice, expected);
 });
 

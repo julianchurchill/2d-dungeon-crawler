@@ -39,7 +39,7 @@ export const ITEM_TYPES = {
   },
   LEATHER_ARMOR: {
     id: 'leather_armor',
-    name: 'Leather Armor',
+    name: 'Leather Shield',
     description: '+2 Defense',
     textureKey: 'item_armor',
     type: 'armor',
@@ -48,7 +48,7 @@ export const ITEM_TYPES = {
   },
   CHAIN_MAIL: {
     id: 'chain_mail',
-    name: 'Chain Mail',
+    name: 'Iron Shield',
     description: '+4 Defense',
     textureKey: 'item_armor',
     type: 'armor',

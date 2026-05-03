@@ -42,6 +42,7 @@ Entries are listed newest-first within each section.
 
 ### Changed
 
+- 2026-05-03 — **Item renames**: "Leather Armor" renamed to "Leather Shield"; "Chain Mail" renamed to "Iron Shield".
 - 2026-04-27 — **Main menu reworked for save/load**: "START GAME" is replaced by **CONTINUE** (disabled when no save exists) and **NEW GAME**. The in-game ESC menu gains a **SAVE AND EXIT** option.
 - 2026-04-27 — **Achievements removed from main menu**: the Achievements button has been removed from the main menu. Achievements are scoped to a single run so they have no meaning before a game starts; they remain accessible from the in-game ESC menu throughout a run.
 
