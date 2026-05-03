@@ -55,6 +55,7 @@ import { NpcRoamController } from '../systems/NpcRoamController.js';
 import { LookCursor } from '../ui/LookCursor.js';
 import { findRangedTarget, resolveRangedAttack } from '../systems/RangedCombat.js';
 import { saveGame, serializeFloor, loadGame, hasSave, deleteSave } from '../save/SaveGame.js';
+import { isDevEnvironment } from '../utils/Environment.js';
 import { createSkillFromData } from '../save/SkillFactory.js';
 import { AutosaveTimer } from '../save/AutosaveTimer.js';
 
@@ -3108,12 +3109,48 @@ export class GameScene extends Phaser.Scene {
   _gameOver() {
     EventBus.emit(GameEvents.LOOK_HIDE);
     this._lookCursor?.deactivate();
-    deleteSave(this._slot);
     EventBus.emit(GameEvents.GAME_OVER);
     this.turnManager.setState(TURN_STATE.GAME_OVER);
-    EventBus.emit(GameEvents.MESSAGE, 'You died! Press R to restart.');
-    this.input.keyboard.once('keydown-R', () => this._restart());
-    EventBus.once(GameEvents.RESTART_GAME, () => this._restart());
+
+    if (isDevEnvironment()) {
+      // In dev mode keep the save intact so resurrect can continue the run.
+      EventBus.emit(GameEvents.MESSAGE, 'You died! Press R to restart or U to resurrect.');
+
+      const onRestart = () => {
+        this.input.keyboard.off('keydown-U', onResurrect);
+        deleteSave(this._slot);
+        this._restart();
+      };
+      const onResurrect = () => {
+        this.input.keyboard.off('keydown-R', onRestart);
+        this._resurrect();
+      };
+      this.input.keyboard.once('keydown-R', onRestart);
+      this.input.keyboard.once('keydown-U', onResurrect);
+      EventBus.once(GameEvents.RESTART_GAME, () => {
+        this.input.keyboard.off('keydown-R', onRestart);
+        this.input.keyboard.off('keydown-U', onResurrect);
+        deleteSave(this._slot);
+        this._restart();
+      });
+    } else {
+      deleteSave(this._slot);
+      EventBus.emit(GameEvents.MESSAGE, 'You died! Press R to restart.');
+      this.input.keyboard.once('keydown-R', () => this._restart());
+      EventBus.once(GameEvents.RESTART_GAME, () => this._restart());
+    }
+  }
+
+  /**
+   * Restores the player to full HP and resumes the game from where they died.
+   * Only available in dev mode via the resurrect prompt shown on death.
+   */
+  _resurrect() {
+    this.player.resurrect();
+    this._setRangedAim(false);
+    this.turnManager.setState(TURN_STATE.PLAYER_INPUT);
+    this._syncRegistry();
+    EventBus.emit(GameEvents.MESSAGE, 'Resurrected! HP fully restored.');
   }
 
   _restart() {
