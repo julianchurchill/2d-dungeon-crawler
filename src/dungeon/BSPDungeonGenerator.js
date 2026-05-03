@@ -3,6 +3,8 @@ import { TILE } from '../utils/TileTypes.js';
 import { RoomShaper } from './RoomShaper.js';
 import { TrashPilePlacer } from './TrashPilePlacer.js';
 import { BreakableWallPlacer } from './BreakableWallPlacer.js';
+import { HiddenPassagePlacer } from './HiddenPassagePlacer.js';
+import { devOptions } from '../systems/DevOptions.js';
 
 const MAP_WIDTH = 80;
 const MAP_HEIGHT = 60;
@@ -158,6 +160,7 @@ export class BSPDungeonGenerator {
 
     new TrashPilePlacer().placeTrash(map, rooms, rng);
     new BreakableWallPlacer().placeWalls(map, rooms, rng);
+    const hiddenPassages = new HiddenPassagePlacer().place(map, rng, devOptions.forceHiddenPassage);
 
     return {
       map,
@@ -165,6 +168,7 @@ export class BSPDungeonGenerator {
       startPos: { x: startRoom.cx, y: startRoom.cy },
       stairsPos: { x: farthestRoom.cx, y: farthestRoom.cy },
       stairsUpPos,
+      hiddenPassages,
     };
   }
 

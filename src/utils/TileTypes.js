@@ -28,6 +28,8 @@ export const TILE = Object.freeze({
   TRASH_PILE_3: 15,
   /** Breakable wall — looks like a regular wall but can be destroyed by a player equipped with a pick axe. Non-walkable, opaque. */
   BREAKABLE_WALL: 16,
+  /** Hidden passage wall — a breakable wall that conceals a secret room beyond it. Renders identically to BREAKABLE_WALL. Non-walkable, opaque. */
+  HIDDEN_PASSAGE_WALL: 17,
 });
 
 export const FOV_STATE = Object.freeze({

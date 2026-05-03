@@ -92,7 +92,7 @@ export class Player {
     // Walking into a locked door — caller decides whether the player has the key
     if (map.getTile(nx, ny) === TILE.LOCKED_DOOR) return { action: 'locked_door', doorX: nx, doorY: ny };
 
-    if (map.getTile(nx, ny) === TILE.BREAKABLE_WALL) {
+    if (map.getTile(nx, ny) === TILE.BREAKABLE_WALL || map.getTile(nx, ny) === TILE.HIDDEN_PASSAGE_WALL) {
       if (this.equippedWeapon?.canBreakWalls) {
         return { action: 'break_wall', wallX: nx, wallY: ny, dx, dy };
       }

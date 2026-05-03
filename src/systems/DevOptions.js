@@ -63,6 +63,7 @@ export const devOptions = {
   championQuantities: null,
   forceUniqueRoom: null,
   forcedFloorItems: new Set(),
+  forceHiddenPassage: false,
 };
 
 /**
@@ -81,6 +82,7 @@ export function resetDevOptions() {
   devOptions.championQuantities = null;
   devOptions.forceUniqueRoom = null;
   devOptions.forcedFloorItems = new Set();
+  devOptions.forceHiddenPassage = false;
 }
 
 /**
