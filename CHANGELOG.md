@@ -7,6 +7,10 @@ Entries are listed newest-first within each section.
 
 ## [Unreleased]
 
+---
+
+## [0.77.0] - 2026-05-03
+
 ### Added
 
 - 2026-05-03 — **Hidden passages behind breakable walls**: some Rocky Stone Walls now conceal a secret 3×3 room beyond them, reachable only by breaking the wall with a Pick Axe. The first time a player comes within 8 tiles of such a wall the message log shows "You feel a draft nearby." Breaking a hidden passage wall reveals the chamber with a special discovery message instead of carving an alcove. Hidden rooms always contain 2 valuable items (gear-biased loot pool). A new "HIDDEN PASSAGES — Force hidden rooms" toggle in Developer Options forces every eligible breakable wall to attempt a hidden room on the next floor. `HiddenPassagePlacer`, `checkDraftProximity`, `getHiddenRoomLoot`, and `TILE.HIDDEN_PASSAGE_WALL` added.
