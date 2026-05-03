@@ -9,6 +9,7 @@ Entries are listed newest-first within each section.
 
 ### Added
 
+- 2026-05-03 — **Confirm before selling an equipped item**: attempting to sell an equipped weapon, armour piece, or other equipped item at a shop now shows a warning ("is equipped! Press again to confirm selling.") and requires a second press to confirm. Navigating away or closing the panel resets the confirmation. `ShopPanel._trySell()` added; `_pendingConfirmIndex` state tracks which sell row is awaiting confirmation.
 - 2026-05-03 — **Dev Options — Item Spawn section**: a new ITEM SPAWN section in Developer Options lets testers force rare floor items to appear on the next dungeon floor, bypassing their normal RNG drop chance. Each item shows an ON/OFF toggle (green = FORCED). Currently exposes the Pick Axe (10% rare drop). New items with percentage-based floor drops are added by registering them in `RARE_FLOOR_DROP_ITEMS`. `devOptions.forcedFloorItems` (Set) added.
 - 2026-05-03 — **Dev resurrect**: in dev mode, dying now shows "Press R to restart or U to resurrect". Resurrecting restores the player to full HP in place with all items and stats intact and continues the run; the save is preserved. `Player.resurrect()` added.
 - 2026-05-03 — **Help screen**: keyboard help now lists `x — drop item` in the Inventory section.

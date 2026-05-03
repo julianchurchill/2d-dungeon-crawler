@@ -52,6 +52,12 @@ export class ShopPanel {
     this._sellGroups = [];
     /** @type {number} Unified cursor index across sell + buy rows. */
     this._cursorIndex = 0;
+    /**
+     * Index of the sell row awaiting confirmation for an equipped-item sale,
+     * or -1 when no confirmation is pending.
+     * @type {number}
+     */
+    this._pendingConfirmIndex = -1;
     /** @type {Array<Phaser.GameObjects.GameObject[]>} Row objects for each sell row. */
     this._sellRows = [];
     /** @type {Array<Phaser.GameObjects.GameObject[]>} Row objects for each buy row. */
@@ -74,6 +80,7 @@ export class ShopPanel {
     this._buyStock = shopStock;
     this._player = player;
     this._cursorIndex = 0;
+    this._pendingConfirmIndex = -1;
     this._buildSellGroups(inventory, shopType);
     this._refresh();
     this.visible = true;
@@ -85,6 +92,7 @@ export class ShopPanel {
   hide() {
     if (!this.visible) return;
     this.visible = false;
+    this._pendingConfirmIndex = -1;
     this._container.setVisible(false);
     this._shopType = null;
     EventBus.emit(GameEvents.SELL_PANEL_TOGGLED, false);
@@ -97,6 +105,7 @@ export class ShopPanel {
    */
   refresh(inventory) {
     if (!this.visible) return;
+    this._pendingConfirmIndex = -1;
     this._buildSellGroups(inventory, this._shopType);
     this._refresh();
   }
@@ -120,6 +129,7 @@ export class ShopPanel {
     const total = this._sellGroups.length + this._buyStock.length;
     if (total === 0) return;
     this._cursorIndex = (this._cursorIndex + delta + total) % total;
+    this._pendingConfirmIndex = -1;
     this._updateCursor();
   }
 
@@ -132,13 +142,33 @@ export class ShopPanel {
     if (section === 'sell') {
       if (this._sellGroups.length === 0) return;
       const { item } = this._sellGroups[this._cursorIndex];
-      EventBus.emit(GameEvents.SELL_ITEM, { shopType: this._shopType, item });
+      this._trySell(this._cursorIndex, item);
     } else {
       const buyIdx = this._cursorIndex - this._sellGroups.length;
       if (buyIdx < 0 || buyIdx >= this._buyStock.length) return;
       const shopItem = this._buyStock[buyIdx];
       EventBus.emit(GameEvents.BUY_ITEM, { shopType: this._shopType, shopItem });
     }
+  }
+
+  /**
+   * Sells the item at the given sell-group index, with a confirmation step
+   * when the item is currently equipped.  The first press on an equipped item
+   * emits a warning message; a second press on the same row confirms the sale.
+   *
+   * @param {number} index - Index into _sellGroups.
+   * @param {import('../items/Item.js').Item} item
+   */
+  _trySell(index, item) {
+    const isEquipped = this._player?.isEquipped?.(item);
+    if (isEquipped && this._pendingConfirmIndex !== index) {
+      this._pendingConfirmIndex = index;
+      EventBus.emit(GameEvents.MESSAGE,
+        `${item.name} is equipped! Press again to confirm selling.`);
+      return;
+    }
+    this._pendingConfirmIndex = -1;
+    EventBus.emit(GameEvents.SELL_ITEM, { shopType: this._shopType, item });
   }
 
   /**
@@ -331,9 +361,10 @@ export class ShopPanel {
         rightColBColor: '#ffdd44',
         onPointerDown: () => {
           if (this._cursorIndex === i) {
-            EventBus.emit(GameEvents.SELL_ITEM, { shopType: this._shopType, item });
+            this._trySell(i, item);
           } else {
             this._cursorIndex = i;
+            this._pendingConfirmIndex = -1;
             this._updateCursor();
           }
         },
@@ -366,6 +397,7 @@ export class ShopPanel {
             EventBus.emit(GameEvents.BUY_ITEM, { shopType: this._shopType, shopItem: { item, buyPrice } });
           } else {
             this._cursorIndex = globalIdx;
+            this._pendingConfirmIndex = -1;
             this._updateCursor();
           }
         },
