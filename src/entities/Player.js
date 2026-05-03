@@ -158,6 +158,14 @@ export class Player {
   }
 
   /**
+   * Restores the player to full HP without altering any other stats.
+   * Used by the dev-mode resurrect option after death.
+   */
+  resurrect() {
+    this.stats.hp = this.stats.maxHp;
+  }
+
+  /**
    * Returns true if the player can pick up the given item.
    * Stackable items can always be picked up when a matching stack already exists
    * in inventory, even when the inventory is otherwise full.

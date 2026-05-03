@@ -9,6 +9,7 @@ Entries are listed newest-first within each section.
 
 ### Added
 
+- 2026-05-03 — **Dev resurrect**: in dev mode, dying now shows "Press R to restart or U to resurrect". Resurrecting restores the player to full HP in place with all items and stats intact and continues the run; the save is preserved. `Player.resurrect()` added.
 - 2026-05-03 — **Help screen**: keyboard help now lists `x — drop item` in the Inventory section.
 - 2026-05-03 — **Pick axe availability rebalanced**: pick axe now has a 10% chance of appearing once as a rare floor drop per dungeon level (outside challenge floors) and costs 50 gold in the weapon shop.
 - 2026-05-02 — **Breakable wall alcove carving**: breaking a Rocky Stone Wall now carves a small cave alcove beyond it — up to 3 new floor tiles open up ahead (75% chance for the tile directly forward, 40% for each forward diagonal). Each wall tile bordering the new space has a 25% chance of also becoming a Rocky Stone Wall, rewarding pick axe exploration with further opportunities to break through. `AlcoveCarver` added.
