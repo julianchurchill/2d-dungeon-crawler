@@ -10,7 +10,7 @@ import { CreepingMass } from '../entities/CreepingMass.js';
 import { OldBones } from '../entities/OldBones.js';
 import { Npc } from '../entities/Npc.js';
 import { Item } from '../items/Item.js';
-import { getFloorLoot, getChallengeLoot } from '../items/ItemTypes.js';
+import { getFloorLoot, getChallengeLoot, getPickAxeFloorDrop } from '../items/ItemTypes.js';
 import { DungeonMap } from '../dungeon/DungeonMap.js';
 import { AlcoveCarver } from '../dungeon/AlcoveCarver.js';
 import { UNIQUE_ROOM_DEFS } from '../dungeon/UniqueRoomDefinitions.js';
@@ -881,6 +881,21 @@ export class GameScene extends Phaser.Scene {
           ? getChallengeLoot(this.rng, unlockedItems)
           : getFloorLoot(floor, this.rng, unlockedItems);
         this._placeItem(ix, iy, typeDef);
+      }
+    }
+    // 10% chance of a single rare pick axe somewhere on regular floors.
+    if (!this._isChallengeFloor && rooms.length > 1) {
+      const pickAxeDrop = getPickAxeFloorDrop(this.rng);
+      if (pickAxeDrop) {
+        for (let i = 1; i < rooms.length; i++) {
+          const room = rooms[i];
+          const ix = this.rng.nextInt(room.x + 1, room.x + room.w - 2);
+          const iy = this.rng.nextInt(room.y + 1, room.y + room.h - 2);
+          if (this.dungeonMap.isWalkable(ix, iy) && !this._getEntityAt(ix, iy)) {
+            this._placeItem(ix, iy, pickAxeDrop);
+            break;
+          }
+        }
       }
     }
   }
