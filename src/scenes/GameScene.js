@@ -3147,7 +3147,7 @@ export class GameScene extends Phaser.Scene {
    */
   _resurrect() {
     this.player.resurrect();
-    this._setRangedAim(false);
+    this._setAimingRanged(false);
     this.turnManager.setState(TURN_STATE.PLAYER_INPUT);
     this._syncRegistry();
     EventBus.emit(GameEvents.MESSAGE, 'Resurrected! HP fully restored.');
