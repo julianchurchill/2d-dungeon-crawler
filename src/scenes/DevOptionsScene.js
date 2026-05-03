@@ -275,6 +275,20 @@ export class DevOptionsScene extends Phaser.Scene {
     });
     y += 32;
 
+    // Hidden passages section heading
+    this.add.text(cx, y, 'HIDDEN PASSAGES', {
+      fontSize: '13px', fontFamily: FONT_FAMILY, color: '#ffdd88', resolution: 2,
+    }).setOrigin(0.5);
+    y += 20;
+
+    this.add.text(cx, y, 'Force every eligible breakable wall to attempt a hidden room', {
+      fontSize: '10px', fontFamily: FONT_FAMILY, color: '#668899', resolution: 2,
+    }).setOrigin(0.5);
+    y += 22;
+
+    this._makeHiddenPassageToggleRow(cx, y);
+    y += 36;
+
     // Record total content height so _scrollContent can clamp correctly.
     this._contentHeight = y + 20;
   }
@@ -648,6 +662,32 @@ export class DevOptionsScene extends Phaser.Scene {
       } else {
         devOptions.forcedFloorItems.add(key);
       }
+      valTxt.setText(display());
+      valTxt.setColor(color());
+    });
+  }
+
+  /**
+   * Builds a single on/off row for the force-hidden-passage dev option.
+   *
+   * @param {number} cx - Horizontal centre of the form.
+   * @param {number} y  - Vertical centre of the row.
+   */
+  _makeHiddenPassageToggleRow(cx, y) {
+    this.add.text(cx - CTRL_OFFSET / 2 - 8, y, 'Force hidden rooms:', {
+      fontSize: '12px', fontFamily: FONT_FAMILY, color: '#aabbcc', resolution: 2,
+    }).setOrigin(1, 0.5);
+
+    const isActive = () => devOptions.forceHiddenPassage;
+    const color    = () => isActive() ? '#88ff88' : '#888888';
+    const display  = () => isActive() ? 'ON' : 'OFF';
+
+    const valTxt = this.add.text(cx, y, display(), {
+      fontSize: '13px', fontFamily: FONT_FAMILY, color: color(), resolution: 2,
+    }).setOrigin(0.5);
+
+    this._makeBtn(cx + 40, y, '✓', () => {
+      devOptions.forceHiddenPassage = !devOptions.forceHiddenPassage;
       valTxt.setText(display());
       valTxt.setColor(color());
     });

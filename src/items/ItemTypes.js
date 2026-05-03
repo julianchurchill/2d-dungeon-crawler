@@ -276,6 +276,26 @@ export function getPickAxeFloorDrop(rng, forced = false) {
 }
 
 /**
+ * Returns a random valuable item suitable for a hidden room cache.
+ * Stub — real implementation in the green phase.
+ *
+ * @param {number} floor
+ * @param {{ next: () => number }} rng
+ * @param {Set<string>} [unlockedItems]
+ * @returns {object}
+ */
+export function getHiddenRoomLoot(floor, rng, unlockedItems = new Set()) {
+  // Bias toward non-potion gear by using a +5 floor bonus and filtering out
+  // the extra health-potion weight added at every floor level.
+  const bonusFloor = floor + 5;
+  const pool = getFloorLootPool(bonusFloor, unlockedItems).filter(
+    item => item !== ITEM_TYPES.HEALTH_POTION,
+  );
+  const src = pool.length > 0 ? pool : getFloorLootPool(floor, unlockedItems);
+  return src[Math.floor(rng.next() * src.length)];
+}
+
+/**
  * Returns the potion-only loot pool used for challenge floors.
  * Challenge floors never drop weapons or armour — only consumable potions.
  *

@@ -10,7 +10,8 @@ import { CreepingMass } from '../entities/CreepingMass.js';
 import { OldBones } from '../entities/OldBones.js';
 import { Npc } from '../entities/Npc.js';
 import { Item } from '../items/Item.js';
-import { getFloorLoot, getChallengeLoot, getPickAxeFloorDrop } from '../items/ItemTypes.js';
+import { getFloorLoot, getChallengeLoot, getPickAxeFloorDrop, getHiddenRoomLoot } from '../items/ItemTypes.js';
+import { checkDraftProximity } from '../dungeon/HiddenPassagePlacer.js';
 import { DungeonMap } from '../dungeon/DungeonMap.js';
 import { AlcoveCarver } from '../dungeon/AlcoveCarver.js';
 import { UNIQUE_ROOM_DEFS } from '../dungeon/UniqueRoomDefinitions.js';
@@ -226,6 +227,8 @@ export class GameScene extends Phaser.Scene {
 
   _buildFloor(dungeonData) {
     const { map, rooms, startPos, shops, npcs: npcDefs } = dungeonData;
+    this._hiddenPassages = dungeonData.hiddenPassages ?? [];
+    this._hiddenPassageDraftShown = new Set();
     /** True when the current floor is a challenge floor (every 5th dungeon floor). */
     this._isChallengeFloor = dungeonData.isChallenge ?? false;
     this.dungeonMap = map;
@@ -305,6 +308,7 @@ export class GameScene extends Phaser.Scene {
 
     // Spawn items
     this._spawnItems(rooms);
+    this._spawnHiddenRoomItems(this._hiddenPassages);
 
     // Unique room: only on regular (non-challenge, non-town) dungeon floors.
     if (!this._isChallengeFloor && !this.floorManager.isTown()) {
@@ -329,6 +333,8 @@ export class GameScene extends Phaser.Scene {
     this.rooms = [];
     this.shops = [];
     this._entryTracker.reset();
+    this._hiddenPassages = [];
+    this._hiddenPassageDraftShown = new Set();
 
     // Reconstruct the DungeonMap from saved tile data
     const map = new DungeonMap(floorState.width, floorState.height);
@@ -539,7 +545,8 @@ export class GameScene extends Phaser.Scene {
       [TILE.TRASH_PILE_1]:   tk('tile_trash_pile_1'),
       [TILE.TRASH_PILE_2]:   tk('tile_trash_pile_2'),
       [TILE.TRASH_PILE_3]:   tk('tile_trash_pile_3'),
-      [TILE.BREAKABLE_WALL]: tk('tile_breakable_wall'),
+      [TILE.BREAKABLE_WALL]:        tk('tile_breakable_wall'),
+      [TILE.HIDDEN_PASSAGE_WALL]:   tk('tile_breakable_wall'),
     };
 
     // Build position → texture-key overrides for typed shop doors (town only)
@@ -1802,6 +1809,7 @@ export class GameScene extends Phaser.Scene {
 
     if (result.action === 'break_wall') {
       this._runController.cancel();
+      const isHiddenPassage = this.dungeonMap.getTile(result.wallX, result.wallY) === TILE.HIDDEN_PASSAGE_WALL;
       this.dungeonMap.setTile(result.wallX, result.wallY, TILE.FLOOR);
       const _bwRoomId = this._entryTracker.getRoomId();
       const _bwRoomDef = _bwRoomId ? UNIQUE_ROOM_DEFS.find(d => d.id === _bwRoomId) : null;
@@ -1810,20 +1818,29 @@ export class GameScene extends Phaser.Scene {
         tilesetManager.getTileKey(_bwFloorBase), undefined,
         result.wallX * TILE_SIZE, result.wallY * TILE_SIZE,
       );
-      // Carve a small alcove beyond the broken wall and repaint changed tiles.
-      const alcoveChanges = new AlcoveCarver().carve(
-        this.dungeonMap, result.wallX, result.wallY, result.dx, result.dy, this.rng,
-      );
-      for (const { x, y, tile } of alcoveChanges) {
-        let tileKey;
-        if (tile === TILE.FLOOR)           tileKey = tilesetManager.getTileKey(_bwFloorBase);
-        else if (tile === TILE.WALL)       tileKey = tilesetManager.getTileKey('tile_wall');
-        else if (tile === TILE.BREAKABLE_WALL) tileKey = tilesetManager.getTileKey('tile_breakable_wall');
-        if (tileKey) this.mapRT.drawFrame(tileKey, undefined, x * TILE_SIZE, y * TILE_SIZE);
+      if (isHiddenPassage) {
+        // The hidden room floor tiles are pre-carved in the map; just update FOV
+        // to reveal them and notify the player.
+        this.turnManager.setState(TURN_STATE.PLAYER_ACTING);
+        this._updateFOV();
+        EventBus.emit(GameEvents.MESSAGE, 'You break through the wall and discover a hidden chamber!');
+      } else {
+        // Regular breakable wall — carve a small alcove and repaint changed tiles.
+        const alcoveChanges = new AlcoveCarver().carve(
+          this.dungeonMap, result.wallX, result.wallY, result.dx, result.dy, this.rng,
+        );
+        for (const { x, y, tile } of alcoveChanges) {
+          let tileKey;
+          if (tile === TILE.FLOOR)               tileKey = tilesetManager.getTileKey(_bwFloorBase);
+          else if (tile === TILE.WALL)            tileKey = tilesetManager.getTileKey('tile_wall');
+          else if (tile === TILE.BREAKABLE_WALL)  tileKey = tilesetManager.getTileKey('tile_breakable_wall');
+          if (tileKey) this.mapRT.drawFrame(tileKey, undefined, x * TILE_SIZE, y * TILE_SIZE);
+        }
+        this.turnManager.setState(TURN_STATE.PLAYER_ACTING);
+        this._updateFOV();
+        EventBus.emit(GameEvents.MESSAGE, 'You swing your pick axe and break through the rocky wall!');
       }
-      this.turnManager.setState(TURN_STATE.PLAYER_ACTING);
-      this._updateFOV();
-      EventBus.emit(GameEvents.MESSAGE, 'You swing your pick axe and break through the rocky wall!');
+      this._checkHiddenPassageDraft();
       this._syncRegistry();
       this._startEnemyTurns();
       return;
@@ -1857,6 +1874,7 @@ export class GameScene extends Phaser.Scene {
   _afterPlayerMove(action) {
     this._updateFOV();
     this._checkItemPickup();
+    this._checkHiddenPassageDraft();
     const entryMessages = this._entryTracker.checkEntry(this.player.x, this.player.y);
     if (entryMessages) {
       entryMessages.forEach(msg => EventBus.emit(GameEvents.MESSAGE, msg));
@@ -1873,6 +1891,44 @@ export class GameScene extends Phaser.Scene {
     }
     this._syncRegistry();
     this._startEnemyTurns();
+  }
+
+  /**
+   * Scans HIDDEN_PASSAGE_WALL tiles on the current floor and emits the
+   * "draft" hint the first time the player walks within DRAFT_RADIUS tiles
+   * of one.  Deduplication is handled by _hiddenPassageDraftShown.
+   */
+  _checkHiddenPassageDraft() {
+    const triggered = checkDraftProximity(
+      this.dungeonMap,
+      this.player.x,
+      this.player.y,
+      this._hiddenPassageDraftShown,
+    );
+    if (triggered.length > 0) {
+      EventBus.emit(GameEvents.MESSAGE, 'You feel a draft nearby.');
+    }
+  }
+
+  /**
+   * Places 2 valuable items inside each hidden room.  Called once per floor
+   * after normal item spawning so hidden rooms always have a reward.
+   *
+   * @param {Array<{wallX:number, wallY:number, room:{x:number,y:number,w:number,h:number}}>} passages
+   */
+  _spawnHiddenRoomItems(passages) {
+    const floor = this.floorManager.currentFloor;
+    for (const { room } of passages) {
+      let placed = 0;
+      for (let attempt = 0; attempt < 20 && placed < 2; attempt++) {
+        const ix = this.rng.nextInt(room.x, room.x + room.w - 1);
+        const iy = this.rng.nextInt(room.y, room.y + room.h - 1);
+        if (this.dungeonMap.isWalkable(ix, iy) && !this._getEntityAt(ix, iy)) {
+          this._placeItem(ix, iy, getHiddenRoomLoot(floor, this.rng));
+          placed++;
+        }
+      }
+    }
   }
 
   _playerAttack(target) {
