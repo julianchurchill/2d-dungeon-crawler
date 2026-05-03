@@ -88,8 +88,8 @@ function _generateWeaponStock(playerLevel, rng) {
   const count = rng.nextInt(3, 5);
   const isHighLevel = playerLevel >= 3;
 
-  // Pick axe — always one in stock as a specialist tool
-  stock.push(_fixedShopItem(ITEM_TYPES.PICK_AXE));
+  // Pick axe — always one in stock; priced at a premium for its utility
+  stock.push({ item: new Item(0, 0, ITEM_TYPES.PICK_AXE), buyPrice: 50 });
 
   for (let i = 0; i < count; i++) {
     // First slot: chance of a rare item

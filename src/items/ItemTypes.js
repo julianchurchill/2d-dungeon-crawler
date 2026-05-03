@@ -254,6 +254,17 @@ export function getFloorLoot(floor, rng, unlockedItems = new Set()) {
 }
 
 /**
+ * Rolls for a rare one-off pick axe floor drop.
+ * Returns ITEM_TYPES.PICK_AXE with a 10% probability, otherwise null.
+ *
+ * @param {{ nextBool: (p: number) => boolean }} rng
+ * @returns {object|null}
+ */
+export function getPickAxeFloorDrop(rng) {
+  return rng.nextBool(0.1) ? ITEM_TYPES.PICK_AXE : null;
+}
+
+/**
  * Returns the potion-only loot pool used for challenge floors.
  * Challenge floors never drop weapons or armour — only consumable potions.
  *

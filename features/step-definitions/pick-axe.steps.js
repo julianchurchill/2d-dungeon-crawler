@@ -2,9 +2,9 @@
  * Step definitions for the Pick Axe feature.
  * Reuses player-movement world context (this.player, this.map, this.result).
  */
-import { Given, Then } from '@cucumber/cucumber';
+import { Given, When, Then } from '@cucumber/cucumber';
 import assert from 'node:assert/strict';
-import { ITEM_TYPES } from '../../src/items/ItemTypes.js';
+import { ITEM_TYPES, getPickAxeFloorDrop } from '../../src/items/ItemTypes.js';
 import { Item } from '../../src/items/Item.js';
 import { TILE } from '../../src/utils/TileTypes.js';
 import { getTileLabel } from '../../src/utils/TileLabelMap.js';
@@ -66,4 +66,32 @@ Given('a BREAKABLE_WALL at position {int}, {int}', function (x, y) {
 
 Given('a pick axe is equipped', function () {
   this.player.equippedWeapon = new Item(0, 0, ITEM_TYPES.PICK_AXE);
+});
+
+// ── Shop price ────────────────────────────────────────────────────────────────
+
+Then('the pick axe buy price should be {int}', function (expected) {
+  const entry = this.shopStock.find(({ item }) => item.id === 'pick_axe');
+  assert.ok(entry, 'Expected pick axe to be in the weapon shop stock');
+  assert.equal(entry.buyPrice, expected,
+    `Expected pick axe buy price to be ${expected} but got ${entry.buyPrice}`);
+});
+
+// ── Rare floor drop ───────────────────────────────────────────────────────────
+
+When('the pick axe floor drop is rolled with an always-trigger RNG', function () {
+  this.dropResult = getPickAxeFloorDrop({ nextBool: () => true });
+});
+
+When('the pick axe floor drop is rolled with a never-trigger RNG', function () {
+  this.dropResult = getPickAxeFloorDrop({ nextBool: () => false });
+});
+
+Then('the drop result should be the pick axe', function () {
+  assert.equal(this.dropResult, ITEM_TYPES.PICK_AXE,
+    'Expected drop result to be ITEM_TYPES.PICK_AXE');
+});
+
+Then('the drop result should be null', function () {
+  assert.equal(this.dropResult, null, 'Expected drop result to be null');
 });

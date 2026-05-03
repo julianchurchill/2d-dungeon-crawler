@@ -50,3 +50,19 @@ Feature: Pick Axe
     And a BREAKABLE_WALL at position 4, 3
     When the player moves right
     Then the move result should be "blocked"
+
+  # ── Shop price ───────────────────────────────────────────────────────────────
+
+  Scenario: Pick axe costs 50 gold in the weapon shop
+    Given a weapon shop stock generated for a level 1 player
+    Then the pick axe buy price should be 50
+
+  # ── Rare floor drop ──────────────────────────────────────────────────────────
+
+  Scenario: Pick axe can appear as a rare floor drop
+    When the pick axe floor drop is rolled with an always-trigger RNG
+    Then the drop result should be the pick axe
+
+  Scenario: Pick axe does not appear as a floor drop when RNG prevents it
+    When the pick axe floor drop is rolled with a never-trigger RNG
+    Then the drop result should be null
