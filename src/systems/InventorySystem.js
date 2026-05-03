@@ -54,11 +54,26 @@ export class InventorySystem {
    * @returns {{ item, message }} dropped item (GameScene should place it on map)
    */
   static dropItem(player, index) {
-    const item = player.removeItem(index);
+    const item = player.inventory[index];
     if (!item) return null;
-    item.x = player.x;
-    item.y = player.y;
+
+    // Unequip first so stat bonuses are removed before the item leaves.
+    const equippedSlot = player.isEquipped?.(item);
+    if (equippedSlot) {
+      player[equippedSlot] = null;
+      EventBus.emit(GameEvents.PLAYER_STATS_CHANGED, {
+        ...player.stats,
+        attack: player.attackPower,
+        defense: player.defensePower,
+      });
+    }
+
+    // Use the return value of removeItem: for stackable stacks it is a clone
+    // (with count=1), not the original slot object that remains in inventory.
+    const dropped = player.removeItem(index);
+    dropped.x = player.x;
+    dropped.y = player.y;
     EventBus.emit(GameEvents.INVENTORY_CHANGED, player.inventory);
-    return { item, message: `You drop the ${item.name}.` };
+    return { item: dropped, message: `You drop the ${dropped.name}.` };
   }
 }

@@ -30,3 +30,21 @@ Feature: Drop items from inventory
     Given a player with no items in their inventory
     When the player drops the item at inventory index 0
     Then the dropped result should be null
+
+  # ── Dropping equipped items ──────────────────────────────────────────────────
+
+  Scenario: Dropping an equipped weapon unequips it
+    Given a player with a sword equipped at inventory index 0
+    When the player drops the item at inventory index 0
+    Then the player's equipped weapon slot should be empty
+
+  Scenario: Dropping an equipped armour unequips it
+    Given a player with a leather shield equipped at inventory index 0
+    When the player drops the item at inventory index 0
+    Then the player's equipped armour slot should be empty
+
+  Scenario: Dropping an unequipped item does not clear any equipment slot
+    Given a player carrying a "health_potion" in inventory slot 0
+    And the player has a sword equipped
+    When the player drops the item at inventory index 0
+    Then the player's equipped weapon slot should not be empty
