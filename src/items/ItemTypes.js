@@ -254,14 +254,25 @@ export function getFloorLoot(floor, rng, unlockedItems = new Set()) {
 }
 
 /**
+ * Registry of item types that have a percentage-based rare floor drop mechanic.
+ * Used by DevOptionsScene to build the ITEM SPAWN toggle rows.
+ *
+ * @type {Array<{ key: string, typeDef: object }>}
+ */
+export const RARE_FLOOR_DROP_ITEMS = [
+  { key: 'PICK_AXE', typeDef: ITEM_TYPES.PICK_AXE },
+];
+
+/**
  * Rolls for a rare one-off pick axe floor drop.
- * Returns ITEM_TYPES.PICK_AXE with a 10% probability, otherwise null.
+ * Returns ITEM_TYPES.PICK_AXE with a 10% probability, or always when forced.
  *
  * @param {{ nextBool: (p: number) => boolean }} rng
+ * @param {boolean} [forced=false] - When true, skips the RNG roll and always returns the item.
  * @returns {object|null}
  */
-export function getPickAxeFloorDrop(rng) {
-  return rng.nextBool(0.1) ? ITEM_TYPES.PICK_AXE : null;
+export function getPickAxeFloorDrop(rng, forced = false) {
+  return (forced || rng.nextBool(0.1)) ? ITEM_TYPES.PICK_AXE : null;
 }
 
 /**

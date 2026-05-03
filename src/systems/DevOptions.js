@@ -46,6 +46,9 @@ export const DEV_START_ITEMS = ['HEALTH_POTION', 'HEALTH_POTION', 'MEGA_POTION',
  *                                             that room is forced to spawn on the next floor,
  *                                             ignoring the probability check and the already-seen
  *                                             guard.  Null uses normal random logic.
+ * @property {Set<string>} forcedFloorItems  - Set of ITEM_TYPES keys (e.g. 'PICK_AXE') that
+ *                                             should be force-placed on the next floor regardless
+ *                                             of their normal RNG drop chance.
  */
 export const devOptions = {
   startFloor: 0,
@@ -59,6 +62,7 @@ export const devOptions = {
   bossQuantities: null,
   championQuantities: null,
   forceUniqueRoom: null,
+  forcedFloorItems: new Set(),
 };
 
 /**
@@ -76,6 +80,7 @@ export function resetDevOptions() {
   devOptions.bossQuantities = null;
   devOptions.championQuantities = null;
   devOptions.forceUniqueRoom = null;
+  devOptions.forcedFloorItems = new Set();
 }
 
 /**
