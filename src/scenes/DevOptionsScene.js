@@ -13,7 +13,7 @@ import { FONT_FAMILY } from '../utils/FontConfig.js';
 
 import Phaser from 'phaser';
 import { devOptions, isSpawnConfigValid } from '../systems/DevOptions.js';
-import { ITEM_TYPES } from '../items/ItemTypes.js';
+import { ITEM_TYPES, RARE_FLOOR_DROP_ITEMS } from '../items/ItemTypes.js';
 import { ENEMY_DEFS } from '../entities/EnemyTypes.js';
 import { UNIQUE_ROOM_DEFS } from '../dungeon/UniqueRoomDefinitions.js';
 
@@ -250,6 +250,28 @@ export class DevOptionsScene extends Phaser.Scene {
     this._makeResetLink('Clear unique room force', cx, y, () => {
       devOptions.forceUniqueRoom = null;
       refreshAllUniqueRows();
+    });
+    y += 32;
+
+    // Item spawn section heading
+    this.add.text(cx, y, 'ITEM SPAWN', {
+      fontSize: '13px', fontFamily: FONT_FAMILY, color: '#ffdd88', resolution: 2,
+    }).setOrigin(0.5);
+    y += 20;
+
+    this.add.text(cx, y, 'Force rare floor drop on next floor (ignores % chance)', {
+      fontSize: '10px', fontFamily: FONT_FAMILY, color: '#668899', resolution: 2,
+    }).setOrigin(0.5);
+    y += 22;
+
+    for (const { key, typeDef } of RARE_FLOOR_DROP_ITEMS) {
+      this._makeItemSpawnToggleRow(typeDef.name, key, cx, y);
+      y += 36;
+    }
+
+    this._makeResetLink('Clear all item spawn forces', cx, y, () => {
+      devOptions.forcedFloorItems.clear();
+      this.scene.restart();
     });
     y += 32;
 
@@ -593,6 +615,42 @@ export class DevOptionsScene extends Phaser.Scene {
       valTxt.setText(display());
       valTxt.setColor(color());
     };
+  }
+
+  /**
+   * Creates a labelled toggle row for forcing a rare floor item to spawn.
+   * The button toggles the item key in `devOptions.forcedFloorItems` and
+   * updates its display immediately, independent of sibling rows.
+   *
+   * @param {string} label - Human-readable item name.
+   * @param {string} key   - ITEM_TYPES key (e.g. 'PICK_AXE').
+   * @param {number} cx    - Horizontal centre of the scene.
+   * @param {number} y     - Vertical centre of this row.
+   */
+  _makeItemSpawnToggleRow(label, key, cx, y) {
+    const labelMaxW = cx - CTRL_OFFSET / 2 - 8;
+    this.add.text(cx - CTRL_OFFSET / 2 - 8, y, label + ':', {
+      fontSize: '12px', fontFamily: FONT_FAMILY, color: '#aabbcc', resolution: 2,
+      wordWrap: { width: labelMaxW },
+    }).setOrigin(1, 0.5);
+
+    const isActive = () => devOptions.forcedFloorItems.has(key);
+    const color    = () => isActive() ? '#88ff88' : '#888888';
+    const display  = () => isActive() ? 'FORCED' : 'OFF';
+
+    const valTxt = this.add.text(cx, y, display(), {
+      fontSize: '13px', fontFamily: FONT_FAMILY, color: color(), resolution: 2,
+    }).setOrigin(0.5);
+
+    this._makeBtn(cx + 40, y, '✓', () => {
+      if (isActive()) {
+        devOptions.forcedFloorItems.delete(key);
+      } else {
+        devOptions.forcedFloorItems.add(key);
+      }
+      valTxt.setText(display());
+      valTxt.setColor(color());
+    });
   }
 
   /**

@@ -884,9 +884,9 @@ export class GameScene extends Phaser.Scene {
         this._placeItem(ix, iy, typeDef);
       }
     }
-    // 10% chance of a single rare pick axe somewhere on regular floors.
+    // 10% chance of a single rare pick axe somewhere on regular floors (forced in dev mode).
     if (!this._isChallengeFloor && rooms.length > 1) {
-      const pickAxeDrop = getPickAxeFloorDrop(this.rng);
+      const pickAxeDrop = getPickAxeFloorDrop(this.rng, devOptions.forcedFloorItems.has('PICK_AXE'));
       if (pickAxeDrop) {
         for (let i = 1; i < rooms.length; i++) {
           const room = rooms[i];

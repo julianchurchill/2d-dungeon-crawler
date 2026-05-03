@@ -9,6 +9,7 @@ Entries are listed newest-first within each section.
 
 ### Added
 
+- 2026-05-03 — **Dev Options — Item Spawn section**: a new ITEM SPAWN section in Developer Options lets testers force rare floor items to appear on the next dungeon floor, bypassing their normal RNG drop chance. Each item shows an ON/OFF toggle (green = FORCED). Currently exposes the Pick Axe (10% rare drop). New items with percentage-based floor drops are added by registering them in `RARE_FLOOR_DROP_ITEMS`. `devOptions.forcedFloorItems` (Set) added.
 - 2026-05-03 — **Dev resurrect**: in dev mode, dying now shows "Press R to restart or U to resurrect". Resurrecting restores the player to full HP in place with all items and stats intact and continues the run; the save is preserved. `Player.resurrect()` added.
 - 2026-05-03 — **Help screen**: keyboard help now lists `x — drop item` in the Inventory section.
 - 2026-05-03 — **Pick axe availability rebalanced**: pick axe now has a 10% chance of appearing once as a rare floor drop per dungeon level (outside challenge floors) and costs 50 gold in the weapon shop.
