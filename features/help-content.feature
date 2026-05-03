@@ -43,3 +43,8 @@ Feature: In-game help content adapts to device type
     Given the device is a touch device
     When the help content is retrieved
     Then the help content should mention "BOW"
+
+  Scenario: Keyboard help includes drop item key binding
+    Given the device is not a touch device
+    When the help content is retrieved
+    Then the help content should mention "drop item"

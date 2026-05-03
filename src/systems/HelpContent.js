@@ -65,6 +65,7 @@ export function getHelpContent(isTouchDev) {
       lines: [
         'Arrow keys or WASD to navigate',
         'ENTER to use or equip item',
+        'x       — drop item',
       ],
     },
   ];
