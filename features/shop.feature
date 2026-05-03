@@ -68,6 +68,16 @@ Feature: Town Shops
     Then the shop accepts leather armor
     And the shop accepts chain mail
 
+  Scenario: The armour shop accepts all equipment slot types
+    Given an armour shop
+    Then the shop accepts leather boots
+    And the shop accepts leather cap
+    And the shop accepts leather chestpiece
+    And the shop accepts leather leggings
+    And the shop accepts leather gauntlets
+    And the shop accepts iron ring
+    And the shop accepts stone amulet
+
   Scenario: The armour shop does not accept potions or weapons
     Given an armour shop
     Then the shop does not accept the health potion

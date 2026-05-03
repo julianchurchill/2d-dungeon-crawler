@@ -9,7 +9,7 @@
 export const SHOP_ACCEPTED_TYPES = {
   potion: ['consumable'],
   weapon: ['weapon', 'ranged_weapon'],
-  armour: ['armor'],
+  armour: ['armor', 'helmet', 'chest', 'legs', 'arms', 'boots', 'ring', 'amulet'],
 };
 
 export class ShopSystem {
