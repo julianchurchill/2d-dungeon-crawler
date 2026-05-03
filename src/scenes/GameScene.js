@@ -12,6 +12,7 @@ import { Npc } from '../entities/Npc.js';
 import { Item } from '../items/Item.js';
 import { getFloorLoot, getChallengeLoot } from '../items/ItemTypes.js';
 import { DungeonMap } from '../dungeon/DungeonMap.js';
+import { AlcoveCarver } from '../dungeon/AlcoveCarver.js';
 import { UNIQUE_ROOM_DEFS } from '../dungeon/UniqueRoomDefinitions.js';
 import { uniqueRoomRegistry } from '../dungeon/UniqueRoomRegistry.js';
 import { placeDecorations } from '../dungeon/RoomDecorationPlacer.js';
@@ -1792,6 +1793,17 @@ export class GameScene extends Phaser.Scene {
         tilesetManager.getTileKey(_bwFloorBase), undefined,
         result.wallX * TILE_SIZE, result.wallY * TILE_SIZE,
       );
+      // Carve a small alcove beyond the broken wall and repaint changed tiles.
+      const alcoveChanges = new AlcoveCarver().carve(
+        this.dungeonMap, result.wallX, result.wallY, result.dx, result.dy, this.rng,
+      );
+      for (const { x, y, tile } of alcoveChanges) {
+        let tileKey;
+        if (tile === TILE.FLOOR)           tileKey = tilesetManager.getTileKey(_bwFloorBase);
+        else if (tile === TILE.WALL)       tileKey = tilesetManager.getTileKey('tile_wall');
+        else if (tile === TILE.BREAKABLE_WALL) tileKey = tilesetManager.getTileKey('tile_breakable_wall');
+        if (tileKey) this.mapRT.drawFrame(tileKey, undefined, x * TILE_SIZE, y * TILE_SIZE);
+      }
       this.turnManager.setState(TURN_STATE.PLAYER_ACTING);
       this._updateFOV();
       EventBus.emit(GameEvents.MESSAGE, 'You swing your pick axe and break through the rocky wall!');

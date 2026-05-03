@@ -94,7 +94,7 @@ export class Player {
 
     if (map.getTile(nx, ny) === TILE.BREAKABLE_WALL) {
       if (this.equippedWeapon?.canBreakWalls) {
-        return { action: 'break_wall', wallX: nx, wallY: ny };
+        return { action: 'break_wall', wallX: nx, wallY: ny, dx, dy };
       }
       return { action: 'blocked' };
     }
