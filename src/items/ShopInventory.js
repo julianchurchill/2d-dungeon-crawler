@@ -120,9 +120,9 @@ function _generateWeaponStock(playerLevel, rng) {
 }
 
 /**
- * Generates armour shop stock. Each piece has a randomly rolled defense bonus
- * within a tier-appropriate range. A rare piece with enhanced stats has a
- * small chance of appearing.
+ * Generates armour shop stock from a tier-appropriate pool of fixed items
+ * covering all equipment slot types (body, head, chest, legs, arms, boots,
+ * accessories). Higher player levels unlock tier-2 pieces.
  *
  * @param {number} playerLevel
  * @param {object} rng
@@ -130,32 +130,27 @@ function _generateWeaponStock(playerLevel, rng) {
  */
 function _generateArmourStock(playerLevel, rng) {
   const stock = [];
-  const count = rng.nextInt(3, 5);
   const isHighLevel = playerLevel >= 3;
 
-  for (let i = 0; i < count; i++) {
-    // First slot: chance of a rare item
-    const isRare = i === 0 && rng.nextInt(1, 100) <= RARE_CHANCE;
-    const useTier2 = isHighLevel || isRare;
+  const tier1 = [
+    ITEM_TYPES.LEATHER_ARMOR,      ITEM_TYPES.LEATHER_CAP,
+    ITEM_TYPES.LEATHER_CHESTPIECE, ITEM_TYPES.LEATHER_LEGGINGS,
+    ITEM_TYPES.LEATHER_GAUNTLETS,  ITEM_TYPES.LEATHER_BOOTS,
+    ITEM_TYPES.STONE_AMULET,
+  ];
+  const tier2 = [
+    ITEM_TYPES.CHAIN_MAIL,    ITEM_TYPES.IRON_HELMET,
+    ITEM_TYPES.CHAIN_HAUBERK, ITEM_TYPES.CHAIN_LEGGINGS,
+    ITEM_TYPES.IRON_GAUNTLETS, ITEM_TYPES.IRON_BOOTS,
+    ITEM_TYPES.JADE_AMULET,   ITEM_TYPES.IRON_RING, ITEM_TYPES.GOLD_RING,
+  ];
 
-    const defenseBonus = useTier2 ? rng.nextInt(3, 6) : rng.nextInt(1, 4);
-    const baseName = useTier2 ? 'Chain Mail' : 'Leather Armor';
-    const name = isRare ? `Fine ${baseName}` : baseName;
-
-    const typeDef = {
-      id: useTier2 ? 'chain_mail' : 'leather_armor',
-      name,
-      description: `+${defenseBonus} Defense`,
-      textureKey: 'item_armor',
-      type: 'armor',
-      defenseBonus,
-      sellPrice: defenseBonus * 4,
-    };
-
-    // Buy price: 7 gold per defense point, plus a premium for rare items
-    const buyPrice = defenseBonus * 7 + (isRare ? 20 : 0);
-
-    stock.push({ item: new Item(0, 0, typeDef), buyPrice });
+  // Pick 4-6 unique items from the tier-appropriate pool.
+  const pool = isHighLevel ? [...tier1, ...tier2] : [...tier1];
+  const count = rng.nextInt(4, 6);
+  for (let i = 0; i < count && pool.length > 0; i++) {
+    const idx = rng.nextInt(0, pool.length - 1);
+    stock.push(_fixedShopItem(pool.splice(idx, 1)[0]));
   }
 
   return stock;

@@ -129,6 +129,41 @@ Then('the shop accepts chain mail', function () {
     'Expected shop to accept chain mail');
 });
 
+Then('the shop accepts leather boots', function () {
+  assert.ok(this.shop.accepts(new Item(0, 0, ITEM_TYPES.LEATHER_BOOTS)),
+    'Expected shop to accept leather boots');
+});
+
+Then('the shop accepts leather cap', function () {
+  assert.ok(this.shop.accepts(new Item(0, 0, ITEM_TYPES.LEATHER_CAP)),
+    'Expected shop to accept leather cap');
+});
+
+Then('the shop accepts leather chestpiece', function () {
+  assert.ok(this.shop.accepts(new Item(0, 0, ITEM_TYPES.LEATHER_CHESTPIECE)),
+    'Expected shop to accept leather chestpiece');
+});
+
+Then('the shop accepts leather leggings', function () {
+  assert.ok(this.shop.accepts(new Item(0, 0, ITEM_TYPES.LEATHER_LEGGINGS)),
+    'Expected shop to accept leather leggings');
+});
+
+Then('the shop accepts leather gauntlets', function () {
+  assert.ok(this.shop.accepts(new Item(0, 0, ITEM_TYPES.LEATHER_GAUNTLETS)),
+    'Expected shop to accept leather gauntlets');
+});
+
+Then('the shop accepts iron ring', function () {
+  assert.ok(this.shop.accepts(new Item(0, 0, ITEM_TYPES.IRON_RING)),
+    'Expected shop to accept iron ring');
+});
+
+Then('the shop accepts stone amulet', function () {
+  assert.ok(this.shop.accepts(new Item(0, 0, ITEM_TYPES.STONE_AMULET)),
+    'Expected shop to accept stone amulet');
+});
+
 Then('the shop does not accept the short sword', function () {
   assert.ok(!this.shop.accepts(new Item(0, 0, ITEM_TYPES.SWORD)),
     'Expected shop NOT to accept short sword');

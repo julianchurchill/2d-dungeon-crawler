@@ -84,10 +84,11 @@ Then('all generated items should be weapons', function () {
 });
 
 Then('all generated items should be armour', function () {
+  const ARMOUR_TYPES = ['armor', 'helmet', 'chest', 'legs', 'arms', 'boots', 'ring', 'amulet'];
   assert.ok(this.shopStock.length > 0, 'Expected shop to have items');
   for (const { item } of this.shopStock) {
-    assert.equal(item.itemType, 'armor',
-      `Expected armor item, got itemType="${item.itemType}" (name="${item.name}")`);
+    assert.ok(ARMOUR_TYPES.includes(item.itemType),
+      `Expected armour item, got itemType="${item.itemType}" (name="${item.name}")`);
   }
 });
 
