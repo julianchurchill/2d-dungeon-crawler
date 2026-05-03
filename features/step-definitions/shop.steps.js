@@ -19,6 +19,20 @@ Given('a player with a short sword in their inventory', function () {
   this.player.inventory.push(this.shortSword);
 });
 
+Given('a player with leather armor in their inventory', function () {
+  this.player = new Player(0, 0);
+  this.leatherArmor = new Item(0, 0, ITEM_TYPES.LEATHER_ARMOR);
+  this.player.inventory.push(this.leatherArmor);
+});
+
+Given('the short sword is equipped as weapon', function () {
+  this.player.equippedWeapon = this.shortSword;
+});
+
+Given('the leather armor is equipped as armor', function () {
+  this.player.equippedArmor = this.leatherArmor;
+});
+
 Given('the player also has a mega potion in their inventory', function () {
   this.megaPotion = new Item(0, 0, ITEM_TYPES.MEGA_POTION);
   this.player.inventory.push(this.megaPotion);
@@ -51,6 +65,11 @@ When('the player sells the short sword at the weapon shop', function () {
 When('the player sells the mega potion at the potion shop', function () {
   const shop = new ShopSystem('potion');
   shop.sell(this.player, this.megaPotion);
+});
+
+When('the player sells the leather armor at the armour shop', function () {
+  const shop = new ShopSystem('armour');
+  shop.sell(this.player, this.leatherArmor);
 });
 
 // --- Then ---
@@ -177,4 +196,14 @@ Then('the shop does not accept leather armor', function () {
 Then('the shop does not accept the health potion', function () {
   assert.ok(!this.shop.accepts(new Item(0, 0, ITEM_TYPES.HEALTH_POTION)),
     'Expected shop NOT to accept health potion');
+});
+
+Then("the player's equipped weapon should be null", function () {
+  assert.equal(this.player.equippedWeapon, null,
+    `Expected equippedWeapon to be null, got ${this.player.equippedWeapon}`);
+});
+
+Then("the player's equipped armor should be null", function () {
+  assert.equal(this.player.equippedArmor, null,
+    `Expected equippedArmor to be null, got ${this.player.equippedArmor}`);
 });

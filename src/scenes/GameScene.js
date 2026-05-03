@@ -58,6 +58,7 @@ import { saveGame, serializeFloor, loadGame, hasSave, deleteSave } from '../save
 import { isDevEnvironment } from '../utils/Environment.js';
 import { createSkillFromData } from '../save/SkillFactory.js';
 import { AutosaveTimer } from '../save/AutosaveTimer.js';
+import { restoreInventoryAndEquipment } from '../save/restorePlayer.js';
 
 // TILE_SIZE is initialised from TilesetManager in GameScene.create() so it
 // reflects the active tileset (16 for Classic/Modern, 32 for HD) each time
@@ -2347,36 +2348,8 @@ export class GameScene extends Phaser.Scene {
     Object.assign(this.player.stats, saveData.player.stats);
     this.player.gold = saveData.player.gold;
 
-    // Inventory — reconstruct Item objects from saved ids
-    const findTypeDef = id => Object.values(ITEM_TYPES).find(t => t.id === id);
-    this.player.inventory = saveData.player.inventory
-      .map(({ id, count }) => {
-        const typeDef = findTypeDef(id);
-        if (!typeDef) return null;
-        const item = new Item(0, 0, typeDef);
-        item.count = count;
-        return item;
-      })
-      .filter(Boolean);
-
-    // Equipment slots
-    const makeEquipped = id => {
-      if (!id) return null;
-      const typeDef = findTypeDef(id);
-      return typeDef ? new Item(0, 0, typeDef) : null;
-    };
-    const eq = saveData.player.equipped;
-    this.player.equippedWeapon       = makeEquipped(eq.weapon);
-    this.player.equippedRangedWeapon = makeEquipped(eq.rangedWeapon);
-    this.player.equippedArmor        = makeEquipped(eq.armor);
-    this.player.equippedHelmet       = makeEquipped(eq.helmet);
-    this.player.equippedChest        = makeEquipped(eq.chest);
-    this.player.equippedLegs         = makeEquipped(eq.legs);
-    this.player.equippedArms         = makeEquipped(eq.arms);
-    this.player.equippedBoots        = makeEquipped(eq.boots);
-    this.player.equippedRing1        = makeEquipped(eq.ring1);
-    this.player.equippedRing2        = makeEquipped(eq.ring2);
-    this.player.equippedAmulet       = makeEquipped(eq.amulet);
+    // Inventory and equipment — shared references so isEquipped() works after load
+    restoreInventoryAndEquipment(this.player, saveData.player);
 
     // Skills
     if (this.player.skillSystem && saveData.player.activeSkills) {

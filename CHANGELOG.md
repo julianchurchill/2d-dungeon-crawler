@@ -50,6 +50,8 @@ Entries are listed newest-first within each section.
 
 ### Fixed
 
+- 2026-05-03 — **Selling an equipped item now unequips it**: `ShopSystem.sell` previously removed the item from inventory but left the equipment slot populated, causing the player to appear equipped with a sold item and retain its stat bonuses. The slot is now cleared before the item is removed.
+- 2026-05-03 — **Equipped-item sell warning works after loading a save**: `GameScene._applyLoadedSave` was reconstructing equipped slots as separate `Item` instances from inventory items, so `Player.isEquipped()` always returned `null` after loading a save. Equipment slots are now assigned the same object references as the corresponding inventory items. Logic extracted to `src/save/restorePlayer.js`.
 - 2026-05-03 — **Dropping an equipped item now unequips it**: dropping a weapon, armour piece, or any other equipped item from the inventory unequips it first. A first press of X when the highlighted item is equipped shows a confirmation warning; a second press confirms and drops it.
 - 2026-05-03 — **Armour shop now accepts and sells all equipment slot types**: boots, helmets, chestpieces, leggings, gauntlets, rings, and amulets can now be sold at the armour shop. The shop's generated stock covers all slot types across two tiers, unlocking tier-2 pieces at higher player levels.
 - 2026-05-02 — **Save now remembers revealed dungeon tiles**: `serializeFloor` now includes the full FOV explored-state array alongside tile data. Continuing a save restores which areas the player had previously revealed, so the fog of war is correctly preserved across sessions. Backward compatible — old saves without `fovState` simply start with everything unexplored.

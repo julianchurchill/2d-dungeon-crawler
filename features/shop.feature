@@ -82,3 +82,17 @@ Feature: Town Shops
     Given an armour shop
     Then the shop does not accept the health potion
     And the shop does not accept the short sword
+
+  # --- Unequip on sell ---
+
+  Scenario: Selling an equipped weapon unequips it
+    Given a player with a short sword in their inventory
+    And the short sword is equipped as weapon
+    When the player sells the short sword at the weapon shop
+    Then the player's equipped weapon should be null
+
+  Scenario: Selling an equipped armour item unequips it
+    Given a player with leather armor in their inventory
+    And the leather armor is equipped as armor
+    When the player sells the leather armor at the armour shop
+    Then the player's equipped armor should be null

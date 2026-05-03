@@ -87,6 +87,10 @@ export class ShopSystem {
     if (!this.accepts(item)) return 0;
     const idx = player.inventory.indexOf(item);
     if (idx === -1) return 0;
+    const equippedSlot = player.isEquipped?.(item);
+    if (equippedSlot) {
+      player[equippedSlot] = null;
+    }
     // removeItem handles stacks: decrements count for stacked items, splices otherwise.
     player.removeItem(idx);
     player.gold += item.sellPrice;
