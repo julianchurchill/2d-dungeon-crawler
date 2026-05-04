@@ -5,8 +5,8 @@
  * key so it survives save-slot deletion and new-game starts.
  *
  * Tracked: deepest floor reached, kills per enemy type, consumables used per
- * item id, walls broken, total gold gained, total gold spent, and a set of
- * unique boss types killed.
+ * item id, walls broken, total gold gained, total gold spent, and a kill count
+ * per unique boss type.
  */
 
 /** localStorage key for global stats. */
@@ -30,7 +30,7 @@ function _defaultStats() {
     wallsBroken: 0,
     goldGained: 0,
     goldSpent: 0,
-    uniqueBossesKilled: [],
+    bossKillCounts: {},
   };
 }
 
@@ -65,9 +65,9 @@ export function loadGlobalStats() {
     _stats.kills               = saved.kills               ?? {};
     _stats.consumablesUsed     = saved.consumablesUsed     ?? {};
     _stats.wallsBroken         = saved.wallsBroken         ?? 0;
-    _stats.goldGained          = saved.goldGained          ?? 0;
-    _stats.goldSpent           = saved.goldSpent           ?? 0;
-    _stats.uniqueBossesKilled  = saved.uniqueBossesKilled  ?? [];
+    _stats.goldGained      = saved.goldGained      ?? 0;
+    _stats.goldSpent       = saved.goldSpent       ?? 0;
+    _stats.bossKillCounts  = saved.bossKillCounts  ?? {};
   } catch {
     // Corrupt entry — leave defaults in place.
   }
@@ -82,7 +82,7 @@ export function getGlobalStats() {
     ..._stats,
     kills:              { ..._stats.kills },
     consumablesUsed:    { ..._stats.consumablesUsed },
-    uniqueBossesKilled: [..._stats.uniqueBossesKilled],
+    bossKillCounts: { ..._stats.bossKillCounts },
   };
 }
 
@@ -124,15 +124,12 @@ export function recordGlobalKill(type) {
 }
 
 /**
- * Adds the given boss type to the unique-bosses-killed set if not already
- * present.  The normal kill counter for the type must be incremented
- * separately via {@link recordGlobalKill}.
+ * Increments the kill count for the given boss type.  The normal kill counter
+ * for the type must be incremented separately via {@link recordGlobalKill}.
  * @param {string} type
  */
 export function recordGlobalBossKill(type) {
-  if (!_stats.uniqueBossesKilled.includes(type)) {
-    _stats.uniqueBossesKilled.push(type);
-  }
+  _stats.bossKillCounts[type] = (_stats.bossKillCounts[type] ?? 0) + 1;
   _persist();
 }
 

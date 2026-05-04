@@ -71,16 +71,17 @@ export function formatRunStats(runStats) {
 /**
  * Formats a global stats object (from GlobalStatsStore) into display-ready
  * sections.  Identical to `formatRunStats` but adds a `uniqueBossesKilled`
- * section listing each unique boss type killed with a friendly name.
+ * section listing each boss type with the number of times it was killed.
  *
- * @param {{ deepestFloor:number, wallsBroken:number, goldGained:number, goldSpent:number, kills:Object<string,number>, consumablesUsed:Object<string,number>, uniqueBossesKilled:string[] }} globalStats
- * @returns {{ summary: Array<{label:string,value:string|number}>, kills: Array<{label:string,value:string|number}>, consumablesUsed: Array<{label:string,value:string|number}>, uniqueBossesKilled: Array<{label:string,value:string}> }}
+ * @param {{ deepestFloor:number, wallsBroken:number, goldGained:number, goldSpent:number, kills:Object<string,number>, consumablesUsed:Object<string,number>, bossKillCounts:Object<string,number> }} globalStats
+ * @returns {{ summary: Array<{label:string,value:string|number}>, kills: Array<{label:string,value:string|number}>, consumablesUsed: Array<{label:string,value:string|number}>, uniqueBossesKilled: Array<{label:string,value:number|string}> }}
  */
 export function formatGlobalStats(globalStats) {
   const base = formatRunStats(globalStats);
 
-  const bossEntries = (globalStats.uniqueBossesKilled ?? [])
-    .map(type => ({ label: enemyName(type), value: '✓' }));
+  const counts = globalStats.bossKillCounts ?? {};
+  const bossEntries = Object.entries(counts)
+    .map(([type, count]) => ({ label: enemyName(type), value: count }));
   const uniqueBossesKilled = bossEntries.length > 0
     ? bossEntries
     : [{ label: 'No bosses killed yet', value: '' }];

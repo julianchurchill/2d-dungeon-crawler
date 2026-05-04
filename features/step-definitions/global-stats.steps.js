@@ -49,7 +49,7 @@ Given('an empty global stats storage', function () {
   resetGlobalStats();
 });
 
-Given('global stats with {int} unique boss killed of type {string}', function (count, type) {
+Given('global stats with {int} boss kills of type {string}', function (count, type) {
   this.globalStorage = makeFakeStorage();
   setGlobalStorage(this.globalStorage);
   resetGlobalStats();
@@ -133,8 +133,8 @@ Then('the global consumables map is empty', function () {
   assert.deepEqual(getGlobalStats().consumablesUsed, {});
 });
 
-Then('the global unique bosses killed is empty', function () {
-  assert.equal(getGlobalStats().uniqueBossesKilled.length, 0);
+Then('the global boss kills map is empty', function () {
+  assert.deepEqual(getGlobalStats().bossKillCounts, {});
 });
 
 Then('the global kill count for {string} is {int}', function (type, expected) {
@@ -145,18 +145,17 @@ Then('the global consumable count for {string} is {int}', function (id, expected
   assert.equal(getGlobalStats().consumablesUsed[id] ?? 0, expected);
 });
 
-Then('the global unique bosses killed count is {int}', function (expected) {
-  assert.equal(getGlobalStats().uniqueBossesKilled.length, expected);
-});
-
-Then('the global unique bosses killed includes {string}', function (type) {
-  assert.ok(
-    getGlobalStats().uniqueBossesKilled.includes(type),
-    `Expected uniqueBossesKilled to include "${type}" but got: ${JSON.stringify(getGlobalStats().uniqueBossesKilled)}`,
-  );
+Then('the global boss kill count for {string} is {int}', function (type, expected) {
+  assert.equal(getGlobalStats().bossKillCounts[type] ?? 0, expected);
 });
 
 Then('the unique bosses section contains {string}', function (label) {
   const found = this.formattedGlobal.uniqueBossesKilled.some(r => r.label === label || r.label.includes(label));
   assert.ok(found, `Expected uniqueBossesKilled section to contain "${label}" but got: ${JSON.stringify(this.formattedGlobal.uniqueBossesKilled)}`);
+});
+
+Then('the unique bosses section shows {string} with count {int}', function (label, count) {
+  const row = this.formattedGlobal.uniqueBossesKilled.find(r => r.label === label || r.label.includes(label));
+  assert.ok(row, `Expected uniqueBossesKilled section to contain "${label}" but got: ${JSON.stringify(this.formattedGlobal.uniqueBossesKilled)}`);
+  assert.equal(row.value, count, `Expected count ${count} for "${label}" but got: ${row.value}`);
 });
