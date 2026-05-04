@@ -11,6 +11,7 @@ import { SkillLevelUpScene } from './scenes/SkillLevelUpScene.js';
 import { StatDistributionScene } from './scenes/StatDistributionScene.js';
 import { OptionsScene } from './scenes/OptionsScene.js';
 import { StatsScene } from './scenes/StatsScene.js';
+import { GlobalStatsScene } from './scenes/GlobalStatsScene.js';
 import { GameScene } from './scenes/GameScene.js';
 import { UIScene } from './scenes/UIScene.js';
 
@@ -26,7 +27,7 @@ const config = {
     width: window.innerWidth,
     height: window.innerHeight,
   },
-  scene: [BootScene, MainMenuScene, SaveSlotScene, OptionsScene, DevOptionsScene, AchievementsScene, InGameMenuScene, HelpScene, StatsScene, DevMenuScene, StatDistributionScene, SkillLevelUpScene, GameScene, UIScene],
+  scene: [BootScene, MainMenuScene, SaveSlotScene, OptionsScene, DevOptionsScene, AchievementsScene, InGameMenuScene, HelpScene, StatsScene, GlobalStatsScene, DevMenuScene, StatDistributionScene, SkillLevelUpScene, GameScene, UIScene],
 };
 
 /**
