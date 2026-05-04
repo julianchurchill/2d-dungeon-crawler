@@ -1,4 +1,4 @@
-import { Given, When, Then } from '@cucumber/cucumber';
+import { Given, When, Then, After } from '@cucumber/cucumber';
 import assert from 'node:assert/strict';
 import { Player } from '../../src/entities/Player.js';
 import { Item } from '../../src/items/Item.js';
@@ -6,11 +6,21 @@ import { ITEM_TYPES } from '../../src/items/ItemTypes.js';
 import { ShopSystem } from '../../src/systems/ShopSystem.js';
 import { generateShopItems } from '../../src/items/ShopInventory.js';
 import { createRNG } from '../../src/utils/RNG.js';
+import { devOptions } from '../../src/systems/DevOptions.js';
 
 // Shared RNG for deterministic test generation
 const TEST_RNG = createRNG(42);
 
+// Reset any dev options touched by these tests after each scenario.
+After(function () {
+  devOptions.freeShop = false;
+});
+
 // ─── Given ────────────────────────────────────────────────────────────────────
+
+Given('the free shop dev option is enabled', function () {
+  devOptions.freeShop = true;
+});
 
 Given('a weapon shop selling a short sword for {int} gold', function (buyPrice) {
   this.shop = new ShopSystem('weapon');

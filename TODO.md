@@ -8,7 +8,6 @@
 - [x] UI menu help tidy up - 'help' screen is missing 'k' for skills. Move 'Controls' information from main menu into a 'help' menu accessible from the main menu - the same 'help' menu as available in-game.
 - [x] dev options screen 'Bosses' section 'total per level (overrides normal boss logic)' text overlaps the buttons below it
 - [x] options menu has "choose the visual style for dungeons tiles" overlaps the tileset buttons and 'active' text overlaps icons on buttons. Fix the text overlap and remove the 'active' text entirely as it is not needed.
-
 - [x] mobile inventory panel has no way to close it — no close button on touch devices
 - [x] mobile double-tap run does not stop when another button is pressed — any d-pad button press should cancel an active run, mirroring keyboard behaviour
 - [x] mobile controls overlap the message log and lack an Achievements/ESC button: move D-pad up to clear the message log, move INV to the centre position, add a menu button that opens Achievements (or closes the message log if it is open)
@@ -19,8 +18,9 @@
 ## General
 
 - [ ] music
+- [x] track player stats globally (across all saves ever) - all stats already tracked per save slot plus total unique bosses killed
+- [x] track player stats per save slot - deepest level reached, total kills for each enemy type, total of each consumable consumed, total walls broken, total gold gained (picked up, or by defeating enemies or selling items), total gold spent in shops
 - [x] hidden passages behind breakable walls. Breakable walls have a chance of concealing a hidden passage that leads to a room that can only be reached by the hidden passage. The firs time a player goes near a breakable wall that leads to a hidden passage (within 8 tiles) the UI shows a message in the message log 'you feel a draft nearby'.
-- [ ] stats - deepest level reached, monster types kill count, unique bosses kill count
 - [x] variable difficulty setting in options — Easy / Normal / Hard affects enemy count per room and enemy HP/ATK multipliers; persisted across sessions
 - [x] every dungeon floor should have an up staircase next to the initial spawn point of the player so they can go back up one floor
 - [x] in-game help screen — pressing ESC or the mobile ≡ menu button shows an in-game menu with Achievements and Help options; Help shows controls relevant to the current device (keyboard or mobile)
@@ -122,6 +122,7 @@
 
 ## Developer
 
+- [x] dev options toggle in game - no gold needed to buy items
 - [x] add in-game dev menu with toggle to make enemies invincible and another toggle to make the player invincible
 - [x] in dev mode when the player dies allow them to choose resurrect rather than return to the main screen — resurrect in place with all items/stats intact and full HP
 - [x] add to developer options the ability to edit the spawn table and to change minimum and maximum number of enemies per room to be set before the game starts

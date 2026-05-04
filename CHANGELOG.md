@@ -9,6 +9,19 @@ Entries are listed newest-first within each section.
 
 ---
 
+## [0.82.0] - 2026-05-04
+
+### Added
+
+- 2026-05-04 — **Dev: free shop toggle**: new "Free shop" toggle in the in-game dev menu (ESC → DEV OPTIONS) lets the player buy items with no gold cost. Gold is not deducted and `recordGoldSpent` is skipped when active. Toggle persists for the duration of the session and resets with `resetDevOptions()`.
+
+- 2026-05-04 — **Global stats: highest level and total deaths**: two new lifetime stats added to `GlobalStatsStore` — `highestLevel` (highest character level reached across all runs) and `totalDeaths` (total number of times the player has died). Both are displayed in the Global Stats screen summary and persisted through reloads. `GameScene` hooks added at the two level-up sites and in `_gameOver()`.
+- 2026-05-04 — **Global stats tracking and screen**: lifetime statistics now accumulate across all save slots and runs in a dedicated `global_stats` localStorage entry. Tracked: deepest floor, kills per enemy type, consumables used, walls broken, gold gained and spent, and unique boss types killed. A **STATS** button on the main menu opens a `GlobalStatsScene` showing all four sections. `GlobalStatsStore`, `GlobalStatsScene`, and `formatGlobalStats` added; `GameScene` hooks added alongside existing per-run hooks; `MainMenuScene` updated with the new button.
+- 2026-05-04 — **Run stats screen**: a new STATS button in the in-game menu (ESC → STATS) opens a read-only run statistics screen showing summary figures, a kills breakdown by enemy type (sorted by count), and consumables used by item id. `StatsScene` and `RunStatsFormatter` added; `InGameMenuScene` updated with the new button.
+- 2026-05-04 — **Run stats tracking**: the game now records per-save-slot statistics for the current run — deepest floor reached, kills per enemy type, consumables used per item id, walls broken, total gold gained (from boss loot and item sales), and total gold spent in shops. Stats are persisted through save/load cycles and default to zero for saves that pre-date this feature. `Player.runStats` object added along with `recordFloorReached`, `recordKill`, `recordConsumableUsed`, `recordWallBroken`, `recordGoldGained`, and `recordGoldSpent` methods.
+
+---
+
 ## [0.77.0] - 2026-05-03
 
 ### Added

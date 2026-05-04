@@ -27,6 +27,7 @@ const HEADER_H = 80;
 const TOGGLES = [
   { label: 'Enemies invincible', key: 'enemiesInvincible' },
   { label: 'Player invincible',  key: 'playerInvincible'  },
+  { label: 'Free shop',          key: 'freeShop'          },
 ];
 
 export class DevMenuScene extends Phaser.Scene {

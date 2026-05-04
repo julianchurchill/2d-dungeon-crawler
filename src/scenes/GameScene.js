@@ -60,6 +60,18 @@ import { isDevEnvironment } from '../utils/Environment.js';
 import { createSkillFromData } from '../save/SkillFactory.js';
 import { AutosaveTimer } from '../save/AutosaveTimer.js';
 import { restoreInventoryAndEquipment } from '../save/restorePlayer.js';
+import {
+  loadGlobalStats,
+  recordGlobalFloorReached,
+  recordGlobalKill,
+  recordGlobalBossKill,
+  recordGlobalConsumableUsed,
+  recordGlobalWallBroken,
+  recordGlobalGoldGained,
+  recordGlobalGoldSpent,
+  recordGlobalHighestLevel,
+  recordGlobalDeath,
+} from '../save/GlobalStatsStore.js';
 
 // TILE_SIZE is initialised from TilesetManager in GameScene.create() so it
 // reflects the active tileset (16 for Classic/Modern, 32 for HD) each time
@@ -101,6 +113,9 @@ export class GameScene extends Phaser.Scene {
     if (data.mode !== 'continue') {
       resetAchievementStore();
     }
+
+    // Load global stats from storage so they are ready for recording.
+    loadGlobalStats();
 
     // AchievementSystem self-registers on the EventBus in its constructor.
     // Store the reference so listeners can be cleaned up when the scene stops,
@@ -1601,12 +1616,16 @@ export class GameScene extends Phaser.Scene {
       this._updateHealthBar(target);
 
       if (killed) {
+        this.player.recordKill(target.type);
+        recordGlobalKill(target.type);
+        if (target.isBoss) recordGlobalBossKill(target.type);
         EventBus.emit(GameEvents.ENEMY_KILLED, target.type);
         if (target.isBoss) this._applyBossLoot(target);
         if (target.isChampion) this._applyChampionLoot(target);
 
         const leveled = this.player.gainXP(target.xp);
         if (leveled) {
+          recordGlobalHighestLevel(this.player.stats.level);
           EventBus.emit(GameEvents.MESSAGE, `Level up! You are now level ${this.player.stats.level}!`);
           EventBus.emit(GameEvents.PLAYER_LEVEL_UP, this.player.stats.level);
           this.cameras.main.flash(600, 255, 220, 100);
@@ -1809,6 +1828,8 @@ export class GameScene extends Phaser.Scene {
 
     if (result.action === 'break_wall') {
       this._runController.cancel();
+      this.player.recordWallBroken();
+      recordGlobalWallBroken();
       const isHiddenPassage = this.dungeonMap.getTile(result.wallX, result.wallY) === TILE.HIDDEN_PASSAGE_WALL;
       this.dungeonMap.setTile(result.wallX, result.wallY, TILE.FLOOR);
       const _bwRoomId = this._entryTracker.getRoomId();
@@ -1974,6 +1995,9 @@ export class GameScene extends Phaser.Scene {
         }
 
         if (killed) {
+          this.player.recordKill(target.type);
+          recordGlobalKill(target.type);
+          if (target.isBoss) recordGlobalBossKill(target.type);
           // Notify achievement system via event so it can update kill-based progress.
           EventBus.emit(GameEvents.ENEMY_KILLED, target.type);
 
@@ -1988,6 +2012,7 @@ export class GameScene extends Phaser.Scene {
 
           const leveled = this.player.gainXP(target.xp);
           if (leveled) {
+            recordGlobalHighestLevel(this.player.stats.level);
             EventBus.emit(GameEvents.MESSAGE, `Level up! You are now level ${this.player.stats.level}!`);
             EventBus.emit(GameEvents.PLAYER_LEVEL_UP, this.player.stats.level);
             // Golden flash over the game world to make the moment unmissable.
@@ -2101,6 +2126,8 @@ export class GameScene extends Phaser.Scene {
   _applyBossLoot(boss) {
     if (boss.dropGold > 0) {
       this.player.gold = (this.player.gold ?? 0) + boss.dropGold;
+      this.player.recordGoldGained(boss.dropGold);
+      recordGlobalGoldGained(boss.dropGold);
       EventBus.emit(GameEvents.PLAYER_GOLD_CHANGED, this.player.gold);
       EventBus.emit(GameEvents.MESSAGE, `You find ${boss.dropGold} gold on the remains!`);
     }
@@ -2415,6 +2442,18 @@ export class GameScene extends Phaser.Scene {
         saveData.player.inactiveSkills.map(createSkillFromData).filter(Boolean);
     }
 
+    // Run stats — fall back to defaults for saves that pre-date this feature
+    if (saveData.player.runStats) {
+      this.player.runStats = {
+        deepestFloor:    saveData.player.runStats.deepestFloor    ?? 1,
+        kills:           { ...(saveData.player.runStats.kills           ?? {}) },
+        consumablesUsed: { ...(saveData.player.runStats.consumablesUsed ?? {}) },
+        wallsBroken:     saveData.player.runStats.wallsBroken     ?? 0,
+        goldGained:      saveData.player.runStats.goldGained      ?? 0,
+        goldSpent:       saveData.player.runStats.goldSpent       ?? 0,
+      };
+    }
+
     // Floor — set before generateFloor() so it generates the correct floor
     this.floorManager.currentFloor = saveData.floor;
 
@@ -2457,6 +2496,8 @@ export class GameScene extends Phaser.Scene {
     this.cameras.main.fadeOut(300, 0, 0, 0);
     this.time.delayedCall(300, () => {
       const dungeonData = this.floorManager.descend();
+      this.player.recordFloorReached(this.floorManager.currentFloor);
+      recordGlobalFloorReached(this.floorManager.currentFloor);
       this._buildFloor(dungeonData);
       saveGame(this.player, this.floorManager,
         serializeFloor(this.dungeonMap, this.enemies, this.items, this.player, uniqueRoomRegistry),
@@ -2716,6 +2757,7 @@ export class GameScene extends Phaser.Scene {
         this.enemies,
         this.items,
       );
+      if (item.isConsumable()) { this.player.recordConsumableUsed(item.id); recordGlobalConsumableUsed(item.id); }
       const msg = InventorySystem.useItem(this.player, index, context);
       EventBus.emit(GameEvents.MESSAGE, msg);
       if (this.turnManager.state === TURN_STATE.INVENTORY) {
@@ -2729,6 +2771,7 @@ export class GameScene extends Phaser.Scene {
     const prevX = this.player.x;
     const prevY = this.player.y;
 
+    if (item?.isConsumable()) { this.player.recordConsumableUsed(item.id); recordGlobalConsumableUsed(item.id); }
     const msg = InventorySystem.useItem(this.player, index, context);
     EventBus.emit(GameEvents.MESSAGE, msg);
 
@@ -2801,11 +2844,15 @@ export class GameScene extends Phaser.Scene {
     // can buy it back if they change their mind.
     // Only push the buy-back entry when the sale actually succeeded (earned > 0)
     // to guard against mismatched shopType emits or other edge cases.
-    if (earned > 0 && this._activeShop) {
-      // For stackable items the stack object is still in inventory (count
-      // decremented), so we must clone it to avoid aliasing the live slot.
-      const buyBackItem = item.stackable ? item._cloneOne() : item;
-      this._activeShop.stock.push(system.createBuyBackEntry(buyBackItem));
+    if (earned > 0) {
+      this.player.recordGoldGained(earned);
+      recordGlobalGoldGained(earned);
+      if (this._activeShop) {
+        // For stackable items the stack object is still in inventory (count
+        // decremented), so we must clone it to avoid aliasing the live slot.
+        const buyBackItem = item.stackable ? item._cloneOne() : item;
+        this._activeShop.stock.push(system.createBuyBackEntry(buyBackItem));
+      }
     }
     EventBus.emit(GameEvents.MESSAGE, `Sold ${item.name} for ${earned} gold.`);
     EventBus.emit(GameEvents.PLAYER_GOLD_CHANGED, this.player.gold);
@@ -2830,12 +2877,17 @@ export class GameScene extends Phaser.Scene {
     const system = new ShopSystem(shopType);
     const success = system.buy(this.player, shopItem.item, shopItem.buyPrice);
     if (!success) {
-      if (this.player.gold < shopItem.buyPrice) {
+      if (!devOptions.freeShop && this.player.gold < shopItem.buyPrice) {
         EventBus.emit(GameEvents.MESSAGE, `You can't afford the ${shopItem.item.name} (${shopItem.buyPrice}g needed).`);
       } else {
         EventBus.emit(GameEvents.MESSAGE, 'Your inventory is full!');
       }
       return;
+    }
+
+    if (!devOptions.freeShop) {
+      this.player.recordGoldSpent(shopItem.buyPrice);
+      recordGlobalGoldSpent(shopItem.buyPrice);
     }
 
     // Remove the purchased item from the shop's persistent stock
@@ -3137,6 +3189,7 @@ export class GameScene extends Phaser.Scene {
   // ─── Game Over ────────────────────────────────────────────────────────────
 
   _gameOver() {
+    recordGlobalDeath();
     EventBus.emit(GameEvents.LOOK_HIDE);
     this._lookCursor?.deactivate();
     EventBus.emit(GameEvents.GAME_OVER);
@@ -3215,5 +3268,6 @@ export class GameScene extends Phaser.Scene {
     this.registry.set('floor', this.floorManager.currentFloor);
     this.registry.set('inventory', [...this.player.inventory]);
     this.registry.set('playerGold', this.player.gold);
+    this.registry.set('runStats', this.player.runStats);
   }
 }
