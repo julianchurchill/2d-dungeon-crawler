@@ -69,6 +69,8 @@ import {
   recordGlobalWallBroken,
   recordGlobalGoldGained,
   recordGlobalGoldSpent,
+  recordGlobalHighestLevel,
+  recordGlobalDeath,
 } from '../save/GlobalStatsStore.js';
 
 // TILE_SIZE is initialised from TilesetManager in GameScene.create() so it
@@ -1623,6 +1625,7 @@ export class GameScene extends Phaser.Scene {
 
         const leveled = this.player.gainXP(target.xp);
         if (leveled) {
+          recordGlobalHighestLevel(this.player.stats.level);
           EventBus.emit(GameEvents.MESSAGE, `Level up! You are now level ${this.player.stats.level}!`);
           EventBus.emit(GameEvents.PLAYER_LEVEL_UP, this.player.stats.level);
           this.cameras.main.flash(600, 255, 220, 100);
@@ -2009,6 +2012,7 @@ export class GameScene extends Phaser.Scene {
 
           const leveled = this.player.gainXP(target.xp);
           if (leveled) {
+            recordGlobalHighestLevel(this.player.stats.level);
             EventBus.emit(GameEvents.MESSAGE, `Level up! You are now level ${this.player.stats.level}!`);
             EventBus.emit(GameEvents.PLAYER_LEVEL_UP, this.player.stats.level);
             // Golden flash over the game world to make the moment unmissable.
@@ -3183,6 +3187,7 @@ export class GameScene extends Phaser.Scene {
   // ─── Game Over ────────────────────────────────────────────────────────────
 
   _gameOver() {
+    recordGlobalDeath();
     EventBus.emit(GameEvents.LOOK_HIDE);
     this._lookCursor?.deactivate();
     EventBus.emit(GameEvents.GAME_OVER);

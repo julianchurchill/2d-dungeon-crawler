@@ -31,6 +31,8 @@ function _defaultStats() {
     goldGained: 0,
     goldSpent: 0,
     bossKillCounts: {},
+    highestLevel: 1,
+    totalDeaths: 0,
   };
 }
 
@@ -68,6 +70,8 @@ export function loadGlobalStats() {
     _stats.goldGained      = saved.goldGained      ?? 0;
     _stats.goldSpent       = saved.goldSpent       ?? 0;
     _stats.bossKillCounts  = saved.bossKillCounts  ?? {};
+    _stats.highestLevel    = saved.highestLevel    ?? 1;
+    _stats.totalDeaths     = saved.totalDeaths     ?? 0;
   } catch {
     // Corrupt entry — leave defaults in place.
   }
@@ -165,5 +169,24 @@ export function recordGlobalGoldGained(amount) {
  */
 export function recordGlobalGoldSpent(amount) {
   _stats.goldSpent += amount;
+  _persist();
+}
+
+/**
+ * Updates the highest character level if `level` exceeds the current record.
+ * @param {number} level
+ */
+export function recordGlobalHighestLevel(level) {
+  if (level > _stats.highestLevel) {
+    _stats.highestLevel = level;
+    _persist();
+  }
+}
+
+/**
+ * Increments the total deaths counter by one.
+ */
+export function recordGlobalDeath() {
+  _stats.totalDeaths += 1;
   _persist();
 }
