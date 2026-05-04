@@ -59,6 +59,7 @@ export const devOptions = {
   maxEnemiesPerRoom: null,
   enemiesInvincible: false,
   playerInvincible: false,
+  freeShop: false,
   bossQuantities: null,
   championQuantities: null,
   forceUniqueRoom: null,
@@ -78,6 +79,7 @@ export function resetDevOptions() {
   devOptions.maxEnemiesPerRoom = null;
   devOptions.enemiesInvincible = false;
   devOptions.playerInvincible = false;
+  devOptions.freeShop = false;
   devOptions.bossQuantities = null;
   devOptions.championQuantities = null;
   devOptions.forceUniqueRoom = null;
