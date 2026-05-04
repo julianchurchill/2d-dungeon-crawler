@@ -31,7 +31,7 @@ import { HeldMovementTracker } from '../systems/HeldMovementTracker.js';
 import { HoldRepeatScheduler } from '../systems/HoldRepeatScheduler.js';
 import { tilesetManager } from '../systems/TilesetManager.js';
 import { RunMovementController } from '../systems/RunMovementController.js';
-import { applyToGame, devOptions } from '../systems/DevOptions.js';
+import { applyToGame, devOptions, devGiveItem } from '../systems/DevOptions.js';
 import { EnemySpawner, DEFAULT_CHAMPION_CHANCE } from '../systems/EnemySpawner.js';
 import { ENEMY_DEFS, getSpawnTable } from '../entities/EnemyTypes.js';
 import { AchievementSystem } from '../achievements/AchievementSystem.js';
@@ -1495,6 +1495,7 @@ export class GameScene extends Phaser.Scene {
     EventBus.on(GameEvents.BUY_ITEM, ({ shopType, shopItem }) => this._handleBuyItem(shopType, shopItem), this);
     EventBus.on(GameEvents.STORE_ITEM, ({ index }) => this._handleStoreItem(index), this);
     EventBus.on(GameEvents.RETRIEVE_ITEM, ({ index }) => this._handleRetrieveItem(index), this);
+    EventBus.on(GameEvents.DEV_GIVE_ITEM, (key) => this._handleDevGiveItem(key), this);
     EventBus.on(GameEvents.FLOOR_CHANGED, (floor) => {
       this.registry.set('floor', floor);
     }, this);
@@ -2416,6 +2417,26 @@ export class GameScene extends Phaser.Scene {
       serializeFloor(this.dungeonMap, this.enemies, this.items, this.player, uniqueRoomRegistry),
       this._slot);
     this._restart();
+  }
+
+  /**
+   * Gives the item identified by `key` directly to the player's inventory.
+   * Emits a message log entry on success or failure.
+   *
+   * @param {string} key - An ITEM_TYPES key (e.g. 'SWORD').
+   */
+  _handleDevGiveItem(key) {
+    if (!ITEM_TYPES[key]) {
+      EventBus.emit(GameEvents.MESSAGE, `[DEV] Unknown item key: ${key}`);
+      return;
+    }
+    const added = devGiveItem(this.player, key);
+    if (added) {
+      EventBus.emit(GameEvents.INVENTORY_CHANGED, [...this.player.inventory]);
+      EventBus.emit(GameEvents.MESSAGE, `[DEV] Added ${ITEM_TYPES[key].name} to inventory.`);
+    } else {
+      EventBus.emit(GameEvents.MESSAGE, '[DEV] Could not add item — inventory is full.');
+    }
   }
 
   /**

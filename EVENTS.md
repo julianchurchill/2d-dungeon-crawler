@@ -68,6 +68,7 @@ GameScene / ShopPanel ✕  ──► CLOSE_SELL_PANEL     ──► UIScene → 
 GameScene (NPC bump)     ──► OPEN_DIALOGUE        ──► UIScene → DialoguePanel.show
 GameScene / UIScene ENTER──► CLOSE_DIALOGUE       ──► UIScene → DialoguePanel.hide
 DialoguePanel (show/hide)──► DIALOGUE_TOGGLED     ──► GameScene (gates ESC handler)
+DevGiveItemScene (GIVE button)   ──► DEV_GIVE_ITEM      ──► GameScene._handleDevGiveItem
 ───────────────────────────────────────────────────────────────────────
 ```
 
@@ -128,3 +129,4 @@ DialoguePanel (show/hide)──► DIALOGUE_TOGGLED     ──► GameScene (gat
 | `LOOK_SHOW_TILE` | `'look-show-tile'` | `number\|string` (TILE constant or label) | GameScene (_showLookInfoAt) | UIScene → LookPanel.showTile() |
 | `LOOK_HIDE` | `'look-hide'` | *(none)* | GameScene (cursor deactivated, player moves, floor change) | UIScene → LookPanel.hide() |
 | `SAVE_AND_EXIT` | `'save-and-exit'` | *(none)* | InGameMenuScene (SAVE AND EXIT button) | GameScene._handleSaveAndExit |
+| `DEV_GIVE_ITEM` | `'dev-give-item'` | `string` (ITEM_TYPES key) | DevGiveItemScene (GIVE button) | GameScene._handleDevGiveItem |

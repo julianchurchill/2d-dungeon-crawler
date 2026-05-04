@@ -395,4 +395,12 @@ export const GameEvents = {
    * Subscribed by: GameScene (_handleSaveAndExit)
    */
   SAVE_AND_EXIT: 'save-and-exit',
+
+  /**
+   * Request to give an item directly to the player's inventory (dev mode only).
+   * Emitted by: DevGiveItemScene (GIVE button)
+   * Subscribed by: GameScene (_handleDevGiveItem)
+   * @type {string} ITEM_TYPES key (e.g. 'SWORD').
+   */
+  DEV_GIVE_ITEM: 'dev-give-item',
 };

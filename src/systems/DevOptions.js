@@ -128,3 +128,17 @@ export function applyToGame(player, floorManager) {
     }
   }
 }
+
+/**
+ * Gives one instance of the specified item type to the player immediately.
+ *
+ * @param {import('../entities/Player.js').Player} player - The active player.
+ * @param {string} key - A key from ITEM_TYPES (e.g. 'SWORD').
+ * @returns {boolean} true if the item was added, false if the key is unknown
+ *   or the inventory is full.
+ */
+export function devGiveItem(player, key) {
+  const typeDef = ITEM_TYPES[key];
+  if (!typeDef) return false;
+  return player.addItem(new Item(0, 0, typeDef));
+}
