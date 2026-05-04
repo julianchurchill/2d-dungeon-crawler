@@ -1,7 +1,8 @@
 /**
  * @module RunStatsFormatter
- * Converts a raw `runStats` object (from Player) into display-ready sections
- * for the Stats screen.  This is a pure function with no Phaser dependency.
+ * Converts raw stats objects into display-ready sections for the Stats screens.
+ * Provides formatters for both per-run stats (Player.runStats) and global stats
+ * (GlobalStatsStore).  Pure functions with no Phaser dependency.
  */
 
 import { ENEMY_DEFS } from '../entities/EnemyTypes.js';
@@ -65,4 +66,25 @@ export function formatRunStats(runStats) {
     : [{ label: 'No consumables used', value: '' }];
 
   return { summary, kills, consumablesUsed };
+}
+
+/**
+ * Formats a global stats object (from GlobalStatsStore) into display-ready
+ * sections.  Identical to `formatRunStats` but adds a `uniqueBossesKilled`
+ * section listing each boss type with the number of times it was killed.
+ *
+ * @param {{ deepestFloor:number, wallsBroken:number, goldGained:number, goldSpent:number, kills:Object<string,number>, consumablesUsed:Object<string,number>, bossKillCounts:Object<string,number> }} globalStats
+ * @returns {{ summary: Array<{label:string,value:string|number}>, kills: Array<{label:string,value:string|number}>, consumablesUsed: Array<{label:string,value:string|number}>, uniqueBossesKilled: Array<{label:string,value:number|string}> }}
+ */
+export function formatGlobalStats(globalStats) {
+  const base = formatRunStats(globalStats);
+
+  const counts = globalStats.bossKillCounts ?? {};
+  const bossEntries = Object.entries(counts)
+    .map(([type, count]) => ({ label: enemyName(type), value: count }));
+  const uniqueBossesKilled = bossEntries.length > 0
+    ? bossEntries
+    : [{ label: 'No bosses killed yet', value: '' }];
+
+  return { ...base, uniqueBossesKilled };
 }

@@ -164,8 +164,37 @@ export class MainMenuScene extends Phaser.Scene {
       onSelect: goOptions,
     });
 
+    // STATS button
+    const statsBtnY = optBtnY + 44;
+    const statsBg = this.add.rectangle(width / 2, statsBtnY, 200, 34, 0x1a2a3a)
+      .setStrokeStyle(1, 0x336677)
+      .setInteractive({ useHandCursor: true });
+
+    const statsTxt = this.add.text(width / 2, statsBtnY, '📊  STATS', {
+      fontSize: '12px', fontFamily: FONT_FAMILY, color: '#6699aa', resolution: 2,
+    }).setOrigin(0.5);
+
+    const goStats = () => {
+      this.cameras.main.fadeOut(200, 0, 0, 0);
+      this.time.delayedCall(200, () =>
+        this.scene.start('GlobalStatsScene', { fromScene: 'MainMenuScene' }));
+    };
+    statsBg.on('pointerover', () => { statsBg.setFillStyle(0x223344); statsTxt.setColor('#aaffee'); });
+    statsBg.on('pointerout',  () => {
+      statsBg.setFillStyle(0x1a2a3a);
+      const isFocused = this._nav && this._nav.focusedIndex === this._navItems.length;
+      statsTxt.setColor(isFocused ? COLOR_FOCUSED : '#6699aa');
+    });
+    statsBg.on('pointerdown', goStats);
+
+    this._navItems.push({
+      onFocus:  () => { statsBg.setFillStyle(0x223344); statsTxt.setColor(COLOR_FOCUSED); },
+      onBlur:   () => { statsBg.setFillStyle(0x1a2a3a); statsTxt.setColor('#6699aa'); },
+      onSelect: goStats,
+    });
+
     // HELP button
-    const helpBtnY = optBtnY + 44;
+    const helpBtnY = statsBtnY + 44;
     const helpBg = this.add.rectangle(width / 2, helpBtnY, 200, 34, 0x1a2a3a)
       .setStrokeStyle(1, 0x336677)
       .setInteractive({ useHandCursor: true });
