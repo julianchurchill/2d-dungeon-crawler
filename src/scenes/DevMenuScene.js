@@ -92,13 +92,18 @@ export class DevMenuScene extends Phaser.Scene {
    */
   _buildToggles(width, height) {
     const cx     = width / 2;
-    const totalH = TOGGLES.length * 56;
+    // Reserve one extra slot for the GIVE ITEMS link row below the toggles.
+    const totalH = (TOGGLES.length + 1) * 56;
     const startY = HEADER_H + (height - HEADER_H) / 2 - totalH / 2 - 30;
 
     TOGGLES.forEach(({ label, key }, i) => {
       const y = startY + i * 56;
       this._addToggleRow(cx, y, label, key);
     });
+
+    // GIVE ITEMS link — opens the DevGiveItemScene.
+    const giveY = startY + TOGGLES.length * 56 + 8;
+    this._addLinkRow(cx, giveY, '▶ Give items to player');
   }
 
   /**
@@ -135,6 +140,31 @@ export class DevMenuScene extends Phaser.Scene {
     btn.on('pointerdown', toggle);
 
     this._navItems.push({ labelTxt, normalColor: '#cccccc', onSelect: toggle });
+  }
+
+  /**
+   * Renders a single link row — a centred clickable label that navigates to
+   * another scene. Registers the row with `_navItems` for keyboard navigation.
+   *
+   * @param {number} cx    - Horizontal centre of the screen.
+   * @param {number} y     - Vertical position of this row.
+   * @param {string} label - Display text.
+   */
+  _addLinkRow(cx, y, label) {
+    const txt = this.add.text(cx, y, label, {
+      fontSize: '18px', fontFamily: FONT_FAMILY,
+      color: '#88ccff', stroke: '#000000', strokeThickness: 3, resolution: 2,
+    }).setOrigin(0.5, 0.5).setInteractive({ useHandCursor: true });
+
+    const open = () => {
+      this.scene.launch('DevGiveItemScene');
+      this.scene.stop();
+    };
+    txt.on('pointerover',  () => txt.setColor('#ffffff'));
+    txt.on('pointerout',   () => txt.setColor('#88ccff'));
+    txt.on('pointerdown',  open);
+
+    this._navItems.push({ labelTxt: txt, normalColor: '#88ccff', onSelect: open });
   }
 
   /**
