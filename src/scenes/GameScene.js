@@ -2877,7 +2877,7 @@ export class GameScene extends Phaser.Scene {
     const system = new ShopSystem(shopType);
     const success = system.buy(this.player, shopItem.item, shopItem.buyPrice);
     if (!success) {
-      if (this.player.gold < shopItem.buyPrice) {
+      if (!devOptions.freeShop && this.player.gold < shopItem.buyPrice) {
         EventBus.emit(GameEvents.MESSAGE, `You can't afford the ${shopItem.item.name} (${shopItem.buyPrice}g needed).`);
       } else {
         EventBus.emit(GameEvents.MESSAGE, 'Your inventory is full!');
@@ -2885,8 +2885,10 @@ export class GameScene extends Phaser.Scene {
       return;
     }
 
-    this.player.recordGoldSpent(shopItem.buyPrice);
-    recordGlobalGoldSpent(shopItem.buyPrice);
+    if (!devOptions.freeShop) {
+      this.player.recordGoldSpent(shopItem.buyPrice);
+      recordGlobalGoldSpent(shopItem.buyPrice);
+    }
 
     // Remove the purchased item from the shop's persistent stock
     const idx = shop.stock.indexOf(shopItem);

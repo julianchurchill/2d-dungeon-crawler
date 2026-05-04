@@ -27,6 +27,30 @@ Feature: Buying items from town shops
     Then the player should still have 50 gold
     And the player's inventory should still be full
 
+  # --- Dev: free shop ---
+
+  Scenario: Free shop allows purchase with no gold
+    Given the free shop dev option is enabled
+    And a weapon shop selling a short sword for 20 gold
+    And a player with 0 gold
+    When the player buys the short sword from the shop
+    Then the player should have 0 gold
+    And the player should have 1 item in their inventory
+
+  Scenario: Free shop does not deduct gold from the player
+    Given the free shop dev option is enabled
+    And a weapon shop selling a short sword for 20 gold
+    And a player with 50 gold
+    When the player buys the short sword from the shop
+    Then the player should have 50 gold
+
+  Scenario: Free shop still respects full inventory
+    Given the free shop dev option is enabled
+    And a weapon shop selling a short sword for 20 gold
+    And a player with a full inventory and 0 gold
+    When the player tries to buy the short sword from the shop
+    Then the player's inventory should still be full
+
   # --- Shop inventory generation ---
 
   Scenario: Weapon shop generates weapon items

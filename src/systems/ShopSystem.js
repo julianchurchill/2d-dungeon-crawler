@@ -5,6 +5,8 @@
  * the relevant category of items for sale.
  */
 
+import { devOptions } from './DevOptions.js';
+
 /** Maps shop type → the item type categories it accepts. */
 export const SHOP_ACCEPTED_TYPES = {
   potion: ['consumable'],
@@ -43,9 +45,9 @@ export class ShopSystem {
    * @returns {boolean} True if the purchase succeeded.
    */
   buy(player, item, buyPrice) {
-    if (player.gold < buyPrice) return false;
+    if (!devOptions.freeShop && player.gold < buyPrice) return false;
     if (!player.canPickUp(item)) return false;
-    player.gold -= buyPrice;
+    if (!devOptions.freeShop) player.gold -= buyPrice;
     player.addItem(item);
     return true;
   }

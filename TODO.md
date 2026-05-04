@@ -122,7 +122,7 @@
 
 ## Developer
 
-- [ ] dev options toggle in game - no gold needed to buy items
+- [x] dev options toggle in game - no gold needed to buy items
 - [x] add in-game dev menu with toggle to make enemies invincible and another toggle to make the player invincible
 - [x] in dev mode when the player dies allow them to choose resurrect rather than return to the main screen — resurrect in place with all items/stats intact and full HP
 - [x] add to developer options the ability to edit the spawn table and to change minimum and maximum number of enemies per room to be set before the game starts
