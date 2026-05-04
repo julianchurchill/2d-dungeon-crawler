@@ -7,6 +7,10 @@ Entries are listed newest-first within each section.
 
 ## [Unreleased]
 
+---
+
+## [0.82.0] - 2026-05-04
+
 ### Added
 
 - 2026-05-04 — **Dev: free shop toggle**: new "Free shop" toggle in the in-game dev menu (ESC → DEV OPTIONS) lets the player buy items with no gold cost. Gold is not deducted and `recordGoldSpent` is skipped when active. Toggle persists for the duration of the session and resets with `resetDevOptions()`.
