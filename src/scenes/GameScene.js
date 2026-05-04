@@ -3239,5 +3239,6 @@ export class GameScene extends Phaser.Scene {
     this.registry.set('floor', this.floorManager.currentFloor);
     this.registry.set('inventory', [...this.player.inventory]);
     this.registry.set('playerGold', this.player.gold);
+    this.registry.set('runStats', this.player.runStats);
   }
 }
