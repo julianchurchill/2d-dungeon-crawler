@@ -7,6 +7,10 @@ Entries are listed newest-first within each section.
 
 ## [Unreleased]
 
+### Added
+
+- 2026-05-04 — **Run stats tracking**: the game now records per-save-slot statistics for the current run — deepest floor reached, kills per enemy type, consumables used per item id, walls broken, total gold gained (from boss loot and item sales), and total gold spent in shops. Stats are persisted through save/load cycles and default to zero for saves that pre-date this feature. `Player.runStats` object added along with `recordFloorReached`, `recordKill`, `recordConsumableUsed`, `recordWallBroken`, `recordGoldGained`, and `recordGoldSpent` methods.
+
 ---
 
 ## [0.77.0] - 2026-05-03

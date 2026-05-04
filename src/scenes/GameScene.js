@@ -1601,6 +1601,7 @@ export class GameScene extends Phaser.Scene {
       this._updateHealthBar(target);
 
       if (killed) {
+        this.player.recordKill(target.type);
         EventBus.emit(GameEvents.ENEMY_KILLED, target.type);
         if (target.isBoss) this._applyBossLoot(target);
         if (target.isChampion) this._applyChampionLoot(target);
@@ -1809,6 +1810,7 @@ export class GameScene extends Phaser.Scene {
 
     if (result.action === 'break_wall') {
       this._runController.cancel();
+      this.player.recordWallBroken();
       const isHiddenPassage = this.dungeonMap.getTile(result.wallX, result.wallY) === TILE.HIDDEN_PASSAGE_WALL;
       this.dungeonMap.setTile(result.wallX, result.wallY, TILE.FLOOR);
       const _bwRoomId = this._entryTracker.getRoomId();
@@ -1974,6 +1976,7 @@ export class GameScene extends Phaser.Scene {
         }
 
         if (killed) {
+          this.player.recordKill(target.type);
           // Notify achievement system via event so it can update kill-based progress.
           EventBus.emit(GameEvents.ENEMY_KILLED, target.type);
 
@@ -2101,6 +2104,7 @@ export class GameScene extends Phaser.Scene {
   _applyBossLoot(boss) {
     if (boss.dropGold > 0) {
       this.player.gold = (this.player.gold ?? 0) + boss.dropGold;
+      this.player.recordGoldGained(boss.dropGold);
       EventBus.emit(GameEvents.PLAYER_GOLD_CHANGED, this.player.gold);
       EventBus.emit(GameEvents.MESSAGE, `You find ${boss.dropGold} gold on the remains!`);
     }
@@ -2415,6 +2419,18 @@ export class GameScene extends Phaser.Scene {
         saveData.player.inactiveSkills.map(createSkillFromData).filter(Boolean);
     }
 
+    // Run stats — fall back to defaults for saves that pre-date this feature
+    if (saveData.player.runStats) {
+      this.player.runStats = {
+        deepestFloor:    saveData.player.runStats.deepestFloor    ?? 1,
+        kills:           { ...(saveData.player.runStats.kills           ?? {}) },
+        consumablesUsed: { ...(saveData.player.runStats.consumablesUsed ?? {}) },
+        wallsBroken:     saveData.player.runStats.wallsBroken     ?? 0,
+        goldGained:      saveData.player.runStats.goldGained      ?? 0,
+        goldSpent:       saveData.player.runStats.goldSpent       ?? 0,
+      };
+    }
+
     // Floor — set before generateFloor() so it generates the correct floor
     this.floorManager.currentFloor = saveData.floor;
 
@@ -2457,6 +2473,7 @@ export class GameScene extends Phaser.Scene {
     this.cameras.main.fadeOut(300, 0, 0, 0);
     this.time.delayedCall(300, () => {
       const dungeonData = this.floorManager.descend();
+      this.player.recordFloorReached(this.floorManager.currentFloor);
       this._buildFloor(dungeonData);
       saveGame(this.player, this.floorManager,
         serializeFloor(this.dungeonMap, this.enemies, this.items, this.player, uniqueRoomRegistry),
@@ -2716,6 +2733,7 @@ export class GameScene extends Phaser.Scene {
         this.enemies,
         this.items,
       );
+      if (item.isConsumable()) this.player.recordConsumableUsed(item.id);
       const msg = InventorySystem.useItem(this.player, index, context);
       EventBus.emit(GameEvents.MESSAGE, msg);
       if (this.turnManager.state === TURN_STATE.INVENTORY) {
@@ -2729,6 +2747,7 @@ export class GameScene extends Phaser.Scene {
     const prevX = this.player.x;
     const prevY = this.player.y;
 
+    if (item?.isConsumable()) this.player.recordConsumableUsed(item.id);
     const msg = InventorySystem.useItem(this.player, index, context);
     EventBus.emit(GameEvents.MESSAGE, msg);
 
@@ -2801,11 +2820,14 @@ export class GameScene extends Phaser.Scene {
     // can buy it back if they change their mind.
     // Only push the buy-back entry when the sale actually succeeded (earned > 0)
     // to guard against mismatched shopType emits or other edge cases.
-    if (earned > 0 && this._activeShop) {
-      // For stackable items the stack object is still in inventory (count
-      // decremented), so we must clone it to avoid aliasing the live slot.
-      const buyBackItem = item.stackable ? item._cloneOne() : item;
-      this._activeShop.stock.push(system.createBuyBackEntry(buyBackItem));
+    if (earned > 0) {
+      this.player.recordGoldGained(earned);
+      if (this._activeShop) {
+        // For stackable items the stack object is still in inventory (count
+        // decremented), so we must clone it to avoid aliasing the live slot.
+        const buyBackItem = item.stackable ? item._cloneOne() : item;
+        this._activeShop.stock.push(system.createBuyBackEntry(buyBackItem));
+      }
     }
     EventBus.emit(GameEvents.MESSAGE, `Sold ${item.name} for ${earned} gold.`);
     EventBus.emit(GameEvents.PLAYER_GOLD_CHANGED, this.player.gold);
@@ -2837,6 +2859,8 @@ export class GameScene extends Phaser.Scene {
       }
       return;
     }
+
+    this.player.recordGoldSpent(shopItem.buyPrice);
 
     // Remove the purchased item from the shop's persistent stock
     const idx = shop.stock.indexOf(shopItem);
