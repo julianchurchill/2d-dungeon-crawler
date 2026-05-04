@@ -17,9 +17,9 @@
 
 ## General
 
-- [ ] track player stats per save slot - deepest level reached, total kills for each enemy type, total of each consumable consumed, total walls broken, total gold gained (picked up, or by defeating enemies or selling items), total gold spent in shops
 - [ ] track player stats globally (across all saves ever) - all stats already tracked per save slot plus total unique bosses killed
 - [ ] music
+- [x] track player stats per save slot - deepest level reached, total kills for each enemy type, total of each consumable consumed, total walls broken, total gold gained (picked up, or by defeating enemies or selling items), total gold spent in shops
 - [x] hidden passages behind breakable walls. Breakable walls have a chance of concealing a hidden passage that leads to a room that can only be reached by the hidden passage. The firs time a player goes near a breakable wall that leads to a hidden passage (within 8 tiles) the UI shows a message in the message log 'you feel a draft nearby'.
 - [x] variable difficulty setting in options — Easy / Normal / Hard affects enemy count per room and enemy HP/ATK multipliers; persisted across sessions
 - [x] every dungeon floor should have an up staircase next to the initial spawn point of the player so they can go back up one floor

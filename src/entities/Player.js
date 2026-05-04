@@ -40,6 +40,15 @@ export class Player {
     /** @type {DisplayCase} Persistent display case for unique items — survives floor transitions. */
     this.displayCase = new DisplayCase();
     this.sprite = null;
+    /** @type {{ deepestFloor:number, kills:Object<string,number>, consumablesUsed:Object<string,number>, wallsBroken:number, goldGained:number, goldSpent:number }} */
+    this.runStats = {
+      deepestFloor: 1,
+      kills: {},
+      consumablesUsed: {},
+      wallsBroken: 0,
+      goldGained: 0,
+      goldSpent: 0,
+    };
   }
 
   get attackPower() {
@@ -231,5 +240,54 @@ export class Player {
       return item._cloneOne();
     }
     return this.inventory.splice(index, 1)[0];
+  }
+
+  /**
+   * Updates deepest floor reached if the given floor is deeper than the current record.
+   * @param {number} floor
+   */
+  recordFloorReached(floor) {
+    if (floor > this.runStats.deepestFloor) {
+      this.runStats.deepestFloor = floor;
+    }
+  }
+
+  /**
+   * Increments the kill count for the given enemy type.
+   * @param {string} type
+   */
+  recordKill(type) {
+    this.runStats.kills[type] = (this.runStats.kills[type] ?? 0) + 1;
+  }
+
+  /**
+   * Increments the usage count for the given consumable item id.
+   * @param {string} id
+   */
+  recordConsumableUsed(id) {
+    this.runStats.consumablesUsed[id] = (this.runStats.consumablesUsed[id] ?? 0) + 1;
+  }
+
+  /**
+   * Increments the walls-broken counter by one.
+   */
+  recordWallBroken() {
+    this.runStats.wallsBroken += 1;
+  }
+
+  /**
+   * Adds to the total gold gained this run.
+   * @param {number} amount
+   */
+  recordGoldGained(amount) {
+    this.runStats.goldGained += amount;
+  }
+
+  /**
+   * Adds to the total gold spent this run.
+   * @param {number} amount
+   */
+  recordGoldSpent(amount) {
+    this.runStats.goldSpent += amount;
   }
 }

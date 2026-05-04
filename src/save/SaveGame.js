@@ -173,6 +173,7 @@ export function saveGame(player, floorManager, floorData = null, slot = 0) {
       },
       activeSkills,
       inactiveSkills,
+      runStats: player.runStats ? { ...player.runStats, kills: { ...player.runStats.kills }, consumablesUsed: { ...player.runStats.consumablesUsed } } : undefined,
     },
     floorState: floorData ?? null,
   };

@@ -4,8 +4,9 @@ import { FONT_FAMILY } from '../utils/FontConfig.js';
  * @description A Phaser scene that presents the in-game pause menu.
  *
  * Shown when the player presses ESC (or the mobile ≡ button) while the
- * message log history panel is closed.  Offers two options:
+ * message log history panel is closed.  Offers the following options:
  *  - ACHIEVEMENTS — opens the AchievementsScene overlay
+ *  - STATS        — opens the StatsScene overlay
  *  - HELP         — opens the HelpScene overlay
  *
  * Back / ESC returns control to the game without doing anything else.
@@ -74,7 +75,8 @@ export class InGameMenuScene extends Phaser.Scene {
   }
 
   /**
-   * Renders the ACHIEVEMENTS, HELP, and BACK buttons centred on screen.
+   * Renders the ACHIEVEMENTS, STATS, HELP, SAVE AND EXIT, and BACK buttons
+   * centred on screen.
    *
    * @param {number} width
    * @param {number} height
@@ -83,18 +85,19 @@ export class InGameMenuScene extends Phaser.Scene {
     const cx = width / 2;
     const devMode = isDevEnvironment();
     // Space buttons evenly; extra rows for SAVE AND EXIT and dev mode.
-    const rowCount = devMode ? 5 : 4;
+    const rowCount = devMode ? 6 : 5;
     const totalH   = (rowCount - 1) * 60;
     const startY   = HEADER_H + (height - HEADER_H) / 2 - totalH / 2;
 
     this._addMenuButton(cx, startY,       'ACHIEVEMENTS',  '#ffdd88', '#664400', () => this._openAchievements());
-    this._addMenuButton(cx, startY + 60,  'HELP',          '#aaddff', '#004466', () => this._openHelp());
-    this._addMenuButton(cx, startY + 120, 'SAVE AND EXIT', '#aaffcc', '#004422', () => this._saveAndExit());
+    this._addMenuButton(cx, startY + 60,  'STATS',         '#aaffee', '#006644', () => this._openStats());
+    this._addMenuButton(cx, startY + 120, 'HELP',          '#aaddff', '#004466', () => this._openHelp());
+    this._addMenuButton(cx, startY + 180, 'SAVE AND EXIT', '#aaffcc', '#004422', () => this._saveAndExit());
     if (devMode) {
-      this._addMenuButton(cx, startY + 180, 'DEV OPTIONS', '#ff9999', '#660000', () => this._openDevMenu());
-      this._addMenuButton(cx, startY + 240, 'BACK',        '#888888', '#333333', () => this._back());
+      this._addMenuButton(cx, startY + 240, 'DEV OPTIONS', '#ff9999', '#660000', () => this._openDevMenu());
+      this._addMenuButton(cx, startY + 300, 'BACK',        '#888888', '#333333', () => this._back());
     } else {
-      this._addMenuButton(cx, startY + 180, 'BACK',        '#888888', '#333333', () => this._back());
+      this._addMenuButton(cx, startY + 240, 'BACK',        '#888888', '#333333', () => this._back());
     }
   }
 
@@ -168,6 +171,14 @@ export class InGameMenuScene extends Phaser.Scene {
    */
   _openAchievements() {
     this.scene.launch('AchievementsScene', { fromScene: 'InGameMenuScene' });
+    this.scene.stop();
+  }
+
+  /**
+   * Launches StatsScene with this scene as the origin.
+   */
+  _openStats() {
+    this.scene.launch('StatsScene', { fromScene: 'InGameMenuScene' });
     this.scene.stop();
   }
 
