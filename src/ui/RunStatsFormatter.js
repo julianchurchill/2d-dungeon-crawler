@@ -70,14 +70,21 @@ export function formatRunStats(runStats) {
 
 /**
  * Formats a global stats object (from GlobalStatsStore) into display-ready
- * sections.  Identical to `formatRunStats` but adds a `uniqueBossesKilled`
- * section listing each boss type with the number of times it was killed.
+ * sections.  Extends `formatRunStats` by adding `highestLevel` and
+ * `totalDeaths` to the summary, and a `uniqueBossesKilled` section listing
+ * each boss type with the number of times it was killed.
  *
- * @param {{ deepestFloor:number, wallsBroken:number, goldGained:number, goldSpent:number, kills:Object<string,number>, consumablesUsed:Object<string,number>, bossKillCounts:Object<string,number> }} globalStats
+ * @param {{ deepestFloor:number, wallsBroken:number, goldGained:number, goldSpent:number, kills:Object<string,number>, consumablesUsed:Object<string,number>, bossKillCounts:Object<string,number>, highestLevel:number, totalDeaths:number }} globalStats
  * @returns {{ summary: Array<{label:string,value:string|number}>, kills: Array<{label:string,value:string|number}>, consumablesUsed: Array<{label:string,value:string|number}>, uniqueBossesKilled: Array<{label:string,value:number|string}> }}
  */
 export function formatGlobalStats(globalStats) {
   const base = formatRunStats(globalStats);
+
+  const summary = [
+    ...base.summary,
+    { label: 'Highest Level', value: globalStats.highestLevel ?? 1 },
+    { label: 'Total Deaths',  value: globalStats.totalDeaths  ?? 0 },
+  ];
 
   const counts = globalStats.bossKillCounts ?? {};
   const bossEntries = Object.entries(counts)
@@ -86,5 +93,5 @@ export function formatGlobalStats(globalStats) {
     ? bossEntries
     : [{ label: 'No bosses killed yet', value: '' }];
 
-  return { ...base, uniqueBossesKilled };
+  return { ...base, summary, uniqueBossesKilled };
 }

@@ -12,6 +12,8 @@ import {
   recordGlobalWallBroken,
   recordGlobalGoldGained,
   recordGlobalGoldSpent,
+  recordGlobalHighestLevel,
+  recordGlobalDeath,
   getGlobalStats,
   setGlobalStorage,
   resetGlobalStats,
@@ -158,4 +160,26 @@ Then('the unique bosses section shows {string} with count {int}', function (labe
   const row = this.formattedGlobal.uniqueBossesKilled.find(r => r.label === label || r.label.includes(label));
   assert.ok(row, `Expected uniqueBossesKilled section to contain "${label}" but got: ${JSON.stringify(this.formattedGlobal.uniqueBossesKilled)}`);
   assert.equal(row.value, count, `Expected count ${count} for "${label}" but got: ${row.value}`);
+});
+
+When('the global highest level {int} is recorded', function (level) {
+  recordGlobalHighestLevel(level);
+});
+
+When('a global death is recorded', function () {
+  recordGlobalDeath();
+});
+
+Then('the global highest level is {int}', function (expected) {
+  assert.equal(getGlobalStats().highestLevel, expected);
+});
+
+Then('the global total deaths is {int}', function (expected) {
+  assert.equal(getGlobalStats().totalDeaths, expected);
+});
+
+Then('the formatted global summary includes {string} with value {int}', function (label, value) {
+  const row = this.formattedGlobal.summary.find(r => r.label === label);
+  assert.ok(row, `Expected summary to include "${label}" but got: ${JSON.stringify(this.formattedGlobal.summary)}`);
+  assert.equal(row.value, value, `Expected value ${value} for "${label}" but got: ${row.value}`);
 });

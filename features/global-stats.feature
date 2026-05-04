@@ -16,6 +16,8 @@ Feature: Global Stats Tracking
     And the global kills map is empty
     And the global consumables map is empty
     And the global boss kills map is empty
+    And the global highest level is 1
+    And the global total deaths is 0
 
   # ── Floor ─────────────────────────────────────────────────────────────────────
 
@@ -29,6 +31,38 @@ Feature: Global Stats Tracking
     When the global floor 8 is recorded
     And the global floor 3 is recorded
     Then the global deepest floor is 8
+
+  # ── Highest level ─────────────────────────────────────────────────────────────
+
+  Scenario: Recording a higher character level updates the highest level
+    Given an empty global stats storage
+    When the global highest level 5 is recorded
+    Then the global highest level is 5
+
+  Scenario: Recording a lower character level does not reduce the highest level
+    Given an empty global stats storage
+    When the global highest level 10 is recorded
+    And the global highest level 3 is recorded
+    Then the global highest level is 10
+
+  Scenario: Highest level of 1 is always kept as the baseline
+    Given an empty global stats storage
+    When the global stats are loaded
+    Then the global highest level is 1
+
+  # ── Total deaths ──────────────────────────────────────────────────────────────
+
+  Scenario: Recording a death increments the total deaths count
+    Given an empty global stats storage
+    When a global death is recorded
+    Then the global total deaths is 1
+
+  Scenario: Multiple deaths accumulate
+    Given an empty global stats storage
+    When a global death is recorded
+    And a global death is recorded
+    And a global death is recorded
+    Then the global total deaths is 3
 
   # ── Kills ──────────────────────────────────────────────────────────────────────
 
@@ -102,10 +136,14 @@ Feature: Global Stats Tracking
     When a global kill of type "goblin" is recorded
     And a global boss kill of type "old_bones" is recorded
     And 50 global gold gained is recorded
+    And the global highest level 7 is recorded
+    And a global death is recorded
     And the global stats are reloaded
     Then the global kill count for "goblin" is 1
     And the global boss kill count for "old_bones" is 1
     And the global gold gained is 50
+    And the global highest level is 7
+    And the global total deaths is 1
 
   # ── Formatter ──────────────────────────────────────────────────────────────────
 
@@ -118,3 +156,12 @@ Feature: Global Stats Tracking
     Given global stats with no bosses killed
     When the global stats are formatted
     Then the unique bosses section contains "No bosses killed yet"
+
+  Scenario: Formatted global stats summary includes highest level and total deaths
+    Given an empty global stats storage
+    And the global highest level 8 is recorded
+    And a global death is recorded
+    And a global death is recorded
+    When the global stats are formatted
+    Then the formatted global summary includes "Highest Level" with value 8
+    And the formatted global summary includes "Total Deaths" with value 2
