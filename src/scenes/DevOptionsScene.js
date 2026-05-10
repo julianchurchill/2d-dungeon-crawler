@@ -13,7 +13,8 @@ import { FONT_FAMILY } from '../utils/FontConfig.js';
 
 import Phaser from 'phaser';
 import { devOptions, isSpawnConfigValid } from '../systems/DevOptions.js';
-import { ITEM_TYPES, RARE_FLOOR_DROP_ITEMS } from '../items/ItemTypes.js';
+import { ITEM_TYPES } from '../items/ItemTypes.js';
+import { RARE_FLOOR_DROP_ITEMS } from '../items/LootTables.js';
 import { ENEMY_DEFS } from '../entities/EnemyTypes.js';
 import { UNIQUE_ROOM_DEFS } from '../dungeon/UniqueRoomDefinitions.js';
 

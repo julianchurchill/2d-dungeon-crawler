@@ -5,7 +5,7 @@ import { Given, When, Then } from '@cucumber/cucumber';
 import assert from 'node:assert/strict';
 import { DungeonMap } from '../../src/dungeon/DungeonMap.js';
 import { HiddenPassagePlacer, checkDraftProximity } from '../../src/dungeon/HiddenPassagePlacer.js';
-import { getHiddenRoomLoot } from '../../src/items/ItemTypes.js';
+import { getHiddenRoomLoot } from '../../src/items/LootTables.js';
 import { TILE } from '../../src/utils/TileTypes.js';
 
 /** RNG that always returns 0 — every chance check succeeds. */

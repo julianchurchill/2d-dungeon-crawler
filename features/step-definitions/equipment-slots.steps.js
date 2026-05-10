@@ -9,7 +9,8 @@ import { Given, When, Then } from '@cucumber/cucumber';
 import assert from 'node:assert/strict';
 import { Player } from '../../src/entities/Player.js';
 import { Item } from '../../src/items/Item.js';
-import { ITEM_TYPES, getFloorLootPool } from '../../src/items/ItemTypes.js';
+import { ITEM_TYPES } from '../../src/items/ItemTypes.js';
+import { getFloorLootPool } from '../../src/items/LootTables.js';
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 

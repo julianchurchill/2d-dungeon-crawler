@@ -9,7 +9,7 @@ import { CreepingMass } from '../entities/CreepingMass.js';
 import { OldBones } from '../entities/OldBones.js';
 import { Npc } from '../entities/Npc.js';
 import { Item } from '../items/Item.js';
-import { getFloorLoot, getChallengeLoot, getPickAxeFloorDrop, getHiddenRoomLoot } from '../items/ItemTypes.js';
+import { getFloorLoot, getChallengeLoot, getPickAxeFloorDrop, getHiddenRoomLoot } from '../items/LootTables.js';
 import { DungeonMap } from '../dungeon/DungeonMap.js';
 import { UNIQUE_ROOM_DEFS } from '../dungeon/UniqueRoomDefinitions.js';
 import { uniqueRoomRegistry } from '../dungeon/UniqueRoomRegistry.js';
