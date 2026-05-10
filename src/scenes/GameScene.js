@@ -2,7 +2,6 @@ import Phaser from 'phaser';
 import { FloorManager } from '../systems/FloorManager.js';
 import { TurnManager, TURN_STATE } from '../systems/TurnManager.js';
 import { resolveMeleeAttack } from '../systems/CombatSystem.js';
-import { InventorySystem } from '../systems/InventorySystem.js';
 import { Player } from '../entities/Player.js';
 import { Enemy, getHealthBarColor } from '../entities/Enemy.js';
 import { Champion } from '../entities/Champion.js';
@@ -11,15 +10,11 @@ import { OldBones } from '../entities/OldBones.js';
 import { Npc } from '../entities/Npc.js';
 import { Item } from '../items/Item.js';
 import { getFloorLoot, getChallengeLoot, getPickAxeFloorDrop, getHiddenRoomLoot } from '../items/ItemTypes.js';
-import { checkDraftProximity } from '../dungeon/HiddenPassagePlacer.js';
 import { DungeonMap } from '../dungeon/DungeonMap.js';
-import { AlcoveCarver } from '../dungeon/AlcoveCarver.js';
 import { UNIQUE_ROOM_DEFS } from '../dungeon/UniqueRoomDefinitions.js';
 import { uniqueRoomRegistry } from '../dungeon/UniqueRoomRegistry.js';
 import { placeDecorations } from '../dungeon/RoomDecorationPlacer.js';
 import { isInnerRoomSpaceAvailable } from '../dungeon/LockedRoomPlacer.js';
-import { startFloorTransition } from '../systems/FloorTransition.js';
-import { DungeonSnapshot } from '../dungeon/DungeonSnapshot.js';
 import { UniqueRoomEntryTracker } from '../dungeon/UniqueRoomEntryTracker.js';
 import { computeFOV, computeDaylightFOV } from '../fov/ShadowcastFOV.js';
 import { EventBus } from '../utils/EventBus.js';
@@ -54,22 +49,17 @@ import { generateShopItems } from '../items/ShopInventory.js';
 import { isTouchDevice } from '../utils/TouchDeviceDetector.js';
 import { NpcRoamController } from '../systems/NpcRoamController.js';
 import { LookCursor } from '../ui/LookCursor.js';
-import { findRangedTarget, resolveRangedAttack } from '../systems/RangedCombat.js';
+import { resolveRangedAttack } from '../systems/RangedCombat.js';
 import { saveGame, serializeFloor, loadGame, hasSave, deleteSave } from '../save/SaveGame.js';
 import { isDevEnvironment } from '../utils/Environment.js';
+import { PlayerActionHandler } from '../systems/PlayerActionHandler.js';
 import { createSkillFromData } from '../save/SkillFactory.js';
 import { AutosaveTimer } from '../save/AutosaveTimer.js';
 import { restoreInventoryAndEquipment } from '../save/restorePlayer.js';
 import {
   loadGlobalStats,
-  recordGlobalFloorReached,
-  recordGlobalKill,
-  recordGlobalBossKill,
-  recordGlobalConsumableUsed,
-  recordGlobalWallBroken,
   recordGlobalGoldGained,
   recordGlobalGoldSpent,
-  recordGlobalHighestLevel,
   recordGlobalDeath,
 } from '../save/GlobalStatsStore.js';
 
@@ -175,6 +165,9 @@ export class GameScene extends Phaser.Scene {
 
     // Player
     this.player = new Player(0, 0, new SkillSystem(this.rng, [new LuckyStrikeSkill()], [new FerocitySkill(), new DodgeSkill()]));
+
+    // Delegate all player-turn logic to a focused handler.
+    this._playerAction = new PlayerActionHandler(this);
 
     // Reset unique-room tracking so each new game gets a fresh set of
     // discoverable rooms.
@@ -1512,27 +1505,7 @@ export class GameScene extends Phaser.Scene {
     }, this);
   }
 
-  _handleDir(dir) {
-    // When the look cursor is active, direction keys move the cursor instead
-    // of the player — the game turn is not advanced.
-    if (this._lookCursor?.active) {
-      if (this.turnManager.state !== TURN_STATE.PLAYER_INPUT) return;
-      const { dx, dy } = DIR_DELTA[dir];
-      this._lookCursor.move(dx, dy);
-      this._showLookInfoAt(this._lookCursor.x, this._lookCursor.y);
-      return;
-    }
-    // When ranged aim mode is active, the direction fires the ranged weapon.
-    if (this._aimingRanged) {
-      if (!this.turnManager.isAcceptingInput()) return;
-      const { dx, dy } = DIR_DELTA[dir];
-      this._doRangedAttack(dx, dy);
-      return;
-    }
-    if (!this.turnManager.isAcceptingInput()) return;
-    const { dx, dy } = DIR_DELTA[dir];
-    this._doPlayerMove(dx, dy);
-  }
+  _handleDir(dir) { this._playerAction.handleDir(dir); }
 
   // ─── Ranged aim mode ──────────────────────────────────────────────────────
 
@@ -1541,30 +1514,14 @@ export class GameScene extends Phaser.Scene {
    *
    * @param {boolean} active - True to enter aim mode, false to leave it.
    */
-  _setAimingRanged(active) {
-    this._aimingRanged = active;
-    EventBus.emit(GameEvents.RANGED_AIM_MODE_CHANGED, active);
-  }
+  _setAimingRanged(active) { this._playerAction.setAimingRanged(active); }
 
   /**
    * Toggles ranged-aim mode on or off.
    * If the player has no ranged weapon equipped, a message is shown and aim
    * mode is not entered.
    */
-  _handleToggleRangedAim() {
-    if (!this.turnManager.isAcceptingInput()) return;
-    if (this._aimingRanged) {
-      this._setAimingRanged(false);
-      EventBus.emit(GameEvents.MESSAGE, 'Ranged aim cancelled.');
-      return;
-    }
-    if (!this.player.equippedRangedWeapon) {
-      EventBus.emit(GameEvents.MESSAGE, 'No ranged weapon equipped.');
-      return;
-    }
-    this._setAimingRanged(true);
-    EventBus.emit(GameEvents.MESSAGE, 'Aim — choose a direction to fire.');
-  }
+  _handleToggleRangedAim() { this._playerAction.handleToggleRangedAim(); }
 
   /**
    * Fires the player's equipped ranged weapon in the given direction.
@@ -1573,72 +1530,7 @@ export class GameScene extends Phaser.Scene {
    * @param {number} dx - Horizontal direction (-1, 0, or 1).
    * @param {number} dy - Vertical direction (-1, 0, or 1).
    */
-  _doRangedAttack(dx, dy) {
-    // Always exit aim mode after a direction is pressed.
-    this._setAimingRanged(false);
-
-    const RANGED_RANGE = 6;
-    const { target, outOfRange } = findRangedTarget(
-      this.player.x, this.player.y,
-      dx, dy,
-      RANGED_RANGE,
-      (x, y) => !this.dungeonMap.isWalkable(x, y),
-      (x, y) => this._getEntityAt(x, y),
-    );
-
-    if (!target) {
-      const msg = outOfRange ? 'Target is out of range.' : 'No target in that direction.';
-      EventBus.emit(GameEvents.MESSAGE, msg);
-      return;
-    }
-
-    this.turnManager.setState(TURN_STATE.PLAYER_ACTING);
-
-    // Animate the projectile first; resolve damage in the onComplete callback so
-    // the hit visuals play after the projectile arrives.
-    this._animateProjectile(this.player.x, this.player.y, target.x, target.y, () => {
-      const { damage, killed, messages } = resolveRangedAttack(
-        this.player, target, this.rng,
-        { defenderIsInvincible: devOptions.enemiesInvincible },
-      );
-      messages.forEach(msg => EventBus.emit(GameEvents.MESSAGE, msg));
-
-      // Flash all sprites for multi-segment enemies (e.g. Creeping Mass), otherwise the single sprite.
-      if (target.segments) {
-        for (const seg of target.segments) this._flashSprite(seg.sprite, 0xff4444);
-      } else {
-        this._flashSprite(target.sprite, 0xff4444, target);
-      }
-
-      // Clean up any segments removed by proportional HP loss (Creeping Mass).
-      this._applyPendingRemovedSegments(target);
-
-      // Refresh the health bar to reflect the new HP.
-      this._updateHealthBar(target);
-
-      if (killed) {
-        this.player.recordKill(target.type);
-        recordGlobalKill(target.type);
-        if (target.isBoss) recordGlobalBossKill(target.type);
-        EventBus.emit(GameEvents.ENEMY_KILLED, target.type);
-        if (target.isBoss) this._applyBossLoot(target);
-        if (target.isChampion) this._applyChampionLoot(target);
-
-        const leveled = this.player.gainXP(target.xp);
-        if (leveled) {
-          recordGlobalHighestLevel(this.player.stats.level);
-          EventBus.emit(GameEvents.MESSAGE, `Level up! You are now level ${this.player.stats.level}!`);
-          EventBus.emit(GameEvents.PLAYER_LEVEL_UP, this.player.stats.level);
-          this.cameras.main.flash(600, 255, 220, 100);
-          this._tryLaunchSkillLevelUp();
-        }
-        this._destroyEnemy(target);
-      }
-
-      this._syncRegistry();
-      this._startEnemyTurns();
-    });
-  }
+  _doRangedAttack(dx, dy) { this._playerAction.doRangedAttack(dx, dy); }
 
   /**
    * Animates a small projectile dot from one tile centre to another, then
@@ -1715,29 +1607,14 @@ export class GameScene extends Phaser.Scene {
    * each step: the run ends if the next tile is blocked (wall or entity),
    * any enemy is visible, or a new item (not visible at run-start) comes into view.
    */
-  _continueRun() {
-    const { dx, dy } = DIR_DELTA[this._runController.getDir()];
-    const nx = this.player.x + dx;
-    const ny = this.player.y + dy;
-    const blocked = !this.dungeonMap.isWalkable(nx, ny) || this._getEntityAt(nx, ny) !== null;
-    const dir = this._runController.nextDir(blocked, this._anyEnemyVisible(), this._anyNewItemVisible());
-    if (dir) this._handleDir(dir);
-  }
+  _continueRun() { this._playerAction.continueRun(); }
 
   /**
    * Returns true if any enemy occupies a tile currently visible in the FOV.
    *
    * @returns {boolean}
    */
-  _anyEnemyVisible() {
-    return this.enemies.some(e => {
-      // Multi-segment enemies (e.g. Creeping Mass): visible if ANY segment tile is in FOV
-      if (e.segments) {
-        return e.segments.some(s => this.dungeonMap.getFovState(s.x, s.y) === FOV_STATE.VISIBLE);
-      }
-      return this.dungeonMap.getFovState(e.x, e.y) === FOV_STATE.VISIBLE;
-    });
-  }
+  _anyEnemyVisible() { return this._playerAction.anyEnemyVisible(); }
 
   /**
    * Returns true if any item that was not visible when the current run started
@@ -1746,141 +1623,11 @@ export class GameScene extends Phaser.Scene {
    *
    * @returns {boolean}
    */
-  _anyNewItemVisible() {
-    return this.items.some(
-      i => this.dungeonMap.getFovState(i.x, i.y) === FOV_STATE.VISIBLE
-        && !this._runStartItems.has(i),
-    );
-  }
+  _anyNewItemVisible() { return this._playerAction.anyNewItemVisible(); }
 
   // ─── Player Actions ───────────────────────────────────────────────────────
 
-  _doPlayerMove(dx, dy) {
-    EventBus.emit(GameEvents.LOOK_HIDE);
-
-    const result = this.player.move(dx, dy, this.dungeonMap, (x, y) => this._getEntityAt(x, y));
-
-    if (result.action === 'blocked') {
-      return; // No turn spent on blocked moves
-    }
-
-    if (result.action === 'npc') {
-      // Cancel any active run and open the dialogue panel; no turn spent
-      this._runController.cancel();
-      this.turnManager.setState(TURN_STATE.DIALOGUE);
-      const line = result.npc.talk(this.player, () => this.rng.next());
-      EventBus.emit(GameEvents.OPEN_DIALOGUE, { npcName: result.npc.name, line });
-      return;
-    }
-
-    if (result.action === 'home') {
-      // Cancel any active run; no turn spent on home interactions
-      this._runController.cancel();
-      this.turnManager.setState(TURN_STATE.DISPLAY_CASE);
-      EventBus.emit(GameEvents.OPEN_DISPLAY_CASE, {
-        displayCase: this.player.displayCase,
-        inventory: this.player.inventory,
-        player: this.player,
-      });
-      return;
-    }
-
-    if (result.action === 'shop') {
-      // Cancel any active run so it doesn't resume into the door on the next turn
-      this._runController.cancel();
-      // Open both buy and sell panels; no turn spent on door interactions
-      const shop = this.shops.find(s => s.doorX === result.doorX && s.doorY === result.doorY);
-      if (shop) {
-        // Use TURN_STATE.SHOP so the state machine blocks I/K panel keys naturally
-        this.turnManager.setState(TURN_STATE.SHOP);
-        // Track which shop is active so _handleSellItem can add buy-back stock
-        this._activeShop = shop;
-        EventBus.emit(GameEvents.OPEN_SHOP_PANEL, {
-          shopType: shop.type,
-          shopStock: shop.stock,
-          inventory: this.player.inventory,
-          player: this.player,
-        });
-      }
-      return;
-    }
-
-    if (result.action === 'locked_door') {
-      this._runController.cancel();
-      const roomId = this._entryTracker.getRoomId();
-      const roomDef = roomId ? UNIQUE_ROOM_DEFS.find(d => d.id === roomId) : null;
-      const requiredKeyId = roomDef?.lockedRoom?.keyId;
-      const keyIdx = requiredKeyId
-        ? this.player.inventory.findIndex(i => i.id === requiredKeyId)
-        : -1;
-      if (keyIdx >= 0) {
-        this.player.removeItem(keyIdx);
-        this.dungeonMap.setTile(result.doorX, result.doorY, TILE.FLOOR);
-        // Repaint the now-open tile with the room's themed floor.
-        const floorBase = roomDef?.floorKey ?? 'tile_floor';
-        this.mapRT.drawFrame(tilesetManager.getTileKey(floorBase), undefined, result.doorX * TILE_SIZE, result.doorY * TILE_SIZE);
-        this._updateFOV();
-        EventBus.emit(GameEvents.MESSAGE, 'You use the Key to Elsewhere. The sealed door swings open.');
-      } else {
-        EventBus.emit(GameEvents.MESSAGE, 'The door is sealed. Martel mentioned a key — the Key to Elsewhere.');
-      }
-      return;
-    }
-
-    if (result.action === 'break_wall') {
-      this._runController.cancel();
-      this.player.recordWallBroken();
-      recordGlobalWallBroken();
-      const isHiddenPassage = this.dungeonMap.getTile(result.wallX, result.wallY) === TILE.HIDDEN_PASSAGE_WALL;
-      this.dungeonMap.setTile(result.wallX, result.wallY, TILE.FLOOR);
-      const _bwRoomId = this._entryTracker.getRoomId();
-      const _bwRoomDef = _bwRoomId ? UNIQUE_ROOM_DEFS.find(d => d.id === _bwRoomId) : null;
-      const _bwFloorBase = _bwRoomDef?.floorKey ?? 'tile_floor';
-      this.mapRT.drawFrame(
-        tilesetManager.getTileKey(_bwFloorBase), undefined,
-        result.wallX * TILE_SIZE, result.wallY * TILE_SIZE,
-      );
-      if (isHiddenPassage) {
-        // The hidden room floor tiles are pre-carved in the map; just update FOV
-        // to reveal them and notify the player.
-        this.turnManager.setState(TURN_STATE.PLAYER_ACTING);
-        this._updateFOV();
-        EventBus.emit(GameEvents.MESSAGE, 'You break through the wall and discover a hidden chamber!');
-      } else {
-        // Regular breakable wall — carve a small alcove and repaint changed tiles.
-        const alcoveChanges = new AlcoveCarver().carve(
-          this.dungeonMap, result.wallX, result.wallY, result.dx, result.dy, this.rng,
-        );
-        for (const { x, y, tile } of alcoveChanges) {
-          let tileKey;
-          if (tile === TILE.FLOOR)               tileKey = tilesetManager.getTileKey(_bwFloorBase);
-          else if (tile === TILE.WALL)            tileKey = tilesetManager.getTileKey('tile_wall');
-          else if (tile === TILE.BREAKABLE_WALL)  tileKey = tilesetManager.getTileKey('tile_breakable_wall');
-          if (tileKey) this.mapRT.drawFrame(tileKey, undefined, x * TILE_SIZE, y * TILE_SIZE);
-        }
-        this.turnManager.setState(TURN_STATE.PLAYER_ACTING);
-        this._updateFOV();
-        EventBus.emit(GameEvents.MESSAGE, 'You swing your pick axe and break through the rocky wall!');
-      }
-      this._checkHiddenPassageDraft();
-      this._syncRegistry();
-      this._startEnemyTurns();
-      return;
-    }
-
-    this.turnManager.setState(TURN_STATE.PLAYER_ACTING);
-
-    if (result.action === 'attacked') {
-      this._playerAttack(result.target);
-    } else if (result.action === 'moved' || result.action === 'stairs' || result.action === 'stairs_up' || result.action === 'recall_portal') {
-      // Update entity map
-      this.dungeonMap.setEntity(this.player.x - dx, this.player.y - dy, null);
-      // Animate
-      this._animateMove(this.playerSprite, this.player.x, this.player.y, () => {
-        this._afterPlayerMove(result.action);
-      });
-    }
-  }
+  _doPlayerMove(dx, dy) { this._playerAction.doPlayerMove(dx, dy); }
 
   _animateMove(sprite, tileX, tileY, onComplete) {
     this.tweens.add({
@@ -1893,44 +1640,14 @@ export class GameScene extends Phaser.Scene {
     });
   }
 
-  _afterPlayerMove(action) {
-    this._updateFOV();
-    this._checkItemPickup();
-    this._checkHiddenPassageDraft();
-    const entryMessages = this._entryTracker.checkEntry(this.player.x, this.player.y);
-    if (entryMessages) {
-      entryMessages.forEach(msg => EventBus.emit(GameEvents.MESSAGE, msg));
-      const enteredRoomId = this._entryTracker.getRoomId();
-      EventBus.emit(GameEvents.UNIQUE_ROOM_ENTERED, enteredRoomId);
-      if (enteredRoomId) uniqueRoomRegistry.markEntered(enteredRoomId);
-    }
-    if (action === 'stairs') {
-      this._showStairsPrompt();
-    } else if (action === 'stairs_up') {
-      this._showStairsUpPrompt();
-    } else if (action === 'recall_portal') {
-      this._showRecallPortalPrompt();
-    }
-    this._syncRegistry();
-    this._startEnemyTurns();
-  }
+  _afterPlayerMove(action) { this._playerAction.afterPlayerMove(action); }
 
   /**
    * Scans HIDDEN_PASSAGE_WALL tiles on the current floor and emits the
    * "draft" hint the first time the player walks within DRAFT_RADIUS tiles
    * of one.  Deduplication is handled by _hiddenPassageDraftShown.
    */
-  _checkHiddenPassageDraft() {
-    const triggered = checkDraftProximity(
-      this.dungeonMap,
-      this.player.x,
-      this.player.y,
-      this._hiddenPassageDraftShown,
-    );
-    if (triggered.length > 0) {
-      EventBus.emit(GameEvents.MESSAGE, 'You feel a draft nearby.');
-    }
-  }
+  _checkHiddenPassageDraft() { this._playerAction.checkHiddenPassageDraft(); }
 
   /**
    * Places 2 valuable items inside each hidden room.  Called once per floor
@@ -1953,82 +1670,7 @@ export class GameScene extends Phaser.Scene {
     }
   }
 
-  _playerAttack(target) {
-    // Bump animation: move toward target then back
-    const tx = target.x * TILE_SIZE + TILE_SIZE / 2;
-    const ty = target.y * TILE_SIZE + TILE_SIZE / 2;
-    const sx = this.playerSprite.x;
-    const sy = this.playerSprite.y;
-    const bx = sx + Math.sign(tx - sx) * TILE_SIZE * 0.4;
-    const by = sy + Math.sign(ty - sy) * TILE_SIZE * 0.4;
-
-    this.tweens.add({
-      targets: this.playerSprite,
-      x: bx, y: by,
-      duration: 40,
-      yoyo: true,
-      onComplete: () => {
-        const { damage, killed, messages } = resolveMeleeAttack(
-          this.player, target, this.rng,
-          { defenderIsInvincible: devOptions.enemiesInvincible },
-        );
-        messages.forEach(msg => EventBus.emit(GameEvents.MESSAGE, msg));
-
-        // Flash all sprites for multi-segment enemies, otherwise the single sprite
-        if (target.segments) {
-          for (const seg of target.segments) this._flashSprite(seg.sprite, 0xff4444);
-        } else {
-          this._flashSprite(target.sprite, 0xff4444, target);
-        }
-
-        // Handle segments removed by damage (proportional HP loss for Creeping Mass)
-        this._applyPendingRemovedSegments(target);
-
-        // Refresh the health bar to reflect the new HP.
-        this._updateHealthBar(target);
-
-        // First-hit minion spawning for bosses that support it
-        if (target.isBoss && target.shouldSpawnMinions && !target.minionsSpawned && damage > 0) {
-          this._spawnBossMinions(target);
-          // Immediately reveal minions — without this call their sprites stay
-          // hidden (setVisible(false) at spawn) until the player's next action.
-          this._updateFOV();
-        }
-
-        if (killed) {
-          this.player.recordKill(target.type);
-          recordGlobalKill(target.type);
-          if (target.isBoss) recordGlobalBossKill(target.type);
-          // Notify achievement system via event so it can update kill-based progress.
-          EventBus.emit(GameEvents.ENEMY_KILLED, target.type);
-
-          // Boss-specific loot: gold and a unique item drop
-          if (target.isBoss) {
-            this._applyBossLoot(target);
-          }
-          // Champion-specific loot: item drop
-          if (target.isChampion) {
-            this._applyChampionLoot(target);
-          }
-
-          const leveled = this.player.gainXP(target.xp);
-          if (leveled) {
-            recordGlobalHighestLevel(this.player.stats.level);
-            EventBus.emit(GameEvents.MESSAGE, `Level up! You are now level ${this.player.stats.level}!`);
-            EventBus.emit(GameEvents.PLAYER_LEVEL_UP, this.player.stats.level);
-            // Golden flash over the game world to make the moment unmissable.
-            this.cameras.main.flash(600, 255, 220, 100);
-            // Offer skill selection if there are choices available.
-            this._tryLaunchSkillLevelUp();
-          }
-          this._destroyEnemy(target);
-        }
-
-        this._syncRegistry();
-        this._startEnemyTurns();
-      },
-    });
-  }
+  _playerAttack(target) { this._playerAction.playerAttack(target); }
 
   /**
    * Cleans up any segments removed from a multi-tile enemy during damage
@@ -2124,19 +1766,7 @@ export class GameScene extends Phaser.Scene {
    *
    * @param {OldBones} boss
    */
-  _applyBossLoot(boss) {
-    if (boss.dropGold > 0) {
-      this.player.gold = (this.player.gold ?? 0) + boss.dropGold;
-      this.player.recordGoldGained(boss.dropGold);
-      recordGlobalGoldGained(boss.dropGold);
-      EventBus.emit(GameEvents.PLAYER_GOLD_CHANGED, this.player.gold);
-      EventBus.emit(GameEvents.MESSAGE, `You find ${boss.dropGold} gold on the remains!`);
-    }
-    if (boss.dropItem) {
-      this._placeItem(boss.x, boss.y, boss.dropItem);
-      EventBus.emit(GameEvents.MESSAGE, `${boss.name} dropped: ${boss.dropItem.name}!`);
-    }
-  }
+  _applyBossLoot(boss) { this._playerAction.applyBossLoot(boss); }
 
   /**
    * Places the champion's drop item on the floor at the champion's position
@@ -2144,12 +1774,7 @@ export class GameScene extends Phaser.Scene {
    *
    * @param {Champion} champion
    */
-  _applyChampionLoot(champion) {
-    if (champion.dropItem) {
-      this._placeItem(champion.x, champion.y, champion.dropItem);
-      EventBus.emit(GameEvents.MESSAGE, `${champion.name} dropped: ${champion.dropItem.name}!`);
-    }
-  }
+  _applyChampionLoot(champion) { this._playerAction.applyChampionLoot(champion); }
 
   /**
    * Flashes `sprite` with `color` for 150 ms, then restores the champion gold
@@ -2224,164 +1849,39 @@ export class GameScene extends Phaser.Scene {
     bar.setVisible(fraction < 1 && enemy.sprite?.visible === true);
   }
 
-  _checkItemPickup() {
-    const px = this.player.x;
-    const py = this.player.y;
-    const itemIndex = this.items.findIndex(i => i.x === px && i.y === py);
-    if (itemIndex === -1) return;
+  _checkItemPickup() { this._playerAction.checkItemPickup(); }
 
-    const item = this.items[itemIndex];
-    // Determine success before calling pickUp so that stackable items that
-    // merge into an existing stack (and are therefore never pushed into the
-    // inventory array) are still removed from the floor.
-    const willPickUp = this.player.canPickUp(item);
-    const msg = InventorySystem.pickUp(this.player, item);
-    EventBus.emit(GameEvents.MESSAGE, msg);
-
-    if (willPickUp) {
-      // Successfully picked up (either added to inventory or merged into a stack)
-      this.items.splice(itemIndex, 1);
-      if (item.sprite) item.sprite.destroy();
-      this._syncRegistry();
-    }
-  }
-
-  _showStairsPrompt() {
-    EventBus.emit(GameEvents.MESSAGE, 'You stand on the stairs. Press > or tap ▼▼ to descend.');
-  }
+  _showStairsPrompt() { this._playerAction.showStairsPrompt(); }
 
   /**
    * Shows a message when the player steps onto up-stairs.
    */
-  _showStairsUpPrompt() {
-    EventBus.emit(GameEvents.MESSAGE, 'You stand on the stairs leading up. Press > or tap ▼▼ to ascend.');
-  }
+  _showStairsUpPrompt() { this._playerAction.showStairsUpPrompt(); }
 
   /**
    * Shows a message when the player steps onto the recall portal.
    */
-  _showRecallPortalPrompt() {
-    EventBus.emit(GameEvents.MESSAGE, 'A shimmering portal hums at your feet. Press > or tap ▼▼ to return to the dungeon.');
-  }
+  _showRecallPortalPrompt() { this._playerAction.showRecallPortalPrompt(); }
 
   /**
    * Teleports the player directly to town after using a Home Seeking Scroll.
    * Saves a DungeonSnapshot so the player can return via the RECALL_PORTAL tile.
    * Can only be called when a snapshot has already been stored by _useInventoryItem.
    */
-  _teleportToTown() {
-    if (!startFloorTransition(this.turnManager)) return;
-    EventBus.emit(GameEvents.LOOK_HIDE);
-    this._lookCursor?.deactivate();
-    this.cameras.main.fadeOut(300, 0, 0, 0);
-    this.time.delayedCall(300, () => {
-      const dungeonData = this.floorManager.jumpToTown();
-      this._buildFloor(dungeonData);
-      this._placeRecallPortal();
-      this._lookCursor?.updateMap(this.dungeonMap, TILE_SIZE);
-      this._syncRegistry();
-      EventBus.emit(GameEvents.MESSAGE, 'You are whisked back to town. A shimmering portal lingers near the stairs.');
-      this.cameras.main.fadeIn(300, 0, 0, 0);
-      this.turnManager.setState(TURN_STATE.PLAYER_INPUT);
-    });
-  }
+  _teleportToTown() { this._playerAction.teleportToTown(); }
 
   /**
    * Places a RECALL_PORTAL tile in the town map, just south of the stairs accent ring.
    * Draws the portal graphic onto the existing map RenderTexture.
    */
-  _placeRecallPortal() {
-    // Fixed portal position: one tile below the town stairs accent ring (stairs at 10,10)
-    const portalX = 10;
-    const portalY = 12;
-    this.dungeonMap.setTile(portalX, portalY, TILE.RECALL_PORTAL);
-    const key = tilesetManager.getTileKey('tile_recall_portal');
-    this.mapRT.drawFrame(key, undefined, portalX * TILE_SIZE, portalY * TILE_SIZE);
-  }
+  _placeRecallPortal() { this._playerAction.placeRecallPortal(); }
 
   /**
    * Restores a dungeon floor from a previously saved DungeonSnapshot.
    * Re-creates enemy and item sprites, places the player at the return position,
    * and removes the snapshot so the portal can only be used once.
    */
-  _returnFromSnapshot() {
-    if (!this._dungeonSnapshot) {
-      EventBus.emit(GameEvents.MESSAGE, 'The portal fades — there is nowhere to return to.');
-      return;
-    }
-    if (!startFloorTransition(this.turnManager)) return;
-
-    const snapshot = this._dungeonSnapshot;
-    this._dungeonSnapshot = null;
-
-    EventBus.emit(GameEvents.LOOK_HIDE);
-    this._lookCursor?.deactivate();
-    this.cameras.main.fadeOut(300, 0, 0, 0);
-    this.time.delayedCall(300, () => {
-      // Restore floor number without regenerating; emit FLOOR_CHANGED for the HUD
-      this.floorManager.currentFloor = snapshot.floor;
-      EventBus.emit(GameEvents.FLOOR_CHANGED, this.floorManager.currentFloor);
-
-      // Build map visuals from the snapshot's preserved map; rooms:[] skips spawning
-      this._buildFloor({
-        map: snapshot.dungeonMap,
-        rooms: [],
-        startPos: { x: snapshot.returnX, y: snapshot.returnY },
-        shops: [],
-        npcs: [],
-      });
-
-      // _buildFloor sets _isChallengeFloor from dungeonData.isChallenge (absent → false).
-      // Re-derive it from the restored floor number so the staircase lock stays correct.
-      this._isChallengeFloor = this.floorManager.isChallengeFloor();
-
-      // Re-create sprites for all snapshotted enemies.
-      // Multi-segment enemies (CreepingMass) are skipped — their segment topology
-      // cannot be safely rebuilt from a shallow snapshot without re-running segment logic.
-      for (const enemy of snapshot.enemies) {
-        if (enemy.segments) continue;
-        const sprite = this.add.sprite(
-          enemy.x * TILE_SIZE + TILE_SIZE / 2,
-          enemy.y * TILE_SIZE + TILE_SIZE / 2,
-          tilesetManager.getTileKey(enemy.textureKey),
-        ).setDepth(8).setVisible(false);
-        if (enemy.isChampion) {
-          sprite.setScale(CHAMPION_SCALE);
-          sprite.setTint(CHAMPION_TINT);
-        }
-        enemy.sprite = sprite;
-        this._createHealthBar(enemy);
-        this.enemies.push(enemy);
-        this.dungeonMap.setEntity(enemy.x, enemy.y, enemy);
-      }
-
-      // Re-create sprites for all snapshotted floor items
-      for (const item of snapshot.items) {
-        const sprite = this.add.sprite(
-          item.x * TILE_SIZE + TILE_SIZE / 2,
-          item.y * TILE_SIZE + TILE_SIZE / 2,
-          tilesetManager.getTileKey(item.textureKey),
-        ).setDepth(6).setVisible(false);
-        item.sprite = sprite;
-        this.items.push(item);
-      }
-
-      // Place player at the saved return position
-      this.player.x = snapshot.returnX;
-      this.player.y = snapshot.returnY;
-      this.playerSprite.setPosition(
-        snapshot.returnX * TILE_SIZE + TILE_SIZE / 2,
-        snapshot.returnY * TILE_SIZE + TILE_SIZE / 2,
-      );
-
-      this._lookCursor?.updateMap(this.dungeonMap, TILE_SIZE);
-      this._updateFOV();
-      this._syncRegistry();
-      EventBus.emit(GameEvents.MESSAGE, `You step through the portal and return to floor ${snapshot.floor}.`);
-      this.cameras.main.fadeIn(300, 0, 0, 0);
-      this.turnManager.setState(TURN_STATE.PLAYER_INPUT);
-    });
-  }
+  _returnFromSnapshot() { this._playerAction.returnFromSnapshot(); }
 
   /**
    * Pauses the game and UI scenes and opens the AchievementsScene overlay.
@@ -2490,90 +1990,16 @@ export class GameScene extends Phaser.Scene {
     this._pendingFloorRestore = saveData.floorState ?? null;
   }
 
-  _tryUseStairs() {
-    if (!this.turnManager.isAcceptingInput()) return;
-    const tileType = this.dungeonMap.getTile(this.player.x, this.player.y);
-    if (tileType === TILE.STAIRS_DOWN) {
-      // On challenge floors the down-staircase is locked until all enemies
-      // in the arena have been defeated.
-      if (this._isChallengeFloor && this.enemies.length > 0) {
-        EventBus.emit(GameEvents.MESSAGE, 'Defeat all enemies before you can descend!');
-        return;
-      }
-      this._descend();
-    } else if (tileType === TILE.STAIRS_UP) {
-      this._ascend();
-    } else if (tileType === TILE.RECALL_PORTAL) {
-      this._returnFromSnapshot();
-    } else {
-      EventBus.emit(GameEvents.MESSAGE, 'No stairs here.');
-    }
-  }
+  _tryUseStairs() { this._playerAction.tryUseStairs(); }
 
-  _descend() {
-    if (!startFloorTransition(this.turnManager)) return;
-    EventBus.emit(GameEvents.LOOK_HIDE);
-    this._lookCursor?.deactivate();
-    this.cameras.main.fadeOut(300, 0, 0, 0);
-    this.time.delayedCall(300, () => {
-      const dungeonData = this.floorManager.descend();
-      this.player.recordFloorReached(this.floorManager.currentFloor);
-      recordGlobalFloorReached(this.floorManager.currentFloor);
-      this._buildFloor(dungeonData);
-      saveGame(this.player, this.floorManager,
-        serializeFloor(this.dungeonMap, this.enemies, this.items, this.player, uniqueRoomRegistry),
-        this._slot);
-      this._lookCursor?.updateMap(this.dungeonMap, TILE_SIZE);
-      this._syncRegistry();
-      if (this._isChallengeFloor) {
-        EventBus.emit(GameEvents.MESSAGE, `Floor ${this.floorManager.currentFloor} — a challenge floor! Defeat all enemies to proceed.`);
-      } else {
-        EventBus.emit(GameEvents.MESSAGE, `You descend to floor ${this.floorManager.currentFloor}.`);
-      }
-      this.cameras.main.fadeIn(300, 0, 0, 0);
-      this.turnManager.setState(TURN_STATE.PLAYER_INPUT);
-    });
-  }
+  _descend() { this._playerAction.descend(); }
 
   /**
    * Move the player back up one floor (to the town when on floor 1).
    * The player is placed at the stairsPos of the destination floor so they
    * land near the stairs they arrived from.
    */
-  _ascend() {
-    if (!startFloorTransition(this.turnManager)) return;
-    EventBus.emit(GameEvents.LOOK_HIDE);
-    this._lookCursor?.deactivate();
-    this.cameras.main.fadeOut(300, 0, 0, 0);
-    this.time.delayedCall(300, () => {
-      const dungeonData = this.floorManager.ascend();
-      this._buildFloor(dungeonData);
-      saveGame(this.player, this.floorManager,
-        serializeFloor(this.dungeonMap, this.enemies, this.items, this.player, uniqueRoomRegistry),
-        this._slot);
-      this._lookCursor?.updateMap(this.dungeonMap, TILE_SIZE);
-      // Place the player at the stairs position of the destination floor,
-      // and sync the sprite so the camera centres on the correct tile.
-      this.player.x = dungeonData.stairsPos.x;
-      this.player.y = dungeonData.stairsPos.y;
-      this.playerSprite.setPosition(
-        dungeonData.stairsPos.x * TILE_SIZE + TILE_SIZE / 2,
-        dungeonData.stairsPos.y * TILE_SIZE + TILE_SIZE / 2,
-      );
-      // Recompute FOV from the actual landing position (stairsPos), not the
-      // startPos that _buildFloor() used — without this the revealed area would
-      // be centred on the wrong tile.
-      this._updateFOV();
-      this._syncRegistry();
-      if (this.floorManager.isTown()) {
-        EventBus.emit(GameEvents.MESSAGE, 'You ascend back to town.');
-      } else {
-        EventBus.emit(GameEvents.MESSAGE, `You ascend to floor ${this.floorManager.currentFloor}.`);
-      }
-      this.cameras.main.fadeIn(300, 0, 0, 0);
-      this.turnManager.setState(TURN_STATE.PLAYER_INPUT);
-    });
-  }
+  _ascend() { this._playerAction.ascend(); }
 
   _toggleInventory() {
     // Only emit the open/close event when a state transition is actually possible,
@@ -2720,18 +2146,7 @@ export class GameScene extends Phaser.Scene {
    * StatDistributionScene chains to SkillLevelUpScene when finished if skill choices exist.
    * Sleeps GameScene and UIScene for the duration of both overlay scenes.
    */
-  _tryLaunchSkillLevelUp() {
-    // Clear movement state before sleeping so missed key-release events
-    // cannot cause phantom auto-repeat or run movement on wake.
-    this.heldMovement.clear();
-    this._runController.cancel();
-    this.scene.launch('StatDistributionScene', {
-      player:      this.player,
-      skillSystem: this.player.skillSystem ?? null,
-    });
-    this.scene.sleep('UIScene');
-    this.scene.sleep('GameScene');
-  }
+  _tryLaunchSkillLevelUp() { this._playerAction.tryLaunchSkillLevelUp(); }
 
   /**
    * Builds the payload for the OPEN_SKILLS event, including each skill's
@@ -2755,74 +2170,7 @@ export class GameScene extends Phaser.Scene {
    *
    * @param {number} index - Inventory slot to use.
    */
-  _useInventoryItem(index) {
-    const item = this.player.inventory[index];
-
-    const context = {
-      rng: this.rng,
-      isWalkable: (x, y) => this.dungeonMap.isWalkable(x, y),
-      getEntityAt: (x, y) => this._getEntityAt(x, y),
-    };
-
-    // Handle teleport_to_town before consuming the item so we can snapshot first
-    if (item?.effect?.type === 'teleport_to_town') {
-      if (this.floorManager.isTown()) {
-        EventBus.emit(GameEvents.MESSAGE, 'You are already in town — the scroll would be wasted here.');
-        return;
-      }
-      this._dungeonSnapshot = DungeonSnapshot.create(
-        this.floorManager.currentFloor,
-        this.player.x,
-        this.player.y,
-        this.dungeonMap,
-        this.enemies,
-        this.items,
-      );
-      if (item.isConsumable()) { this.player.recordConsumableUsed(item.id); recordGlobalConsumableUsed(item.id); }
-      const msg = InventorySystem.useItem(this.player, index, context);
-      EventBus.emit(GameEvents.MESSAGE, msg);
-      if (this.turnManager.state === TURN_STATE.INVENTORY) {
-        this.turnManager.setState(TURN_STATE.PLAYER_INPUT);
-        EventBus.emit(GameEvents.OPEN_INVENTORY, { inventory: this.player.inventory, player: this.player });
-      }
-      this._teleportToTown();
-      return;
-    }
-
-    const prevX = this.player.x;
-    const prevY = this.player.y;
-
-    if (item?.isConsumable()) { this.player.recordConsumableUsed(item.id); recordGlobalConsumableUsed(item.id); }
-    const msg = InventorySystem.useItem(this.player, index, context);
-    EventBus.emit(GameEvents.MESSAGE, msg);
-
-    const playerTeleported = this.player.x !== prevX || this.player.y !== prevY;
-    if (playerTeleported) {
-      // Close the inventory panel before enemy turns so the TurnManager state
-      // is PLAYER_INPUT when _startEnemyTurns cycles through ENEMY_ACTING.
-      if (this.turnManager.state === TURN_STATE.INVENTORY) {
-        this.turnManager.setState(TURN_STATE.PLAYER_INPUT);
-        EventBus.emit(GameEvents.OPEN_INVENTORY, {
-          inventory: this.player.inventory,
-          player: this.player,
-        });
-      }
-      this.playerSprite.setPosition(
-        this.player.x * TILE_SIZE + TILE_SIZE / 2,
-        this.player.y * TILE_SIZE + TILE_SIZE / 2,
-      );
-      this._updateFOV();
-      this._checkItemPickup();
-      this._syncRegistry();
-      this._startEnemyTurns();
-      return;
-    }
-
-    this._syncRegistry();
-    if (this.player.isDead()) {
-      this._gameOver();
-    }
-  }
+  _useInventoryItem(index) { this._playerAction.useInventoryItem(index); }
 
   /**
    * Handles INVENTORY_DROP: removes the item from the player's inventory and
@@ -2830,23 +2178,7 @@ export class GameScene extends Phaser.Scene {
    *
    * @param {number} index - Zero-based inventory index to drop.
    */
-  _dropInventoryItem(index) {
-    const result = InventorySystem.dropItem(this.player, index);
-    if (!result) return;
-
-    const { item, message } = result;
-    const sprite = this.add.sprite(
-      item.x * TILE_SIZE + TILE_SIZE / 2,
-      item.y * TILE_SIZE + TILE_SIZE / 2,
-      tilesetManager.getTileKey(item.textureKey),
-    ).setDepth(6).setVisible(
-      this.dungeonMap.getFovState(item.x, item.y) === FOV_STATE.VISIBLE,
-    );
-    item.sprite = sprite;
-    this.items.push(item);
-    EventBus.emit(GameEvents.MESSAGE, message);
-    this._syncRegistry();
-  }
+  _dropInventoryItem(index) { this._playerAction.dropInventoryItem(index); }
 
   /**
    * Handles a sell request from the SellPanel.  Creates a ShopSystem for the
@@ -3124,18 +2456,7 @@ export class GameScene extends Phaser.Scene {
    * Separating this from _startEnemyTurns keeps enemy-turn logic and
    * player-turn-start logic in distinct, single-purpose methods.
    */
-  _beginPlayerTurn() {
-    if (this._runController.isRunning()) {
-      // Continue the active run — each step is a full turn (enemies act, FOV
-      // updates) handled by _continueRun rather than the hold-repeat system.
-      this._continueRun();
-    } else {
-      // Auto-continue movement if a direction key is still held from last turn,
-      // but wait MOVE_REPEAT_DELAY_MS before triggering the next move so the
-      // total repeat interval (~150 ms) feels comfortable rather than frantic.
-      this._holdRepeat?.schedule((dir) => this._handleDir(dir));
-    }
-  }
+  _beginPlayerTurn() { this._playerAction.beginPlayerTurn(); }
 
   // ─── Entity Lookup ────────────────────────────────────────────────────────
 

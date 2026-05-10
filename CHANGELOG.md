@@ -7,6 +7,10 @@ Entries are listed newest-first within each section.
 
 ## [Unreleased]
 
+### Changed
+
+- 2026-05-10 — **Refactor: extract PlayerActionHandler**: all player-turn logic (~27 methods, ~850 lines) extracted from `GameScene` into a dedicated `PlayerActionHandler` class in `src/systems/`. `GameScene` methods are now one-line delegates, reducing `GameScene.js` from ~3,300 to ~2,400 lines. Unused imports removed from `GameScene.js`.
+
 ### Added
 
 - 2026-05-10 — **General Shop**: added a fourth town shop — the General Shop — selling rings and amulets. These items have been removed from the Armour Shop. The town map has been widened from 20 to 26 tiles to accommodate the new shop building.
