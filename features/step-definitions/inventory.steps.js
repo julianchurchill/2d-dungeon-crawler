@@ -64,6 +64,42 @@ Given('leather armor in the player inventory', function () {
   this.player.addItem(new Item(0, 0, ITEM_TYPES.LEATHER_ARMOR));
 });
 
+Given('a leather cap in the player inventory', function () {
+  this.player.addItem(new Item(0, 0, ITEM_TYPES.LEATHER_CAP));
+});
+
+Given('a leather chestpiece in the player inventory', function () {
+  this.player.addItem(new Item(0, 0, ITEM_TYPES.LEATHER_CHESTPIECE));
+});
+
+Given('leather leggings in the player inventory', function () {
+  this.player.addItem(new Item(0, 0, ITEM_TYPES.LEATHER_LEGGINGS));
+});
+
+Given('leather gauntlets in the player inventory', function () {
+  this.player.addItem(new Item(0, 0, ITEM_TYPES.LEATHER_GAUNTLETS));
+});
+
+Given('leather boots in the player inventory', function () {
+  this.player.addItem(new Item(0, 0, ITEM_TYPES.LEATHER_BOOTS));
+});
+
+Given('an iron ring in the player inventory', function () {
+  this.player.addItem(new Item(0, 0, ITEM_TYPES.IRON_RING));
+});
+
+Given('an iron ring already equipped in slot 1', function () {
+  this.player.equippedRing1 = new Item(0, 0, ITEM_TYPES.IRON_RING);
+});
+
+Given('a stone amulet in the player inventory', function () {
+  this.player.addItem(new Item(0, 0, ITEM_TYPES.STONE_AMULET));
+});
+
+Given('a home seeking scroll in the player inventory', function () {
+  this.player.addItem(new Item(0, 0, ITEM_TYPES.HOME_SEEKING_SCROLL));
+});
+
 // --- When ---
 
 When('the player picks up the health potion', function () {
@@ -92,6 +128,38 @@ When('the player equips the leather armor', function () {
 
 When('the player drops the health potion', function () {
   this.result = InventorySystem.dropItem(this.player, 0);
+});
+
+When('the player equips the leather cap', function () {
+  this.result = InventorySystem.useItem(this.player, 0);
+});
+
+When('the player equips the leather chestpiece', function () {
+  this.result = InventorySystem.useItem(this.player, 0);
+});
+
+When('the player equips the leather leggings', function () {
+  this.result = InventorySystem.useItem(this.player, 0);
+});
+
+When('the player equips the leather gauntlets', function () {
+  this.result = InventorySystem.useItem(this.player, 0);
+});
+
+When('the player equips the leather boots', function () {
+  this.result = InventorySystem.useItem(this.player, 0);
+});
+
+When('the player equips the iron ring', function () {
+  this.result = InventorySystem.useItem(this.player, 0);
+});
+
+When('the player equips the stone amulet', function () {
+  this.result = InventorySystem.useItem(this.player, 0);
+});
+
+When('the player uses the home seeking scroll', function () {
+  this.result = InventorySystem.useItem(this.player, 0);
 });
 
 // --- Then ---
@@ -178,4 +246,49 @@ Then('the PLAYER_STATS_CHANGED event should carry attack {int}', function (expec
 Then('the PLAYER_STATS_CHANGED event should carry defense {int}', function (expected) {
   assert.ok(this.emittedStats, 'Expected PLAYER_STATS_CHANGED to have been emitted');
   assert.equal(this.emittedStats.defense, expected);
+});
+
+Then('the leather cap should be the equipped helmet', function () {
+  assert.ok(this.player.equippedHelmet, 'Expected a helmet to be equipped');
+  assert.equal(this.player.equippedHelmet.id, ITEM_TYPES.LEATHER_CAP.id);
+});
+
+Then('the leather chestpiece should be the equipped chest', function () {
+  assert.ok(this.player.equippedChest, 'Expected a chestpiece to be equipped');
+  assert.equal(this.player.equippedChest.id, ITEM_TYPES.LEATHER_CHESTPIECE.id);
+});
+
+Then('the leather leggings should be the equipped legs', function () {
+  assert.ok(this.player.equippedLegs, 'Expected leggings to be equipped');
+  assert.equal(this.player.equippedLegs.id, ITEM_TYPES.LEATHER_LEGGINGS.id);
+});
+
+Then('the leather gauntlets should be the equipped arms', function () {
+  assert.ok(this.player.equippedArms, 'Expected gauntlets to be equipped');
+  assert.equal(this.player.equippedArms.id, ITEM_TYPES.LEATHER_GAUNTLETS.id);
+});
+
+Then('the leather boots should be the equipped boots', function () {
+  assert.ok(this.player.equippedBoots, 'Expected boots to be equipped');
+  assert.equal(this.player.equippedBoots.id, ITEM_TYPES.LEATHER_BOOTS.id);
+});
+
+Then('the iron ring should be in ring slot 1', function () {
+  assert.ok(this.player.equippedRing1, 'Expected ring slot 1 to be filled');
+  assert.equal(this.player.equippedRing1.id, ITEM_TYPES.IRON_RING.id);
+});
+
+Then('the iron ring should be in ring slot 2', function () {
+  assert.ok(this.player.equippedRing2, 'Expected ring slot 2 to be filled');
+  assert.equal(this.player.equippedRing2.id, ITEM_TYPES.IRON_RING.id);
+});
+
+Then('the stone amulet should be the equipped amulet', function () {
+  assert.ok(this.player.equippedAmulet, 'Expected an amulet to be equipped');
+  assert.equal(this.player.equippedAmulet.id, ITEM_TYPES.STONE_AMULET.id);
+});
+
+Then('the use result should mention returning to town', function () {
+  assert.ok(this.result && this.result.includes('town'),
+    `Expected result to mention "town", got: ${this.result}`);
 });
