@@ -92,6 +92,7 @@
 
 ## Town
 
+- [x] General Shop - a new shop that will have amulets and rings instead of them appearing in the 'armour' shop
 - [x] rename the 'Potion shop' to be the 'Magic shop' for future expansion with new magical items besides potions
 - [x] the town contains shops that can be entered where the player can buy items with currency. The items will have randomly generated stats and may include occasional rare items that are powerful for the players level. They will not include unique items that can only be found by exploring the dungeon.
 - [x] the town contains shops that can be entered where items from the players inventory can be sold for currency

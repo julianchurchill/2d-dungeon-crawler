@@ -9,6 +9,7 @@ Entries are listed newest-first within each section.
 
 ### Added
 
+- 2026-05-10 — **General Shop**: added a fourth town shop — the General Shop — selling rings and amulets. These items have been removed from the Armour Shop. The town map has been widened from 20 to 26 tiles to accommodate the new shop building.
 - 2026-05-04 — **Dev: give items to player**: a new **GIVE ITEMS** option in the in-game dev menu (ESC → DEV OPTIONS → Give items to player) opens a scrollable `DevGiveItemScene` listing every item in the game grouped by type. Pressing GIVE next to any item immediately adds one instance to the player's inventory and appends a message-log entry. A full-inventory message is shown if the add fails. `devGiveItem()` added to `DevOptions`; `DEV_GIVE_ITEM` event added to `GameEvents`.
 
 ---

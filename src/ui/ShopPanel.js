@@ -70,7 +70,7 @@ export class ShopPanel {
   /**
    * Opens the panel for the given shop.
    *
-   * @param {string} shopType - 'potion', 'weapon', or 'armour'.
+   * @param {string} shopType - 'potion', 'weapon', 'armour', or 'general'.
    * @param {ShopItem[]} shopStock - Items the shop has for sale.
    * @param {Item[]} inventory - The player's full inventory.
    * @param {import('../entities/Player.js').Player} player

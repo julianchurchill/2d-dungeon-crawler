@@ -525,7 +525,7 @@ export class GameScene extends Phaser.Scene {
   /**
    * Render all tiles into a RenderTexture.
    * In town mode the shops array is used to draw type-specific door textures
-   * (tile_door_potion / tile_door_weapon / tile_door_armour) at each shop door.
+   * (tile_door_potion / tile_door_weapon / tile_door_armour / tile_door_general) at each shop door.
    *
    * @param {DungeonMap} map
    * @param {boolean} isTown - Use town tile textures when true.

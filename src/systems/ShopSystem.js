@@ -9,14 +9,15 @@ import { devOptions } from './DevOptions.js';
 
 /** Maps shop type → the item type categories it accepts. */
 export const SHOP_ACCEPTED_TYPES = {
-  potion: ['consumable'],
-  weapon: ['weapon', 'ranged_weapon'],
-  armour: ['armor', 'helmet', 'chest', 'legs', 'arms', 'boots', 'ring', 'amulet'],
+  potion:  ['consumable'],
+  weapon:  ['weapon', 'ranged_weapon'],
+  armour:  ['armor', 'helmet', 'chest', 'legs', 'arms', 'boots'],
+  general: ['ring', 'amulet'],
 };
 
 export class ShopSystem {
   /**
-   * @param {'potion'|'weapon'|'armour'} shopType
+   * @param {'potion'|'weapon'|'armour'|'general'} shopType
    */
   constructor(shopType) {
     this.shopType = shopType;

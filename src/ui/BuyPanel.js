@@ -126,7 +126,7 @@ export class BuyPanel {
   /**
    * Opens the buy panel for the given shop type.
    *
-   * @param {string} shopType - 'potion', 'weapon', or 'armour'.
+   * @param {string} shopType - 'potion', 'weapon', 'armour', or 'general'.
    * @param {Array<{item: import('../items/Item.js').Item, buyPrice: number}>} shopStock
    * @param {import('../entities/Player.js').Player} player
    * @param {number} [xOffset=0] - Horizontal pixel offset from screen centre.

@@ -5,9 +5,10 @@
 
 /** Maps shop type to display name. */
 export const SHOP_NAMES = {
-  potion: 'Magic Shop',
-  weapon: 'Weapon Shop',
-  armour: 'Armour Shop',
+  potion:  'Magic Shop',
+  weapon:  'Weapon Shop',
+  armour:  'Armour Shop',
+  general: 'General Shop',
 };
 
 /**

@@ -123,7 +123,7 @@ export class SellPanel {
    * Opens the panel for the given shop type.
    * Bumping the same door again closes it (toggle).
    *
-   * @param {string} shopType - 'potion', 'weapon', or 'armour'.
+   * @param {string} shopType - 'potion', 'weapon', 'armour', or 'general'.
    * @param {Item[]} inventory - The player's full inventory.
    * @param {Player} player - The player instance.
    * @param {number} [xOffset=0] - Horizontal pixel offset from screen centre.
