@@ -66,3 +66,72 @@ Feature: Inventory Management
   Scenario: Item without a shortName has no shortName property defined
     Given the Health Potion item type
     Then the item shortName should not be defined
+
+  Scenario: Player equips a short bow and gains ranged attack power
+    Given a player with base attack 5
+    And a short bow in the player inventory
+    When the player equips the short bow
+    Then the player ranged attack power should be 7
+    And the short bow should be the equipped ranged weapon
+
+  Scenario: Player equips a leather cap and gains defense
+    Given a player with base defense 2
+    And a leather cap in the player inventory
+    When the player equips the leather cap
+    Then the player defense power should be 3
+    And the leather cap should be the equipped helmet
+
+  Scenario: Player equips a leather chestpiece and gains defense
+    Given a player with base defense 2
+    And a leather chestpiece in the player inventory
+    When the player equips the leather chestpiece
+    Then the player defense power should be 4
+    And the leather chestpiece should be the equipped chest
+
+  Scenario: Player equips leather leggings and gains defense
+    Given a player with base defense 2
+    And leather leggings in the player inventory
+    When the player equips the leather leggings
+    Then the player defense power should be 3
+    And the leather leggings should be the equipped legs
+
+  Scenario: Player equips leather gauntlets and gains defense
+    Given a player with base defense 2
+    And leather gauntlets in the player inventory
+    When the player equips the leather gauntlets
+    Then the player defense power should be 3
+    And the leather gauntlets should be the equipped arms
+
+  Scenario: Player equips leather boots and gains defense
+    Given a player with base defense 2
+    And leather boots in the player inventory
+    When the player equips the leather boots
+    Then the player defense power should be 3
+    And the leather boots should be the equipped boots
+
+  Scenario: Player equips an iron ring into the first ring slot
+    Given a player with base attack 5
+    And an iron ring in the player inventory
+    When the player equips the iron ring
+    Then the player attack power should be 6
+    And the iron ring should be in ring slot 1
+
+  Scenario: Player equips a second iron ring into the second ring slot
+    Given a player with base attack 5
+    And an iron ring already equipped in slot 1
+    And an iron ring in the player inventory
+    When the player equips the iron ring
+    Then the iron ring should be in ring slot 2
+
+  Scenario: Player equips a stone amulet and gains defense
+    Given a player with base defense 2
+    And a stone amulet in the player inventory
+    When the player equips the stone amulet
+    Then the player defense power should be 4
+    And the stone amulet should be the equipped amulet
+
+  Scenario: Using a home seeking scroll returns a return-to-town message
+    Given a player with base attack 5
+    And a home seeking scroll in the player inventory
+    When the player uses the home seeking scroll
+    Then the use result should mention returning to town
