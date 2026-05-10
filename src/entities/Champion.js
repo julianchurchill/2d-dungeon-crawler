@@ -6,7 +6,7 @@
  */
 
 import { Enemy } from './Enemy.js';
-import { getFloorLoot } from '../items/ItemTypes.js';
+import { getFloorLoot } from '../items/LootTables.js';
 
 /** HP multiplier applied to the base enemy HP when creating a champion. */
 export const CHAMPION_HP_MULT   = 1.5;

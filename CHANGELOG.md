@@ -9,6 +9,7 @@ Entries are listed newest-first within each section.
 
 ### Changed
 
+- 2026-05-10 — **Refactor: extract LootTables**: loot selection functions (`getFloorLoot`, `getFloorLootPool`, `getChallengeLoot`, `getChallengeLootPool`, `getPickAxeFloorDrop`, `getHiddenRoomLoot`) and `RARE_FLOOR_DROP_ITEMS` moved from `ItemTypes.js` into a new `src/items/LootTables.js`. `ItemTypes.js` now contains only item type definitions.
 - 2026-05-10 — **Refactor: Item.use() strategy pattern**: replaced the 9-branch if-else in `Item.use()` with a strategy pattern. Each item type definition in `ItemTypes.js` now carries its own `use(item, player, context)` function field. `Item.use()` delegates to it via `this._typeDef?.use?.(...)`. Adding new usable item types no longer requires modifying `Item.js`.
 - 2026-05-10 — **Refactor: extract PlayerActionHandler**: all player-turn logic (~27 methods, ~850 lines) extracted from `GameScene` into a dedicated `PlayerActionHandler` class in `src/systems/`. `GameScene` methods are now one-line delegates, reducing `GameScene.js` from ~3,300 to ~2,400 lines. Unused imports removed from `GameScene.js`.
 

@@ -4,7 +4,8 @@
  */
 import { Given, When, Then } from '@cucumber/cucumber';
 import assert from 'node:assert/strict';
-import { ITEM_TYPES, getPickAxeFloorDrop } from '../../src/items/ItemTypes.js';
+import { ITEM_TYPES } from '../../src/items/ItemTypes.js';
+import { getPickAxeFloorDrop } from '../../src/items/LootTables.js';
 import { Item } from '../../src/items/Item.js';
 import { TILE } from '../../src/utils/TileTypes.js';
 import { getTileLabel } from '../../src/utils/TileLabelMap.js';

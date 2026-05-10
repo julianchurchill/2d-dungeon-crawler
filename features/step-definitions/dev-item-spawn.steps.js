@@ -4,7 +4,7 @@
 import { When, Then, defineStep } from '@cucumber/cucumber';
 import assert from 'node:assert/strict';
 import { devOptions } from '../../src/systems/DevOptions.js';
-import { RARE_FLOOR_DROP_ITEMS, getPickAxeFloorDrop } from '../../src/items/ItemTypes.js';
+import { RARE_FLOOR_DROP_ITEMS, getPickAxeFloorDrop } from '../../src/items/LootTables.js';
 import { ITEM_TYPES } from '../../src/items/ItemTypes.js';
 
 // ── State helpers ─────────────────────────────────────────────────────────────

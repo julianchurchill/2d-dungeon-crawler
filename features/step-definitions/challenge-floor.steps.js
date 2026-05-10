@@ -2,7 +2,7 @@ import { Given, When, Then } from '@cucumber/cucumber';
 import assert from 'node:assert/strict';
 import { FloorManager } from '../../src/systems/FloorManager.js';
 import { ChallengeFloorGenerator } from '../../src/dungeon/ChallengeFloorGenerator.js';
-import { getChallengeLoot } from '../../src/items/ItemTypes.js';
+import { getChallengeLoot } from '../../src/items/LootTables.js';
 import { TILE } from '../../src/utils/TileTypes.js';
 
 // ─── Shared helpers ────────────────────────────────────────────────────────

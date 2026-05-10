@@ -4,7 +4,8 @@
 import { Given, When, Then } from '@cucumber/cucumber';
 import assert from 'node:assert/strict';
 import { findMinorTeleportDestination } from '../../src/systems/MinorTeleportation.js';
-import { ITEM_TYPES, getFloorLoot } from '../../src/items/ItemTypes.js';
+import { ITEM_TYPES } from '../../src/items/ItemTypes.js';
+import { getFloorLoot } from '../../src/items/LootTables.js';
 import { Item } from '../../src/items/Item.js';
 
 // Stub RNG that always picks the first element of any array.

@@ -2,7 +2,7 @@ import { Given, When, Then } from '@cucumber/cucumber';
 import assert from 'node:assert/strict';
 import { Champion } from '../../src/entities/Champion.js';
 import { ENEMY_DEFS } from '../../src/entities/EnemyTypes.js';
-import { getFloorLootPool } from '../../src/items/ItemTypes.js';
+import { getFloorLootPool } from '../../src/items/LootTables.js';
 import { EnemySpawner } from '../../src/systems/EnemySpawner.js';
 
 // ─── Shared helpers ────────────────────────────────────────────────────────
