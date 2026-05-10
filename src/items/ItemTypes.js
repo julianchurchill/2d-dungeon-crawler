@@ -246,21 +246,210 @@ export const ITEM_TYPES = {
       return `You read the ${item.name} and are whisked back to town!`;
     },
   },
+
+  // ── Helmet slot ────────────────────────────────────────────────────────────
+
+  LEATHER_CAP: {
+    id: 'leather_cap',
+    name: 'Leather Cap',
+    description: '+1 Defense',
+    textureKey: 'item_helmet',
+    type: 'helmet',
+    defenseBonus: 1,
+    sellPrice: 10,
+    use(item, player) {
+      player.equippedHelmet = item;
+      return `You equip the ${item.name}. (+${item.defenseBonus} DEF)`;
+    },
+  },
+  IRON_HELMET: {
+    id: 'iron_helmet',
+    name: 'Iron Helmet',
+    description: '+3 Defense',
+    textureKey: 'item_helmet',
+    type: 'helmet',
+    defenseBonus: 3,
+    sellPrice: 20,
+    use(item, player) {
+      player.equippedHelmet = item;
+      return `You equip the ${item.name}. (+${item.defenseBonus} DEF)`;
+    },
+  },
+
+  // ── Chest slot ─────────────────────────────────────────────────────────────
+
+  LEATHER_CHESTPIECE: {
+    id: 'leather_chestpiece',
+    name: 'Leather Chestpiece',
+    description: '+2 Defense',
+    textureKey: 'item_chest',
+    type: 'chest',
+    defenseBonus: 2,
+    sellPrice: 12,
+    use(item, player) {
+      player.equippedChest = item;
+      return `You equip the ${item.name}. (+${item.defenseBonus} DEF)`;
+    },
+  },
+  CHAIN_HAUBERK: {
+    id: 'chain_hauberk',
+    name: 'Chain Hauberk',
+    description: '+4 Defense',
+    textureKey: 'item_chest',
+    type: 'chest',
+    defenseBonus: 4,
+    sellPrice: 22,
+    use(item, player) {
+      player.equippedChest = item;
+      return `You equip the ${item.name}. (+${item.defenseBonus} DEF)`;
+    },
+  },
+
+  // ── Legs slot ──────────────────────────────────────────────────────────────
+
+  LEATHER_LEGGINGS: {
+    id: 'leather_leggings',
+    name: 'Leather Leggings',
+    description: '+1 Defense',
+    textureKey: 'item_legs',
+    type: 'legs',
+    defenseBonus: 1,
+    sellPrice: 8,
+    use(item, player) {
+      player.equippedLegs = item;
+      return `You equip the ${item.name}. (+${item.defenseBonus} DEF)`;
+    },
+  },
+  CHAIN_LEGGINGS: {
+    id: 'chain_leggings',
+    name: 'Chain Leggings',
+    description: '+3 Defense',
+    textureKey: 'item_legs',
+    type: 'legs',
+    defenseBonus: 3,
+    sellPrice: 18,
+    use(item, player) {
+      player.equippedLegs = item;
+      return `You equip the ${item.name}. (+${item.defenseBonus} DEF)`;
+    },
+  },
+
+  // ── Arms slot ──────────────────────────────────────────────────────────────
+
+  LEATHER_GAUNTLETS: {
+    id: 'leather_gauntlets',
+    name: 'Leather Gauntlets',
+    description: '+1 Defense',
+    textureKey: 'item_arms',
+    type: 'arms',
+    defenseBonus: 1,
+    sellPrice: 8,
+    use(item, player) {
+      player.equippedArms = item;
+      return `You equip the ${item.name}. (+${item.defenseBonus} DEF)`;
+    },
+  },
+  IRON_GAUNTLETS: {
+    id: 'iron_gauntlets',
+    name: 'Iron Gauntlets',
+    description: '+3 Defense',
+    textureKey: 'item_arms',
+    type: 'arms',
+    defenseBonus: 3,
+    sellPrice: 18,
+    use(item, player) {
+      player.equippedArms = item;
+      return `You equip the ${item.name}. (+${item.defenseBonus} DEF)`;
+    },
+  },
+
+  // ── Boots slot ─────────────────────────────────────────────────────────────
+
+  LEATHER_BOOTS: {
+    id: 'leather_boots',
+    name: 'Leather Boots',
+    description: '+1 Defense',
+    textureKey: 'item_boots',
+    type: 'boots',
+    defenseBonus: 1,
+    sellPrice: 6,
+    use(item, player) {
+      player.equippedBoots = item;
+      return `You equip the ${item.name}. (+${item.defenseBonus} DEF)`;
+    },
+  },
+  IRON_BOOTS: {
+    id: 'iron_boots',
+    name: 'Iron Boots',
+    description: '+2 Defense',
+    textureKey: 'item_boots',
+    type: 'boots',
+    defenseBonus: 2,
+    sellPrice: 14,
+    use(item, player) {
+      player.equippedBoots = item;
+      return `You equip the ${item.name}. (+${item.defenseBonus} DEF)`;
+    },
+  },
+
+  // ── Ring slot ──────────────────────────────────────────────────────────────
+
+  IRON_RING: {
+    id: 'iron_ring',
+    name: 'Iron Ring',
+    description: '+1 Attack',
+    textureKey: 'item_ring',
+    type: 'ring',
+    attackBonus: 1,
+    defenseBonus: 0,
+    sellPrice: 15,
+    use(item, player) {
+      if (player.equippedRing1 === null) { player.equippedRing1 = item; } else { player.equippedRing2 = item; }
+      return `You equip the ${item.name}. (+${item.attackBonus} ATK)`;
+    },
+  },
+  GOLD_RING: {
+    id: 'gold_ring',
+    name: 'Gold Ring',
+    description: '+2 Attack',
+    textureKey: 'item_ring',
+    type: 'ring',
+    attackBonus: 2,
+    defenseBonus: 0,
+    sellPrice: 25,
+    use(item, player) {
+      if (player.equippedRing1 === null) { player.equippedRing1 = item; } else { player.equippedRing2 = item; }
+      return `You equip the ${item.name}. (+${item.attackBonus} ATK)`;
+    },
+  },
+
+  // ── Amulet slot ────────────────────────────────────────────────────────────
+
+  STONE_AMULET: {
+    id: 'stone_amulet',
+    name: 'Stone Amulet',
+    description: '+2 Defense',
+    textureKey: 'item_amulet',
+    type: 'amulet',
+    defenseBonus: 2,
+    sellPrice: 15,
+    use(item, player) {
+      player.equippedAmulet = item;
+      return `You equip the ${item.name}. (+${item.defenseBonus} DEF)`;
+    },
+  },
+  JADE_AMULET: {
+    id: 'jade_amulet',
+    name: 'Jade Amulet',
+    description: '+3 Defense',
+    textureKey: 'item_amulet',
+    type: 'amulet',
+    attackBonus: 0,
+    defenseBonus: 3,
+    sellPrice: 25,
+    use(item, player) {
+      player.equippedAmulet = item;
+      return `You equip the ${item.name}. (+${item.defenseBonus} DEF)`;
+    },
+  },
 };
-
-// ── Additional equipment slot items ───────────────────────────────────────────
-
-ITEM_TYPES.LEATHER_CAP       = { id: 'leather_cap',       name: 'Leather Cap',        type: 'helmet',  defenseBonus: 1, sellPrice: 10, description: '+1 Defense', textureKey: 'item_helmet', use(item, player) { player.equippedHelmet = item; return `You equip the ${item.name}. (+${item.defenseBonus} DEF)`; } };
-ITEM_TYPES.IRON_HELMET        = { id: 'iron_helmet',        name: 'Iron Helmet',         type: 'helmet',  defenseBonus: 3, sellPrice: 20, description: '+3 Defense', textureKey: 'item_helmet', use(item, player) { player.equippedHelmet = item; return `You equip the ${item.name}. (+${item.defenseBonus} DEF)`; } };
-ITEM_TYPES.LEATHER_CHESTPIECE = { id: 'leather_chestpiece', name: 'Leather Chestpiece',  type: 'chest',   defenseBonus: 2, sellPrice: 12, description: '+2 Defense', textureKey: 'item_chest',  use(item, player) { player.equippedChest = item; return `You equip the ${item.name}. (+${item.defenseBonus} DEF)`; } };
-ITEM_TYPES.CHAIN_HAUBERK      = { id: 'chain_hauberk',      name: 'Chain Hauberk',       type: 'chest',   defenseBonus: 4, sellPrice: 22, description: '+4 Defense', textureKey: 'item_chest',  use(item, player) { player.equippedChest = item; return `You equip the ${item.name}. (+${item.defenseBonus} DEF)`; } };
-ITEM_TYPES.LEATHER_LEGGINGS   = { id: 'leather_leggings',   name: 'Leather Leggings',    type: 'legs',    defenseBonus: 1, sellPrice: 8,  description: '+1 Defense', textureKey: 'item_legs',   use(item, player) { player.equippedLegs = item; return `You equip the ${item.name}. (+${item.defenseBonus} DEF)`; } };
-ITEM_TYPES.CHAIN_LEGGINGS     = { id: 'chain_leggings',     name: 'Chain Leggings',      type: 'legs',    defenseBonus: 3, sellPrice: 18, description: '+3 Defense', textureKey: 'item_legs',   use(item, player) { player.equippedLegs = item; return `You equip the ${item.name}. (+${item.defenseBonus} DEF)`; } };
-ITEM_TYPES.LEATHER_GAUNTLETS  = { id: 'leather_gauntlets',  name: 'Leather Gauntlets',   type: 'arms',    defenseBonus: 1, sellPrice: 8,  description: '+1 Defense', textureKey: 'item_arms',   use(item, player) { player.equippedArms = item; return `You equip the ${item.name}. (+${item.defenseBonus} DEF)`; } };
-ITEM_TYPES.IRON_GAUNTLETS     = { id: 'iron_gauntlets',     name: 'Iron Gauntlets',      type: 'arms',    defenseBonus: 3, sellPrice: 18, description: '+3 Defense', textureKey: 'item_arms',   use(item, player) { player.equippedArms = item; return `You equip the ${item.name}. (+${item.defenseBonus} DEF)`; } };
-ITEM_TYPES.LEATHER_BOOTS      = { id: 'leather_boots',      name: 'Leather Boots',       type: 'boots',   defenseBonus: 1, sellPrice: 6,  description: '+1 Defense', textureKey: 'item_boots',  use(item, player) { player.equippedBoots = item; return `You equip the ${item.name}. (+${item.defenseBonus} DEF)`; } };
-ITEM_TYPES.IRON_BOOTS         = { id: 'iron_boots',         name: 'Iron Boots',          type: 'boots',   defenseBonus: 2, sellPrice: 14, description: '+2 Defense', textureKey: 'item_boots',  use(item, player) { player.equippedBoots = item; return `You equip the ${item.name}. (+${item.defenseBonus} DEF)`; } };
-ITEM_TYPES.IRON_RING          = { id: 'iron_ring',          name: 'Iron Ring',           type: 'ring',    attackBonus: 1,  defenseBonus: 0, sellPrice: 15, description: '+1 Attack', textureKey: 'item_ring',   use(item, player) { if (player.equippedRing1 === null) { player.equippedRing1 = item; } else { player.equippedRing2 = item; } return `You equip the ${item.name}. (+${item.attackBonus} ATK)`; } };
-ITEM_TYPES.GOLD_RING          = { id: 'gold_ring',          name: 'Gold Ring',           type: 'ring',    attackBonus: 2,  defenseBonus: 0, sellPrice: 25, description: '+2 Attack', textureKey: 'item_ring',   use(item, player) { if (player.equippedRing1 === null) { player.equippedRing1 = item; } else { player.equippedRing2 = item; } return `You equip the ${item.name}. (+${item.attackBonus} ATK)`; } };
-ITEM_TYPES.STONE_AMULET       = { id: 'stone_amulet',       name: 'Stone Amulet',        type: 'amulet',  defenseBonus: 2, sellPrice: 15, description: '+2 Defense', textureKey: 'item_amulet', use(item, player) { player.equippedAmulet = item; return `You equip the ${item.name}. (+${item.defenseBonus} DEF)`; } };
-ITEM_TYPES.JADE_AMULET        = { id: 'jade_amulet',        name: 'Jade Amulet',         type: 'amulet',  attackBonus: 0,  defenseBonus: 3, sellPrice: 25, description: '+3 Defense', textureKey: 'item_amulet', use(item, player) { player.equippedAmulet = item; return `You equip the ${item.name}. (+${item.defenseBonus} DEF)`; } };
