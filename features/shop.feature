@@ -1,7 +1,7 @@
 Feature: Town Shops
 
   Players can sell items from their inventory at town shops in exchange for gold.
-  Each shop type (potion, weapon, armour) accepts only the relevant item category.
+  Each shop type (potion, weapon, armour, general) accepts only the relevant item category.
 
   # --- Player gold ---
 
@@ -75,13 +75,26 @@ Feature: Town Shops
     And the shop accepts leather chestpiece
     And the shop accepts leather leggings
     And the shop accepts leather gauntlets
-    And the shop accepts iron ring
-    And the shop accepts stone amulet
 
-  Scenario: The armour shop does not accept potions or weapons
+  Scenario: The armour shop does not accept potions, weapons, rings or amulets
     Given an armour shop
     Then the shop does not accept the health potion
     And the shop does not accept the short sword
+    And the shop does not accept iron ring
+    And the shop does not accept stone amulet
+
+  Scenario: The general shop accepts rings and amulets
+    Given a general shop
+    Then the shop accepts iron ring
+    And the shop accepts gold ring
+    And the shop accepts stone amulet
+    And the shop accepts jade amulet
+
+  Scenario: The general shop does not accept potions, weapons or armour
+    Given a general shop
+    Then the shop does not accept the health potion
+    And the shop does not accept the short sword
+    And the shop does not accept leather armor
 
   # --- Unequip on sell ---
 

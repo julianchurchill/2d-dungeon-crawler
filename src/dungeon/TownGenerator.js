@@ -2,7 +2,7 @@
  * TownGenerator — produces the fixed, non-random town layout for floor 0.
  * The town is the starting area for every new game; its layout never changes.
  *
- * Layout (20×20):
+ * Layout (26×20):
  *   - Outer wall border
  *   - Open floor interior
  *   - Three shops along the north wall (potions, weapons, armour),
@@ -15,7 +15,7 @@ import { TILE } from '../utils/TileTypes.js';
 import { TOWN_NPCS } from '../entities/NpcDefinitions.js';
 
 /** Width of the fixed town map in tiles. */
-const TOWN_WIDTH = 20;
+const TOWN_WIDTH = 26;
 /** Height of the fixed town map in tiles. */
 const TOWN_HEIGHT = 20;
 /** Player start position — south-west open area, away from shops and the well. */
@@ -42,9 +42,10 @@ const HOME_DOOR_POS = { x: HOME.doorX, y: HOME.doorY };
  * the interior (y=1–2) is rendered as a shop roof.
  */
 const SHOPS = [
-  { type: 'potion', left: 2,  right: 6,  doorX: 4,  doorY: 3 },
-  { type: 'weapon', left: 8,  right: 12, doorX: 10, doorY: 3 },
-  { type: 'armour', left: 14, right: 18, doorX: 16, doorY: 3 },
+  { type: 'potion',  left: 2,  right: 6,  doorX: 4,  doorY: 3 },
+  { type: 'weapon',  left: 8,  right: 12, doorX: 10, doorY: 3 },
+  { type: 'armour',  left: 14, right: 18, doorX: 16, doorY: 3 },
+  { type: 'general', left: 20, right: 24, doorX: 22, doorY: 3 },
 ];
 
 /**

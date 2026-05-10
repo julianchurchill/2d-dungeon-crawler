@@ -50,6 +50,10 @@ Given('an armour shop', function () {
   this.shop = new ShopSystem('armour');
 });
 
+Given('a general shop', function () {
+  this.shop = new ShopSystem('general');
+});
+
 // --- When ---
 
 When('the player sells the health potion at the potion shop', function () {
@@ -178,9 +182,29 @@ Then('the shop accepts iron ring', function () {
     'Expected shop to accept iron ring');
 });
 
+Then('the shop accepts gold ring', function () {
+  assert.ok(this.shop.accepts(new Item(0, 0, ITEM_TYPES.GOLD_RING)),
+    'Expected shop to accept gold ring');
+});
+
 Then('the shop accepts stone amulet', function () {
   assert.ok(this.shop.accepts(new Item(0, 0, ITEM_TYPES.STONE_AMULET)),
     'Expected shop to accept stone amulet');
+});
+
+Then('the shop accepts jade amulet', function () {
+  assert.ok(this.shop.accepts(new Item(0, 0, ITEM_TYPES.JADE_AMULET)),
+    'Expected shop to accept jade amulet');
+});
+
+Then('the shop does not accept iron ring', function () {
+  assert.ok(!this.shop.accepts(new Item(0, 0, ITEM_TYPES.IRON_RING)),
+    'Expected shop NOT to accept iron ring');
+});
+
+Then('the shop does not accept stone amulet', function () {
+  assert.ok(!this.shop.accepts(new Item(0, 0, ITEM_TYPES.STONE_AMULET)),
+    'Expected shop NOT to accept stone amulet');
 });
 
 Then('the shop does not accept the short sword', function () {

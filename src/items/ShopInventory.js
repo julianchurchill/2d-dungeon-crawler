@@ -22,9 +22,10 @@ const RARE_CHANCE = 20;
  */
 export function generateShopItems(shopType, playerLevel, rng) {
   switch (shopType) {
-    case 'potion': return _generatePotionStock(playerLevel);
-    case 'weapon': return _generateWeaponStock(playerLevel, rng);
-    case 'armour': return _generateArmourStock(playerLevel, rng);
+    case 'potion':   return _generatePotionStock(playerLevel);
+    case 'weapon':   return _generateWeaponStock(playerLevel, rng);
+    case 'armour':   return _generateArmourStock(playerLevel, rng);
+    case 'general':  return _generateGeneralStock(playerLevel, rng);
     default: return [];
   }
 }
@@ -136,18 +137,41 @@ function _generateArmourStock(playerLevel, rng) {
     ITEM_TYPES.LEATHER_ARMOR,      ITEM_TYPES.LEATHER_CAP,
     ITEM_TYPES.LEATHER_CHESTPIECE, ITEM_TYPES.LEATHER_LEGGINGS,
     ITEM_TYPES.LEATHER_GAUNTLETS,  ITEM_TYPES.LEATHER_BOOTS,
-    ITEM_TYPES.STONE_AMULET,
   ];
   const tier2 = [
     ITEM_TYPES.CHAIN_MAIL,    ITEM_TYPES.IRON_HELMET,
     ITEM_TYPES.CHAIN_HAUBERK, ITEM_TYPES.CHAIN_LEGGINGS,
     ITEM_TYPES.IRON_GAUNTLETS, ITEM_TYPES.IRON_BOOTS,
-    ITEM_TYPES.JADE_AMULET,   ITEM_TYPES.IRON_RING, ITEM_TYPES.GOLD_RING,
   ];
 
   // Pick 4-6 unique items from the tier-appropriate pool.
   const pool = isHighLevel ? [...tier1, ...tier2] : [...tier1];
   const count = rng.nextInt(4, 6);
+  for (let i = 0; i < count && pool.length > 0; i++) {
+    const idx = rng.nextInt(0, pool.length - 1);
+    stock.push(_fixedShopItem(pool.splice(idx, 1)[0]));
+  }
+
+  return stock;
+}
+
+/**
+ * Generates stock for the General Shop: rings and amulets.
+ * Low-level players see only tier-1 items; higher-level players see both tiers.
+ *
+ * @param {number} playerLevel
+ * @param {import('../utils/Rng.js').Rng} rng
+ * @returns {Array<{item: import('./Item.js').Item, buyPrice: number}>}
+ */
+function _generateGeneralStock(playerLevel, rng) {
+  const stock = [];
+  const isHighLevel = playerLevel >= 3;
+
+  const tier1 = [ITEM_TYPES.STONE_AMULET];
+  const tier2 = [ITEM_TYPES.JADE_AMULET, ITEM_TYPES.IRON_RING, ITEM_TYPES.GOLD_RING];
+
+  const pool = isHighLevel ? [...tier1, ...tier2] : [...tier1];
+  const count = rng.nextInt(1, pool.length);
   for (let i = 0; i < count && pool.length > 0; i++) {
     const idx = rng.nextInt(0, pool.length - 1);
     stock.push(_fixedShopItem(pool.splice(idx, 1)[0]));

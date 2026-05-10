@@ -311,6 +311,22 @@ export function createModernTileTextures(generateTextureFn) {
     g.fillRect(T / 2 - 2, 6, 4, 2);
   });
 
+  // General shop door — deep charcoal with ring and gem icon
+  generateTextureFn('modern_tile_door_general', T, T, (g) => {
+    _drawModernDoorBase(g);
+    // Outer ring
+    g.fillStyle(0xaa66dd);
+    g.fillRect(T / 2 - 3, 3, 6, 6);
+    // Inner hole
+    g.fillStyle(0x1a1a2e);
+    g.fillRect(T / 2 - 2, 4, 4, 4);
+    // Gem below
+    g.fillStyle(0xcc88ff);
+    g.fillRect(T / 2 - 1, T / 2 + 1, 2, 3);
+    g.fillStyle(0xeeccff, 0.7);
+    g.fillRect(T / 2 - 1, T / 2 + 1, 1, 1);
+  });
+
   // Home door — rich oak with ornate gold house icon
   generateTextureFn('modern_tile_home_door', T, T, (g) => {
     // Frame — very dark oak

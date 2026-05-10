@@ -236,6 +236,27 @@ export function createClassicTileTextures(generateTextureFn) {
     g.fillRect(T / 2 - 2, 6, 4, 2);
   });
 
+  // General shop door — dark wood with ring and gem icon
+  generateTextureFn('classic_tile_door_general', T, T, (g) => {
+    g.fillStyle(0x3a2a1a);
+    g.fillRect(0, 0, T, T);
+    g.fillStyle(0x6a4a28);
+    g.fillRect(2, 1, T - 4, T - 2);
+    g.fillStyle(0x4a3015, 0.7);
+    g.fillRect(3, 5, T - 6, 1);
+    g.fillRect(3, T - 6, T - 6, 1);
+    // Ring icon
+    g.fillStyle(0xcc88ff);
+    g.fillRect(T / 2 - 3, 3, 6, 6);
+    g.fillStyle(0x3a2a1a);
+    g.fillRect(T / 2 - 2, 4, 4, 4);
+    // Gem
+    g.fillStyle(0xaa55ff);
+    g.fillRect(T / 2 - 1, T / 2 + 1, 2, 3);
+    g.fillStyle(0xddaaff);
+    g.fillRect(T / 2 - 1, T / 2 + 1, 1, 1);
+  });
+
   // Home door — warm golden door with house icon
   generateTextureFn('classic_tile_home_door', T, T, (g) => {
     g.fillStyle(0x4a2e10);

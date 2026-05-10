@@ -3,7 +3,7 @@
  * @description Fixed NPC definitions for the town. Each entry describes one NPC:
  * their tile position, display name, sprite key, cycling dialogue lines, and
  * optional contextual line generators that fire based on the player's state.
- * Positions must be on walkable floor tiles within the town layout (20×20).
+ * Positions must be on walkable floor tiles within the town layout (26×20).
  */
 
 /**

@@ -446,6 +446,29 @@ export function createHdTileTextures(generateTextureFn) {
     g.fillRect(S/2, 12, 2, 2);
   });
 
+  // General shop door — dark wood with ring and gem icon
+  generateTextureFn('hd_tile_door_general', S, S, (g) => {
+    drawHdDoorBase(g, S);
+    // Outer ring — purple band
+    g.fillStyle(0x220033);
+    g.fillRect(S/2 - 7, 5, 15, 15);
+    g.fillStyle(0xaa55ee);
+    g.fillRect(S/2 - 6, 6, 13, 13);
+    // Inner hole
+    g.fillStyle(0x0d0d1a);
+    g.fillRect(S/2 - 4, 8, 9, 9);
+    // Ring highlight
+    g.fillStyle(0xddaaff, 0.5);
+    g.fillRect(S/2 - 5, 6, 4, 3);
+    // Gem below ring
+    g.fillStyle(0x330044);
+    g.fillRect(S/2 - 2, 22, 5, 7);
+    g.fillStyle(0xcc77ff);
+    g.fillRect(S/2 - 1, 23, 3, 5);
+    g.fillStyle(0xeeccff, 0.6);
+    g.fillRect(S/2 - 1, 23, 1, 2);
+  });
+
   // Home door — rich oak with ornate house icon and gold trim
   generateTextureFn('hd_tile_home_door', S, S, (g) => {
     drawHdDoorBase(g, S);

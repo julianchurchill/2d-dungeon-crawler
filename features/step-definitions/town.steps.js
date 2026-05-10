@@ -4,7 +4,7 @@ import { FloorManager } from '../../src/systems/FloorManager.js';
 import { TownGenerator } from '../../src/dungeon/TownGenerator.js';
 import { TILE } from '../../src/utils/TileTypes.js';
 
-const SHOP_TYPES = ['potion', 'weapon', 'armour'];
+const SHOP_TYPES = ['potion', 'weapon', 'armour', 'general'];
 
 // --- Given ---
 
@@ -122,7 +122,7 @@ Then('the town result should include {int} shops', function (expected) {
     `Expected ${expected} shops, got ${shops.length}`);
 });
 
-Then('the town shops should be of types potion, weapon and armour', function () {
+Then('the town shops should be of types potion, weapon, armour and general', function () {
   assert.ok(Array.isArray(this.townResult.shops),
     'Expected townResult.shops to be an array');
   const types = this.townResult.shops.map(s => s.type);
