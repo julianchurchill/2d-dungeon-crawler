@@ -7,14 +7,9 @@ import { Enemy, getHealthBarColor } from '../entities/Enemy.js';
 import { Champion } from '../entities/Champion.js';
 import { CreepingMass } from '../entities/CreepingMass.js';
 import { OldBones } from '../entities/OldBones.js';
-import { Npc } from '../entities/Npc.js';
 import { Item } from '../items/Item.js';
-import { getFloorLoot, getChallengeLoot, getPickAxeFloorDrop, getHiddenRoomLoot } from '../items/LootTables.js';
 import { DungeonMap } from '../dungeon/DungeonMap.js';
-import { UNIQUE_ROOM_DEFS } from '../dungeon/UniqueRoomDefinitions.js';
 import { uniqueRoomRegistry } from '../dungeon/UniqueRoomRegistry.js';
-import { placeDecorations } from '../dungeon/RoomDecorationPlacer.js';
-import { isInnerRoomSpaceAvailable } from '../dungeon/LockedRoomPlacer.js';
 import { UniqueRoomEntryTracker } from '../dungeon/UniqueRoomEntryTracker.js';
 import { computeFOV, computeDaylightFOV } from '../fov/ShadowcastFOV.js';
 import { EventBus } from '../utils/EventBus.js';
@@ -27,8 +22,8 @@ import { HoldRepeatScheduler } from '../systems/HoldRepeatScheduler.js';
 import { tilesetManager } from '../systems/TilesetManager.js';
 import { RunMovementController } from '../systems/RunMovementController.js';
 import { applyToGame, devOptions, devGiveItem } from '../systems/DevOptions.js';
-import { EnemySpawner, DEFAULT_CHAMPION_CHANCE } from '../systems/EnemySpawner.js';
-import { ENEMY_DEFS, getSpawnTable } from '../entities/EnemyTypes.js';
+import { EnemySpawner } from '../systems/EnemySpawner.js';
+import { ENEMY_DEFS } from '../entities/EnemyTypes.js';
 import { AchievementSystem } from '../achievements/AchievementSystem.js';
 import { handleMobileMenuPress } from '../systems/MobileMenuHandler.js';
 import { wrapWithRunCancel } from '../utils/ActionWrapper.js';
@@ -43,7 +38,7 @@ import { DodgeSkill } from '../skills/DodgeSkill.js';
 import { HuntingSkill } from '../skills/HuntingSkill.js';
 import { NightVisionSkill } from '../skills/NightVisionSkill.js';
 import { ITEM_TYPES } from '../items/ItemTypes.js';
-import { getProgress, achievementStore, resetAchievementStore } from '../achievements/AchievementStore.js';
+import { resetAchievementStore } from '../achievements/AchievementStore.js';
 import { ShopSystem } from '../systems/ShopSystem.js';
 import { generateShopItems } from '../items/ShopInventory.js';
 import { isTouchDevice } from '../utils/TouchDeviceDetector.js';
@@ -53,6 +48,7 @@ import { resolveRangedAttack } from '../systems/RangedCombat.js';
 import { saveGame, serializeFloor, loadGame, hasSave, deleteSave } from '../save/SaveGame.js';
 import { isDevEnvironment } from '../utils/Environment.js';
 import { PlayerActionHandler } from '../systems/PlayerActionHandler.js';
+import { FloorBuilder } from '../systems/FloorBuilder.js';
 import { createSkillFromData } from '../save/SkillFactory.js';
 import { AutosaveTimer } from '../save/AutosaveTimer.js';
 import { restoreInventoryAndEquipment } from '../save/restorePlayer.js';
@@ -169,6 +165,9 @@ export class GameScene extends Phaser.Scene {
     // Delegate all player-turn logic to a focused handler.
     this._playerAction = new PlayerActionHandler(this);
 
+    // Delegate all floor-building logic to a focused builder.
+    this._floorBuilder = new FloorBuilder(this);
+
     // Reset unique-room tracking so each new game gets a fresh set of
     // discoverable rooms.
     uniqueRoomRegistry.reset();
@@ -255,7 +254,7 @@ export class GameScene extends Phaser.Scene {
     this._clearFloorEntities();
 
     // Build Phaser tilemap
-    this._buildTilemap(map);
+    this._floorBuilder.buildTilemap(map);
 
     // Spawn player
     this.player.x = startPos.x;
@@ -296,35 +295,35 @@ export class GameScene extends Phaser.Scene {
     // player can safely land and assess the situation.  The arena room (rooms[1])
     // is filled with enemies including at least one champion.
     if (this._isChallengeFloor) {
-      this._spawnChallengeArena(rooms[1], this.floorManager.currentFloor);
+      this._floorBuilder.spawnChallengeArena(rooms[1], this.floorManager.currentFloor);
     } else {
       // Spawn enemies (skip start room)
-      this._spawnEnemies(rooms);
+      this._floorBuilder.spawnEnemies(rooms);
 
       // Boss spawning: dev override takes priority over normal floor logic
       if (devOptions.bossQuantities !== null) {
-        this._spawnDevBosses(rooms, devOptions.bossQuantities);
+        this._floorBuilder.spawnDevBosses(rooms, devOptions.bossQuantities);
       } else {
-        this._trySpawnOldBones(rooms);
+        this._floorBuilder.trySpawnOldBones(rooms);
       }
 
       // Champion spawning: dev override places specific champion types at room centres
       if (devOptions.championQuantities !== null) {
-        this._spawnDevChampions(rooms, devOptions.championQuantities);
+        this._floorBuilder.spawnDevChampions(rooms, devOptions.championQuantities);
       }
     }
 
     // Spawn items
-    this._spawnItems(rooms);
-    this._spawnHiddenRoomItems(this._hiddenPassages);
+    this._floorBuilder.spawnItems(rooms);
+    this._floorBuilder.spawnHiddenRoomItems(this._hiddenPassages);
 
     // Unique room: only on regular (non-challenge, non-town) dungeon floors.
     if (!this._isChallengeFloor && !this.floorManager.isTown()) {
-      this._trySpawnUniqueRoom(rooms);
+      this._floorBuilder.trySpawnUniqueRoom(rooms);
     }
 
     // Spawn NPCs (town only — npcDefs is populated by TownGenerator)
-    this._spawnNpcs(npcDefs ?? []);
+    this._floorBuilder.spawnNpcs(npcDefs ?? []);
 
     // Update FOV
     this._updateFOV();
@@ -359,7 +358,7 @@ export class GameScene extends Phaser.Scene {
     this.dungeonMap = map;
 
     this._clearFloorEntities();
-    this._buildTilemap(map);
+    this._floorBuilder.buildTilemap(map);
 
     // Restore player position
     this.player.x = floorState.playerX;
@@ -510,86 +509,7 @@ export class GameScene extends Phaser.Scene {
     if (this.shadowGraphics) { this.shadowGraphics.destroy(); this.shadowGraphics = null; }
   }
 
-  _buildTilemap(map) {
-    this._buildMapGraphics(map, this.floorManager.isTown(), this.shops);
-    this._buildShadowLayer(map);
-  }
 
-  /**
-   * Render all tiles into a RenderTexture.
-   * In town mode the shops array is used to draw type-specific door textures
-   * (tile_door_potion / tile_door_weapon / tile_door_armour / tile_door_general) at each shop door.
-   *
-   * @param {DungeonMap} map
-   * @param {boolean} isTown - Use town tile textures when true.
-   * @param {Array<{type:string,doorX:number,doorY:number}>} shops - Shop metadata for door icons.
-   */
-  _buildMapGraphics(map, isTown = false, shops = []) {
-    const mapW = map.width * TILE_SIZE;
-    const mapH = map.height * TILE_SIZE;
-
-    // Use a RenderTexture for the entire map (draw once)
-    this.mapRT = this.add.renderTexture(0, 0, mapW, mapH).setDepth(0).setOrigin(0);
-
-    // Resolve tile texture keys through the tileset manager so the active
-    // tileset prefix ('classic_' or 'modern_') is applied automatically.
-    const tk = (base) => tilesetManager.getTileKey(base);
-
-    const tileKeys = isTown ? {
-      [TILE.FLOOR]:          tk('tile_town_floor'),
-      [TILE.WALL]:           tk('tile_town_wall'),
-      [TILE.DOOR]:           tk('tile_door'),
-      [TILE.STAIRS_DOWN]:    tk('tile_town_stairs'),
-      [TILE.TOWN_ACCENT]:    tk('tile_town_accent'),
-      [TILE.SHOP_ROOF]:      tk('tile_shop_roof'),
-      [TILE.HOME_DOOR]:      tk('tile_home_door'),
-      [TILE.RECALL_PORTAL]:  tk('tile_recall_portal'),
-    } : {
-      [TILE.FLOOR]:          tk('tile_floor'),
-      [TILE.WALL]:           tk('tile_wall'),
-      [TILE.DOOR]:           tk('tile_door'),
-      [TILE.STAIRS_DOWN]:    tk('tile_stairs'),
-      [TILE.STAIRS_UP]:      tk('tile_stairs_up'),
-      [TILE.TRASH_PILE_1]:   tk('tile_trash_pile_1'),
-      [TILE.TRASH_PILE_2]:   tk('tile_trash_pile_2'),
-      [TILE.TRASH_PILE_3]:   tk('tile_trash_pile_3'),
-      [TILE.BREAKABLE_WALL]:        tk('tile_breakable_wall'),
-      [TILE.HIDDEN_PASSAGE_WALL]:   tk('tile_breakable_wall'),
-    };
-
-    // Build position → texture-key overrides for typed shop doors (town only)
-    const doorTextureAt = {};
-    if (isTown) {
-      for (const shop of shops) {
-        doorTextureAt[`${shop.doorX},${shop.doorY}`] = tk(`tile_door_${shop.type}`);
-      }
-    }
-
-    for (let y = 0; y < map.height; y++) {
-      for (let x = 0; x < map.width; x++) {
-        const tileType = map.getTile(x, y);
-        let key = tileKeys[tileType];
-        // Use the type-specific door texture when available
-        if (tileType === TILE.DOOR) {
-          key = doorTextureAt[`${x},${y}`] ?? key;
-        }
-        if (key) {
-          this.mapRT.drawFrame(key, undefined, x * TILE_SIZE, y * TILE_SIZE);
-        }
-      }
-    }
-  }
-
-  _buildShadowLayer(map) {
-    // Shadow overlay: array of sprites (one per tile)
-    // Using a RenderTexture for performance then updating per-tile via a Graphics layer
-    // For simplicity, use individual rectangles grouped in a container
-    // But for 80x60 = 4800 tiles that's too many individual objects.
-    // Instead use a single Graphics object we redraw on each FOV update.
-
-    this.shadowGraphics = this.add.graphics().setDepth(5);
-    this._redrawShadows();
-  }
 
   _redrawShadows() {
     const g = this.shadowGraphics;
@@ -610,142 +530,7 @@ export class GameScene extends Phaser.Scene {
     }
   }
 
-  // ─── Enemy & Item Spawning ────────────────────────────────────────────────
 
-  _spawnEnemies(rooms) {
-    this._enemySpawner.spawnForRooms(
-      rooms,
-      this.floorManager.currentFloor,
-      // Treat non-walkable tiles (e.g. pillar walls inside rooms) as occupied
-      // so enemies are never placed on top of wall tiles.
-      (x, y) => !this.dungeonMap.isWalkable(x, y) || this._getEntityAt(x, y),
-      (x, y, type, options) => this._spawnEnemy(x, y, type, options),
-    );
-  }
-
-  /**
-   * Attempts to place the Old Bones boss on the current floor.
-   * Conditions: floor 10–15, boss not yet defeated (achievement incomplete),
-   * and a 50% random chance per floor visit.  Spawns in a random non-start room.
-   *
-   * @param {Array<{x:number,y:number,w:number,h:number}>} rooms
-   */
-  _trySpawnOldBones(rooms) {
-    const floor = this.floorManager.currentFloor;
-    if (floor < 10 || floor > 15) return;
-    if (getProgress('old_bones_slayer', achievementStore).completed) return;
-    if (!this.rng.nextBool(0.5)) return;
-
-    // Pick a random non-start room (index 1+)
-    const candidates = rooms.slice(1);
-    if (candidates.length === 0) return;
-    const room = this.rng.pick(candidates);
-
-    // Place boss near room centre, avoiding occupied tiles
-    const cx = Math.floor(room.x + room.w / 2);
-    const cy = Math.floor(room.y + room.h / 2);
-    if (this._getEntityAt(cx, cy)) return;
-
-    // Delegate to _spawnEnemy so the hint message and boss construction are
-    // handled in one place, regardless of whether the boss was placed here or
-    // via the dev spawn-weight override.
-    this._spawnEnemy(cx, cy, 'old_bones');
-  }
-
-  /**
-   * Dev-only: spawns an exact number of each boss type specified in the
-   * `bossQuantities` map, ignoring normal floor-range and achievement gates.
-   * Bosses are placed at the centre of non-start rooms (first-fit order).
-   *
-   * @param {Array<{x:number,y:number,w:number,h:number}>} rooms
-   * @param {Object.<string,number>} quantities - Map of boss type → total count.
-   */
-  _spawnDevBosses(rooms, quantities) {
-    const candidates = rooms.slice(1);
-    for (const [type, count] of Object.entries(quantities)) {
-      let spawned = 0;
-      for (const room of candidates) {
-        if (spawned >= count) break;
-        const cx = Math.floor(room.x + room.w / 2);
-        const cy = Math.floor(room.y + room.h / 2);
-        if (!this._getEntityAt(cx, cy)) {
-          this._spawnEnemy(cx, cy, type);
-          spawned++;
-        }
-      }
-    }
-  }
-
-  /**
-   * Dev-only: spawns an exact number of champion variants of each enemy type
-   * specified in the `championQuantities` map.  Champions are placed at the
-   * centre of non-start rooms (first-fit order).  This runs in addition to the
-   * normal enemy spawner so that dev champions appear alongside regular enemies.
-   *
-   * @param {Array<{x:number,y:number,w:number,h:number}>} rooms
-   * @param {Object.<string,number>} quantities - Map of enemy type → total champion count.
-   */
-  _spawnDevChampions(rooms, quantities) {
-    const candidates = rooms.slice(1);
-    for (const [type, count] of Object.entries(quantities)) {
-      let spawned = 0;
-      for (const room of candidates) {
-        if (spawned >= count) break;
-        const cx = Math.floor(room.x + room.w / 2);
-        const cy = Math.floor(room.y + room.h / 2);
-        if (!this._getEntityAt(cx, cy)) {
-          this._spawnEnemy(cx, cy, type, { isChampion: true });
-          spawned++;
-        }
-      }
-    }
-  }
-
-  /**
-   * Populates the challenge arena room with a large wave of enemies, including
-   * at least one champion.  Enemy types and positions are chosen from the current
-   * floor's spawn table.  Non-boss, non-solitary enemies are eligible.
-   *
-   * The arena is filled more densely than a normal room: a base of 8 enemies
-   * scaled by the difficulty `enemyCount` multiplier, with at least 1 champion
-   * guaranteed among them.
-   *
-   * @param {{ x:number, y:number, w:number, h:number }} arenaRoom
-   * @param {number} floor
-   */
-  _spawnChallengeArena(arenaRoom, floor) {
-    const spawnTable = getSpawnTable(floor, devOptions.spawnWeights);
-    // Filter out boss and solitary types — only standard enemies fill the arena.
-    const eligibleTypes = spawnTable.filter(type => {
-      const def = ENEMY_DEFS[type];
-      return !def.isBoss && !def.solitary && def.clusterMin === undefined;
-    });
-    if (eligibleTypes.length === 0) return;
-
-    const { enemyCount } = difficultyManager.getConfig();
-    const totalEnemies = Math.max(4, Math.round(8 * enemyCount));
-
-    let championSpawned = false;
-    let attempts = 0;
-    const maxAttempts = totalEnemies * 5;
-
-    for (let i = 0; i < totalEnemies && attempts < maxAttempts; i++) {
-      const type = this.rng.pick(eligibleTypes);
-      const ex = this.rng.nextInt(arenaRoom.x + 1, arenaRoom.x + arenaRoom.w - 2);
-      const ey = this.rng.nextInt(arenaRoom.y + 1, arenaRoom.y + arenaRoom.h - 2);
-      if (this._getEntityAt(ex, ey)) {
-        // Tile occupied — retry this slot
-        i--;
-        attempts++;
-        continue;
-      }
-      // Guarantee at least one champion; after that use normal 10% chance.
-      const isChampion = !championSpawned || this.rng.next() < DEFAULT_CHAMPION_CHANCE;
-      this._spawnEnemy(ex, ey, type, { isChampion });
-      if (isChampion) championSpawned = true;
-      attempts++;
-    }
-  }
 
   /**
    * Spawns a single enemy entity at the given tile coordinates.
@@ -877,400 +662,7 @@ export class GameScene extends Phaser.Scene {
     return placed;
   }
 
-  _spawnItems(rooms) {
-    const floor = this.floorManager.currentFloor;
-    // Build the set of achievement-unlocked item ids for this run.
-    const unlockedItems = new Set();
-    if (getProgress('sprite_stalker', achievementStore).completed) {
-      unlockedItems.add(ITEM_TYPES.POTION_OF_MINOR_TELEPORTATION.id);
-    }
-    // Place 1–2 items per room (skip start room).
-    // Challenge floors use potions-only loot; regular floors use the standard pool.
-    for (let i = 1; i < rooms.length; i++) {
-      if (!this.rng.nextBool(0.6)) continue;
-      const room = rooms[i];
-      const ix = this.rng.nextInt(room.x + 1, room.x + room.w - 2);
-      const iy = this.rng.nextInt(room.y + 1, room.y + room.h - 2);
-      // Also guard against non-walkable tiles (e.g. pillar walls) so items
-      // are never placed inside a wall.
-      if (this.dungeonMap.isWalkable(ix, iy) && !this._getEntityAt(ix, iy)) {
-        const typeDef = this._isChallengeFloor
-          ? getChallengeLoot(this.rng, unlockedItems)
-          : getFloorLoot(floor, this.rng, unlockedItems);
-        this._placeItem(ix, iy, typeDef);
-      }
-    }
-    // 10% chance of a single rare pick axe somewhere on regular floors (forced in dev mode).
-    if (!this._isChallengeFloor && rooms.length > 1) {
-      const pickAxeDrop = getPickAxeFloorDrop(this.rng, devOptions.forcedFloorItems.has('PICK_AXE'));
-      if (pickAxeDrop) {
-        for (let i = 1; i < rooms.length; i++) {
-          const room = rooms[i];
-          const ix = this.rng.nextInt(room.x + 1, room.x + room.w - 2);
-          const iy = this.rng.nextInt(room.y + 1, room.y + room.h - 2);
-          if (this.dungeonMap.isWalkable(ix, iy) && !this._getEntityAt(ix, iy)) {
-            this._placeItem(ix, iy, pickAxeDrop);
-            break;
-          }
-        }
-      }
-    }
-  }
 
-  /**
-   * Checks whether a unique room should appear on the current floor and, if so,
-   * selects an eligible definition, marks it as seen, and calls `_spawnUniqueRoom`.
-   *
-   * Unique rooms are skipped on the town (floor 0) and challenge floors.
-   * Each definition has its own `chance` probability; the dev `forceUniqueRoom`
-   * option bypasses both the chance roll and the already-seen check.
-   *
-   * At most one unique room is placed per floor visit.
-   *
-   * @param {Array<{x:number,y:number,w:number,h:number}>} rooms
-   */
-  _trySpawnUniqueRoom(rooms) {
-    const floor  = this.floorManager.currentFloor;
-    const force  = devOptions.forceUniqueRoom;
-    const eligible = uniqueRoomRegistry.getEligible(floor, UNIQUE_ROOM_DEFS, force);
-    if (eligible.length === 0) return;
-
-    // When a room is forced via dev options, select it directly so it is
-    // guaranteed to spawn regardless of what else is eligible.
-    const def = force
-      ? eligible.find(d => d.id === force) ?? this.rng.pick(eligible)
-      : this.rng.pick(eligible);
-
-    // Force option skips the probability check; otherwise roll against def.chance.
-    if (force !== def.id && this.rng.next() >= def.chance) return;
-
-    // Choose a room that is not the start room (index 0) and, where possible,
-    // not the stairs room, to give the player room to explore.
-    const candidates = rooms.length > 2 ? rooms.slice(1, -1) : rooms.slice(1);
-    if (candidates.length === 0) return;
-    const room = this.rng.pick(candidates);
-
-    uniqueRoomRegistry.markSeen(def.id);
-    this._spawnUniqueRoom(room, def);
-    this._entryTracker.setRoom(room, def);
-
-    // Notify the player that something unusual is on this floor after a short
-    // delay so the UIScene message log is ready to receive it.
-    this.time.delayedCall(250, () => {
-      EventBus.emit(GameEvents.MESSAGE, 'You sense a place of power on this floor.');
-    });
-  }
-
-  /**
-   * Spawns the contents of a unique room: guaranteed items, optional enemies,
-   * and an optional NPC.  Emits a discovery message after a short delay so the
-   * UIScene's message log is ready to receive it.
-   *
-   * @param {{ x:number, y:number, w:number, h:number }} room  - The BSP room to populate.
-   * @param {import('../dungeon/UniqueRoomDefinitions.js').UniqueRoomDef} def
-   */
-  _spawnUniqueRoom(room, def) {
-    const cx = Math.floor(room.x + room.w / 2);
-    const cy = Math.floor(room.y + room.h / 2);
-
-    // Place decorations first so their tiles are non-walkable before items/enemies
-    // are placed — ensuring nothing spawns on top of a weapon mount or bookcase.
-    if (def.decorations) {
-      this._placeRoomDecorations(room, def.decorations);
-    }
-
-    // Place each guaranteed item at a random walkable position in the room.
-    for (const itemKey of def.items) {
-      const typeDef = ITEM_TYPES[itemKey];
-      if (!typeDef) continue;
-      // Try a few positions to avoid overlap.
-      for (let attempt = 0; attempt < 8; attempt++) {
-        const ix = this.rng.nextInt(room.x + 1, room.x + room.w - 2);
-        const iy = this.rng.nextInt(room.y + 1, room.y + room.h - 2);
-        if (this.dungeonMap.isWalkable(ix, iy) && !this._getEntityAt(ix, iy)) {
-          this._placeItem(ix, iy, typeDef);
-          break;
-        }
-      }
-    }
-
-    // Spawn any enemies defined for the room, placed near the centre.
-    for (const enemySpec of def.enemies ?? []) {
-      // Try centre first, then nearby tiles.
-      const candidates = [
-        { x: cx,     y: cy     },
-        { x: cx + 1, y: cy     },
-        { x: cx - 1, y: cy     },
-        { x: cx,     y: cy + 1 },
-        { x: cx,     y: cy - 1 },
-      ];
-      for (const pos of candidates) {
-        if (this.dungeonMap.isWalkable(pos.x, pos.y) && !this._getEntityAt(pos.x, pos.y)) {
-          this._spawnEnemy(pos.x, pos.y, enemySpec.type, { isChampion: enemySpec.isChampion ?? false });
-          break;
-        }
-      }
-    }
-
-    // Carve an inner room adjacent to one wall of this room, connected only via a
-    // locked door.  Returns placement info (including innerRoom bounds) or null.
-    let innerRoom = null;
-    if (def.lockedRoom) {
-      const lockedResult = this._trySpawnInnerRoom(room, def.lockedRoom);
-      if (lockedResult) innerRoom = lockedResult.innerRoom;
-    }
-
-    // Spawn the unique room's NPC (if any) near the centre of the parent room.
-    if (def.npc) {
-      const candidates = [
-        { x: cx,     y: cy     },
-        { x: cx + 1, y: cy     },
-        { x: cx - 1, y: cy     },
-        { x: cx,     y: cy + 1 },
-        { x: cx,     y: cy - 1 },
-      ];
-      for (const pos of candidates) {
-        if (this.dungeonMap.isWalkable(pos.x, pos.y) && !this._getEntityAt(pos.x, pos.y)) {
-          this._spawnDungeonNpc(pos.x, pos.y, def.npc);
-          break;
-        }
-      }
-    }
-
-    // Paint the room's themed floor and wall tiles over the base dungeon tilemap.
-    if (def.floorKey || def.wallKey) {
-      this._paintUniqueRoomTiles(room, def, innerRoom);
-    }
-
-  }
-
-  /**
-   * Tries each of the four cardinal sides of `room` in order (bottom, right,
-   * top, left) and carves the first side where a small inner room fits without
-   * overlapping any existing floor tile.  The inner room is connected to the
-   * parent room only via a LOCKED_DOOR placed in the shared wall tile.
-   *
-   * Because the inner room is carved after BSP generation, no BSP corridor can
-   * ever reach it — the locked door is the only entrance.
-   *
-   * @param {{ x:number, y:number, w:number, h:number }} room
-   * @param {{ keyId:string, items:string[] }} lockedRoomDef
-   * @returns {{ doorX:number, doorY:number, innerRoom:{x,y,w,h} }|null}
-   */
-  _trySpawnInnerRoom(room, lockedRoomDef) {
-    const INNER_LONG  = Math.min(room.w - 2, 5);
-    const INNER_TALL  = Math.min(room.h - 2, 5);
-    const INNER_SHORT = 3;
-
-    // Each entry: a thunk returning { ix, iy, iw, ih, doorX, doorY } or null.
-    const sides = [
-      () => { // bottom
-        const iw = INNER_LONG, ih = INNER_SHORT;
-        const ix = room.x + Math.floor((room.w - iw) / 2);
-        const iy = room.y + room.h + 1;
-        if (!isInnerRoomSpaceAvailable(this.dungeonMap, ix, iy, iw, ih)) return null;
-        return { ix, iy, iw, ih, doorX: ix + Math.floor(iw / 2), doorY: iy - 1 };
-      },
-      () => { // right
-        const iw = INNER_SHORT, ih = INNER_TALL;
-        const ix = room.x + room.w + 1;
-        const iy = room.y + Math.floor((room.h - ih) / 2);
-        if (!isInnerRoomSpaceAvailable(this.dungeonMap, ix, iy, iw, ih)) return null;
-        return { ix, iy, iw, ih, doorX: ix - 1, doorY: iy + Math.floor(ih / 2) };
-      },
-      () => { // top
-        const iw = INNER_LONG, ih = INNER_SHORT;
-        const ix = room.x + Math.floor((room.w - iw) / 2);
-        const iy = room.y - ih - 1;
-        if (!isInnerRoomSpaceAvailable(this.dungeonMap, ix, iy, iw, ih)) return null;
-        return { ix, iy, iw, ih, doorX: ix + Math.floor(iw / 2), doorY: iy + ih };
-      },
-      () => { // left
-        const iw = INNER_SHORT, ih = INNER_TALL;
-        const ix = room.x - iw - 1;
-        const iy = room.y + Math.floor((room.h - ih) / 2);
-        if (!isInnerRoomSpaceAvailable(this.dungeonMap, ix, iy, iw, ih)) return null;
-        return { ix, iy, iw, ih, doorX: ix + iw, doorY: iy + Math.floor(ih / 2) };
-      },
-    ];
-
-    for (const trySide of sides) {
-      const p = trySide();
-      if (!p) continue;
-      const { ix, iy, iw, ih, doorX, doorY } = p;
-
-      // Carve inner room floor.
-      for (let y = iy; y < iy + ih; y++) {
-        for (let x = ix; x < ix + iw; x++) {
-          this.dungeonMap.setTile(x, y, TILE.FLOOR);
-        }
-      }
-
-      // Set border walls around the inner room (buildWalls has already run).
-      for (let x = ix - 1; x <= ix + iw; x++) {
-        if (this.dungeonMap.getTile(x, iy - 1) !== TILE.FLOOR)
-          this.dungeonMap.setTile(x, iy - 1, TILE.WALL);
-        if (this.dungeonMap.getTile(x, iy + ih) !== TILE.FLOOR)
-          this.dungeonMap.setTile(x, iy + ih, TILE.WALL);
-      }
-      for (let y = iy; y < iy + ih; y++) {
-        if (this.dungeonMap.getTile(ix - 1, y) !== TILE.FLOOR)
-          this.dungeonMap.setTile(ix - 1, y, TILE.WALL);
-        if (this.dungeonMap.getTile(ix + iw, y) !== TILE.FLOOR)
-          this.dungeonMap.setTile(ix + iw, y, TILE.WALL);
-      }
-
-      // Place the locked door in the shared wall between parent and inner room.
-      this.dungeonMap.setTile(doorX, doorY, TILE.LOCKED_DOOR);
-
-      // Place each item at a random walkable position inside the inner room.
-      for (const itemKey of lockedRoomDef.items) {
-        const typeDef = ITEM_TYPES[itemKey];
-        if (!typeDef) continue;
-        for (let attempt = 0; attempt < 10; attempt++) {
-          const px = this.rng.nextInt(ix, ix + iw - 1);
-          const py = this.rng.nextInt(iy, iy + ih - 1);
-          if (this.dungeonMap.isWalkable(px, py) && !this._getEntityAt(px, py)) {
-            this._placeItem(px, py, typeDef);
-            break;
-          }
-        }
-      }
-
-      return { doorX, doorY, innerRoom: { x: ix, y: iy, w: iw, h: ih } };
-    }
-
-    return null;
-  }
-
-  /**
-   * Overdraw floor and wall tiles within a unique room (and its surrounding
-   * wall border) with themed textures defined in the room's definition.  When
-   * an inner room was successfully carved, its tiles are painted too.
-   *
-   * The base dungeon tilemap has already been rendered to `this.mapRT`; this
-   * method draws on top of that RenderTexture for only the affected tiles,
-   * following the same pattern as the shop-door texture overrides.
-   *
-   * @param {{ x:number, y:number, w:number, h:number }} room
-   * @param {import('../dungeon/UniqueRoomDefinitions.js').UniqueRoomDef} def
-   * @param {{ x:number, y:number, w:number, h:number }|null} [innerRoom]
-   */
-  _paintUniqueRoomTiles(room, def, innerRoom = null) {
-    const floorKey = def.floorKey ? tilesetManager.getTileKey(def.floorKey) : null;
-    const wallKey  = def.wallKey  ? tilesetManager.getTileKey(def.wallKey)  : null;
-
-    // Resolve decoration texture key once if a decoration type is defined.
-    const decorKey = def.decorations?.tileType
-      ? tilesetManager.getTileKey(`tile_${def.decorations.tileType.toLowerCase()}`)
-      : null;
-    const decorTile = def.decorations?.tileType ? TILE[def.decorations.tileType] : null;
-
-    // Locked door gets its own themed texture when the room has a lockedRoom.
-    const lockedDoorKey = def.lockedRoom
-      ? tilesetManager.getTileKey('tile_locked_door')
-      : null;
-
-    /** Paint all tiles in the axis-aligned bounding box with 1-tile border. */
-    const paintRect = (rx, ry, rw, rh) => {
-      const x0 = Math.max(0, rx - 1);
-      const y0 = Math.max(0, ry - 1);
-      const x1 = Math.min(this.dungeonMap.width  - 1, rx + rw);
-      const y1 = Math.min(this.dungeonMap.height - 1, ry + rh);
-      for (let ty = y0; ty <= y1; ty++) {
-        for (let tx = x0; tx <= x1; tx++) {
-          const tileType = this.dungeonMap.getTile(tx, ty);
-          let key = null;
-          if (tileType === TILE.FLOOR && floorKey) key = floorKey;
-          else if (tileType === TILE.WALL && wallKey) key = wallKey;
-          else if (tileType === TILE.LOCKED_DOOR && lockedDoorKey) key = lockedDoorKey;
-          else if (decorTile !== null && tileType === decorTile && decorKey) key = decorKey;
-          if (key) this.mapRT.drawFrame(key, undefined, tx * TILE_SIZE, ty * TILE_SIZE);
-        }
-      }
-    };
-
-    // Paint the parent room (and its surrounding wall ring).
-    paintRect(room.x, room.y, room.w, room.h);
-
-    // Paint the inner room (and its surrounding wall ring) if one was carved.
-    if (innerRoom) paintRect(innerRoom.x, innerRoom.y, innerRoom.w, innerRoom.h);
-  }
-
-  /**
-   * Places decoration tiles (e.g. WEAPON_MOUNT, BOOKCASE) into the dungeon map.
-   * Delegates to RoomDecorationPlacer which handles corridor-avoidance logic.
-   *
-   * @param {{ x:number, y:number, w:number, h:number }} room
-   * @param {{ tileType:string, placement:string, spacing?:number }} decorSpec
-   */
-  _placeRoomDecorations(room, decorSpec) {
-    placeDecorations(this.dungeonMap, room, decorSpec);
-  }
-
-  /**
-   * Spawns a single NPC in a dungeon room (no roam controller — dungeon NPCs
-   * stay put).  Visibility is driven by FOV like enemies, not forced visible
-   * like town NPCs.
-   *
-   * @param {number} x
-   * @param {number} y
-   * @param {{ name:string, spriteKey:string, lines:string[] }} npcDef
-   */
-  _spawnDungeonNpc(x, y, npcDef) {
-    const npc = new Npc(x, y, npcDef);
-    const resolvedKey = tilesetManager.getTileKey(npcDef.spriteKey);
-    const textureKey = this.textures.exists(resolvedKey)
-      ? resolvedKey
-      : tilesetManager.getTileKey('entity_player');
-    const sprite = this.add.sprite(
-      x * TILE_SIZE + TILE_SIZE / 2,
-      y * TILE_SIZE + TILE_SIZE / 2,
-      textureKey,
-    ).setDepth(8).setVisible(false); // revealed by FOV like enemies
-    npc.sprite = sprite;
-    this.npcs.push(npc);
-    this.dungeonMap.setEntity(x, y, npc);
-    // No NpcRoamController — dungeon NPCs do not wander.
-  }
-
-  _placeItem(x, y, typeDef) {
-    const item = new Item(x, y, typeDef);
-    const sprite = this.add.sprite(
-      x * TILE_SIZE + TILE_SIZE / 2,
-      y * TILE_SIZE + TILE_SIZE / 2,
-      tilesetManager.getTileKey(item.textureKey)
-    ).setDepth(6).setVisible(false);
-    item.sprite = sprite;
-    this.items.push(item);
-  }
-
-  /**
-   * Spawns NPC entities from their definitions and adds them to this.npcs.
-   * Each NPC gets a sprite placed at its tile position (always visible — NPCs
-   * are only present in the town which is fully lit).
-   *
-   * @param {Array<{name:string,x:number,y:number,spriteKey:string,lines:string[]}>} npcDefs
-   */
-  _spawnNpcs(npcDefs) {
-    for (const def of npcDefs) {
-      const npc = new Npc(def.x, def.y, def);
-      // Fall back to the player sprite if the NPC texture is not loaded.
-      const resolvedKey = tilesetManager.getTileKey(def.spriteKey);
-      const textureKey = this.textures.exists(resolvedKey) ? resolvedKey : tilesetManager.getTileKey('entity_player');
-      const sprite = this.add.sprite(
-        def.x * TILE_SIZE + TILE_SIZE / 2,
-        def.y * TILE_SIZE + TILE_SIZE / 2,
-        textureKey,
-      ).setDepth(8).setVisible(true);
-      npc.sprite = sprite;
-      this.npcs.push(npc);
-      // Register in the entity map so setEntity null/npc is consistent from the first move.
-      this.dungeonMap.setEntity(npc.x, npc.y, npc);
-      // Give each NPC its own roam controller; NPCs step every 3 player turns.
-      this._npcRoamControllers.push(new NpcRoamController(npc, { interval: 3, rng: () => this.rng.next() }));
-    }
-  }
 
   /**
    * Processes one turn of roaming for a single NPC.  If the controller returns
@@ -1648,27 +1040,6 @@ export class GameScene extends Phaser.Scene {
    * of one.  Deduplication is handled by _hiddenPassageDraftShown.
    */
   _checkHiddenPassageDraft() { this._playerAction.checkHiddenPassageDraft(); }
-
-  /**
-   * Places 2 valuable items inside each hidden room.  Called once per floor
-   * after normal item spawning so hidden rooms always have a reward.
-   *
-   * @param {Array<{wallX:number, wallY:number, room:{x:number,y:number,w:number,h:number}}>} passages
-   */
-  _spawnHiddenRoomItems(passages) {
-    const floor = this.floorManager.currentFloor;
-    for (const { room } of passages) {
-      let placed = 0;
-      for (let attempt = 0; attempt < 20 && placed < 2; attempt++) {
-        const ix = this.rng.nextInt(room.x, room.x + room.w - 1);
-        const iy = this.rng.nextInt(room.y, room.y + room.h - 1);
-        if (this.dungeonMap.isWalkable(ix, iy) && !this._getEntityAt(ix, iy)) {
-          this._placeItem(ix, iy, getHiddenRoomLoot(floor, this.rng));
-          placed++;
-        }
-      }
-    }
-  }
 
   _playerAttack(target) { this._playerAction.playerAttack(target); }
 
