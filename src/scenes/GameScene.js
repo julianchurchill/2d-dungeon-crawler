@@ -1,7 +1,6 @@
 import Phaser from 'phaser';
 import { FloorManager } from '../systems/FloorManager.js';
 import { TurnManager, TURN_STATE } from '../systems/TurnManager.js';
-import { resolveMeleeAttack } from '../systems/CombatSystem.js';
 import { Player } from '../entities/Player.js';
 import { Enemy, getHealthBarColor } from '../entities/Enemy.js';
 import { Champion } from '../entities/Champion.js';
@@ -44,11 +43,11 @@ import { generateShopItems } from '../items/ShopInventory.js';
 import { isTouchDevice } from '../utils/TouchDeviceDetector.js';
 import { NpcRoamController } from '../systems/NpcRoamController.js';
 import { LookCursor } from '../ui/LookCursor.js';
-import { resolveRangedAttack } from '../systems/RangedCombat.js';
 import { saveGame, serializeFloor, loadGame, hasSave, deleteSave } from '../save/SaveGame.js';
 import { isDevEnvironment } from '../utils/Environment.js';
 import { PlayerActionHandler } from '../systems/PlayerActionHandler.js';
 import { FloorBuilder } from '../systems/FloorBuilder.js';
+import { CombatHandler } from '../systems/CombatHandler.js';
 import { createSkillFromData } from '../save/SkillFactory.js';
 import { AutosaveTimer } from '../save/AutosaveTimer.js';
 import { restoreInventoryAndEquipment } from '../save/restorePlayer.js';
@@ -167,6 +166,9 @@ export class GameScene extends Phaser.Scene {
 
     // Delegate all floor-building logic to a focused builder.
     this._floorBuilder = new FloorBuilder(this);
+
+    // Delegate all combat and enemy-turn logic to a focused handler.
+    this._combatHandler = new CombatHandler(this);
 
     // Reset unique-room tracking so each new game gets a fresh set of
     // discoverable rooms.
@@ -1050,21 +1052,7 @@ export class GameScene extends Phaser.Scene {
    *
    * @param {object} enemy
    */
-  _applyPendingRemovedSegments(enemy) {
-    if (!enemy.pendingRemovedSegments?.length) return;
-    for (const seg of enemy.pendingRemovedSegments) {
-      this.dungeonMap.setEntity(seg.x, seg.y, null);
-      if (seg.sprite) {
-        this.tweens.add({
-          targets: seg.sprite,
-          alpha: 0,
-          duration: 200,
-          onComplete: () => seg.sprite?.destroy(),
-        });
-      }
-    }
-    enemy.pendingRemovedSegments = [];
-  }
+  _applyPendingRemovedSegments(enemy) { this._combatHandler.applyPendingRemovedSegments(enemy); }
 
   /**
    * Removes an enemy from the scene, clearing all of its dungeon-map tiles and
@@ -1073,79 +1061,16 @@ export class GameScene extends Phaser.Scene {
    *
    * @param {object} target - The enemy entity to remove.
    */
-  _destroyEnemy(target) {
-    this.enemies = this.enemies.filter(e => e !== target);
-    if (target.segments) {
-      // Multi-segment: clear every tile and destroy every sprite
-      for (const seg of target.segments) {
-        this.dungeonMap.setEntity(seg.x, seg.y, null);
-        if (seg.sprite) {
-          this.tweens.add({
-            targets: seg.sprite,
-            alpha: 0,
-            duration: 200,
-            onComplete: () => seg.sprite?.destroy(),
-          });
-        }
-      }
-    } else {
-      this.dungeonMap.setEntity(target.x, target.y, null);
-      target.healthBar?.destroy();
-      target.healthBar = null;
-      if (target.sprite) {
-        this.tweens.add({
-          targets: target.sprite,
-          alpha: 0,
-          duration: 200,
-          onComplete: () => target.sprite?.destroy(),
-        });
-      }
-    }
-  }
+  _destroyEnemy(target) { this._combatHandler.destroyEnemy(target); }
 
   /**
    * Spawns up to `boss.maxMinions` minions of `boss.minionType` adjacent to
    * the boss on its first hit.  Marks `minionsSpawned` so this only triggers
    * once per encounter.
    *
-   * @param {object} boss - A boss entity with minionType, maxMinions, and minionSpawnMessage fields.
+   * @param {object} boss
    */
-  _spawnBossMinions(boss) {
-    boss.minionsSpawned = true;
-    const count = this.rng.nextInt(0, boss.maxMinions);
-    if (count === 0) return;
-
-    const dirs = [{ dx: 0, dy: -1 }, { dx: 1, dy: 0 }, { dx: 0, dy: 1 }, { dx: -1, dy: 0 }];
-    let spawned = 0;
-    for (const { dx, dy } of dirs) {
-      if (spawned >= count) break;
-      const nx = boss.x + dx;
-      const ny = boss.y + dy;
-      if (this.dungeonMap.isWalkable(nx, ny) && !this._getEntityAt(nx, ny)) {
-        this._spawnEnemy(nx, ny, boss.minionType);
-        spawned++;
-      }
-    }
-    // Only announce if at least one minion actually materialised
-    if (spawned > 0) {
-      EventBus.emit(GameEvents.MESSAGE, boss.minionSpawnMessage);
-    }
-  }
-
-  /**
-   * Awards the player the boss's gold and places its unique item drop on the floor.
-   *
-   * @param {OldBones} boss
-   */
-  _applyBossLoot(boss) { this._playerAction.applyBossLoot(boss); }
-
-  /**
-   * Places the champion's drop item on the floor at the champion's position
-   * and notifies the player via the message log.
-   *
-   * @param {Champion} champion
-   */
-  _applyChampionLoot(champion) { this._playerAction.applyChampionLoot(champion); }
+  _spawnBossMinions(boss) { this._combatHandler.spawnBossMinions(boss); }
 
   /**
    * Flashes `sprite` with `color` for 150 ms, then restores the champion gold
@@ -1673,146 +1598,7 @@ export class GameScene extends Phaser.Scene {
 
   // ─── Enemy Turns ──────────────────────────────────────────────────────────
 
-  _startEnemyTurns() {
-    this.turnManager.setState(TURN_STATE.ENEMY_ACTING);
-
-    /**
-     * Ranged attacks whose projectile animations are deferred until after the
-     * synchronous turn loop completes, so all projectiles can fly simultaneously.
-     * Damage is resolved immediately; only the visual is deferred.
-     *
-     * @type {Array<{fromX: number, fromY: number, toX: number, toY: number, color: number, killed: boolean}>}
-     */
-    const pendingProjectiles = [];
-
-    for (const enemy of this.enemies) {
-      const result = enemy.takeTurn(this.player, this.dungeonMap, (x, y) => this._getEntityAt(x, y), this.rng);
-
-      if (result.action === 'attack') {
-        const { damage, killed, messages } = resolveMeleeAttack(
-          enemy, this.player, this.rng,
-          { defenderIsInvincible: devOptions.playerInvincible },
-        );
-        messages.forEach(msg => EventBus.emit(GameEvents.MESSAGE, msg));
-        this._flashSprite(this.playerSprite, 0xff0000);
-        this._syncRegistry();
-
-        if (this.player.isDead()) {
-          this._gameOver();
-          return;
-        }
-      } else if (result.action === 'ranged_attack') {
-        const { damage, killed, messages } = resolveRangedAttack(
-          enemy, this.player, this.rng,
-          { defenderIsInvincible: devOptions.playerInvincible },
-        );
-        messages.forEach(msg => EventBus.emit(GameEvents.MESSAGE, msg));
-        this._syncRegistry();
-
-        // Queue a projectile animation — visual flies after all enemy actions resolve.
-        pendingProjectiles.push({
-          fromX: enemy.x,
-          fromY: enemy.y,
-          toX: this.player.x,
-          toY: this.player.y,
-          color: enemy.projectileColor,
-          killed,
-        });
-
-        // Player died — stop processing enemies; the deferred path handles game over.
-        if (killed) break;
-      } else if (result.action === 'move') {
-        this.dungeonMap.setEntity(enemy.x, enemy.y, null);
-        enemy.x += result.dx;
-        enemy.y += result.dy;
-        this.dungeonMap.setEntity(enemy.x, enemy.y, enemy);
-        if (enemy.sprite) {
-          enemy.sprite.setPosition(
-            enemy.x * TILE_SIZE + TILE_SIZE / 2,
-            enemy.y * TILE_SIZE + TILE_SIZE / 2
-          );
-        }
-        // Reposition health bar at new tile coordinates.
-        this._updateHealthBar(enemy);
-      } else if (result.action === 'teleport') {
-        this.dungeonMap.setEntity(enemy.x, enemy.y, null);
-        enemy.x = result.x;
-        enemy.y = result.y;
-        this.dungeonMap.setEntity(enemy.x, enemy.y, enemy);
-        if (enemy.sprite) {
-          enemy.sprite.setPosition(
-            enemy.x * TILE_SIZE + TILE_SIZE / 2,
-            enemy.y * TILE_SIZE + TILE_SIZE / 2
-          );
-        }
-        // Reposition health bar at new tile coordinates.
-        this._updateHealthBar(enemy);
-      } else if (result.action === 'creeping_move') {
-        // Creeping Mass movement: one tail segment removed, one new segment added
-        const { removeSegment, addSegment } = result;
-        const seg = enemy.segments.find(s => s.x === removeSegment.x && s.y === removeSegment.y);
-        if (seg) {
-          this.dungeonMap.setEntity(seg.x, seg.y, null);
-          seg.x = addSegment.x;
-          seg.y = addSegment.y;
-          this.dungeonMap.setEntity(seg.x, seg.y, enemy);
-          if (seg.sprite) {
-            seg.sprite.setPosition(
-              seg.x * TILE_SIZE + TILE_SIZE / 2,
-              seg.y * TILE_SIZE + TILE_SIZE / 2,
-            );
-          }
-        }
-        // Keep head x, y in sync with the first remaining segment
-        if (enemy.segments.length > 0) {
-          enemy.x = enemy.segments[0].x;
-          enemy.y = enemy.segments[0].y;
-          enemy.sprite = enemy.segments[0].sprite;
-        }
-      }
-    }
-
-    // Tick NPC roam controllers — NPCs wander slowly around town.
-    for (const roamer of this._npcRoamControllers) {
-      this._tickNpcRoam(roamer);
-    }
-
-    // If any enemy fired a ranged attack, animate all projectiles simultaneously
-    // then flash the player and hand control back (or trigger game over).
-    if (pendingProjectiles.length > 0) {
-      const playerWasKilled = pendingProjectiles.some(p => p.killed);
-      this._launchEnemyProjectiles(pendingProjectiles, () => {
-        this._flashSprite(this.playerSprite, 0xff8800);
-        if (playerWasKilled) {
-          this._gameOver();
-        } else {
-          this.turnManager.setState(TURN_STATE.PLAYER_INPUT);
-          this._beginPlayerTurn();
-        }
-      });
-      return;
-    }
-
-    this.turnManager.setState(TURN_STATE.PLAYER_INPUT);
-    this._beginPlayerTurn();
-  }
-
-  /**
-   * Fires all pending enemy projectile animations simultaneously.
-   * `onComplete` is called once every projectile has reached its target.
-   *
-   * @param {Array<{fromX: number, fromY: number, toX: number, toY: number, color: number}>} projectiles
-   * @param {function} onComplete
-   */
-  _launchEnemyProjectiles(projectiles, onComplete) {
-    let remaining = projectiles.length;
-    for (const { fromX, fromY, toX, toY, color } of projectiles) {
-      this._animateProjectile(fromX, fromY, toX, toY, () => {
-        remaining -= 1;
-        if (remaining === 0) onComplete();
-      }, color);
-    }
-  }
+  _startEnemyTurns() { this._combatHandler.startEnemyTurns(); }
 
   /**
    * Called at the start of every player turn — both the first turn of the game
