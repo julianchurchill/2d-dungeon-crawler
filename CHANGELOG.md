@@ -13,6 +13,7 @@ Entries are listed newest-first within each section.
 
 ### Changed
 
+- 2026-05-11 — **Refactor: extract CombatHandler**: all enemy-turn and combat-resolution logic extracted from `GameScene` and `PlayerActionHandler` into a new `CombatHandler` class in `src/systems/`. Includes `startEnemyTurns`, `destroyEnemy`, `applyPendingRemovedSegments`, `spawnBossMinions`, `applyBossLoot`, and `applyChampionLoot`. `GameScene` methods are now one-line delegates; unused imports removed.
 - 2026-05-10 — **Refactor: extract FloorBuilder**: all floor-construction and entity-spawning logic (~18 methods) extracted from `GameScene` into a dedicated `FloorBuilder` class in `src/systems/`. `GameScene._buildFloor()` now delegates to `this._floorBuilder` for tilemap rendering, enemy/item/NPC placement, and unique room construction. Eleven now-unused imports removed from `GameScene.js`.
 - 2026-05-10 — **Refactor: consolidate ItemTypes**: the 14 equipment-slot items (LEATHER_CAP through JADE_AMULET) that were appended to `ITEM_TYPES` after the object literal are now defined inside it, matching the format of all other item types. Section comments added to group by slot.
 - 2026-05-10 — **Refactor: extract LootTables**: loot selection functions (`getFloorLoot`, `getFloorLootPool`, `getChallengeLoot`, `getChallengeLootPool`, `getPickAxeFloorDrop`, `getHiddenRoomLoot`) and `RARE_FLOOR_DROP_ITEMS` moved from `ItemTypes.js` into a new `src/items/LootTables.js`. `ItemTypes.js` now contains only item type definitions.

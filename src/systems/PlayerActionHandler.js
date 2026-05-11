@@ -29,7 +29,6 @@ import {
   recordGlobalKill,
   recordGlobalBossKill,
   recordGlobalWallBroken,
-  recordGlobalGoldGained,
   recordGlobalConsumableUsed,
   recordGlobalHighestLevel,
 } from '../save/GlobalStatsStore.js';
@@ -377,8 +376,8 @@ export class PlayerActionHandler {
           if (target.isBoss) recordGlobalBossKill(target.type);
           EventBus.emit(GameEvents.ENEMY_KILLED, target.type);
 
-          if (target.isBoss)     this.applyBossLoot(target);
-          if (target.isChampion) this.applyChampionLoot(target);
+          if (target.isBoss)     sc._combatHandler.applyBossLoot(target);
+          if (target.isChampion) sc._combatHandler.applyChampionLoot(target);
 
           const leveled = sc.player.gainXP(target.xp);
           if (leveled) {
@@ -446,8 +445,8 @@ export class PlayerActionHandler {
         recordGlobalKill(target.type);
         if (target.isBoss) recordGlobalBossKill(target.type);
         EventBus.emit(GameEvents.ENEMY_KILLED, target.type);
-        if (target.isBoss)     this.applyBossLoot(target);
-        if (target.isChampion) this.applyChampionLoot(target);
+        if (target.isBoss)     sc._combatHandler.applyBossLoot(target);
+        if (target.isChampion) sc._combatHandler.applyChampionLoot(target);
 
         const leveled = sc.player.gainXP(target.xp);
         if (leveled) {
@@ -592,38 +591,6 @@ export class PlayerActionHandler {
     );
     if (triggered.length > 0) {
       EventBus.emit(GameEvents.MESSAGE, 'You feel a draft nearby.');
-    }
-  }
-
-  // ─── Loot ──────────────────────────────────────────────────────────────────
-
-  /**
-   * Awards gold and places any item drop from a defeated boss.
-   * @param {import('../entities/OldBones.js').OldBones} boss
-   */
-  applyBossLoot(boss) {
-    const sc = this._scene;
-    if (boss.dropGold > 0) {
-      sc.player.gold = (sc.player.gold ?? 0) + boss.dropGold;
-      sc.player.recordGoldGained(boss.dropGold);
-      recordGlobalGoldGained(boss.dropGold);
-      EventBus.emit(GameEvents.PLAYER_GOLD_CHANGED, sc.player.gold);
-      EventBus.emit(GameEvents.MESSAGE, `You find ${boss.dropGold} gold on the remains!`);
-    }
-    if (boss.dropItem) {
-      sc._floorBuilder._placeItem(boss.x, boss.y, boss.dropItem);
-      EventBus.emit(GameEvents.MESSAGE, `${boss.name} dropped: ${boss.dropItem.name}!`);
-    }
-  }
-
-  /**
-   * Places any item drop from a defeated champion.
-   * @param {import('../entities/Champion.js').Champion} champion
-   */
-  applyChampionLoot(champion) {
-    if (champion.dropItem) {
-      this._scene._floorBuilder._placeItem(champion.x, champion.y, champion.dropItem);
-      EventBus.emit(GameEvents.MESSAGE, `${champion.name} dropped: ${champion.dropItem.name}!`);
     }
   }
 
