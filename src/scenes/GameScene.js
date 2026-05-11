@@ -38,7 +38,6 @@ import { HuntingSkill } from '../skills/HuntingSkill.js';
 import { NightVisionSkill } from '../skills/NightVisionSkill.js';
 import { ITEM_TYPES } from '../items/ItemTypes.js';
 import { resetAchievementStore } from '../achievements/AchievementStore.js';
-import { ShopSystem } from '../systems/ShopSystem.js';
 import { generateShopItems } from '../items/ShopInventory.js';
 import { isTouchDevice } from '../utils/TouchDeviceDetector.js';
 import { NpcRoamController } from '../systems/NpcRoamController.js';
@@ -48,13 +47,12 @@ import { isDevEnvironment } from '../utils/Environment.js';
 import { PlayerActionHandler } from '../systems/PlayerActionHandler.js';
 import { FloorBuilder } from '../systems/FloorBuilder.js';
 import { CombatHandler } from '../systems/CombatHandler.js';
+import { ShopEventHandler } from '../systems/ShopEventHandler.js';
 import { createSkillFromData } from '../save/SkillFactory.js';
 import { AutosaveTimer } from '../save/AutosaveTimer.js';
 import { restoreInventoryAndEquipment } from '../save/restorePlayer.js';
 import {
   loadGlobalStats,
-  recordGlobalGoldGained,
-  recordGlobalGoldSpent,
   recordGlobalDeath,
 } from '../save/GlobalStatsStore.js';
 
@@ -168,7 +166,8 @@ export class GameScene extends Phaser.Scene {
     this._floorBuilder = new FloorBuilder(this);
 
     // Delegate all combat and enemy-turn logic to a focused handler.
-    this._combatHandler = new CombatHandler(this);
+    this._combatHandler    = new CombatHandler(this);
+    this._shopEventHandler = new ShopEventHandler(this);
 
     // Reset unique-room tracking so each new game gets a fresh set of
     // discoverable rooms.
@@ -1484,30 +1483,7 @@ export class GameScene extends Phaser.Scene {
    * @param {string} shopType - 'potion', 'weapon', or 'armour'.
    * @param {Item} item - The item to sell (must be in player's inventory).
    */
-  _handleSellItem(shopType, item) {
-    // Guard against rapid double-clicks: item may already be gone from inventory
-    if (!this.player.inventory.includes(item)) return;
-    const system = new ShopSystem(shopType);
-    const earned = system.sell(this.player, item);
-    // Add the sold item back to the shop's stock at a 10% mark-up so the player
-    // can buy it back if they change their mind.
-    // Only push the buy-back entry when the sale actually succeeded (earned > 0)
-    // to guard against mismatched shopType emits or other edge cases.
-    if (earned > 0) {
-      this.player.recordGoldGained(earned);
-      recordGlobalGoldGained(earned);
-      if (this._activeShop) {
-        // For stackable items the stack object is still in inventory (count
-        // decremented), so we must clone it to avoid aliasing the live slot.
-        const buyBackItem = item.stackable ? item._cloneOne() : item;
-        this._activeShop.stock.push(system.createBuyBackEntry(buyBackItem));
-      }
-    }
-    EventBus.emit(GameEvents.MESSAGE, `Sold ${item.name} for ${earned} gold.`);
-    EventBus.emit(GameEvents.PLAYER_GOLD_CHANGED, this.player.gold);
-    EventBus.emit(GameEvents.INVENTORY_CHANGED, [...this.player.inventory]);
-    this._syncRegistry();
-  }
+  _handleSellItem(shopType, item) { this._shopEventHandler.handleSellItem(shopType, item); }
 
   /**
    * Handles a buy request from the BuyPanel.  Validates the purchase via
@@ -1517,37 +1493,7 @@ export class GameScene extends Phaser.Scene {
    * @param {string} shopType - 'potion', 'weapon', or 'armour'.
    * @param {{item: import('../items/Item.js').Item, buyPrice: number}} shopItem
    */
-  _handleBuyItem(shopType, shopItem) {
-    if (!shopItem || !shopItem.item) return;
-    // Find the shop whose stock still contains this shopItem reference
-    const shop = this.shops.find(s => s.type === shopType && s.stock.includes(shopItem));
-    if (!shop) return;
-
-    const system = new ShopSystem(shopType);
-    const success = system.buy(this.player, shopItem.item, shopItem.buyPrice);
-    if (!success) {
-      if (!devOptions.freeShop && this.player.gold < shopItem.buyPrice) {
-        EventBus.emit(GameEvents.MESSAGE, `You can't afford the ${shopItem.item.name} (${shopItem.buyPrice}g needed).`);
-      } else {
-        EventBus.emit(GameEvents.MESSAGE, 'Your inventory is full!');
-      }
-      return;
-    }
-
-    if (!devOptions.freeShop) {
-      this.player.recordGoldSpent(shopItem.buyPrice);
-      recordGlobalGoldSpent(shopItem.buyPrice);
-    }
-
-    // Remove the purchased item from the shop's persistent stock
-    const idx = shop.stock.indexOf(shopItem);
-    if (idx !== -1) shop.stock.splice(idx, 1);
-
-    EventBus.emit(GameEvents.MESSAGE, `Bought ${shopItem.item.name} for ${shopItem.buyPrice} gold.`);
-    EventBus.emit(GameEvents.PLAYER_GOLD_CHANGED, this.player.gold);
-    EventBus.emit(GameEvents.INVENTORY_CHANGED, [...this.player.inventory]);
-    this._syncRegistry();
-  }
+  _handleBuyItem(shopType, shopItem) { this._shopEventHandler.handleBuyItem(shopType, shopItem); }
 
   // ─── Display Case ────────────────────────────────────────────────────────
 
@@ -1557,22 +1503,7 @@ export class GameScene extends Phaser.Scene {
    *
    * @param {number} index - Zero-based index into the player's inventory.
    */
-  _handleStoreItem(index) {
-    const item = this.player.inventory[index];
-    if (!item) return;
-    const stored = this.player.displayCase.store(item);
-    if (!stored) {
-      EventBus.emit(GameEvents.MESSAGE, `${item.name} cannot be stored in the display case.`);
-      return;
-    }
-    this.player.removeItem(index);
-    EventBus.emit(GameEvents.MESSAGE, `You place the ${item.name} in the display case.`);
-    EventBus.emit(GameEvents.DISPLAY_CASE_CHANGED, {
-      displayCase: this.player.displayCase,
-      inventory: this.player.inventory,
-    });
-    EventBus.emit(GameEvents.INVENTORY_CHANGED, [...this.player.inventory]);
-  }
+  _handleStoreItem(index) { this._shopEventHandler.handleStoreItem(index); }
 
   /**
    * Retrieves the display case item at `index` into the player's inventory.
@@ -1580,21 +1511,7 @@ export class GameScene extends Phaser.Scene {
    *
    * @param {number} index - Zero-based index into the display case items.
    */
-  _handleRetrieveItem(index) {
-    if (!this.player.canPickUp()) {
-      EventBus.emit(GameEvents.MESSAGE, 'Your pack is full!');
-      return;
-    }
-    const item = this.player.displayCase.retrieve(index);
-    if (!item) return;
-    this.player.addItem(item);
-    EventBus.emit(GameEvents.MESSAGE, `You take the ${item.name} from the display case.`);
-    EventBus.emit(GameEvents.DISPLAY_CASE_CHANGED, {
-      displayCase: this.player.displayCase,
-      inventory: this.player.inventory,
-    });
-    EventBus.emit(GameEvents.INVENTORY_CHANGED, [...this.player.inventory]);
-  }
+  _handleRetrieveItem(index) { this._shopEventHandler.handleRetrieveItem(index); }
 
   // ─── Enemy Turns ──────────────────────────────────────────────────────────
 
