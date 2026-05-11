@@ -41,19 +41,16 @@ import { isTouchDevice } from '../utils/TouchDeviceDetector.js';
 import { NpcRoamController } from '../systems/NpcRoamController.js';
 import { LookCursor } from '../ui/LookCursor.js';
 import { saveGame, serializeFloor, loadGame, hasSave, deleteSave } from '../save/SaveGame.js';
-import { isDevEnvironment } from '../utils/Environment.js';
+
 import { PlayerActionHandler } from '../systems/PlayerActionHandler.js';
 import { FloorBuilder } from '../systems/FloorBuilder.js';
 import { CombatHandler } from '../systems/CombatHandler.js';
 import { ShopEventHandler }  from '../systems/ShopEventHandler.js';
 import { SkillEventHandler } from '../systems/SkillEventHandler.js';
-import { createSkillFromData } from '../save/SkillFactory.js';
+import { GameLifecycleHandler } from '../systems/GameLifecycleHandler.js';
+
 import { AutosaveTimer } from '../save/AutosaveTimer.js';
-import { restoreInventoryAndEquipment } from '../save/restorePlayer.js';
-import {
-  loadGlobalStats,
-  recordGlobalDeath,
-} from '../save/GlobalStatsStore.js';
+import { loadGlobalStats } from '../save/GlobalStatsStore.js';
 
 // TILE_SIZE is initialised from TilesetManager in GameScene.create() so it
 // reflects the active tileset (16 for Classic/Modern, 32 for HD) each time
@@ -168,6 +165,7 @@ export class GameScene extends Phaser.Scene {
     this._combatHandler    = new CombatHandler(this);
     this._shopEventHandler  = new ShopEventHandler(this);
     this._skillEventHandler = new SkillEventHandler(this);
+    this._lifecycleHandler  = new GameLifecycleHandler(this);
 
     // Reset unique-room tracking so each new game gets a fresh set of
     // discoverable rooms.
@@ -1207,12 +1205,7 @@ export class GameScene extends Phaser.Scene {
    * Saves game state then returns to the main menu without deleting the save,
    * so the player can continue from this point later.
    */
-  _handleSaveAndExit() {
-    saveGame(this.player, this.floorManager,
-      serializeFloor(this.dungeonMap, this.enemies, this.items, this.player, uniqueRoomRegistry),
-      this._slot);
-    this._restart();
-  }
+  _handleSaveAndExit() { this._lifecycleHandler.handleSaveAndExit(); }
 
   /**
    * Gives the item identified by `key` directly to the player's inventory.
@@ -1235,55 +1228,9 @@ export class GameScene extends Phaser.Scene {
   }
 
   /**
-   * Applies a loaded save object to the current player and floorManager,
-   * restoring stats, gold, inventory, equipment, skills, and floor number.
-   *
    * @param {object} saveData - Plain object returned by loadGame().
    */
-  _applyLoadedSave(saveData) {
-    if (!saveData) return;
-
-    // Stats and gold
-    Object.assign(this.player.stats, saveData.player.stats);
-    this.player.gold = saveData.player.gold;
-
-    // Inventory and equipment — shared references so isEquipped() works after load
-    restoreInventoryAndEquipment(this.player, saveData.player);
-
-    // Skills
-    if (this.player.skillSystem && saveData.player.activeSkills) {
-      this.player.skillSystem._activeSkills =
-        saveData.player.activeSkills.map(createSkillFromData).filter(Boolean);
-      this.player.skillSystem._inactiveSkills =
-        saveData.player.inactiveSkills.map(createSkillFromData).filter(Boolean);
-    }
-
-    // Run stats — fall back to defaults for saves that pre-date this feature
-    if (saveData.player.runStats) {
-      this.player.runStats = {
-        deepestFloor:    saveData.player.runStats.deepestFloor    ?? 1,
-        kills:           { ...(saveData.player.runStats.kills           ?? {}) },
-        consumablesUsed: { ...(saveData.player.runStats.consumablesUsed ?? {}) },
-        wallsBroken:     saveData.player.runStats.wallsBroken     ?? 0,
-        goldGained:      saveData.player.runStats.goldGained      ?? 0,
-        goldSpent:       saveData.player.runStats.goldSpent       ?? 0,
-      };
-    }
-
-    // Floor — set before generateFloor() so it generates the correct floor
-    this.floorManager.currentFloor = saveData.floor;
-
-    // Unique room registry — restore seen/entered sets from saved floor state
-    // so rooms already visited are not re-discoverable on continue.
-    if (saveData.floorState?.uniqueRooms) {
-      const { seen, entered } = saveData.floorState.uniqueRooms;
-      for (const id of seen)    uniqueRoomRegistry.markSeen(id);
-      for (const id of entered) uniqueRoomRegistry.markEntered(id);
-    }
-
-    // Store floor state for restore after EnemySpawner init (in create()).
-    this._pendingFloorRestore = saveData.floorState ?? null;
-  }
+  _applyLoadedSave(saveData) { this._lifecycleHandler.applyLoadedSave(saveData); }
 
   _tryUseStairs() { this._playerAction.tryUseStairs(); }
 
@@ -1526,74 +1473,9 @@ export class GameScene extends Phaser.Scene {
 
   // ─── Game Over ────────────────────────────────────────────────────────────
 
-  _gameOver() {
-    recordGlobalDeath();
-    EventBus.emit(GameEvents.LOOK_HIDE);
-    this._lookCursor?.deactivate();
-    EventBus.emit(GameEvents.GAME_OVER);
-    this.turnManager.setState(TURN_STATE.GAME_OVER);
-
-    if (isDevEnvironment()) {
-      // In dev mode keep the save intact so resurrect can continue the run.
-      EventBus.emit(GameEvents.MESSAGE, 'You died! Press R to restart or U to resurrect.');
-
-      const onRestart = () => {
-        this.input.keyboard.off('keydown-U', onResurrect);
-        deleteSave(this._slot);
-        this._restart();
-      };
-      const onResurrect = () => {
-        this.input.keyboard.off('keydown-R', onRestart);
-        this._resurrect();
-      };
-      this.input.keyboard.once('keydown-R', onRestart);
-      this.input.keyboard.once('keydown-U', onResurrect);
-      EventBus.once(GameEvents.RESTART_GAME, () => {
-        this.input.keyboard.off('keydown-R', onRestart);
-        this.input.keyboard.off('keydown-U', onResurrect);
-        deleteSave(this._slot);
-        this._restart();
-      });
-    } else {
-      deleteSave(this._slot);
-      EventBus.emit(GameEvents.MESSAGE, 'You died! Press R to restart.');
-      this.input.keyboard.once('keydown-R', () => this._restart());
-      EventBus.once(GameEvents.RESTART_GAME, () => this._restart());
-    }
-  }
-
-  /**
-   * Restores the player to full HP and resumes the game from where they died.
-   * Only available in dev mode via the resurrect prompt shown on death.
-   */
-  _resurrect() {
-    this.player.resurrect();
-    this._setAimingRanged(false);
-    this.turnManager.setState(TURN_STATE.PLAYER_INPUT);
-    this._syncRegistry();
-    EventBus.emit(GameEvents.MESSAGE, 'Resurrected! HP fully restored.');
-  }
-
-  _restart() {
-    this._autosaveTimer?.stop();
-    EventBus.emit(GameEvents.LOOK_HIDE);
-    this._lookCursor?.deactivate();
-    // Clean up event listeners
-    EventBus.removeAllListeners();
-
-    this.rng = createRNG(Date.now());
-    this.player = new Player(0, 0, new SkillSystem(this.rng, [new LuckyStrikeSkill()], [new FerocitySkill(), new DodgeSkill()]));
-    this.floorManager = new FloorManager();
-    this.turnManager = new TurnManager();
-    this.playerSprite = null;
-
-    this.scene.stop('UIScene');
-    this.cameras.main.fadeOut(300, 0, 0, 0);
-    this.time.delayedCall(350, () => {
-      this.scene.start('MainMenuScene');
-      this.scene.stop('GameScene');
-    });
-  }
+  _gameOver()        { this._lifecycleHandler.gameOver(); }
+  _resurrect()       { this._lifecycleHandler.resurrect(); }
+  _restart()         { this._lifecycleHandler.restart(); }
 
   // ─── Registry Sync ───────────────────────────────────────────────────────
 
