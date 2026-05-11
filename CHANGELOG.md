@@ -7,6 +7,10 @@ Entries are listed newest-first within each section.
 
 ## [Unreleased]
 
+### Fixed
+
+- 2026-05-11 — **Champion/boss loot drop crash**: `PlayerActionHandler.applyChampionLoot` and `applyBossLoot` called `sc._placeItem(...)` which no longer exists on `GameScene` after the FloorBuilder extraction. Both now correctly call `sc._floorBuilder._placeItem(...)`.
+
 ### Changed
 
 - 2026-05-10 — **Refactor: extract FloorBuilder**: all floor-construction and entity-spawning logic (~18 methods) extracted from `GameScene` into a dedicated `FloorBuilder` class in `src/systems/`. `GameScene._buildFloor()` now delegates to `this._floorBuilder` for tilemap rendering, enemy/item/NPC placement, and unique room construction. Eleven now-unused imports removed from `GameScene.js`.
