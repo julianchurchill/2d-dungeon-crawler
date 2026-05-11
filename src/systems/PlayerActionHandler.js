@@ -611,7 +611,7 @@ export class PlayerActionHandler {
       EventBus.emit(GameEvents.MESSAGE, `You find ${boss.dropGold} gold on the remains!`);
     }
     if (boss.dropItem) {
-      sc._placeItem(boss.x, boss.y, boss.dropItem);
+      sc._floorBuilder._placeItem(boss.x, boss.y, boss.dropItem);
       EventBus.emit(GameEvents.MESSAGE, `${boss.name} dropped: ${boss.dropItem.name}!`);
     }
   }
@@ -622,7 +622,7 @@ export class PlayerActionHandler {
    */
   applyChampionLoot(champion) {
     if (champion.dropItem) {
-      this._scene._placeItem(champion.x, champion.y, champion.dropItem);
+      this._scene._floorBuilder._placeItem(champion.x, champion.y, champion.dropItem);
       EventBus.emit(GameEvents.MESSAGE, `${champion.name} dropped: ${champion.dropItem.name}!`);
     }
   }
