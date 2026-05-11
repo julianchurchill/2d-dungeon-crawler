@@ -34,8 +34,6 @@ import { SkillSystem } from '../systems/SkillSystem.js';
 import { LuckyStrikeSkill } from '../skills/LuckyStrikeSkill.js';
 import { FerocitySkill } from '../skills/FerocitySkill.js';
 import { DodgeSkill } from '../skills/DodgeSkill.js';
-import { HuntingSkill } from '../skills/HuntingSkill.js';
-import { NightVisionSkill } from '../skills/NightVisionSkill.js';
 import { ITEM_TYPES } from '../items/ItemTypes.js';
 import { resetAchievementStore } from '../achievements/AchievementStore.js';
 import { generateShopItems } from '../items/ShopInventory.js';
@@ -47,7 +45,8 @@ import { isDevEnvironment } from '../utils/Environment.js';
 import { PlayerActionHandler } from '../systems/PlayerActionHandler.js';
 import { FloorBuilder } from '../systems/FloorBuilder.js';
 import { CombatHandler } from '../systems/CombatHandler.js';
-import { ShopEventHandler } from '../systems/ShopEventHandler.js';
+import { ShopEventHandler }  from '../systems/ShopEventHandler.js';
+import { SkillEventHandler } from '../systems/SkillEventHandler.js';
 import { createSkillFromData } from '../save/SkillFactory.js';
 import { AutosaveTimer } from '../save/AutosaveTimer.js';
 import { restoreInventoryAndEquipment } from '../save/restorePlayer.js';
@@ -167,7 +166,8 @@ export class GameScene extends Phaser.Scene {
 
     // Delegate all combat and enemy-turn logic to a focused handler.
     this._combatHandler    = new CombatHandler(this);
-    this._shopEventHandler = new ShopEventHandler(this);
+    this._shopEventHandler  = new ShopEventHandler(this);
+    this._skillEventHandler = new SkillEventHandler(this);
 
     // Reset unique-room tracking so each new game gets a fresh set of
     // discoverable rooms.
@@ -1325,45 +1325,7 @@ export class GameScene extends Phaser.Scene {
    *
    * @param {string} achievementId - The ID of the completed achievement.
    */
-  _handleAchievementSkillUnlock(achievementId) {
-    const skillSystem = this.player?.skillSystem;
-    if (!skillSystem) return;
-
-    // Permanent skills are applied immediately and are never shown in the
-    // level-up pool — the player cannot activate or upgrade them.
-    const PERMANENT_SKILLS = {
-      goblin_killer:            () => new HuntingSkill('GOBLIN_HUNTING'),
-      orc_killer:               () => new HuntingSkill('ORC_HUNTING'),
-      troll_killer:             () => new HuntingSkill('TROLL_HUNTING'),
-      cockroach_killer:         () => new HuntingSkill('COCKROACH_HUNTING'),
-      sprite_killer:            () => new HuntingSkill('SPRITE_HUNTING'),
-      mass_slayer:              () => new HuntingSkill('CREEPING_MASS_HUNTING'),
-      skeleton_killer:          () => new HuntingSkill('SKELETON_HUNTING'),
-      skeleton_warrior_killer:  () => new HuntingSkill('SKELETON_WARRIOR_HUNTING'),
-      skeleton_mage_killer:     () => new HuntingSkill('SKELETON_MAGE_HUNTING'),
-    };
-
-    // Pool skills are added to the inactive skill list so the player can
-    // choose to activate (and later upgrade) them via the level-up screen.
-    const POOL_SKILLS = {
-      burrower: () => new NightVisionSkill(),
-    };
-
-    const permanentFactory = PERMANENT_SKILLS[achievementId];
-    if (permanentFactory) {
-      const skill = permanentFactory();
-      skillSystem.unlockPermanentSkill(skill);
-      EventBus.emit(GameEvents.MESSAGE, `Permanent skill unlocked: ${skill.name}!`);
-      return;
-    }
-
-    const poolFactory = POOL_SKILLS[achievementId];
-    if (poolFactory) {
-      const skill = poolFactory();
-      skillSystem.unlockSkill(skill);
-      EventBus.emit(GameEvents.MESSAGE, `New skill available: ${skill.name}! Select it on your next level up.`);
-    }
-  }
+  _handleAchievementSkillUnlock(achievementId) { this._skillEventHandler.handleAchievementSkillUnlock(achievementId); }
 
   /**
    * Removes the skill associated with a re-locked achievement from the player's
@@ -1373,26 +1335,7 @@ export class GameScene extends Phaser.Scene {
    *
    * @param {string} achievementId - The ID of the achievement that was reset.
    */
-  _handleAchievementSkillLock(achievementId) {
-    const skillSystem = this.player?.skillSystem;
-    if (!skillSystem) return;
-
-    const SKILL_IDS = {
-      goblin_killer:            'goblin_hunting',
-      orc_killer:               'orc_hunting',
-      troll_killer:             'troll_hunting',
-      cockroach_killer:         'cockroach_hunting',
-      sprite_killer:            'sprite_hunting',
-      mass_slayer:              'creeping_mass_hunting',
-      skeleton_killer:          'skeleton_hunting',
-      skeleton_warrior_killer:  'skeleton_warrior_hunting',
-      skeleton_mage_killer:     'skeleton_mage_hunting',
-      burrower:                 'night_vision',
-    };
-
-    const skillId = SKILL_IDS[achievementId];
-    if (skillId) skillSystem.removeSkill(skillId);
-  }
+  _handleAchievementSkillLock(achievementId) { this._skillEventHandler.handleAchievementSkillLock(achievementId); }
 
   /**
    * Handles a request (from SkillsPanel in dev mode) to upgrade a named skill.
@@ -1401,13 +1344,7 @@ export class GameScene extends Phaser.Scene {
    *
    * @param {string} skillId - The ID of the skill to upgrade.
    */
-  _handleUpgradeSkill(skillId) {
-    if (this.player.skillSystem) {
-      this.player.skillSystem.upgradeSkill(skillId);
-    }
-    // Re-emit with forceRefresh so the panel re-renders without toggling.
-    EventBus.emit(GameEvents.OPEN_SKILLS, { ...this._buildSkillsPayload(), forceRefresh: true });
-  }
+  _handleUpgradeSkill(skillId) { this._skillEventHandler.handleUpgradeSkill(skillId); }
 
   /**
    * Handles a request (from SkillsPanel in dev mode) to downgrade a named skill.
@@ -1416,12 +1353,7 @@ export class GameScene extends Phaser.Scene {
    *
    * @param {string} skillId - The ID of the skill to downgrade.
    */
-  _handleDowngradeSkill(skillId) {
-    if (this.player.skillSystem) {
-      this.player.skillSystem.downgradeSkill(skillId);
-    }
-    EventBus.emit(GameEvents.OPEN_SKILLS, { ...this._buildSkillsPayload(), forceRefresh: true });
-  }
+  _handleDowngradeSkill(skillId) { this._skillEventHandler.handleDowngradeSkill(skillId); }
 
   /**
    * Handles a request (from SkillsPanel in dev mode) to activate a named inactive skill.
@@ -1429,12 +1361,7 @@ export class GameScene extends Phaser.Scene {
    *
    * @param {string} skillId - The ID of the skill to activate.
    */
-  _handleActivateSkill(skillId) {
-    if (this.player.skillSystem) {
-      this.player.skillSystem.activateSkill(skillId);
-    }
-    EventBus.emit(GameEvents.OPEN_SKILLS, { ...this._buildSkillsPayload(), forceRefresh: true });
-  }
+  _handleActivateSkill(skillId) { this._skillEventHandler.handleActivateSkill(skillId); }
 
   /**
    * Launches StatDistributionScene so the player can spend their new stat points.
@@ -1449,12 +1376,7 @@ export class GameScene extends Phaser.Scene {
    *
    * @returns {{ skills: object[], inactiveSkills: object[] }}
    */
-  _buildSkillsPayload() {
-    const skillSystem = this.player.skillSystem;
-    const skills         = skillSystem ? skillSystem.getSkills()         : [];
-    const inactiveSkills = skillSystem ? skillSystem.getInactiveSkills() : [];
-    return { skills, inactiveSkills };
-  }
+  _buildSkillsPayload() { return this._skillEventHandler._buildSkillsPayload(); }
 
   /**
    * Uses the item at the given inventory index.  Passes a world-access context
