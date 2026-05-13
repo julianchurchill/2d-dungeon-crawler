@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import { FloorManager } from '../systems/FloorManager.js';
 import { TurnManager, TURN_STATE } from '../systems/TurnManager.js';
 import { Player } from '../entities/Player.js';
-import { Enemy, getHealthBarColor } from '../entities/Enemy.js';
+import { Enemy } from '../entities/Enemy.js';
 import { Champion } from '../entities/Champion.js';
 import { CreepingMass } from '../entities/CreepingMass.js';
 import { OldBones } from '../entities/OldBones.js';
@@ -45,6 +45,7 @@ import { SkillEventHandler } from '../systems/SkillEventHandler.js';
 import { GameLifecycleHandler } from '../systems/GameLifecycleHandler.js';
 import { InputHandler } from '../systems/InputHandler.js';
 import { FovHandler } from '../systems/FovHandler.js';
+import { SpriteAnimator } from '../systems/SpriteAnimator.js';
 
 import { AutosaveTimer } from '../save/AutosaveTimer.js';
 import { loadGlobalStats } from '../save/GlobalStatsStore.js';
@@ -58,7 +59,6 @@ let TILE_SIZE = 16;
 const CHAMPION_TINT  = 0xffaa00;
 /** Scale factor applied to champion sprites to make them visibly larger. */
 const CHAMPION_SCALE = 1.35;
-const MOVE_DURATION = 80;
 export class GameScene extends Phaser.Scene {
   constructor() {
     super({ key: 'GameScene' });
@@ -160,6 +160,7 @@ export class GameScene extends Phaser.Scene {
     this._lifecycleHandler  = new GameLifecycleHandler(this);
     this._inputHandler      = new InputHandler(this);
     this._fovHandler        = new FovHandler(this);
+    this._spriteAnimator    = new SpriteAnimator(this);
 
     // Reset unique-room tracking so each new game gets a fresh set of
     // discoverable rooms.
@@ -744,38 +745,7 @@ export class GameScene extends Phaser.Scene {
    * @param {function} onComplete - Called once the projectile reaches its target.
    * @param {number}   [color=0xffdd44] - Phaser hex colour for the projectile dot.
    */
-  _animateProjectile(fromTileX, fromTileY, toTileX, toTileY, onComplete, color = 0xffdd44) {
-    const half = TILE_SIZE / 2;
-    const sx = fromTileX * TILE_SIZE + half;
-    const sy = fromTileY * TILE_SIZE + half;
-    const tx = toTileX  * TILE_SIZE + half;
-    const ty = toTileY  * TILE_SIZE + half;
-
-    // Draw a small coloured circle — size scales with tile size for all three tilesets.
-    const radius = Math.max(2, Math.round(TILE_SIZE * 0.15));
-    const projectile = this.add.graphics()
-      .fillStyle(color, 1)
-      .fillCircle(0, 0, radius)
-      .setPosition(sx, sy)
-      .setDepth(12); // above map (0), shadows (5), entities (8), player (10)
-
-    // 500 px/s gives ~192 ms for max range (6 tiles) at 16 px/tile, fast but readable.
-    const PROJECTILE_PX_PER_MS = 0.5;
-    const dist = Math.hypot(tx - sx, ty - sy);
-    const duration = Math.max(60, dist / PROJECTILE_PX_PER_MS);
-
-    this.tweens.add({
-      targets: projectile,
-      x: tx,
-      y: ty,
-      duration,
-      ease: 'Linear',
-      onComplete: () => {
-        projectile.destroy();
-        onComplete();
-      },
-    });
-  }
+  _animateProjectile(fromTileX, fromTileY, toTileX, toTileY, onComplete, color = 0xffdd44) { this._spriteAnimator.animateProjectile(fromTileX, fromTileY, toTileX, toTileY, onComplete, color); }
 
   /**
    * Starts a run in the given direction.  If the immediately adjacent tile
@@ -829,16 +799,7 @@ export class GameScene extends Phaser.Scene {
 
   _doPlayerMove(dx, dy) { this._playerAction.doPlayerMove(dx, dy); }
 
-  _animateMove(sprite, tileX, tileY, onComplete) {
-    this.tweens.add({
-      targets: sprite,
-      x: tileX * TILE_SIZE + TILE_SIZE / 2,
-      y: tileY * TILE_SIZE + TILE_SIZE / 2,
-      duration: MOVE_DURATION,
-      ease: 'Linear',
-      onComplete,
-    });
-  }
+  _animateMove(sprite, tileX, tileY, onComplete) { this._spriteAnimator.animateMove(sprite, tileX, tileY, onComplete); }
 
   _afterPlayerMove(action) { this._playerAction.afterPlayerMove(action); }
 
@@ -886,17 +847,7 @@ export class GameScene extends Phaser.Scene {
    * @param {number} color       - Hex color integer for the flash.
    * @param {object} [entity]    - The owning enemy entity; used to restore tint.
    */
-  _flashSprite(sprite, color, entity = null) {
-    if (!sprite) return;
-    sprite.setTint(color);
-    this.time.delayedCall(150, () => {
-      if (entity?.isChampion) {
-        sprite.setTint(CHAMPION_TINT);
-      } else {
-        sprite.clearTint();
-      }
-    });
-  }
+  _flashSprite(sprite, color, entity = null) { this._spriteAnimator.flashSprite(sprite, color, entity); }
 
   /**
    * Creates a thin health-bar Graphics object above the enemy's sprite and
@@ -908,17 +859,7 @@ export class GameScene extends Phaser.Scene {
    *
    * @param {Enemy} enemy
    */
-  _createHealthBar(enemy) {
-    const barW = TILE_SIZE - 4;
-    const barH = Math.max(2, Math.round(TILE_SIZE * 0.1));
-    const bar = this.add.graphics()
-      .setDepth(9)       // just above entity sprites (depth 8)
-      .setScrollFactor(1)
-      .setVisible(false); // hidden until damaged
-    enemy.healthBar = bar;
-    // Draw the initial (full-health) state so dimensions are established.
-    this._updateHealthBar(enemy);
-  }
+  _createHealthBar(enemy) { this._spriteAnimator.createHealthBar(enemy); }
 
   /**
    * Redraws `enemy.healthBar` to reflect the enemy's current HP fraction.
@@ -927,29 +868,7 @@ export class GameScene extends Phaser.Scene {
    *
    * @param {Enemy} enemy
    */
-  _updateHealthBar(enemy) {
-    const bar = enemy.healthBar;
-    if (!bar) return;
-
-    const fraction = enemy.healthBarFraction;
-    const barW = TILE_SIZE - 4;
-    const barH = Math.max(2, Math.round(TILE_SIZE * 0.1));
-
-    // Position: centred horizontally above the sprite's top edge.
-    const cx = enemy.x * TILE_SIZE + TILE_SIZE / 2;
-    const cy = enemy.y * TILE_SIZE + 1; // 1 px below the top of the tile
-
-    bar.clear();
-    // Background track
-    bar.fillStyle(0x222222, 0.85);
-    bar.fillRect(cx - barW / 2, cy, barW, barH);
-    // Foreground fill
-    bar.fillStyle(getHealthBarColor(fraction), 1);
-    bar.fillRect(cx - barW / 2, cy, Math.round(barW * fraction), barH);
-
-    // Only show the bar when the enemy is damaged.
-    bar.setVisible(fraction < 1 && enemy.sprite?.visible === true);
-  }
+  _updateHealthBar(enemy) { this._spriteAnimator.updateHealthBar(enemy); }
 
   _checkItemPickup() { this._playerAction.checkItemPickup(); }
 
