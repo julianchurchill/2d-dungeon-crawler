@@ -17,3 +17,5 @@ Feature: FloorBuilder
     And the builder exposes spawnHiddenRoomItems
     And the builder exposes trySpawnUniqueRoom
     And the builder exposes spawnNpcs
+    And the builder exposes attachEnemySprite
+    And the builder exposes attachItemSprite
