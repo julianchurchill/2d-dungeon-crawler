@@ -453,6 +453,17 @@ export class FloorBuilder {
   }
 
   /**
+   * Public entry point for repainting a unique room's themed tiles onto mapRT.
+   * Called when restoring a floor from a DungeonSnapshot to recover the
+   * custom floor/wall textures that were overwritten by the base tile pass.
+   * @param {object} room - Bounding-box { x, y, w, h } of the unique room.
+   * @param {object} def - UNIQUE_ROOM_DEFS entry for this room.
+   */
+  paintUniqueRoomTiles(room, def) {
+    this._paintUniqueRoomTiles(room, def);
+  }
+
+  /**
    * Places decorations, items, enemies, a locked inner room, and an NPC for
    * the given unique room definition.
    * @param {object} room

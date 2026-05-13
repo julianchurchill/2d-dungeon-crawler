@@ -486,6 +486,7 @@ export class PlayerActionHandler {
       sc._dungeonSnapshot = DungeonSnapshot.create(
         sc.floorManager.currentFloor, sc.player.x, sc.player.y,
         sc.dungeonMap, sc.enemies, sc.items,
+        sc._entryTracker.getActiveRoom(),
       );
       if (item.isConsumable()) { sc.player.recordConsumableUsed(item.id); recordGlobalConsumableUsed(item.id); }
       const msg = InventorySystem.useItem(sc.player, index, context);
@@ -745,6 +746,12 @@ export class PlayerActionHandler {
 
       // Re-derive challenge flag from restored floor number.
       sc._isChallengeFloor = sc.floorManager.isChallengeFloor();
+
+      // Restore unique room tile textures — _buildFloor repaints the base
+      // dungeon tiles, overwriting the custom library/armoury textures.
+      if (snapshot.uniqueRoom) {
+        sc._floorBuilder.paintUniqueRoomTiles(snapshot.uniqueRoom.room, snapshot.uniqueRoom.def);
+      }
 
       for (const enemy of snapshot.enemies) {
         if (enemy.segments) continue;

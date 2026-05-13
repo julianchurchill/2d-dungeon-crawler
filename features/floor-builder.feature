@@ -19,3 +19,14 @@ Feature: FloorBuilder
     And the builder exposes spawnNpcs
     And the builder exposes attachEnemySprite
     And the builder exposes attachItemSprite
+    And the builder exposes paintUniqueRoomTiles
+
+  Scenario: Spawning the Necropolis Library paints its themed floor tiles onto mapRT
+    Given a FloorBuilder with a spying mapRT and a room suitable for the necropolis library
+    When the necropolis library unique room is spawned
+    Then drawFrame should have been called with the necropolis library floor key
+
+  Scenario: Spawning the Necropolis Library paints its themed wall tiles onto mapRT
+    Given a FloorBuilder with a spying mapRT and a room suitable for the necropolis library
+    When the necropolis library unique room is spawned
+    Then drawFrame should have been called with the necropolis library wall key
