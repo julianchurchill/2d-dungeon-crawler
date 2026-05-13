@@ -16,20 +16,15 @@ import { GameEvents } from '../events/GameEvents.js';
 import { DIR, DIR_DELTA } from '../utils/Direction.js';
 import { TILE, FOV_STATE } from '../utils/TileTypes.js';
 import { createRNG } from '../utils/RNG.js';
-import { HeldMovementTracker } from '../systems/HeldMovementTracker.js';
-import { HoldRepeatScheduler } from '../systems/HoldRepeatScheduler.js';
 import { tilesetManager } from '../systems/TilesetManager.js';
 import { RunMovementController } from '../systems/RunMovementController.js';
 import { applyToGame, devOptions, devGiveItem } from '../systems/DevOptions.js';
 import { EnemySpawner } from '../systems/EnemySpawner.js';
 import { ENEMY_DEFS } from '../entities/EnemyTypes.js';
 import { AchievementSystem } from '../achievements/AchievementSystem.js';
-import { handleMobileMenuPress } from '../systems/MobileMenuHandler.js';
-import { wrapWithRunCancel } from '../utils/ActionWrapper.js';
 import { applyInventoryToggle } from '../systems/InventoryToggle.js';
 import { applySkillsToggle } from '../systems/SkillsToggle.js';
 import { difficultyManager } from '../systems/DifficultyManager.js';
-import { applyEscPanelClose } from '../systems/EscPanelClose.js';
 import { SkillSystem } from '../systems/SkillSystem.js';
 import { LuckyStrikeSkill } from '../skills/LuckyStrikeSkill.js';
 import { FerocitySkill } from '../skills/FerocitySkill.js';
@@ -48,6 +43,7 @@ import { CombatHandler } from '../systems/CombatHandler.js';
 import { ShopEventHandler }  from '../systems/ShopEventHandler.js';
 import { SkillEventHandler } from '../systems/SkillEventHandler.js';
 import { GameLifecycleHandler } from '../systems/GameLifecycleHandler.js';
+import { InputHandler } from '../systems/InputHandler.js';
 
 import { AutosaveTimer } from '../save/AutosaveTimer.js';
 import { loadGlobalStats } from '../save/GlobalStatsStore.js';
@@ -63,10 +59,6 @@ const CHAMPION_TINT  = 0xffaa00;
 /** Scale factor applied to champion sprites to make them visibly larger. */
 const CHAMPION_SCALE = 1.35;
 const MOVE_DURATION = 80;
-// Additional delay after the move animation before auto-repeat fires.
-// Total repeat interval ≈ MOVE_DURATION + MOVE_REPEAT_DELAY_MS (~150 ms).
-const MOVE_REPEAT_DELAY_MS = 70;
-
 export class GameScene extends Phaser.Scene {
   constructor() {
     super({ key: 'GameScene' });
@@ -166,6 +158,7 @@ export class GameScene extends Phaser.Scene {
     this._shopEventHandler  = new ShopEventHandler(this);
     this._skillEventHandler = new SkillEventHandler(this);
     this._lifecycleHandler  = new GameLifecycleHandler(this);
+    this._inputHandler      = new InputHandler(this);
 
     // Reset unique-room tracking so each new game gets a fresh set of
     // discoverable rooms.
@@ -215,7 +208,7 @@ export class GameScene extends Phaser.Scene {
     // Input
     this._runController  = new RunMovementController();
     this._runStartItems  = new Set();
-    this._setupInput();
+    this._inputHandler.setup();
 
 
 
@@ -759,120 +752,13 @@ export class GameScene extends Phaser.Scene {
 
   // ─── Input ────────────────────────────────────────────────────────────────
 
-  _setupInput() {
-    this.cursors = this.input.keyboard.createCursorKeys();
-    this.wasd = this.input.keyboard.addKeys({
-      up:    Phaser.Input.Keyboard.KeyCodes.W,
-      down:  Phaser.Input.Keyboard.KeyCodes.S,
-      left:  Phaser.Input.Keyboard.KeyCodes.A,
-      right: Phaser.Input.Keyboard.KeyCodes.D,
-    });
-
-    // HeldMovementTracker self-registers its own keydown/keyup listeners.
-    this.heldMovement = new HeldMovementTracker(this.input.keyboard, EventBus);
-    this._holdRepeat  = new HoldRepeatScheduler(this.heldMovement, MOVE_REPEAT_DELAY_MS);
-
-    // Non-movement actions: cancel any active run before executing.
-    this.input.keyboard.on('keydown-I',           wrapWithRunCancel(this._runController, () => this._toggleInventory()));
-    this.input.keyboard.on('keydown-K',           wrapWithRunCancel(this._runController, () => this._toggleSkills()));
-    this.input.keyboard.on('keydown-PERIOD',       wrapWithRunCancel(this._runController, () => this._tryUseStairs()));
-    this.input.keyboard.on('keydown-GREATER_THAN', wrapWithRunCancel(this._runController, () => this._tryUseStairs()));
-    // 'l' — toggle look cursor (non-touch devices only).
-    if (!isTouchDevice()) {
-      this.input.keyboard.on('keydown-L', wrapWithRunCancel(this._runController, () => {
-        if (this._lookCursor?.active) {
-          this._lookCursor.deactivate();
-          EventBus.emit(GameEvents.LOOK_HIDE);
-        } else {
-          this._lookCursor?.activate(this.player.x, this.player.y);
-          this._showLookInfoAt(this.player.x, this.player.y);
-        }
-      }));
-
-      // 'r' — toggle ranged-aim mode.
-      this.input.keyboard.on('keydown-R', wrapWithRunCancel(this._runController, () => {
-        this._handleToggleRangedAim();
-      }));
-    }
-
-    // ESC closes whichever panel is open (message log, sell, inventory, skills)
-    // before falling through to the in-game menu — evaluated in priority order.
-    this.input.keyboard.on('keydown-ESC', wrapWithRunCancel(this._runController, () => {
-      // Look cursor takes highest priority — ESC deactivates it first.
-      if (this._lookCursor?.active) {
-        this._lookCursor.deactivate();
-        EventBus.emit(GameEvents.LOOK_HIDE);
-        return;
-      }
-      // Ranged aim mode — ESC cancels it.
-      if (this._aimingRanged) {
-        this._setAimingRanged(false);
-        EventBus.emit(GameEvents.MESSAGE, 'Ranged aim cancelled.');
-        return;
-      }
-      if (this._messageLogOpen) {
-        EventBus.emit(GameEvents.CLOSE_MESSAGE_LOG);
-      } else if (this.turnManager.state === TURN_STATE.DIALOGUE) {
-        EventBus.emit(GameEvents.CLOSE_DIALOGUE);
-      } else if (this.turnManager.state === TURN_STATE.DISPLAY_CASE) {
-        EventBus.emit(GameEvents.CLOSE_DISPLAY_CASE);
-      } else if (this.turnManager.state === TURN_STATE.SHOP) {
-        // Close both shop panels together — UIScene handles the cascade
-        EventBus.emit(GameEvents.CLOSE_SELL_PANEL);
-      } else {
-        const action = applyEscPanelClose(this.turnManager);
-        if (action === 'close-inventory') {
-          EventBus.emit(GameEvents.OPEN_INVENTORY, { inventory: this.player.inventory, player: this.player });
-        } else if (action === 'close-skills') {
-          EventBus.emit(GameEvents.OPEN_SKILLS, this._buildSkillsPayload());
-        } else {
-          this._openInGameMenu();
-        }
-      }
-    }));
-
-    // SHIFT+direction starts a run; a plain direction key cancels any active run
-    // and performs a single step.  Pre-build the wrapped step handlers so the
-    // same function instance is reused for arrow keys and WASD.
-    const wUp    = wrapWithRunCancel(this._runController, () => this._handleDir(DIR.UP));
-    const wDown  = wrapWithRunCancel(this._runController, () => this._handleDir(DIR.DOWN));
-    const wLeft  = wrapWithRunCancel(this._runController, () => this._handleDir(DIR.LEFT));
-    const wRight = wrapWithRunCancel(this._runController, () => this._handleDir(DIR.RIGHT));
-
-    this.input.keyboard.on('keydown-UP',    (e) => { if (e.shiftKey) { this._startRun(DIR.UP);    } else { wUp();    } });
-    this.input.keyboard.on('keydown-DOWN',  (e) => { if (e.shiftKey) { this._startRun(DIR.DOWN);  } else { wDown();  } });
-    this.input.keyboard.on('keydown-LEFT',  (e) => { if (e.shiftKey) { this._startRun(DIR.LEFT);  } else { wLeft();  } });
-    this.input.keyboard.on('keydown-RIGHT', (e) => { if (e.shiftKey) { this._startRun(DIR.RIGHT); } else { wRight(); } });
-    this.input.keyboard.on('keydown-W',     (e) => { if (e.shiftKey) { this._startRun(DIR.UP);    } else { wUp();    } });
-    this.input.keyboard.on('keydown-S',     (e) => { if (e.shiftKey) { this._startRun(DIR.DOWN);  } else { wDown();  } });
-    this.input.keyboard.on('keydown-A',     (e) => { if (e.shiftKey) { this._startRun(DIR.LEFT);  } else { wLeft();  } });
-    this.input.keyboard.on('keydown-D',     (e) => { if (e.shiftKey) { this._startRun(DIR.RIGHT); } else { wRight(); } });
-
-    // Pointer click/touch — look at the tapped cell without advancing the turn.
-    this.input.on('pointerdown', (pointer) => this._handleLookClick(pointer));
-  }
-
   _setupEvents() {
-    // D-pad presses from UIScene — cancel any active run first (mirrors keyboard behaviour).
-    EventBus.on(GameEvents.DPAD_PRESS, wrapWithRunCancel(this._runController, (dir) => this._handleDir(dir)), this);
-    // D-pad double-tap starts a run (equivalent to SHIFT+direction on keyboard).
-    EventBus.on(GameEvents.DPAD_RUN, (dir) => this._startRun(dir), this);
-    // Mobile menu button (≡): cancel run, then close message log if open or open in-game menu.
-    EventBus.on(GameEvents.OPEN_IN_GAME_MENU, () => {
-      this._runController.cancel();
-      handleMobileMenuPress(
-        this._messageLogOpen,
-        () => EventBus.emit(GameEvents.CLOSE_MESSAGE_LOG),
-        () => this._openInGameMenu(),
-      );
-    }, this);
-    EventBus.on(GameEvents.TOGGLE_INVENTORY,  wrapWithRunCancel(this._runController, () => this._toggleInventory()), this);
-    EventBus.on(GameEvents.TOGGLE_SKILLS,     wrapWithRunCancel(this._runController, () => this._toggleSkills()), this);
-    EventBus.on(GameEvents.TOGGLE_RANGED_AIM, wrapWithRunCancel(this._runController, () => this._handleToggleRangedAim()), this);
+    // Input-routing (D-pad, mobile menu, UI buttons) is handled by InputHandler.
+    this._inputHandler.setupEvents();
+
     EventBus.on(GameEvents.UPGRADE_SKILL,   ({ skillId }) => this._handleUpgradeSkill(skillId),   this);
     EventBus.on(GameEvents.DOWNGRADE_SKILL, ({ skillId }) => this._handleDowngradeSkill(skillId), this);
     EventBus.on(GameEvents.ACTIVATE_SKILL,  ({ skillId }) => this._handleActivateSkill(skillId),  this);
-    EventBus.on(GameEvents.USE_STAIRS, wrapWithRunCancel(this._runController, () => this._tryUseStairs()), this);
     EventBus.on(GameEvents.INVENTORY_USE,  (index) => this._useInventoryItem(index),  this);
     EventBus.on(GameEvents.INVENTORY_DROP, (index) => this._dropInventoryItem(index), this);
     EventBus.on(GameEvents.SELL_ITEM, ({ shopType, item }) => this._handleSellItem(shopType, item), this);
@@ -1413,34 +1299,8 @@ export class GameScene extends Phaser.Scene {
     ) || this.npcs.find(n => n.x === x && n.y === y) || null;
   }
 
-  /**
-   * Handles a pointer click or touch on the game canvas.
-   * Deactivates the look cursor if active, then shows the LookPanel for the
-   * clicked tile (if it is in the player's FOV).  Never advances the turn.
-   *
-   * @param {Phaser.Input.Pointer} pointer
-   */
-  _handleLookClick(pointer) {
-    // Only act when the player can take input (blocks DPad side-effects, enemy
-    // turn animations, and clicks through open UI panels in UIScene).
-    if (this.turnManager.state !== TURN_STATE.PLAYER_INPUT) return;
 
-    // A click while the cursor is active deactivates it.
-    if (this._lookCursor?.active) {
-      this._lookCursor.deactivate();
-    }
 
-    // Convert screen-space pointer position to world-space tile coordinates.
-    const world = this.cameras.main.getWorldPoint(pointer.x, pointer.y);
-    const tx = Math.floor(world.x / TILE_SIZE);
-    const ty = Math.floor(world.y / TILE_SIZE);
-
-    // Only reveal info for tiles currently in the player's line of sight.
-    if (!this.dungeonMap.inBounds(tx, ty)) return;
-    if (this.dungeonMap.getFovState(tx, ty) !== FOV_STATE.VISIBLE) return;
-
-    this._showLookInfoAt(tx, ty);
-  }
 
   /**
    * Shows the LookPanel for the given tile coordinates.
