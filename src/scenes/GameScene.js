@@ -10,7 +10,7 @@ import { Item } from '../items/Item.js';
 import { DungeonMap } from '../dungeon/DungeonMap.js';
 import { uniqueRoomRegistry } from '../dungeon/UniqueRoomRegistry.js';
 import { UniqueRoomEntryTracker } from '../dungeon/UniqueRoomEntryTracker.js';
-import { computeFOV, computeDaylightFOV } from '../fov/ShadowcastFOV.js';
+
 import { EventBus } from '../utils/EventBus.js';
 import { GameEvents } from '../events/GameEvents.js';
 import { DIR, DIR_DELTA } from '../utils/Direction.js';
@@ -44,6 +44,7 @@ import { ShopEventHandler }  from '../systems/ShopEventHandler.js';
 import { SkillEventHandler } from '../systems/SkillEventHandler.js';
 import { GameLifecycleHandler } from '../systems/GameLifecycleHandler.js';
 import { InputHandler } from '../systems/InputHandler.js';
+import { FovHandler } from '../systems/FovHandler.js';
 
 import { AutosaveTimer } from '../save/AutosaveTimer.js';
 import { loadGlobalStats } from '../save/GlobalStatsStore.js';
@@ -53,7 +54,6 @@ import { loadGlobalStats } from '../save/GlobalStatsStore.js';
 // the scene starts.  Declared as let so the module-level references below
 // stay simple while still being writable at create-time.
 let TILE_SIZE = 16;
-const FOV_RADIUS = 8;
 /** Gold tint applied to champion sprites to distinguish them from normal enemies. */
 const CHAMPION_TINT  = 0xffaa00;
 /** Scale factor applied to champion sprites to make them visibly larger. */
@@ -159,6 +159,7 @@ export class GameScene extends Phaser.Scene {
     this._skillEventHandler = new SkillEventHandler(this);
     this._lifecycleHandler  = new GameLifecycleHandler(this);
     this._inputHandler      = new InputHandler(this);
+    this._fovHandler        = new FovHandler(this);
 
     // Reset unique-room tracking so each new game gets a fresh set of
     // discoverable rooms.
@@ -503,24 +504,7 @@ export class GameScene extends Phaser.Scene {
 
 
 
-  _redrawShadows() {
-    const g = this.shadowGraphics;
-    g.clear();
-
-    for (let y = 0; y < this.dungeonMap.height; y++) {
-      for (let x = 0; x < this.dungeonMap.width; x++) {
-        const state = this.dungeonMap.getFovState(x, y);
-        if (state === FOV_STATE.UNEXPLORED) {
-          g.fillStyle(0x000000, 1.0);
-          g.fillRect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
-        } else if (state === FOV_STATE.EXPLORED) {
-          g.fillStyle(0x000000, 0.72);
-          g.fillRect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
-        }
-        // VISIBLE: no shadow drawn
-      }
-    }
-  }
+  _redrawShadows() { this._fovHandler.redrawShadows(); }
 
 
 
@@ -687,68 +671,7 @@ export class GameScene extends Phaser.Scene {
 
   // ─── FOV ─────────────────────────────────────────────────────────────────
 
-  _updateFOV() {
-    const map = this.dungeonMap;
-    // Reset currently visible tiles
-    for (let y = 0; y < map.height; y++) {
-      for (let x = 0; x < map.width; x++) {
-        if (map.getFovState(x, y) === FOV_STATE.VISIBLE) {
-          map.setFovState(x, y, FOV_STATE.EXPLORED);
-        }
-      }
-    }
-
-    // Compute new visible set
-    if (this.floorManager.isTown()) {
-      // Daylight: all tiles are visible, no radius limit
-      computeDaylightFOV(
-        map.width, map.height,
-        (x, y) => { if (map.inBounds(x, y)) map.setFovState(x, y, FOV_STATE.VISIBLE); }
-      );
-    } else {
-      computeFOV(
-        this.player.x,
-        this.player.y,
-        FOV_RADIUS + (this.player.skillSystem?.getFovBonus() ?? 0),
-        (x, y) => map.isOpaque(x, y),
-        (x, y) => {
-          if (map.inBounds(x, y)) map.setFovState(x, y, FOV_STATE.VISIBLE);
-        }
-      );
-    }
-
-    // Redraw shadow overlay
-    this._redrawShadows();
-
-    // Update entity visibility
-    for (const enemy of this.enemies) {
-      if (enemy.segments) {
-        // Multi-segment enemy: each segment has its own sprite and visibility
-        for (const seg of enemy.segments) {
-          const segVisible = map.getFovState(seg.x, seg.y) === FOV_STATE.VISIBLE;
-          if (seg.sprite) seg.sprite.setVisible(segVisible);
-        }
-      } else {
-        const visible = map.getFovState(enemy.x, enemy.y) === FOV_STATE.VISIBLE;
-        if (enemy.sprite) enemy.sprite.setVisible(visible);
-        // Health bar follows sprite visibility; also hide when at full health.
-        if (enemy.healthBar) {
-          enemy.healthBar.setVisible(visible && enemy.healthBarFraction < 1);
-        }
-      }
-    }
-    for (const item of this.items) {
-      const visible = map.getFovState(item.x, item.y) === FOV_STATE.VISIBLE;
-      if (item.sprite) item.sprite.setVisible(visible);
-    }
-    // Reveal dungeon NPCs (spawned hidden) when they enter the player's FOV.
-    // Town NPCs are spawned with setVisible(true) and are never hidden, so
-    // including them here is safe — the entire town is always fully visible.
-    for (const npc of this.npcs) {
-      const visible = map.getFovState(npc.x, npc.y) === FOV_STATE.VISIBLE;
-      if (npc.sprite) npc.sprite.setVisible(visible);
-    }
-  }
+  _updateFOV() { this._fovHandler.updateFOV(); }
 
   // ─── Input ────────────────────────────────────────────────────────────────
 
