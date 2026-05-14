@@ -10,6 +10,7 @@ import { Item } from '../items/Item.js';
 import { DungeonMap } from '../dungeon/DungeonMap.js';
 import { uniqueRoomRegistry } from '../dungeon/UniqueRoomRegistry.js';
 import { UniqueRoomEntryTracker } from '../dungeon/UniqueRoomEntryTracker.js';
+import { UNIQUE_ROOM_DEFS } from '../dungeon/UniqueRoomDefinitions.js';
 
 import { EventBus } from '../utils/EventBus.js';
 import { GameEvents } from '../events/GameEvents.js';
@@ -96,7 +97,7 @@ export class GameScene extends Phaser.Scene {
     this._autosaveTimer = new AutosaveTimer(
       120_000,
       () => saveGame(this.player, this.floorManager,
-        serializeFloor(this.dungeonMap, this.enemies, this.items, this.player, uniqueRoomRegistry),
+        serializeFloor(this.dungeonMap, this.enemies, this.items, this.player, uniqueRoomRegistry, this._entryTracker, this.npcs),
         this._slot),
     );
     this._autosaveTimer.start();
@@ -351,6 +352,16 @@ export class GameScene extends Phaser.Scene {
     this._clearFloorEntities();
     this._floorBuilder.buildTilemap(map);
 
+    // Repaint unique room textures if the save was made inside a unique room
+    if (floorState.activeUniqueRoom) {
+      const { defId, room } = floorState.activeUniqueRoom;
+      const def = UNIQUE_ROOM_DEFS.find(d => d.id === defId);
+      if (def) {
+        this._entryTracker.setRoomRestored(room, def);
+        this._floorBuilder.paintUniqueRoomTiles(room, def);
+      }
+    }
+
     // Restore player position
     this.player.x = floorState.playerX;
     this.player.y = floorState.playerY;
@@ -466,6 +477,11 @@ export class GameScene extends Phaser.Scene {
       ).setDepth(6).setVisible(false);
       item.sprite = sprite;
       this.items.push(item);
+    }
+
+    // Restore dungeon NPCs (e.g. unique room NPCs like the Archivist)
+    if (floorState.npcs?.length) {
+      this._floorBuilder.restoreNpcs(floorState.npcs);
     }
 
     this._updateFOV();

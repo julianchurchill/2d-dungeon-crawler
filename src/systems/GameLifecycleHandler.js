@@ -107,7 +107,7 @@ export class GameLifecycleHandler {
     saveGame(
       sc.player,
       sc.floorManager,
-      serializeFloor(sc.dungeonMap, sc.enemies, sc.items, sc.player, uniqueRoomRegistry),
+      serializeFloor(sc.dungeonMap, sc.enemies, sc.items, sc.player, uniqueRoomRegistry, sc._entryTracker, sc.npcs),
       sc._slot,
     );
     this.restart();

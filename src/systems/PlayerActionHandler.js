@@ -631,7 +631,7 @@ export class PlayerActionHandler {
       recordGlobalFloorReached(sc.floorManager.currentFloor);
       sc._buildFloor(dungeonData);
       saveGame(sc.player, sc.floorManager,
-        serializeFloor(sc.dungeonMap, sc.enemies, sc.items, sc.player, uniqueRoomRegistry),
+        serializeFloor(sc.dungeonMap, sc.enemies, sc.items, sc.player, uniqueRoomRegistry, sc._entryTracker, sc.npcs),
         sc._slot);
       sc._lookCursor?.updateMap(sc.dungeonMap, this._tileSize);
       sc._syncRegistry();
@@ -659,7 +659,7 @@ export class PlayerActionHandler {
       const dungeonData = sc.floorManager.ascend();
       sc._buildFloor(dungeonData);
       saveGame(sc.player, sc.floorManager,
-        serializeFloor(sc.dungeonMap, sc.enemies, sc.items, sc.player, uniqueRoomRegistry),
+        serializeFloor(sc.dungeonMap, sc.enemies, sc.items, sc.player, uniqueRoomRegistry, sc._entryTracker, sc.npcs),
         sc._slot);
       sc._lookCursor?.updateMap(sc.dungeonMap, this._tileSize);
       sc.player.x = dungeonData.stairsPos.x;

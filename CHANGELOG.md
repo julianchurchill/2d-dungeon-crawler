@@ -9,6 +9,7 @@ Entries are listed newest-first within each section.
 
 ### Fixed
 
+- 2026-05-14 — **Save/load: unique room textures and NPC lost on reload**: loading a save made inside a unique room (e.g. Necropolis Library) now correctly repaints the themed floor/wall tiles and restores the dungeon NPC (e.g. the Archivist). `serializeFloor` now accepts an `entryTracker` and `npcs` array; `_restoreFloor` calls `paintUniqueRoomTiles` and `spawnNpcs` when the saved state includes them.
 - 2026-05-13 — **Unique room textures lost after portal return**: using a Home Seeking Scroll and returning through the RECALL_PORTAL repainted the unique room (library, armoury, darker way) with default dungeon tiles. `DungeonSnapshot` now captures the active unique room; `returnFromSnapshot` calls `FloorBuilder.paintUniqueRoomTiles` after rebuilding the floor to restore the correct themed tiles.
 - 2026-05-11 — **Champion/boss loot drop crash**: `PlayerActionHandler.applyChampionLoot` and `applyBossLoot` called `sc._placeItem(...)` which no longer exists on `GameScene` after the FloorBuilder extraction. Both now correctly call `sc._floorBuilder._placeItem(...)`.
 
