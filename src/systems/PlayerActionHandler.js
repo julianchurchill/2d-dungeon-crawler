@@ -662,11 +662,11 @@ export class PlayerActionHandler {
         serializeFloor(sc.dungeonMap, sc.enemies, sc.items, sc.player, uniqueRoomRegistry, sc._entryTracker, sc.npcs),
         sc._slot);
       sc._lookCursor?.updateMap(sc.dungeonMap, this._tileSize);
-      sc.player.x = dungeonData.stairsPos.x;
-      sc.player.y = dungeonData.stairsPos.y;
+      sc.player.x = dungeonData.stairsUpPos.x;
+      sc.player.y = dungeonData.stairsUpPos.y;
       sc.playerSprite.setPosition(
-        dungeonData.stairsPos.x * this._tileSize + this._tileSize / 2,
-        dungeonData.stairsPos.y * this._tileSize + this._tileSize / 2,
+        dungeonData.stairsUpPos.x * this._tileSize + this._tileSize / 2,
+        dungeonData.stairsUpPos.y * this._tileSize + this._tileSize / 2,
       );
       sc._updateFOV();
       sc._syncRegistry();
