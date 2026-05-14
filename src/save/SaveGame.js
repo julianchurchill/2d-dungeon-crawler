@@ -294,6 +294,15 @@ export function importSave(slot = 0, encoded) {
   try {
     const save = JSON.parse(decodeURIComponent(atob(encoded)));
     if (typeof save.floor !== 'number' || !save.player) return false;
+    if (save.floor < 0) return false;
+    if (save.floorState) {
+      const { width, height, tiles, playerX, playerY } = save.floorState;
+      if (typeof width === 'number' && typeof height === 'number') {
+        if (Array.isArray(tiles) && tiles.length !== width * height) return false;
+        if (typeof playerX === 'number' && (playerX < 0 || playerX >= width)) return false;
+        if (typeof playerY === 'number' && (playerY < 0 || playerY >= height)) return false;
+      }
+    }
     _storage.setItem(SAVE_KEY(slot), JSON.stringify(save));
     return true;
   } catch {
