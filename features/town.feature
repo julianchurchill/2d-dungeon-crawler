@@ -50,6 +50,10 @@ Feature: Town Level
     Given the town is generated
     Then the town shops should be of types potion, weapon, armour and general
 
+  Scenario: The town generation result includes a stairsUpPos for ascending players to land on
+    Given the town is generated
+    Then the town result should include a stairsUpPos
+
   Scenario: FloorManager generates the town map at floor 0
     Given a new FloorManager
     When the floor is generated

@@ -61,7 +61,7 @@ Then('the handler exposes {word}', function (methodName) {
  * Builds a minimal scene stub for testing ascend() in isolation.
  * delayedCall fires synchronously so assertions can run without real timers.
  */
-function makeAscendScene(stairsPos, stairsUpPos) {
+function makeAscendScene(stairsPos, stairsUpPos, isTown = false) {
   const player = {
     x: 0, y: 0,
     stats: { hp: 30, maxHp: 30, attack: 5, defense: 2, level: 1, xp: 0, xpToNext: 20, statPoints: 0 },
@@ -93,8 +93,8 @@ function makeAscendScene(stairsPos, stairsUpPos) {
     rng: {},
     floorManager: {
       ascend: () => ({ stairsPos, stairsUpPos }),
-      isTown: () => false,
-      currentFloor: 2,
+      isTown: () => isTown,
+      currentFloor: isTown ? 0 : 2,
     },
     playerSprite: { setPosition: () => {} },
     mapRT: {},
@@ -124,7 +124,16 @@ function makeAscendScene(stairsPos, stairsUpPos) {
 Given('a PlayerActionHandler bound to an ascend test scene with stairsPos at {int},{int} and stairsUpPos at {int},{int}',
   function (sx, sy, ux, uy) {
     setSaveStorage(null);
-    const scene = makeAscendScene({ x: sx, y: sy }, { x: ux, y: uy });
+    const scene = makeAscendScene({ x: sx, y: sy }, { x: ux, y: uy }, false);
+    this.ascendScene = scene;
+    this.handler = new PlayerActionHandler(scene);
+  },
+);
+
+Given('a PlayerActionHandler bound to a town ascend test scene with stairsPos at {int},{int} and stairsUpPos at {int},{int}',
+  function (sx, sy, ux, uy) {
+    setSaveStorage(null);
+    const scene = makeAscendScene({ x: sx, y: sy }, { x: ux, y: uy }, true);
     this.ascendScene = scene;
     this.handler = new PlayerActionHandler(scene);
   },

@@ -139,3 +139,11 @@ Then('the generated floor start position is on a walkable tile', function () {
     `Expected generated floor start position (${startPos.x}, ${startPos.y}) to be walkable`
   );
 });
+
+Then('the town result should include a stairsUpPos', function () {
+  const { stairsUpPos } = this.townResult;
+  assert.ok(
+    stairsUpPos && typeof stairsUpPos.x === 'number' && typeof stairsUpPos.y === 'number',
+    'Expected townResult to include a stairsUpPos with numeric x and y',
+  );
+});

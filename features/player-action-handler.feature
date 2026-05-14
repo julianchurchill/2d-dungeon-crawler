@@ -11,6 +11,12 @@ Feature: PlayerActionHandler
     Then the player x should be 3
     And the player y should be 3
 
+  Scenario: ascend() places the player at the stairs-up position when returning to town
+    Given a PlayerActionHandler bound to a town ascend test scene with stairsPos at 10,10 and stairsUpPos at 10,10
+    When ascend is called on the handler
+    Then the player x should be 10
+    And the player y should be 10
+
   Scenario: PlayerActionHandler exposes the expected player-turn methods
     Given a PlayerActionHandler bound to a minimal scene context
     Then the handler exposes handleDir
