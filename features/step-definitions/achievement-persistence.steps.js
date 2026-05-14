@@ -86,3 +86,24 @@ Then('the storage entry should be empty', function () {
   assert.ok(raw === null || raw === '{}',
     `Expected storage to be empty but got: ${raw}`);
 });
+
+// ── Security: unknown key rejection ─────────────────────────────────────────
+
+Given('a fake storage containing crafted achievement data with unknown key {string}',
+  function (key) {
+    this.store = {};
+    this.fakeStorage = makeFakeStorage();
+    const crafted = { [key]: { count: 1, completed: false } };
+    this.fakeStorage.setItem(STORAGE_KEY, JSON.stringify(crafted));
+    setStorage(this.fakeStorage);
+  });
+
+Then('the achievement store should not contain key {string}', function (key) {
+  assert.ok(!Object.prototype.hasOwnProperty.call(this.store, key),
+    `Expected store not to contain key "${key}" but it was present`);
+});
+
+Then('Object.prototype should not have been polluted by the load', function () {
+  assert.equal(({}).poisoned, undefined,
+    'Object.prototype was polluted by loadAchievementStore');
+});
