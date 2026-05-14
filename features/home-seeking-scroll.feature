@@ -83,6 +83,11 @@ Feature: Home Seeking Scroll
     Given a dungeon snapshot created with 3 items
     Then the snapshot item count is 3
 
+  Scenario: DungeonSnapshot records the active unique room for texture restoration
+    Given a dungeon snapshot created with the necropolis library as the active unique room
+    Then the snapshot uniqueRoom id is "necropolis_library"
+    And the snapshot uniqueRoom has room bounds
+
   # ── Player movement on RECALL_PORTAL ─────────────────────────────────────────
 
   Scenario: Moving onto a RECALL_PORTAL tile returns a recall_portal action

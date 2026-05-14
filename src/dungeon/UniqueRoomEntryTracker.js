@@ -41,6 +41,15 @@ export class UniqueRoomEntryTracker {
   }
 
   /**
+   * Returns the active unique room's definition and bounds, or null if none.
+   * @returns {{ room: object, def: object }|null}
+   */
+  getActiveRoom() {
+    if (!this._def || !this._room) return null;
+    return { room: this._room, def: this._def };
+  }
+
+  /**
    * Call after every player move.  Returns an array of message strings on the
    * first call where the player position is inside the room bounds; returns
    * null on every other call.

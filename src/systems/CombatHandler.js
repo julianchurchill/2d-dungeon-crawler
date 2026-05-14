@@ -13,7 +13,6 @@ import { EventBus } from '../utils/EventBus.js';
 import { GameEvents } from '../events/GameEvents.js';
 import { TURN_STATE } from '../systems/TurnManager.js';
 import { devOptions } from '../systems/DevOptions.js';
-import { tilesetManager } from '../systems/TilesetManager.js';
 import { recordGlobalGoldGained } from '../save/GlobalStatsStore.js';
 
 export class CombatHandler {
@@ -24,9 +23,6 @@ export class CombatHandler {
     /** @private */
     this._scene = scene;
   }
-
-  /** @returns {number} Current tile size from the active tileset. */
-  get _tileSize() { return tilesetManager.getTileSize(); }
 
   // ── Public methods ────────────────────────────────────────────────────────
 
@@ -86,35 +82,26 @@ export class CombatHandler {
         // Player died — stop processing enemies; the deferred path handles game over.
         if (killed) break;
       } else if (result.action === 'move') {
-        const ts = this._tileSize;
         sc.dungeonMap.setEntity(enemy.x, enemy.y, null);
         enemy.x += result.dx;
         enemy.y += result.dy;
         sc.dungeonMap.setEntity(enemy.x, enemy.y, enemy);
         if (enemy.sprite) {
-          enemy.sprite.setPosition(
-            enemy.x * ts + ts / 2,
-            enemy.y * ts + ts / 2,
-          );
+          sc._repositionSprite(enemy.sprite, enemy.x, enemy.y);
         }
         // Reposition health bar at new tile coordinates.
         sc._updateHealthBar(enemy);
       } else if (result.action === 'teleport') {
-        const ts = this._tileSize;
         sc.dungeonMap.setEntity(enemy.x, enemy.y, null);
         enemy.x = result.x;
         enemy.y = result.y;
         sc.dungeonMap.setEntity(enemy.x, enemy.y, enemy);
         if (enemy.sprite) {
-          enemy.sprite.setPosition(
-            enemy.x * ts + ts / 2,
-            enemy.y * ts + ts / 2,
-          );
+          sc._repositionSprite(enemy.sprite, enemy.x, enemy.y);
         }
         // Reposition health bar at new tile coordinates.
         sc._updateHealthBar(enemy);
       } else if (result.action === 'creeping_move') {
-        const ts = this._tileSize;
         // Creeping Mass movement: one tail segment removed, one new segment added
         const { removeSegment, addSegment } = result;
         const seg = enemy.segments.find(s => s.x === removeSegment.x && s.y === removeSegment.y);
@@ -124,10 +111,7 @@ export class CombatHandler {
           seg.y = addSegment.y;
           sc.dungeonMap.setEntity(seg.x, seg.y, enemy);
           if (seg.sprite) {
-            seg.sprite.setPosition(
-              seg.x * ts + ts / 2,
-              seg.y * ts + ts / 2,
-            );
+            sc._repositionSprite(seg.sprite, seg.x, seg.y);
           }
         }
         // Keep head x, y in sync with the first remaining segment
