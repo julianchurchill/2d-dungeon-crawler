@@ -24,6 +24,19 @@ export class UniqueRoomEntryTracker {
     this._announced = false;
   }
 
+  /**
+   * Restore the room from a saved state.  Sets _announced = true so the
+   * entry message does not re-fire on the first move after loading.
+   *
+   * @param {{ x:number, y:number, w:number, h:number }} room
+   * @param {object} def
+   */
+  setRoomRestored(room, def) {
+    this._room = room;
+    this._def = def;
+    this._announced = true;
+  }
+
   /** Clear tracked room (call when a new floor is loaded). */
   reset() {
     this._room = null;
@@ -38,6 +51,16 @@ export class UniqueRoomEntryTracker {
    */
   getRoomId() {
     return this._def?.id ?? null;
+  }
+
+  /**
+   * Returns the active room and its definition, or null if no unique room is set.
+   *
+   * @returns {{ room: { x:number, y:number, w:number, h:number }, def: object }|null}
+   */
+  getActiveRoom() {
+    if (!this._def || !this._room) return null;
+    return { room: this._room, def: this._def };
   }
 
   /**

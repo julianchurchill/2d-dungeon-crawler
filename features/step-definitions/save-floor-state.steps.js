@@ -246,3 +246,76 @@ Then('a DungeonMap restored from the floor state has EXPLORED fovState at {int},
     assert.equal(restoredMap.getFovState(x, y), FOV_STATE.EXPLORED,
       `Expected restored fovState at ${x},${y} to be EXPLORED`);
   });
+
+// ── Active unique room ────────────────────────────────────────────────────────
+
+Given('the active unique room is the necropolis library at {int},{int} size {int}x{int}',
+  function (rx, ry, rw, rh) {
+    this.entryTracker = {
+      getActiveRoom: () => ({
+        room: { x: rx, y: ry, w: rw, h: rh },
+        def: { id: 'necropolis_library', name: 'Necropolis Library', floorKey: 'tile_floor_necropolis_library', wallKey: 'tile_wall_necropolis_library' },
+      }),
+    };
+  });
+
+When('the floor state is serialised with entry tracker and npcs', function () {
+  this.floorState = serializeFloor(
+    this.dungeonMap,
+    this.enemies ?? [],
+    this.floorItems ?? [],
+    this.player,
+    this.registry ?? makeRegistry(),
+    this.entryTracker ?? { getActiveRoom: () => null },
+    this.dungeonNpcs ?? [],
+  );
+});
+
+Then('the floor state should include activeUniqueRoom with defId {string}', function (defId) {
+  assert.ok(this.floorState.activeUniqueRoom,
+    'Expected activeUniqueRoom to be present in floor state');
+  assert.equal(this.floorState.activeUniqueRoom.defId, defId,
+    `Expected defId "${defId}" but got "${this.floorState.activeUniqueRoom.defId}"`);
+});
+
+Then('the floor state activeUniqueRoom should have room bounds', function () {
+  const r = this.floorState.activeUniqueRoom?.room;
+  assert.ok(
+    r && typeof r.x === 'number' && typeof r.y === 'number' &&
+    typeof r.w === 'number' && typeof r.h === 'number',
+    `Expected activeUniqueRoom.room to have x/y/w/h but got: ${JSON.stringify(r)}`,
+  );
+});
+
+Then('the floor state activeUniqueRoom should be null', function () {
+  assert.equal(this.floorState.activeUniqueRoom, null,
+    `Expected activeUniqueRoom to be null but got: ${JSON.stringify(this.floorState.activeUniqueRoom)}`);
+});
+
+// ── Dungeon NPCs ─────────────────────────────────────────────────────────────
+
+Given('a dungeon NPC named {string} at {int},{int} with spriteKey {string}',
+  function (name, x, y, spriteKey) {
+    this.dungeonNpcs = this.dungeonNpcs ?? [];
+    this.dungeonNpcs.push({
+      x, y,
+      name,
+      spriteKey,
+      _lines: ['Hello, adventurer.'],
+      _lineIndex: 0,
+    });
+  });
+
+Then('the floor state should contain an NPC named {string} at {int},{int}',
+  function (name, x, y) {
+    const found = (this.floorState.npcs ?? []).find(n => n.name === name && n.x === x && n.y === y);
+    assert.ok(found,
+      `Expected NPC "${name}" at ${x},${y} in floor state npcs but got: ${JSON.stringify(this.floorState.npcs)}`);
+  });
+
+Then('the floor state npcs array should be empty', function () {
+  assert.ok(Array.isArray(this.floorState.npcs),
+    'Expected floor state to have a npcs array');
+  assert.equal(this.floorState.npcs.length, 0,
+    `Expected empty npcs array but got ${this.floorState.npcs.length} entries`);
+});

@@ -283,6 +283,39 @@ export class FloorBuilder {
   }
 
   /**
+   * Repaints unique room floor and wall tiles onto mapRT.  Used when restoring
+   * a floor from a save or snapshot so the themed tiles are not lost after
+   * buildTilemap resets the render texture.
+   *
+   * @param {{ x:number, y:number, w:number, h:number }} room
+   * @param {{ floorKey:string, wallKey:string }} def
+   */
+  paintUniqueRoomTiles(room, def) {
+    this._paintUniqueRoomTiles(room, def);
+  }
+
+  /**
+   * Restores dungeon NPCs from serialised floor state, using the same
+   * _spawnDungeonNpc code path so NPCs do not get a NpcRoamController
+   * (dungeon NPCs must not wander).
+   *
+   * @param {Array<{ x:number, y:number, name:string, spriteKey:string, lines:string[], lineIndex:number }>} npcSaveData
+   */
+  restoreNpcs(npcSaveData) {
+    const sc = this._scene;
+    for (const saved of npcSaveData) {
+      this._spawnDungeonNpc(saved.x, saved.y, {
+        name: saved.name,
+        spriteKey: saved.spriteKey,
+        lines: saved.lines,
+      });
+      if (saved.lineIndex != null) {
+        sc.npcs[sc.npcs.length - 1]._lineIndex = saved.lineIndex;
+      }
+    }
+  }
+
+  /**
    * Spawns town NPCs from the given definitions array.
    * @param {object[]} npcDefs
    */

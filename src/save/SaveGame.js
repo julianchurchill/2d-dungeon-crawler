@@ -121,7 +121,8 @@ function serializeEnemy(enemy) {
  * @param {object}   uniqueRoomRegistry - Registry instance with ._seen and ._entered Sets.
  * @returns {object} Plain object suitable for JSON serialisation.
  */
-export function serializeFloor(dungeonMap, enemies, items, player, uniqueRoomRegistry) {
+export function serializeFloor(dungeonMap, enemies, items, player, uniqueRoomRegistry, entryTracker = null, npcs = []) {
+  const activeRoom = entryTracker?.getActiveRoom() ?? null;
   return {
     width:   dungeonMap.width,
     height:  dungeonMap.height,
@@ -135,6 +136,16 @@ export function serializeFloor(dungeonMap, enemies, items, player, uniqueRoomReg
       seen:    Array.from(uniqueRoomRegistry._seen),
       entered: Array.from(uniqueRoomRegistry._entered),
     },
+    activeUniqueRoom: activeRoom
+      ? { defId: activeRoom.def.id, room: activeRoom.room }
+      : null,
+    npcs: npcs.map(n => ({
+      x: n.x, y: n.y,
+      name: n.name,
+      spriteKey: n.spriteKey,
+      lines: n._lines,
+      lineIndex: n._lineIndex,
+    })),
   };
 }
 

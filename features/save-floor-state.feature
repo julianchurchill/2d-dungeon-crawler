@@ -81,3 +81,38 @@ Feature: Save Floor State
     Given a real dungeon map 10 wide and 10 tall with explored tile at 3,4
     When the floor state is serialised
     Then a DungeonMap restored from the floor state has EXPLORED fovState at 3,4
+
+  # ── Active unique room ───────────────────────────────────────────────────────
+
+  Scenario: Active unique room is included in the saved floor state
+    Given an empty save storage
+    And a dungeon map 10 wide and 10 tall with tile 1 at position 3,4
+    And a player at position 2,2 on floor 1 with 30 HP and 0 gold
+    And the active unique room is the necropolis library at 4,4 size 8x6
+    When the floor state is serialised with entry tracker and npcs
+    Then the floor state should include activeUniqueRoom with defId "necropolis_library"
+    And the floor state activeUniqueRoom should have room bounds
+
+  Scenario: No active unique room results in null activeUniqueRoom
+    Given an empty save storage
+    And a dungeon map 10 wide and 10 tall with tile 1 at position 3,4
+    And a player at position 2,2 on floor 1 with 30 HP and 0 gold
+    When the floor state is serialised with entry tracker and npcs
+    Then the floor state activeUniqueRoom should be null
+
+  # ── Dungeon NPCs ────────────────────────────────────────────────────────────
+
+  Scenario: Dungeon NPCs are included in the saved floor state
+    Given an empty save storage
+    And a dungeon map 10 wide and 10 tall with tile 1 at position 3,4
+    And a player at position 2,2 on floor 1 with 30 HP and 0 gold
+    And a dungeon NPC named "The Archivist" at 6,5 with spriteKey "entity_npc_archivist"
+    When the floor state is serialised with entry tracker and npcs
+    Then the floor state should contain an NPC named "The Archivist" at 6,5
+
+  Scenario: No dungeon NPCs results in empty npcs array
+    Given an empty save storage
+    And a dungeon map 10 wide and 10 tall with tile 1 at position 3,4
+    And a player at position 2,2 on floor 1 with 30 HP and 0 gold
+    When the floor state is serialised with entry tracker and npcs
+    Then the floor state npcs array should be empty
