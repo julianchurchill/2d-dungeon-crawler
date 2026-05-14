@@ -5,9 +5,8 @@
 
 import { tilesetManager } from '../systems/TilesetManager.js';
 import { getHealthBarColor } from '../entities/Enemy.js';
+import { CHAMPION_TINT } from '../utils/EntityConstants.js';
 
-/** Gold tint applied to champion sprites. */
-const CHAMPION_TINT = 0xffaa00;
 /** Duration in ms of a single tile-step move tween. */
 const MOVE_DURATION = 80;
 
@@ -148,5 +147,17 @@ export class SpriteAnimator {
 
     // Only show the bar when the enemy is damaged.
     bar.setVisible(fraction < 1 && enemy.sprite?.visible === true);
+  }
+
+  /**
+   * Instantly moves a sprite to the pixel centre of the given tile coordinates.
+   * Used for instant (non-tweened) reposition — teleport, enemy move, etc.
+   * @param {Phaser.GameObjects.Sprite} sprite - The sprite to reposition.
+   * @param {number} tileX - Tile column.
+   * @param {number} tileY - Tile row.
+   */
+  repositionSprite(sprite, tileX, tileY) {
+    const ts = this._tileSize;
+    sprite.setPosition(tileX * ts + ts / 2, tileY * ts + ts / 2);
   }
 }

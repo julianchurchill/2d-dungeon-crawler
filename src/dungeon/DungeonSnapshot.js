@@ -12,14 +12,16 @@ export class DungeonSnapshot {
    * @param {object} dungeonMap - The DungeonMap instance at the time of capture.
    * @param {object[]} enemies - Live enemy array at the time of capture.
    * @param {object[]} items - Floor item array at the time of capture.
+   * @param {{room: object, def: object}|null} uniqueRoom - Active unique room, or null.
    */
-  constructor(floor, returnX, returnY, dungeonMap, enemies, items) {
+  constructor(floor, returnX, returnY, dungeonMap, enemies, items, uniqueRoom = null) {
     this.floor = floor;
     this.returnX = returnX;
     this.returnY = returnY;
     this.dungeonMap = dungeonMap;
     this.enemies = enemies;
     this.items = items;
+    this.uniqueRoom = uniqueRoom;
   }
 
   /**
@@ -31,9 +33,10 @@ export class DungeonSnapshot {
    * @param {object} dungeonMap
    * @param {object[]} enemies
    * @param {object[]} items
+   * @param {{room: object, def: object}|null} uniqueRoom
    * @returns {DungeonSnapshot}
    */
-  static create(floor, returnX, returnY, dungeonMap, enemies, items) {
-    return new DungeonSnapshot(floor, returnX, returnY, dungeonMap, [...enemies], [...items]);
+  static create(floor, returnX, returnY, dungeonMap, enemies, items, uniqueRoom = null) {
+    return new DungeonSnapshot(floor, returnX, returnY, dungeonMap, [...enemies], [...items], uniqueRoom);
   }
 }

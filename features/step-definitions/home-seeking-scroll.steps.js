@@ -161,6 +161,27 @@ Then('the snapshot item count is {int}', function (count) {
     `Expected ${count} items in snapshot but got ${this.snapshot.items.length}`);
 });
 
+Given('a dungeon snapshot created with the necropolis library as the active unique room', function () {
+  const map = new DungeonMap(20, 20);
+  const room = { x: 4, y: 4, w: 8, h: 6 };
+  const def = { id: 'necropolis_library', floorKey: 'tile_floor_necropolis_library', wallKey: 'tile_wall_necropolis_library' };
+  this.snapshot = DungeonSnapshot.create(3, 7, 8, map, [], [], { room, def });
+});
+
+Then('the snapshot uniqueRoom id is {string}', function (id) {
+  assert.equal(this.snapshot.uniqueRoom?.def?.id, id,
+    `Expected snapshot.uniqueRoom.def.id to be "${id}" but got "${this.snapshot.uniqueRoom?.def?.id}"`);
+});
+
+Then('the snapshot uniqueRoom has room bounds', function () {
+  const r = this.snapshot.uniqueRoom?.room;
+  assert.ok(
+    r && typeof r.x === 'number' && typeof r.y === 'number' &&
+    typeof r.w === 'number' && typeof r.h === 'number',
+    `Expected snapshot.uniqueRoom.room to have x/y/w/h but got: ${JSON.stringify(r)}`,
+  );
+});
+
 // ── Player movement on RECALL_PORTAL ─────────────────────────────────────────
 
 Given('a recall portal tile at position {int}, {int}', function (x, y) {

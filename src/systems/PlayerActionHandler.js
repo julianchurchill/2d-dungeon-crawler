@@ -33,10 +33,6 @@ import {
   recordGlobalHighestLevel,
 } from '../save/GlobalStatsStore.js';
 
-/** @type {number} Gold tint applied to champion sprites restored from a snapshot. */
-const CHAMPION_TINT  = 0xffaa00;
-/** @type {number} Scale factor applied to champion sprites restored from a snapshot. */
-const CHAMPION_SCALE = 1.35;
 
 export class PlayerActionHandler {
   /**
@@ -490,6 +486,7 @@ export class PlayerActionHandler {
       sc._dungeonSnapshot = DungeonSnapshot.create(
         sc.floorManager.currentFloor, sc.player.x, sc.player.y,
         sc.dungeonMap, sc.enemies, sc.items,
+        sc._entryTracker.getActiveRoom(),
       );
       if (item.isConsumable()) { sc.player.recordConsumableUsed(item.id); recordGlobalConsumableUsed(item.id); }
       const msg = InventorySystem.useItem(sc.player, index, context);
@@ -750,31 +747,19 @@ export class PlayerActionHandler {
       // Re-derive challenge flag from restored floor number.
       sc._isChallengeFloor = sc.floorManager.isChallengeFloor();
 
+      // Restore unique room tile textures — _buildFloor repaints the base
+      // dungeon tiles, overwriting the custom library/armoury textures.
+      if (snapshot.uniqueRoom) {
+        sc._floorBuilder.paintUniqueRoomTiles(snapshot.uniqueRoom.room, snapshot.uniqueRoom.def);
+      }
+
       for (const enemy of snapshot.enemies) {
         if (enemy.segments) continue;
-        const sprite = sc.add.sprite(
-          enemy.x * this._tileSize + this._tileSize / 2,
-          enemy.y * this._tileSize + this._tileSize / 2,
-          tilesetManager.getTileKey(enemy.textureKey),
-        ).setDepth(8).setVisible(false);
-        if (enemy.isChampion) {
-          sprite.setScale(CHAMPION_SCALE);
-          sprite.setTint(CHAMPION_TINT);
-        }
-        enemy.sprite = sprite;
-        sc._createHealthBar(enemy);
-        sc.enemies.push(enemy);
-        sc.dungeonMap.setEntity(enemy.x, enemy.y, enemy);
+        sc._floorBuilder.attachEnemySprite(enemy);
       }
 
       for (const item of snapshot.items) {
-        const sprite = sc.add.sprite(
-          item.x * this._tileSize + this._tileSize / 2,
-          item.y * this._tileSize + this._tileSize / 2,
-          tilesetManager.getTileKey(item.textureKey),
-        ).setDepth(6).setVisible(false);
-        item.sprite = sprite;
-        sc.items.push(item);
+        sc._floorBuilder.attachItemSprite(item);
       }
 
       sc.player.x = snapshot.returnX;

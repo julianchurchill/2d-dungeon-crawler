@@ -25,6 +25,7 @@ import { getProgress, achievementStore } from '../achievements/AchievementStore.
 import { Npc } from '../entities/Npc.js';
 import { NpcRoamController } from '../systems/NpcRoamController.js';
 import { DEFAULT_CHAMPION_CHANCE } from '../systems/EnemySpawner.js';
+import { CHAMPION_TINT, CHAMPION_SCALE } from '../utils/EntityConstants.js';
 
 export class FloorBuilder {
   /**
@@ -440,6 +441,59 @@ export class FloorBuilder {
     ).setDepth(6).setVisible(false);
     item.sprite = sprite;
     sc.items.push(item);
+  }
+
+  /**
+   * Creates and attaches a Phaser sprite to an already-constructed enemy,
+   * registers it in sc.enemies and the dungeon map, and creates its health bar.
+   * Used when restoring enemies from a snapshot (e.g. returning from a portal).
+   * @param {import('../entities/Enemy.js').Enemy} enemy - Enemy with x, y, textureKey set.
+   */
+  attachEnemySprite(enemy) {
+    const sc = this._scene;
+    const ts = this._tileSize;
+    const sprite = sc.add.sprite(
+      enemy.x * ts + ts / 2,
+      enemy.y * ts + ts / 2,
+      tilesetManager.getTileKey(enemy.textureKey),
+    ).setDepth(8).setVisible(false);
+    if (enemy.isChampion) {
+      sprite.setScale(CHAMPION_SCALE);
+      sprite.setTint(CHAMPION_TINT);
+    }
+    enemy.sprite = sprite;
+    sc._createHealthBar(enemy);
+    sc.enemies.push(enemy);
+    sc.dungeonMap.setEntity(enemy.x, enemy.y, enemy);
+  }
+
+  /**
+   * Creates and attaches a Phaser sprite to an already-constructed item,
+   * and registers it in sc.items.
+   * Used when restoring items from a snapshot (e.g. returning from a portal).
+   * @param {import('../items/Item.js').Item} item - Item with x, y, textureKey set.
+   */
+  attachItemSprite(item) {
+    const sc = this._scene;
+    const ts = this._tileSize;
+    const sprite = sc.add.sprite(
+      item.x * ts + ts / 2,
+      item.y * ts + ts / 2,
+      tilesetManager.getTileKey(item.textureKey),
+    ).setDepth(6).setVisible(false);
+    item.sprite = sprite;
+    sc.items.push(item);
+  }
+
+  /**
+   * Public entry point for repainting a unique room's themed tiles onto mapRT.
+   * Called when restoring a floor from a DungeonSnapshot to recover the
+   * custom floor/wall textures that were overwritten by the base tile pass.
+   * @param {object} room - Bounding-box { x, y, w, h } of the unique room.
+   * @param {object} def - UNIQUE_ROOM_DEFS entry for this room.
+   */
+  paintUniqueRoomTiles(room, def) {
+    this._paintUniqueRoomTiles(room, def);
   }
 
   /**

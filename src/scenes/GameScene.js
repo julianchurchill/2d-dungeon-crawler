@@ -47,6 +47,7 @@ import { GameLifecycleHandler } from '../systems/GameLifecycleHandler.js';
 import { InputHandler } from '../systems/InputHandler.js';
 import { FovHandler } from '../systems/FovHandler.js';
 import { SpriteAnimator } from '../systems/SpriteAnimator.js';
+import { CHAMPION_TINT, CHAMPION_SCALE } from '../utils/EntityConstants.js';
 
 import { AutosaveTimer } from '../save/AutosaveTimer.js';
 import { loadGlobalStats } from '../save/GlobalStatsStore.js';
@@ -56,10 +57,6 @@ import { loadGlobalStats } from '../save/GlobalStatsStore.js';
 // the scene starts.  Declared as let so the module-level references below
 // stay simple while still being writable at create-time.
 let TILE_SIZE = 16;
-/** Gold tint applied to champion sprites to distinguish them from normal enemies. */
-const CHAMPION_TINT  = 0xffaa00;
-/** Scale factor applied to champion sprites to make them visibly larger. */
-const CHAMPION_SCALE = 1.35;
 export class GameScene extends Phaser.Scene {
   constructor() {
     super({ key: 'GameScene' });
@@ -885,6 +882,9 @@ export class GameScene extends Phaser.Scene {
    * @param {Enemy} enemy
    */
   _updateHealthBar(enemy) { this._spriteAnimator.updateHealthBar(enemy); }
+
+  /** @param {Phaser.GameObjects.Sprite} sprite @param {number} tileX @param {number} tileY */
+  _repositionSprite(sprite, tileX, tileY) { this._spriteAnimator.repositionSprite(sprite, tileX, tileY); }
 
   _checkItemPickup() { this._playerAction.checkItemPickup(); }
 

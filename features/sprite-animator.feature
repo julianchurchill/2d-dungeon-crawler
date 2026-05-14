@@ -13,3 +13,4 @@ Feature: SpriteAnimator
     And the sprite animator exposes flashSprite
     And the sprite animator exposes createHealthBar
     And the sprite animator exposes updateHealthBar
+    And the sprite animator exposes repositionSprite
