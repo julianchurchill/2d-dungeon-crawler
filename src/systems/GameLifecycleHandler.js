@@ -9,7 +9,7 @@ import { FerocitySkill } from '../skills/FerocitySkill.js';
 import { DodgeSkill } from '../skills/DodgeSkill.js';
 import { createRNG } from '../utils/RNG.js';
 import { isDevEnvironment } from '../utils/Environment.js';
-import { saveGame, serializeFloor, deleteSave } from '../save/SaveGame.js';
+import { saveGame, serializeFloor, deleteSave, applyPlayerStats } from '../save/SaveGame.js';
 import { uniqueRoomRegistry } from '../dungeon/UniqueRoomRegistry.js';
 import { restoreInventoryAndEquipment } from '../save/restorePlayer.js';
 import { createSkillFromData } from '../save/SkillFactory.js';
@@ -121,7 +121,7 @@ export class GameLifecycleHandler {
     const sc = this._scene;
     if (!saveData) return;
 
-    Object.assign(sc.player.stats, saveData.player.stats);
+    applyPlayerStats(sc.player.stats, saveData.player.stats);
     sc.player.gold = saveData.player.gold;
 
     restoreInventoryAndEquipment(sc.player, saveData.player);

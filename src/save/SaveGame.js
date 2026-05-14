@@ -150,6 +150,23 @@ export function serializeFloor(dungeonMap, enemies, items, player, uniqueRoomReg
 }
 
 /**
+ * Applies saved player stats onto a target stats object, copying only
+ * known stat keys to prevent prototype pollution from crafted save data.
+ *
+ * @param {object} target - The player's live stats object.
+ * @param {object} source - The raw stats object from the save file.
+ */
+export function applyPlayerStats(target, source) {
+  if (!source) return;
+  const KNOWN_STATS = ['hp', 'maxHp', 'attack', 'defense', 'level', 'xp', 'xpToNext', 'statPoints'];
+  for (const key of KNOWN_STATS) {
+    if (Object.prototype.hasOwnProperty.call(source, key)) {
+      target[key] = source[key];
+    }
+  }
+}
+
+/**
  * @param {object} player
  * @param {object} floorManager
  * @param {object|null} [floorData]

@@ -14,7 +14,12 @@
  */
 
 /** localStorage key used to persist achievement data. */
+import { ACHIEVEMENTS } from './AchievementDefinitions.js';
+
 const STORAGE_KEY = 'achievements';
+
+/** Set of valid achievement IDs, used to reject unknown keys on load. */
+const KNOWN_IDS = new Set(ACHIEVEMENTS.map(a => a.id));
 
 /**
  * @typedef {object} AchievementProgress
@@ -67,7 +72,9 @@ export function loadAchievementStore(store = achievementStore) {
   try {
     const saved = JSON.parse(raw);
     for (const [id, progress] of Object.entries(saved)) {
-      store[id] = progress;
+      if (KNOWN_IDS.has(id)) {
+        store[id] = progress;
+      }
     }
   } catch {
     // Corrupt storage entry — ignore and start fresh.
