@@ -254,7 +254,7 @@ export class CombatHandler {
       EventBus.emit(GameEvents.MESSAGE, `You find ${boss.dropGold} gold on the remains!`);
     }
     if (boss.dropItem) {
-      sc._floorBuilder._placeItem(boss.x, boss.y, boss.dropItem);
+      sc._floorBuilder._placeItem(boss.x, boss.y, boss.dropItem._typeDef ?? boss.dropItem);
       EventBus.emit(GameEvents.MESSAGE, `${boss.name} dropped: ${boss.dropItem.name}!`);
     }
   }
@@ -268,7 +268,7 @@ export class CombatHandler {
   applyChampionLoot(champion) {
     const sc = this._scene;
     if (champion.dropItem) {
-      sc._floorBuilder._placeItem(champion.x, champion.y, champion.dropItem);
+      sc._floorBuilder._placeItem(champion.x, champion.y, champion.dropItem._typeDef ?? champion.dropItem);
       EventBus.emit(GameEvents.MESSAGE, `${champion.name} dropped: ${champion.dropItem.name}!`);
     }
   }
