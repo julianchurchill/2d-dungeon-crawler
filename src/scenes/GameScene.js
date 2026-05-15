@@ -357,7 +357,8 @@ export class GameScene extends Phaser.Scene {
       const { defId, room } = floorState.activeUniqueRoom;
       const def = UNIQUE_ROOM_DEFS.find(d => d.id === defId);
       if (def) {
-        this._entryTracker.setRoomRestored(room, def);
+        const wasEntered = (floorState.uniqueRooms?.entered ?? []).includes(defId);
+        this._entryTracker.restoreFromSave(room, def, wasEntered);
         this._floorBuilder.paintUniqueRoomTiles(room, def);
       }
     }
