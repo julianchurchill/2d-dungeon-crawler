@@ -37,6 +37,20 @@ export class UniqueRoomEntryTracker {
     this._announced = true;
   }
 
+  /**
+   * Restores room tracking state from a save.
+   * @param {object} room - The room bounds.
+   * @param {object} def - The unique room definition.
+   * @param {boolean} wasEntered - Whether the player had entered the room before saving.
+   */
+  restoreFromSave(room, def, wasEntered) {
+    if (wasEntered) {
+      this.setRoomRestored(room, def);
+    } else {
+      this.setRoom(room, def);
+    }
+  }
+
   /** Clear tracked room (call when a new floor is loaded). */
   reset() {
     this._room = null;

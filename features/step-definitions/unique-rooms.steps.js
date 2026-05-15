@@ -293,6 +293,22 @@ Given('a unique room entry tracker with room at x {int} y {int} width {int} heig
     this.lastMessages = null;
   });
 
+Given('a unique room entry tracker restored for an un-entered room at x {int} y {int} width {int} height {int} for {string}',
+  function (rx, ry, rw, rh, id) {
+    const def = UNIQUE_ROOM_DEFS.find(d => d.id === id);
+    this.tracker = new UniqueRoomEntryTracker();
+    this.tracker.restoreFromSave({ x: rx, y: ry, w: rw, h: rh }, def, false);
+    this.lastMessages = null;
+  });
+
+Given('a unique room entry tracker restored for an already-entered room at x {int} y {int} width {int} height {int} for {string}',
+  function (rx, ry, rw, rh, id) {
+    const def = UNIQUE_ROOM_DEFS.find(d => d.id === id);
+    this.tracker = new UniqueRoomEntryTracker();
+    this.tracker.restoreFromSave({ x: rx, y: ry, w: rw, h: rh }, def, true);
+    this.lastMessages = null;
+  });
+
 When('the player is checked at x {int} y {int}', function (px, py) {
   this.lastMessages = this.tracker.checkEntry(px, py);
 });

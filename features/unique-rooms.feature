@@ -146,6 +146,16 @@ Feature: Unique rooms in dungeon generation
     When the player is checked at x 5 y 5
     Then the entry message should contain "The Dark Armoury"
 
+  Scenario: restoring a room the player had not yet entered still fires the entry message on first entry
+    Given a unique room entry tracker restored for an un-entered room at x 5 y 5 width 4 height 4 for "dark_armoury"
+    When the player is checked at x 5 y 5
+    Then entry messages should be returned
+
+  Scenario: restoring a room the player was already inside suppresses the entry message
+    Given a unique room entry tracker restored for an already-entered room at x 5 y 5 width 4 height 4 for "dark_armoury"
+    When the player is checked at x 5 y 5
+    Then no entry messages should be returned
+
   Scenario: Entry messages are only returned once per floor
     Given a unique room entry tracker with room at x 5 y 5 width 4 height 4 for "dark_armoury"
     When the player is checked at x 5 y 5
